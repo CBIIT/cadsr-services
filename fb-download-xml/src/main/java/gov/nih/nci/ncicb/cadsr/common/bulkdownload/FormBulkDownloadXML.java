@@ -1,6 +1,8 @@
 package gov.nih.nci.ncicb.cadsr.common.bulkdownload;
 
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
@@ -65,6 +67,8 @@ public class FormBulkDownloadXML {
 		Collection forms = null;
 		Object[] formArr = null;
 		String formIdSeq;		
+		byte[] xmlBytes;
+		String convertedForm = "";
 		try {
 			forms = service.getAllForms(null, null, null, "RELEASED", null, null, null, null, "latestVersion", null,
 					null, null, "'TEST', 'Training'");
@@ -90,25 +94,39 @@ public class FormBulkDownloadXML {
 				}
 
 				try {
-					logger.info("Writing XML file... ");
-					String convertedForm = FormConverterUtil.instance().convertFormToV2(crf);
-					// FIXME use platform path separator, and generally clean up
-					Path path = Paths.get("dwld");
-					String dir = path.getFileName().toString();
-					logger.debug("xml file directory: " + dir);
-					String xmlFilename = dir + "/Form" + crf.getPublicId() + "_v" + crf.getVersion();
-					xmlFilename = xmlFilename + ".xml";
-					logger.info("xmlFilename: " + xmlFilename);
-					FileOutputStream fileOut = new FileOutputStream(xmlFilename);
-					byte[] xmlBytes = convertedForm.getBytes();
-					fileOut.write(xmlBytes);
-					fileOut.flush();
-					fileOut.close();
+					convertedForm = convertedForm + FormConverterUtil.instance().convertFormToV2(crf);
 					// }
 				} catch (Exception exp) {
 					logger.info("Exception converting CRF 2: " + exp);
 					exp.printStackTrace();
-				}
+				}							
+			}
+			
+			try {
+				xmlBytes = convertedForm.getBytes();
+				// FIXME use platform path separator, and generally clean up
+				Path path = Paths.get("dwld");
+				if (!Files.exists(path)) {
+		            try {
+		                Files.createDirectories(path);
+		            	logger.info("Directory dwld not present, so creating the folder....");			                
+		            } catch (IOException e) {
+		                e.printStackTrace();
+		            }
+		        }
+				logger.info("Writing XML file... ");				
+				String dir = path.getFileName().toString();
+				logger.debug("xml file directory: " + dir);
+				String xmlFilename = dir + "/FormsDownload";
+				xmlFilename = xmlFilename + ".xml";
+				logger.info("xmlFilename: " + xmlFilename);
+				FileOutputStream fileOut = new FileOutputStream(xmlFilename);
+				fileOut.write(xmlBytes);
+				fileOut.flush();
+				fileOut.close();				
+			} catch (Exception exp) {
+				logger.info("Exception converting CRF 2: " + exp);
+				exp.printStackTrace();
 			}
 
 		} catch (Exception e) {

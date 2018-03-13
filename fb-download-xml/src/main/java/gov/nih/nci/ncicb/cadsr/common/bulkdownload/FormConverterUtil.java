@@ -58,7 +58,7 @@ public class FormConverterUtil {
 				 
 				String content = writer.toString();
 	 
-				File file = new File("downloanv1-20140602.xml");
+				File file = new File("download1.xml");
 	 
 				// if file doesnt exists, then create it
 				if (!file.exists()) {

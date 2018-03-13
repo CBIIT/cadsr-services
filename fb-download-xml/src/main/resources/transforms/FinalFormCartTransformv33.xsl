@@ -114,12 +114,7 @@
 
 <!-- 06-02-2014: V2 object name changed -->
     <xsl:template match="form-v2-transfer-object">
-        <xsl:text>
-	</xsl:text>
-        <xsl:comment>Transformed with FinalFormCartTransformv33.xsl and validated with FormCartv21.xsd </xsl:comment>
-        <xsl:text>
-	</xsl:text>
-     
+      
      <xsl:element name="form">
         <xsl:element name="context">
    <!-- 06-02-2014: make sure to use current node value -->         
