@@ -75,7 +75,6 @@
 						<argument>-classpath</argument>
 						<classpath />
 						<argument>gov.nih.nci.ncicb.cadsr.common.bulkdownload.FormBulkDownloadXML</argument>
-						<argument>D71EB130-996E-9982-E040-BB89AD435BA6</argument>
 					</arguments>
 				</configuration>
 			</plugin>

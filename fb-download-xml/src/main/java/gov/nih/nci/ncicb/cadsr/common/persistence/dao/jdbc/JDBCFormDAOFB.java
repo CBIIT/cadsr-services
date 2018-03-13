@@ -996,31 +996,10 @@ public class JDBCFormDAOFB extends JDBCAdminComponentDAOFB implements FormDAO
                           type, classificationIdseq,contextRestriction,
                           publicId, version, moduleName, cdePublicId, hasWhere);
       String sql = selectWhat.toString() + " " + fromWhat.toString() + " "
-                    + initialWhere.toString() + whereClause;
+                    + initialWhere.toString() + whereClause + "AND ROWNUM <= 5";
       super.setSql(sql);
       
-      System.out.println("FRM SEARCH QRY: ["+sql+"]");
-/*
-      if (StringUtils.doesValueExist(moduleName) || StringUtils.doesValueExist(cdePublicId)){
-        whereClause = makeWhereClause(
-          formLongName, protocolIdSeq, contextIdSeq, workflow, categoryName,
-          type, classificationIdseq,contextRestriction,
-          publicId, version, moduleName, cdePublicId, true);
-          String sql = "SELECT " + selectWhat +
-                        " FROM FB_FORMS_VIEW f, FB_QUEST_MODULE_VIEW q where ( f.QC_IDSEQ = q.FORM_IDSEQ ) " +
-                        whereClause + "ORDER BY upper(f.LONG_NAME)";
-           super.setSql(sql);
-           System.out.println(sql);
-     }else{
-      whereClause = makeWhereClause(
-           formLongName, protocolIdSeq, contextIdSeq, workflow, categoryName,
-           type, classificationIdseq,contextRestriction,
-           publicId, version, moduleName, cdePublicId, false);
-           String sql = "SELECT " + selectWhat + " FROM FB_FORMS_VIEW  f " + whereClause + " ORDER BY upper(f.LONG_NAME)";
-           super.setSql(sql);
-           System.out.println("sql=" + sql);
-     }
-    */
+      logger.info("FRM SEARCH QRY: ["+sql+"]");
 }
 
    /**
