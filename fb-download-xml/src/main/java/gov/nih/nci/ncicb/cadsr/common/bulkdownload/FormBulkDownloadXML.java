@@ -105,8 +105,10 @@ public class FormBulkDownloadXML {
 			forms = service.getAllForms(null, null, null, "RELEASED", null, null, null, null, "latestVersion", null,
 					null, null, "'TEST', 'Training'");
 			logger.info("Forms size: " + forms.size());
+			int remainingForms = 0;
 			if (forms.size() > 0) {
 				formArr = forms.toArray();
+				remainingForms = forms.size();
 			}
 			String formFileNameAppend = "";
 			for (int i = 0; i < formArr.length; i++) {
@@ -121,6 +123,7 @@ public class FormBulkDownloadXML {
 
 					crf = service.getFormDetailsV2(formIdSeq);
 					formsCount++;
+					remainingForms--;
 				} catch (Exception exp) {
 					logger.info("Exception getting CRF: " + exp);
 					exp.printStackTrace();
@@ -137,13 +140,14 @@ public class FormBulkDownloadXML {
 					convertedForm.append(currentForm);
 					if (formsCount==1) {
 						formFileNameAppend = ""+form.getPublicId();
-						logger.info("Beginning Form ID "+formFileNameAppend + ":: Forms count: "+formsCount);
+						logger.info("Beginning Form ID "+formFileNameAppend + ":: Forms count: "+formsCount+" :: Remaining Forms: "+remainingForms);
 					}
-					if (formsCount==formArr.length - 1 || formsCount == formsPerFile) {
+					if (formsCount == formsPerFile) {
 						formFileNameAppend = formFileNameAppend+"-"+form.getPublicId();
-						logger.info("Combined Form ID "+formFileNameAppend + ":: Forms count: "+formsCount);
+						logger.info("Combined Form ID "+formFileNameAppend + ":: Forms count: "+formsCount+" :: Remaining Forms: "+remainingForms);
 					}					
-					if (formsCount == formsPerFile || formsCount == formArr.length) {
+					if (formsCount == formsPerFile || remainingForms==0) {
+						logger.info("Before writing XML file :: Forms count: "+formsCount+" :: Remaining Forms: "+remainingForms);
 						writeXMLFile(convertedForm.toString().getBytes("UTF-8"), formFileNameAppend);
 						convertedForm = new StringBuilder();
 						formFileNameAppend = "";
