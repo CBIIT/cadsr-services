@@ -997,8 +997,8 @@ public class JDBCFormDAOFB extends JDBCAdminComponentDAOFB implements FormDAO
                           publicId, version, moduleName, cdePublicId, hasWhere);
       String sql = selectWhat.toString() + " " + fromWhat.toString() + " "
                     + initialWhere.toString() + whereClause
-                 // Restricted to 4 records for DEV purpose, should be removed for getting all records.
-                    + "AND ROWNUM <= 4"
+                 // Restricted to 10 records for DEV purpose, should be removed for getting all records.
+                    + "AND ROWNUM <= 10"
                     ; 
       super.setSql(sql);
       
