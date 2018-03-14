@@ -1,5 +1,6 @@
 package gov.nih.nci.ncicb.cadsr.common.bulkdownload;
 
+import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,12 +23,10 @@ public class FormBulkDownloadXML {
 	private static final Log logger = LogFactory.getLog(FormBulkDownloadXML.class.getName());
 	private static Integer FORMS_PER_FILE = 4;
 	
-	private static void writeXMLFile(String convertedForm, String formFileNameAppend) {
+	private static void writeXMLFile(byte[] xmlBytes, String formFileNameAppend) {
 		try {
-			convertedForm = convertedForm.replaceAll("\\<\\?xml(.+?)\\?\\>", "").trim();
-			convertedForm = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<FormList>\n"+convertedForm+"\n</FormList>";
-			byte[] xmlBytes = convertedForm.getBytes();
-			// FIXME use platform path separator, and generally clean up
+			String convertedFormBegin = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<FormList>\n";
+			String convertedFormEnd = "\n</FormList>";
 			Path path = Paths.get("dwld");
 			if (!Files.exists(path)) {
 	            try {
@@ -36,15 +35,17 @@ public class FormBulkDownloadXML {
 	            } catch (IOException e) {
 	                e.printStackTrace();
 	            }
-	        }
-			logger.info("Writing XML file... ");				
+	        }							
 			String dir = path.getFileName().toString();
 			logger.debug("xml file directory: " + dir);
-			String xmlFilename = dir + "/FormsDownload-"+formFileNameAppend;
+			String separator = System.getProperty("file.separator");
+			String xmlFilename = dir + separator + "FormsDownload-" + formFileNameAppend;
 			xmlFilename = xmlFilename + ".xml";
 			logger.info("xmlFilename: " + xmlFilename);
-			FileOutputStream fileOut = new FileOutputStream(xmlFilename);
+			BufferedOutputStream fileOut = new BufferedOutputStream(new FileOutputStream(xmlFilename));
+			fileOut.write(convertedFormBegin.getBytes("UTF-8"));
 			fileOut.write(xmlBytes);
+			fileOut.write(convertedFormEnd.getBytes("UTF-8"));
 			fileOut.flush();
 			fileOut.close();				
 		} catch (Exception exp) {
@@ -84,7 +85,7 @@ public class FormBulkDownloadXML {
 		Collection forms = null;
 		Object[] formArr = null;
 		String formIdSeq;		
-		String convertedForm = "";
+		StringBuilder convertedForm = new StringBuilder();
 		int formsCount = 0;
 		int formsPerFile = FORMS_PER_FILE;		
 		
@@ -121,12 +122,19 @@ public class FormBulkDownloadXML {
 					crf = service.getFormDetailsV2(formIdSeq);
 					formsCount++;
 				} catch (Exception exp) {
-					logger.info("Exception getting CRF: " + exp);					
+					logger.info("Exception getting CRF: " + exp);
 					exp.printStackTrace();
+					continue;
 				}
 
 				try {
-					convertedForm = convertedForm + FormConverterUtil.instance().convertFormToV2(crf);
+					String currentForm = FormConverterUtil.instance().convertFormToV2(crf);
+					currentForm = currentForm.replaceAll("\\<\\?xml(.+?)\\?\\>", "").trim();
+					currentForm = currentForm.replace("<form>", "<form num=\"" + formsCount + "\">");
+					if (convertedForm.length() > 0) {
+						convertedForm.append('\n');
+					}
+					convertedForm.append(currentForm);
 					if (formsCount==1) {
 						formFileNameAppend = ""+form.getPublicId();
 						logger.info("Beginning Form ID "+formFileNameAppend + ":: Forms count: "+formsCount);
@@ -136,17 +144,17 @@ public class FormBulkDownloadXML {
 						logger.info("Combined Form ID "+formFileNameAppend + ":: Forms count: "+formsCount);
 					}					
 					if (formsCount == formsPerFile || formsCount == formArr.length) {
-						writeXMLFile(convertedForm, formFileNameAppend);
-						convertedForm = "";
+						writeXMLFile(convertedForm.toString().getBytes("UTF-8"), formFileNameAppend);
+						convertedForm = new StringBuilder();
 						formFileNameAppend = "";
 						formsCount = 0;
 					}
 				} catch (Exception exp) {
 					logger.info("Exception converting CRF 2: " + exp);
 					exp.printStackTrace();
+					return;
 				}						
 			}			
-
 		} catch (Exception e) {
 			logger.info("Exception getting All the forms: " + e);
 			e.printStackTrace();
