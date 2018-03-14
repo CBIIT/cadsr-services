@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 
-//import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import gov.nih.nci.ncicb.cadsr.common.exception.FatalException;
@@ -18,17 +17,11 @@ import gov.nih.nci.ncicb.cadsr.common.util.logging.LogFactory;
 import gov.nih.nci.ncicb.cadsr.formbuilder.ejb.impl.FormBuilderServiceImpl;
 import gov.nih.nci.ncicb.cadsr.formbuilder.ejb.service.FormBuilderService;
 
-/*import gov.nih.nci.ncicb.cadsr.loader.UserSelections;
-import gov.nih.nci.ncicb.cadsr.loader.util.BeansAccessor;
-import gov.nih.nci.ncicb.cadsr.loader.util.PropertyAccessor;*/
-//@ComponentScan(basePackages = "gov.nih.nci.ncicb.cadsr.common.persistence.dao.jdbc")
-
 public class FormBulkDownloadXML {
 
 	private static final Log logger = LogFactory.getLog(FormBulkDownloadXML.class.getName());
 
 	public static void main(String[] args) throws Exception {
-		// FIXME download XML RELEASED forms not just one form
 		logger.info("Starting download...");
 		try {
 			Class.forName("oracle.jdbc.driver.OracleDriver");
@@ -38,15 +31,6 @@ public class FormBulkDownloadXML {
 			e.printStackTrace();
 			System.exit(-1);
 		}
-
-		// FIXME this is for feasibility only working with one Form // TO BE REMOVED or will be substituted for row limit
-
-		/*if (args.length > 0) {
-			formIdSeq = args[0];
-		} else {
-			formIdSeq = "D71EB130-996E-9982-E040-BB89AD435BA6";
-		}
-		logger.info("Form ID seq: " + formIdSeq);*/
 
 		@SuppressWarnings("resource")
 		ClassPathXmlApplicationContext cpCtx = new ClassPathXmlApplicationContext(
@@ -77,7 +61,6 @@ public class FormBulkDownloadXML {
 				formArr = forms.toArray();
 			}
 			for (int i = 0; i < formArr.length; i++) {
-
 				form = (Form) formArr[i];
 				formIdSeq = form.getFormIdseq();
 				logger.info("Form ID seq: " + formIdSeq);
@@ -87,22 +70,23 @@ public class FormBulkDownloadXML {
 								new Exception("Invalid form download parameters."));
 
 					crf = service.getFormDetailsV2(formIdSeq);
-
 				} catch (Exception exp) {
 					logger.info("Exception getting CRF: " + exp);
+					
 					exp.printStackTrace();
 				}
 
 				try {
 					convertedForm = convertedForm + FormConverterUtil.instance().convertFormToV2(crf);
-					// }
 				} catch (Exception exp) {
 					logger.info("Exception converting CRF 2: " + exp);
 					exp.printStackTrace();
-				}							
+				}						
 			}
 			
 			try {
+				convertedForm = convertedForm.replaceAll("\\<\\?xml(.+?)\\?\\>", "").trim();
+				convertedForm = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><FormList>"+convertedForm+"</FormList>";
 				xmlBytes = convertedForm.getBytes();
 				// FIXME use platform path separator, and generally clean up
 				Path path = Paths.get("dwld");
