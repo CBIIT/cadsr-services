@@ -974,8 +974,8 @@ public class JDBCFormDAOFB extends JDBCAdminComponentDAOFB implements FormDAO
 
       String selectWhat = "SELECT distinct f.qc_idseq, f.version, f.type, f.conte_idseq, f.CATEGORY_NAME, f.workflow, f.preferred_name, f.definition, " +
                           " f.long_name, f.context_name, f.public_id, latest_version_ind,  f.DATE_MODIFIED, f.DATE_CREATED ";
-      StringBuffer fromWhat = new StringBuffer(" FROM FB_FORMS_VIEW f ");
-      StringBuffer initialWhere = new StringBuffer();
+      StringBuilder fromWhat = new StringBuilder(" FROM FB_FORMS_VIEW f ");
+      StringBuilder initialWhere = new StringBuilder();
       boolean hasWhere = false;
       if (StringUtils.doesValueExist(moduleName) || StringUtils.doesValueExist(cdePublicId)){
         fromWhat.append(", FB_QUEST_MODULE_VIEW q ");
@@ -998,8 +998,8 @@ public class JDBCFormDAOFB extends JDBCAdminComponentDAOFB implements FormDAO
       String sql = selectWhat.toString() + " " + fromWhat.toString() + " "
                     + initialWhere.toString() + whereClause
                  // Restricted to 10 records for DEV purpose, should be removed for getting all records.
-                    + "AND ROWNUM <= 10"
-                    ; 
+                    + " AND ROWNUM <= 10"
+                    + " ORDER BY public_Id, version";
       super.setSql(sql);
       
       logger.info("FRM SEARCH QRY: ["+sql+"]");
@@ -1078,7 +1078,7 @@ public class JDBCFormDAOFB extends JDBCAdminComponentDAOFB implements FormDAO
       boolean hasWhere)
     {
       String where = "";
-      StringBuffer whereBuffer = new StringBuffer("");
+      StringBuilder whereBuffer = new StringBuilder("");
 
       if (StringUtils.doesValueExist(formName)) {
         String temp = StringUtils.strReplace(formName, "*", "%");
@@ -2074,7 +2074,7 @@ public class JDBCFormDAOFB extends JDBCAdminComponentDAOFB implements FormDAO
             return 0;
         }
         String delimtedBy = ",";
-        StringBuffer sbuf = new StringBuffer();
+        StringBuilder sbuf = new StringBuilder();
         Iterator it = protocolIds.iterator();
         while (it.hasNext()){
             String pid = (String)it.next();

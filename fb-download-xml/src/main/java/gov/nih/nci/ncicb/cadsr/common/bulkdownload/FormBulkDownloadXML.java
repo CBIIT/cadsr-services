@@ -3,14 +3,19 @@ package gov.nih.nci.ncicb.cadsr.common.bulkdownload;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import gov.nih.nci.ncicb.cadsr.common.exception.FatalException;
 import gov.nih.nci.ncicb.cadsr.common.resource.Form;
 import gov.nih.nci.ncicb.cadsr.common.resource.FormV2;
 import gov.nih.nci.ncicb.cadsr.common.util.logging.Log;
@@ -21,30 +26,23 @@ import gov.nih.nci.ncicb.cadsr.formbuilder.ejb.service.FormBuilderService;
 public class FormBulkDownloadXML {
 
 	private static final Log logger = LogFactory.getLog(FormBulkDownloadXML.class.getName());
-	private static Integer FORMS_PER_FILE = 4;
+	private static final String convertedFormBegin = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<FormList>\n";
+	private static final String convertedFormEnd = "\n</FormList>";	
+	private static String dir;
+	private static String separator;
+	private static FormBuilderService service;
+
+	private static OutputStream startXMLFile(String formFileNameAppend) throws Exception {
+		String xmlFilename = "dwld" + separator + dir + separator + "FormsDownload-" + formFileNameAppend + ".xml";
+		logger.info("xmlFilename: " + xmlFilename);
+		BufferedOutputStream fileOut = new BufferedOutputStream(new FileOutputStream(xmlFilename));
+		fileOut.write(convertedFormBegin.getBytes("UTF-8"));
+		fileOut.flush();
+		return fileOut;
+	}
 	
-	private static void writeXMLFile(byte[] xmlBytes, String formFileNameAppend) {
+	private static void closeXMLFile(OutputStream fileOut) {
 		try {
-			String convertedFormBegin = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<FormList>\n";
-			String convertedFormEnd = "\n</FormList>";
-			Path path = Paths.get("dwld");
-			if (!Files.exists(path)) {
-	            try {
-	                Files.createDirectories(path);
-	            	logger.info("Directory dwld not present, so creating the folder....");			                
-	            } catch (IOException e) {
-	                e.printStackTrace();
-	            }
-	        }							
-			String dir = path.getFileName().toString();
-			logger.debug("xml file directory: " + dir);
-			String separator = System.getProperty("file.separator");
-			String xmlFilename = dir + separator + "FormsDownload-" + formFileNameAppend;
-			xmlFilename = xmlFilename + ".xml";
-			logger.info("xmlFilename: " + xmlFilename);
-			BufferedOutputStream fileOut = new BufferedOutputStream(new FileOutputStream(xmlFilename));
-			fileOut.write(convertedFormBegin.getBytes("UTF-8"));
-			fileOut.write(xmlBytes);
 			fileOut.write(convertedFormEnd.getBytes("UTF-8"));
 			fileOut.flush();
 			fileOut.close();				
@@ -52,12 +50,10 @@ public class FormBulkDownloadXML {
 			logger.info("Exception converting CRF 2: " + exp);
 			exp.printStackTrace();
 		}		
-		
 	}
 	
-	public static void main(String[] args) throws Exception {
-		logger.info("Starting download...");
-		try {
+	private static void init() throws Exception {
+		try {//check we have a JDBC Driver class
 			Class.forName("oracle.jdbc.driver.OracleDriver");
 			logger.info("...oracle.jdbc.driver.OracleDriver loaded");
 		} catch (ClassNotFoundException e) {
@@ -78,92 +74,139 @@ public class FormBulkDownloadXML {
 		// FormBuilderServiceImpl
 		Object formBuilderServiceImpl = cpCtx.getBean("formBuilderServiceImpl");
 		logger.debug(".......formBuilderServiceImpl loaded: " + (formBuilderServiceImpl != null));
-		FormBuilderService service = (FormBuilderServiceImpl) (formBuilderServiceImpl);
+		service = (FormBuilderServiceImpl) (formBuilderServiceImpl);
+		
+		separator = System.getProperty("file.separator");
+		String dirSuffix = new SimpleDateFormat("yyyy-MMM-dd-HH-mm").format(new Date());
+		Path path = Paths.get("dwld" + separator + dirSuffix);
+		if (!Files.exists(path)) {
+			Files.createDirectories(path);
+			logger.info("creating the folder " + dirSuffix);
+		}
+		
+		dir = path.getFileName().toString();
+		logger.info("xml file directory: " + dir);
+	}
+	
+	private static int parseParamFormsPerFile(String[] args) throws Exception {
+		if(args.length < 1) {
+			  logger.error("Please provide the number of forms per file.");
+		      throw new Exception("Please provide a number of forms per file.");
+		}
+		else {
+			try {
+				int formsPerFile = Integer.parseInt(args[0]);
+				logger.info("Forms Per file: " +formsPerFile);
+				if (formsPerFile <= 0) {
+					throw new Exception("Please provide a valid number of forms per file: " + args[0]);
+				}
+				return formsPerFile;
+			} catch (NumberFormatException ex) {
+				logger.error("Please provide a valid number of forms per file: " + args[0]);
+				ex.printStackTrace();
+				throw ex;
+		    }
+		}
+	}
+	private static int parseParamFormAmount(String[] args) throws Exception {
+		int formAmount = 0;
+		if(args.length >= 2) {
+			try {
+				formAmount = Integer.parseInt(args[1]);
+				logger.info("Forms amount: " + formAmount);
+				
+			} catch (NumberFormatException ex) {
+				logger.error("Please provide the number of forms to be downloaded per file.");
+				ex.printStackTrace();
+				throw ex;
+		    }
+		}
+		return formAmount;
+	}
+	private static List<String> collectFormIdseq (Collection forms, int formAmount) {
+		@SuppressWarnings("rawtypes")
+		Iterator iter = forms.iterator();
+		int idx = formAmount;
+		Form form;
+		List<String> idseqList = new ArrayList<>(formAmount);
+		while((iter.hasNext()) && (idx > 0)) {
+			form = (Form)iter.next();
+			idseqList.add(form.getFormIdseq());
+			idx--;
+		}
+		return idseqList;
+	}
+	private static int calcNumberOfGroups(final int lengthOfCollection, final int maxRecords) {
+		return (lengthOfCollection / maxRecords) + 
+			(((lengthOfCollection % maxRecords) == 0)? 0 : 1);
+	}
+	
+	public static void main(String[] args) throws Exception {
+		logger.info("Starting XML Forms download...");
+
+		init();
 
 		FormV2 crf = null;
-		Form form = null;
-		Collection forms = null;
-		Object[] formArr = null;
-		String formIdSeq;		
-		StringBuilder convertedForm = new StringBuilder();
-		int formsCount = 0;
-		int formsPerFile = FORMS_PER_FILE;		
+
+		int formsPerFile = parseParamFormsPerFile(args); //how many forms to load in one file which shall be more than 0
+		int formAmount = parseParamFormAmount(args); ////how many forms to load
 		
-		if(args.length != 1) {
-			  logger.error("Please provide the number of forms to be downloaded per file.");
-		      System.exit(1);
-		    }
-	    try {
-	    	formsPerFile = Integer.parseInt(args[0]);
-			logger.info("Forms Per file: " +formsPerFile);
-	    } catch (NumberFormatException ex) {
-	    	logger.error("Please provide the number of forms to be downloaded per file.");
-	      System.exit(1);
-	    }
-		
-		try {
-			forms = service.getAllForms(null, null, null, "RELEASED", null, null, null, null, "latestVersion", null,
-					null, null, "'TEST', 'Training'");
-			logger.info("Forms size: " + forms.size());
-			int remainingForms = 0;
-			if (forms.size() > 0) {
-				formArr = forms.toArray();
-				remainingForms = forms.size();
-			}
-			String formFileNameAppend = "";
-			for (int i = 0; i < formArr.length; i++) {
-				form = (Form) formArr[i];
-				formIdSeq = form.getFormIdseq();
+		Collection forms = service.getAllForms(null, null, null, "RELEASED", null, null, null, null, "latestVersion", null,
+				null, null, "'TEST', 'Training'");
+		logger.info("Forms amount found in DB: " + forms.size());
 
-				logger.info("Form ID seq: " + formIdSeq);
-				try {
-					if (!FormBuilderUtil.validateIdSeqRequestParameter(formIdSeq))
-						throw new FatalException("Invalid form download parameters.",
-								new Exception("Invalid form download parameters."));
-
-					crf = service.getFormDetailsV2(formIdSeq);
-					formsCount++;
-					remainingForms--;
-				} catch (Exception exp) {
-					logger.info("Exception getting CRF: " + exp);
-					exp.printStackTrace();
-					continue;
-				}
-
-				try {
-					String currentForm = FormConverterUtil.instance().convertFormToV2(crf);
-					currentForm = currentForm.replaceAll("\\<\\?xml(.+?)\\?\\>", "").trim();
-					currentForm = currentForm.replace("<form>", "<form num=\"" + formsCount + "\">");
-					if (convertedForm.length() > 0) {
-						convertedForm.append('\n');
-					}
-					convertedForm.append(currentForm);
-					if (formsCount==1) {
-						formFileNameAppend = ""+form.getPublicId();
-						logger.info("Beginning Form ID "+formFileNameAppend + ":: Forms count: "+formsCount+" :: Remaining Forms: "+remainingForms);
-					}
-					if (formsCount == formsPerFile) {
-						formFileNameAppend = formFileNameAppend+"-"+form.getPublicId();
-						logger.info("Combined Form ID "+formFileNameAppend + ":: Forms count: "+formsCount+" :: Remaining Forms: "+remainingForms);
-					}					
-					if (formsCount == formsPerFile || remainingForms==0) {
-						logger.info("Before writing XML file :: Forms count: "+formsCount+" :: Remaining Forms: "+remainingForms);
-						writeXMLFile(convertedForm.toString().getBytes("UTF-8"), formFileNameAppend);
-						convertedForm = new StringBuilder();
-						formFileNameAppend = "";
-						formsCount = 0;
-					}
-				} catch (Exception exp) {
-					logger.info("Exception converting CRF 2: " + exp);
-					exp.printStackTrace();
-					return;
-				}						
-			}			
-		} catch (Exception e) {
-			logger.info("Exception getting All the forms: " + e);
-			e.printStackTrace();
+		formAmount = (forms.size() < formAmount) ? forms.size() : formAmount;
+		if (formAmount <= 0) {//no form found
+			logger.info("No forms amount to download, formAmount: " + formAmount);
 			return;
 		}
+		
+		logger.info("Forms amount to download: " + formAmount);
+		
+		int numGroups = calcNumberOfGroups(formAmount, formsPerFile);
+		logger.info("Files amount: " + numGroups);
+		
+		List<String> idseqList = collectFormIdseq(forms, formAmount);
 
+		int currIdseqListIdx = 0;//global IDSEQ number in the array
+
+		for (int groupId = 1; groupId <= numGroups; groupId++) {
+			String formFileNameAppend = ""+ groupId;
+			//start a new file
+			OutputStream currFileOut = startXMLFile(formFileNameAppend);
+			int numValue = 0; 
+			for (int idxInGroup = 0; ((idxInGroup < formsPerFile) && (currIdseqListIdx < formAmount)); idxInGroup++,  currIdseqListIdx++) {
+				String formIdSeq = idseqList.get(currIdseqListIdx);
+				logger.debug("Form ID seq: " + formIdSeq);
+
+				if (!FormBuilderUtil.validateIdSeqRequestParameter(formIdSeq)) {
+					logger.error("!!! Invalid form IDSEQ skipped: " + formIdSeq);
+					continue;//go to the next form
+				}
+				String currentForm;
+				try {
+					crf = service.getFormDetailsV2(formIdSeq);
+					currentForm = FormConverterUtil.instance().convertFormToV2(crf);
+				
+				} catch (Exception exp) {
+					logger.error("Exception getting CRF: " + exp);
+					logger.error("!!! Form IDSEQ skipped: " + formIdSeq);
+					exp.printStackTrace();
+					continue;//go to the next form
+				}
+				
+				numValue++;//form number in the group starts from 1
+				
+				currentForm = currentForm.replaceAll("\\<\\?xml(.+?)\\?\\>", "").trim();
+				currentForm = currentForm.replace("<form>", "<form num=\"" + numValue + "\">");
+				if (numValue > 1) {
+					currFileOut.write('\n');
+				}
+				currFileOut.write(currentForm.toString().getBytes("UTF-8"));//download the current form
+				currFileOut.flush();
+			}//one form processing loop
+			
+			closeXMLFile(currFileOut);
+		}
 	}
 }
