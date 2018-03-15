@@ -999,7 +999,7 @@ public class JDBCFormDAOFB extends JDBCAdminComponentDAOFB implements FormDAO
                     + initialWhere.toString() + whereClause
                  // Restricted to 10 records for DEV purpose, should be removed for getting all records.
                     + " AND ROWNUM <= 10"
-                    + " ORDER BY public_Id, version";
+                    + " ORDER BY public_Id";
       super.setSql(sql);
       
       logger.info("FRM SEARCH QRY: ["+sql+"]");
