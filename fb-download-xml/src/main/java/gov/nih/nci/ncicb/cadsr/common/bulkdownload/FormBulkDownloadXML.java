@@ -2,7 +2,6 @@ package gov.nih.nci.ncicb.cadsr.common.bulkdownload;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,6 +21,7 @@ import gov.nih.nci.ncicb.cadsr.common.util.logging.Log;
 import gov.nih.nci.ncicb.cadsr.common.util.logging.LogFactory;
 import gov.nih.nci.ncicb.cadsr.formbuilder.ejb.impl.FormBuilderServiceImpl;
 import gov.nih.nci.ncicb.cadsr.formbuilder.ejb.service.FormBuilderService;
+import gov.nih.nci.ncicb.cadsr.common.resource.Context;
 
 public class FormBulkDownloadXML {
 
@@ -31,9 +31,11 @@ public class FormBulkDownloadXML {
 	private static String dir;
 	private static String separator;
 	private static FormBuilderService service;
-
+	private static String contextNameParam = "";//use only this context given by name; not null
+	private static String contextInPath = "";//as "PhenX/" or just ""
+	
 	private static OutputStream startXMLFile(String formFileNameAppend) throws Exception {
-		String xmlFilename = "dwld" + separator + dir + separator + "FormsDownload-" + formFileNameAppend + ".xml";
+		String xmlFilename = "dwld" + separator + contextInPath + dir + separator + "FormsDownload-" + formFileNameAppend + ".xml";
 		logger.info("xmlFilename: " + xmlFilename);
 		BufferedOutputStream fileOut = new BufferedOutputStream(new FileOutputStream(xmlFilename));
 		fileOut.write(convertedFormBegin.getBytes("UTF-8"));
@@ -76,12 +78,13 @@ public class FormBulkDownloadXML {
 		logger.debug(".......formBuilderServiceImpl loaded: " + (formBuilderServiceImpl != null));
 		service = (FormBuilderServiceImpl) (formBuilderServiceImpl);
 		
-		separator = System.getProperty("file.separator");
 		String dirSuffix = new SimpleDateFormat("yyyy-MMM-dd-HH-mm").format(new Date());
-		Path path = Paths.get("dwld" + separator + dirSuffix);
+		
+		Path path = Paths.get("dwld" + separator + contextInPath + dirSuffix);
+		
 		if (!Files.exists(path)) {
 			Files.createDirectories(path);
-			logger.info("creating the folder " + dirSuffix);
+			logger.info("creating the folder " + "dwld" + separator + contextInPath + dirSuffix);
 		}
 		
 		dir = path.getFileName().toString();
@@ -108,11 +111,23 @@ public class FormBulkDownloadXML {
 		    }
 		}
 	}
+	private static void parseParamFormContext(String[] args) throws Exception {
+		if(args.length >= 2) {
+			contextNameParam = args[1];
+		}//otherwise ""
+
+		if (contextNameParam.length() > 0) {
+			contextInPath = contextNameParam + separator;
+		}//otherwise ""
+		
+		logger.debug("contextInPath: " + contextInPath);
+	}
+	
 	private static int parseParamFormAmount(String[] args) throws Exception {
 		int formAmount = 0;
-		if(args.length >= 2) {
+		if(args.length >= 3) {
 			try {
-				formAmount = Integer.parseInt(args[1]);
+				formAmount = Integer.parseInt(args[2]);
 				logger.info("Forms amount: " + formAmount);
 				
 			} catch (NumberFormatException ex) {
@@ -141,20 +156,52 @@ public class FormBulkDownloadXML {
 			(((lengthOfCollection % maxRecords) == 0)? 0 : 1);
 	}
 	
+	private static String findContextIdSeq() throws Exception {
+		Collection contextsObj = service.getAllContexts();
+		for (Object obj : contextsObj) {
+			Context currContext = (Context)obj;
+			if (contextNameParam.equals(currContext.getName())) {
+				return currContext.getConteIdseq();
+			}				
+		}
+		if (contextNameParam.length() > 0) {
+			logger.error("Context not found: " + contextNameParam);
+			throw new Exception("Please provide a valid Context name: " + contextNameParam);
+		}
+		else return contextNameParam;
+	}
+	
 	public static void main(String[] args) throws Exception {
+		long start = System.currentTimeMillis();
 		logger.info("Starting XML Forms download...");
-
+		separator = System.getProperty("file.separator");
+		
+		//parse parameters
+		int formsPerFile = parseParamFormsPerFile(args); //how many forms to load in one file which shall be more than 0
+		parseParamFormContext(args);
+		int formAmount = parseParamFormAmount(args); //how many forms to load
+		
 		init();
 
 		FormV2 crf = null;
 
-		int formsPerFile = parseParamFormsPerFile(args); //how many forms to load in one file which shall be more than 0
-		int formAmount = parseParamFormAmount(args); ////how many forms to load
-		
-		Collection forms = service.getAllForms(null, null, null, "RELEASED", null, null, null, null, "latestVersion", null,
-				null, null, "'TEST', 'Training'");
-		logger.info("Forms amount found in DB: " + forms.size());
+		String conteIdseq = findContextIdSeq();
 
+		Collection forms;
+		if (conteIdseq.length() > 0) {
+			logger.info("Forms from Context with conteIdseq: " + conteIdseq);
+			forms = service.getAllForms(null, null, conteIdseq, "RELEASED", null, null, null, null, "latestVersion", null,
+					null, null, null);
+		}
+		else {
+			logger.info("Forms from all Contexts");
+			forms = service.getAllForms(null, null, null, "RELEASED", null, null, null, null, "latestVersion", null,
+				null, null, "'TEST', 'Training'");
+		}
+		logger.info("Forms amount found in DB: " + forms.size());
+		if (formAmount == 0) {//not provided
+			formAmount = forms.size();
+		}
 		formAmount = (forms.size() < formAmount) ? forms.size() : formAmount;
 		if (formAmount <= 0) {//no form found
 			logger.info("No forms amount to download, formAmount: " + formAmount);
@@ -172,6 +219,7 @@ public class FormBulkDownloadXML {
 
 		for (int groupId = 1; groupId <= numGroups; groupId++) {
 			String formFileNameAppend = ""+ groupId;
+			logger.info("the next file: " + formFileNameAppend);
 			//start a new file
 			OutputStream currFileOut = startXMLFile(formFileNameAppend);
 			int numValue = 0; 
@@ -208,5 +256,7 @@ public class FormBulkDownloadXML {
 			
 			closeXMLFile(currFileOut);
 		}
+		long finished = System.currentTimeMillis();
+		logger.info(".....Download time in minutes: " + (((finished - start)/1000)/60));
 	}
 }

@@ -75,8 +75,9 @@
 						<argument>-classpath</argument>
 						<classpath />
 						<argument>gov.nih.nci.ncicb.cadsr.common.bulkdownload.FormBulkDownloadXML</argument>
-						<argument>1</argument>
-						<argument>1</argument>
+						<argument>2</argument>
+						<argument>Theradex</argument>
+						<argument>3</argument>
 					</arguments>
 				</configuration>
 			</plugin>

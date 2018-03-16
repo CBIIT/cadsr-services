@@ -998,8 +998,9 @@ public class JDBCFormDAOFB extends JDBCAdminComponentDAOFB implements FormDAO
       String sql = selectWhat.toString() + " " + fromWhat.toString() + " "
                     + initialWhere.toString() + whereClause
                  // Restricted to 10 records for DEV purpose, should be removed for getting all records.
-                    + " AND ROWNUM <= 10"
-                    + " ORDER BY public_Id";
+                    //+ " AND ROWNUM <= 10"
+                    + " ORDER BY public_Id"
+                    ;
       super.setSql(sql);
       
       logger.info("FRM SEARCH QRY: ["+sql+"]");
@@ -1991,7 +1992,7 @@ public class JDBCFormDAOFB extends JDBCAdminComponentDAOFB implements FormDAO
         super();
        }
 
-       public void setSql(int publicId, Float version) {
+	public void setSql(int publicId, Float version) {
        String idseqQuerySQL =
                 " SELECT qc_idseq from SBREXT.QUEST_CONTENTS_VIEW_EXT crf where (crf.QTL_NAME = 'CRF' or crf.QTL_NAME = 'TEMPLATE') AND QC_ID = " + publicId + " AND VERSION = " + version;
        super.setSql(idseqQuerySQL);
