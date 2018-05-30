@@ -9,9 +9,9 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven-jar-plugin.version>2.6</maven-jar-plugin.version>
-		<spring.version>4.3.8.RELEASE</spring.version>
+		<!-- <spring.version>4.3.17.RELEASE</spring.version> implied by parent -->
 		<!-- <spring.boot.version>2.0.2.RELEASE</spring.boot.version> -->
-		<spring.boot.version>1.5.13.RELEASE</spring.boot.version>
+		<!-- <spring.boot.version>1.5.13.RELEASE</spring.boot.version> -->
 		<logback-classic.version>1.2.3</logback-classic.version>
 		<slf4j.version>1.7.25</slf4j.version>
 		<commons-logging.version>1.2</commons-logging.version>
@@ -100,17 +100,32 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
-			<version>${spring.version}</version>
+			<!-- version>${spring.version}</version-->
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-aop</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-expression</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
 		</dependency>
 		<dependency>
 		    <groupId>org.springframework</groupId>
 		    <artifactId>spring-jdbc</artifactId>
-			<version>${spring.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.12</version>
+			<!-- version>4.12</version> defined by spring-boot-starter-parent -->
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -160,7 +175,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>${slf4j.version}</version>
+			<!-- version>${slf4j.version}</version -->
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
 		<dependency>

@@ -24,7 +24,7 @@ public class Example {
 
 	@RequestMapping("/")
 	String home() {
-		return "Hello Spring Boot World!";
+		return "Hello Spring Boot World!\n";
 	}
 //    @Value("classpath:boot.properties")
 //    private Resource res;

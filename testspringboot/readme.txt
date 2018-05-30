@@ -1,27 +1,41 @@
-This is a Maven test application to run RESTful services using Spring boot to create a microservice.
+This is a Maven test application to run RESTful services using Spring boot to create microservices.
 
 The service uploads a file, and saves it to directory listed in configuration file.
-Configuration file is:
+This application configuration file is:
 src/main/resources/boot.properties
 
-Maven build copies all dependencies libraries to "target/lib" directory.
+Spring boot application configuration conventional file name:
+application.properties
+Add DB properties values to this file.
+There is a port listened by Tomcat Spring embedded web server (8040). Default port would be 8080.
+
+Maven "package" copies all dependencies libraries to "target/lib" directory.
 Change pom.xml if this is not desirable.
 
-The RESTful controller example is in the class "RestUploadController".
-Add more similar controllers as required to the same package "gov.nih.nci.testspringboot"
+The RESTful controller examples:
+"RestUploadController"
+"RestDataElementController"
 
-"Example" controller class is also the main application class. It serves the root application page "/".
+Add more similar controllers as required to the same package "gov.nih.nci.testspringboot"using say "RestDataElementController" as a start point.
 
-One can run Spring Boot application from Eclipse using this class, and Run as "Spring Boot App".
-This requires using STS IDE, or Eclipse "STS plugin" to be installed.
+"Example" controller class is the main Spring boot application class. It also works as a controller for the root application page "/".
 
-To run from a command line:
+"EmbeddedTomcatDBConfig" creates application beans on the application start. It uses the file "application.properties" to create DB "DataSource" bean.
+The bean set includes beans "dataSource" and "jdbcTemplate".
+A class "DataElementRepository" is created as a bean, and it has autowired "jdbcTemplate" bean.
+RESTful controller "RestDataElementController" has autowired DataElementRepository bean used to retrieve DB objects.
+A class "DataElements" is a POJO, which is streamed by RESTful controller as a JSON.
+
+One can run Spring Boot application from Eclipse using a "Example" class, using right mouse button menu "Run as" -> "Spring Boot App".
+This run menu is shown if using STS IDE, or if Eclipse "STS plugin" is installed.
+
+To run boot from a command line:
 1. Go to project pom.xml directory
 
 2. Select a port to listen, below is 8040.
 Maven command is "spring-boot:run":
 
-mvn -Dserver.port=8040 spring-boot:run
+mvn spring-boot:run
 
 You shall see the output:
   .   ____          _            __ _ _
@@ -51,8 +65,14 @@ You can send an AJAX request from a web page.
 Default: /local/content/cchecker/
 If the directory does not exist it will be created when possible.
 
-7. DB Example:
-curl http://localhost:8040/rest/cde/
-Add DB information to the file:
-application.properties
-This is a conventional boot configuration file.
+7. DB RESTful service example:
+curl http://localhost:8080/rest/cde/
+DB information shall be added to the file "application.properties".
+The order of fields in JSON is the same as the order of 'get' methods in class "DataElements".
+
+8. To create the application jar file use:
+mvn package
+or to skip tests
+mvn package --DskipTests=true
+To run the application using jar file from the main project directory:
+java -jar target/testspringboot-0.0.1-SNAPSHOT.jar

@@ -70,11 +70,11 @@ public class DataElements {
 	public void setAslName(String aslName) {
 		this.aslName = aslName;
 	}
-	public String getLongNAme() {
+	public String getLongName() {
 		return longName;
 	}
-	public void setLongNAme(String longNAme) {
-		this.longName = longNAme;
+	public void setLongName(String longName) {
+		this.longName = longName;
 	}
 	public String getOrigin() {
 		return origin;
