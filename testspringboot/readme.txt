@@ -36,7 +36,7 @@ and you shall not see any exception.
 The service will be running
 
 3. go to a browser with a URL
-http://http://localhost:8040/ 
+http://localhost:8040/ 
 
 4. It shall show "index" page, implemented by "Example" controller class. This class is also main application class.
 Hello Spring Boot World!
@@ -50,3 +50,9 @@ You can send an AJAX request from a web page.
 6. The file shall be saved in the directory from configuration.
 Default: /local/content/cchecker/
 If the directory does not exist it will be created when possible.
+
+7. DB Example:
+curl http://localhost:8040/rest/cde/
+Add DB information to the file:
+application.properties
+This is a conventional boot configuration file.
