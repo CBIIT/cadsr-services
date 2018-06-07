@@ -258,18 +258,43 @@ public class AlsParser {
 	private static List<ALSDataDictionaryEntry> getDataDictionaryEntries(Sheet sheet) {
 		List<ALSDataDictionaryEntry> dataDictionaryEntries = new ArrayList<ALSDataDictionaryEntry>();
 		if (sheet.getSheetName().equalsIgnoreCase("DataDictionaryEntries")) {
+        	ALSDataDictionaryEntry dde = new ALSDataDictionaryEntry();
+        	List<Integer> ordinal = new ArrayList<Integer>();
+        	List<String> cd = new ArrayList<String>();
+        	List<String> uds = new ArrayList<String>();
+        	List<Boolean> specify = new ArrayList<Boolean>();
+        	String ddName = "";
         	Iterator<Row> rowIterator = sheet.rowIterator();
         	Row row = rowIterator.next();        	
-            while (rowIterator.hasNext()) {            	
+            while (rowIterator.hasNext()) {    	
             	row = rowIterator.next();
-            	if (row.getCell(0)!=null) {	
-		            	ALSDataDictionaryEntry dde = new ALSDataDictionaryEntry();
-		            	dde.setDataDictionaryName(dataFormatter.formatCellValue(row.getCell(0)));
-		            	dde.setCodedData(dataFormatter.formatCellValue(row.getCell(1)));
-		            	dde.setOrdinal(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(2))));
-		            	dde.setUserDataString(dataFormatter.formatCellValue(row.getCell(3)));
-		            	dde.setSpecify(Boolean.valueOf(dataFormatter.formatCellValue(row.getCell(4))));
-		            	dataDictionaryEntries.add(dde);
+            	if (row.getCell(0)!=null) {
+            		if (ddName.equals(""))
+            			ddName = dataFormatter.formatCellValue(row.getCell(0));
+            		
+        			if (!ddName.equals(dataFormatter.formatCellValue(row.getCell(0)))) {
+        				if (dde.getCodedData().size() > 0)
+        					dataDictionaryEntries.add(dde);
+        				dde = new ALSDataDictionaryEntry();
+        				dde.setDataDictionaryName(dataFormatter.formatCellValue(row.getCell(0)));
+        				ordinal = new ArrayList<Integer>();
+        				cd = new ArrayList<String>();
+        				uds = new ArrayList<String>();
+        				specify = new ArrayList<Boolean>();
+        			} else {
+        				cd.add(dataFormatter.formatCellValue(row.getCell(1)));        				
+        				ordinal.add(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(2))));
+        				uds.add(dataFormatter.formatCellValue(row.getCell(3)));
+        				specify.add(Boolean.valueOf(dataFormatter.formatCellValue(row.getCell(4))));
+        			}
+            		
+		            	//dde.setDataDictionaryName(dataFormatter.formatCellValue(row.getCell(0)));
+		            	//dde.setCodedData(dataFormatter.formatCellValue(row.getCell(1)));
+		            	//dde.setOrdinal(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(2))));
+		            	//dde.setUserDataString(dataFormatter.formatCellValue(row.getCell(3)));
+		            	//dde.setSpecify(Boolean.valueOf(dataFormatter.formatCellValue(row.getCell(4))));
+        			//if (dde.getCodedData().size() > 0)
+    					//dataDictionaryEntries.add(dde);
             		}
             	}					
 		}	else {
@@ -353,13 +378,14 @@ public class AlsParser {
 				question.setRaveControlType(alsField.getControlType());
 				question.setControlTypeResult("Match"); // Will be replaced with the caDSR db validation result
 				question.setCdeValueDomainType(""); // from caDSR DB - Value Domain	Enumerated/NonEnumerated
-				List<String> pvList = new ArrayList<String>();
 				if (alsField.getDataDictionaryName().equals(dde.getDataDictionaryName()))
-					pvList.add(dde.getUserDataString());
-				question.setRaveCodedData(pvList); // Data dictionary name and its corresponding entries - All the Permissible values
+					{
+						question.setRaveCodedData(dde.getCodedData()); // Data dictionary name and its corresponding entries - All the Permissible values
+						question.setRaveUserString(dde.getUserDataString());
+					}				 
 				question.setCodedDataResult("Error/Match");  // Will be replaced with the caDSR db validation result
 				question.setAllowableCdeValue("");
-				question.setRaveUserString(dde.getUserDataString());
+
 				question.setPvResult("Error/match"); // Will be replaced with the caDSR db validation result
 				question.setAllowableCdeTextChoices("A|B|C|D"); // Test values - will be replaced with the PV value meanings from caDSR db
 				questionsList.add(question);
