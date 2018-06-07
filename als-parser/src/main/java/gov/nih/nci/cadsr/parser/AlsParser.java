@@ -24,6 +24,9 @@ import gov.nih.nci.cadsr.data.ALSDataDictionaryEntry;
 import gov.nih.nci.cadsr.data.ALSField;
 import gov.nih.nci.cadsr.data.ALSForm;
 import gov.nih.nci.cadsr.data.ALSUnitDictionaryEntry;
+import gov.nih.nci.cadsr.data.CCCForm;
+import gov.nih.nci.cadsr.data.CCCQuestion;
+import gov.nih.nci.cadsr.data.CCCReport;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
@@ -32,8 +35,9 @@ import org.w3c.dom.Element;
 public class AlsParser {
 	
 	public static final Logger logger = Logger.getLogger(AlsParser.class);
-	public static final String INPUT_XLSX_FILE_PATH = "/Users/santhanamv/Documents/FORMBUILD-595/ALS_8237_ForFormLoaderTesting.xlsx";
+	public static final String INPUT_XLSX_FILE_PATH = "/Users/santhanamv/Documents/FORMBUILD-595/June4/FORMBUILD-595/From-PeterZipFile-RAVE-ALS-10057-VS.xlsx";
 	public static ALSData alsData;
+	public static CCCReport cccReport;
 	public static DataFormatter dataFormatter = new DataFormatter();		
 
 	public static void main(String[] args) throws IOException, InvalidFormatException {
@@ -41,6 +45,10 @@ public class AlsParser {
 		// Parsing the ALS file in Excel format (XLS). If this file has a XML extension
 		// It needs to be converted to an XLSX file before being parsed.
 		parseExcel();
+		
+		//Validating (Non-DB) & producing the final output
+		getOutput();
+		
 
 	}
 
@@ -53,13 +61,18 @@ public class AlsParser {
         Workbook workbook = WorkbookFactory.create(new File(INPUT_XLSX_FILE_PATH));
 		
         logger.debug("Workbook has " + workbook.getNumberOfSheets() + " Sheets : ");
+        
+        // print all the sheets in the workbook
+        /*for (Sheet sheet : workbook) {
+        	logger.debug("Sheet name: "+sheet.getSheetName());
+        }*/
 
         alsData = new ALSData();
         alsData.setCrfDrafts(getCrfDrafts(workbook.getSheetAt(0)));
         alsData.setForms(getForms(workbook.getSheetAt(1)));
         alsData.setFields(getFields(workbook.getSheetAt(2)));
-        alsData.setDataDictionaryEntries(getDataDictionaryEntries(workbook.getSheetAt(4)));
-        alsData.setUnitDictionaryEntries(getUnitDictionaryEntries(workbook.getSheetAt(6)));
+        alsData.setDataDictionaryEntries(getDataDictionaryEntries(workbook.getSheetAt(5)));
+        alsData.setUnitDictionaryEntries(getUnitDictionaryEntries(workbook.getSheetAt(7)));
         
         
         logger.debug("alsData : "+alsData.getRaveProtocolName());
@@ -138,7 +151,8 @@ public class AlsParser {
         	Row row = rowIterator.next();        	
             while (rowIterator.hasNext()) {
             	row = rowIterator.next();
-    			ALSForm form = new ALSForm();    			
+    			ALSForm form = new ALSForm(); 
+    			if (row.getCell(0)!=null) {    			
     			form.setFormOId(dataFormatter.formatCellValue(row.getCell(0)));
     			form.setOrdinal(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(1))));    			
     			form.setDraftFormName(dataFormatter.formatCellValue(row.getCell(2)));
@@ -155,6 +169,7 @@ public class AlsParser {
     			form.setLinkFolderOid(dataFormatter.formatCellValue(row.getCell(13)));
     			form.setLinkFormOid(dataFormatter.formatCellValue(row.getCell(14)));    			
     			forms.add(form);
+    			}
             }
 			
 		}	else {
@@ -297,5 +312,61 @@ public class AlsParser {
 		return dataDictionaryEntries;
 	}	
 	
+	/**
+	 * @param  
+	 * @return 
+	 * Populates the output object after initial validation and parsing of data
+	 * 
+	 */		
+	private static void getOutput() {
+		cccReport = new CCCReport();
+		cccReport.setReportOwner("VS");
+		cccReport.setReportDate(alsData.getReportDate());
+		cccReport.setRaveProtocolName(alsData.getRaveProtocolName());
+		cccReport.setRaveProtocolNumber(alsData.getRaveProtocolNumber());
+		List<CCCForm> formsList = new ArrayList<CCCForm>();
+		CCCForm form  = new CCCForm();
+		String formName = "";
+		List<CCCQuestion> questionsList = new ArrayList<CCCQuestion>();		
+		ALSDataDictionaryEntry dde = new ALSDataDictionaryEntry();
+		for (ALSField alsField : alsData.getFields()) {
+			if (formName == "" || !formName.equals(alsField.getFormOid())) {
+				form.setQuestions(questionsList);				
+				formName = alsField.getFormOid();
+				form = new CCCForm();
+				form.setRaveFormOId(formName);
+				questionsList = new ArrayList<CCCQuestion>();
+			}
+			CCCQuestion question = new CCCQuestion();
+			question.setFieldOrder(alsField.getOrdinal()); // which tab is it from - Forms/Fields?
+			String draftFieldName = alsField.getDraftFieldName();
+			if (draftFieldName.indexOf("PID") > -1 && draftFieldName.indexOf("_V") > -1) {
+				String idVersion = draftFieldName.substring(draftFieldName.indexOf("PID"), draftFieldName.length());
+				question.setCdePublicId(idVersion.substring(3, idVersion.indexOf("_")));
+				question.setCdeVersion((idVersion.substring(idVersion.indexOf("_V")+2, idVersion.length())).replaceAll("_", "."));
+				question.setNciCategory("NRDS"); //"NRDS" "Mandatory Module: {CRF ID/V}", "Optional Module {CRF ID/V}", "Conditional Module: {CRF ID/V}"
+				question.setQuestionCongruenceStatus("MATCH");//Valid results are "ERROR" "Match"
+				question.setMessage("Error message"); // Will be replaced with the caDSR db validation result error message, if any.
+				question.setRaveFieldLabel(alsField.getPreText());
+				question.setRaveFieldLabelResult("Error/Match"); // Will be replaced with the caDSR db validation result
+				question.setCdePermitQuestionTextChoices(""); // From the caDSR DB - docText
+				question.setRaveControlType(alsField.getControlType());
+				question.setControlTypeResult("Match"); // Will be replaced with the caDSR db validation result
+				question.setCdeValueDomainType(""); // from caDSR DB - Value Domain	Enumerated/NonEnumerated
+				List<String> pvList = new ArrayList<String>();
+				if (alsField.getDataDictionaryName().equals(dde.getDataDictionaryName()))
+					pvList.add(dde.getUserDataString());
+				question.setRaveCodedData(pvList); // Data dictionary name and its corresponding entries - All the Permissible values
+				question.setCodedDataResult("Error/Match");  // Will be replaced with the caDSR db validation result
+				question.setAllowableCdeValue("");
+				question.setRaveUserString(dde.getUserDataString());
+				question.setPvResult("Error/match"); // Will be replaced with the caDSR db validation result
+				question.setAllowableCdeTextChoices("A|B|C|D"); // Test values - will be replaced with the PV value meanings from caDSR db
+				questionsList.add(question);
+			}
 
+		}
+		formsList.add(form);
+		cccReport.setCccForms(formsList);		
+	}	
 }

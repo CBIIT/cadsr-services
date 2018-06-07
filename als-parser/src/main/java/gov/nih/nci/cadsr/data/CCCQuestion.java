@@ -3,17 +3,12 @@ package gov.nih.nci.cadsr.data;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CCCForm {	
+public class CCCQuestion {	
 
 String raveFormOId;
-String caDSRFormId;
-int countTotalQuestions;
-String version;
-//String fieldOrder;
-
-List<CCCQuestion> questions = new ArrayList<CCCQuestion>();
+String fieldOrder;
 // placeholder for missing field on row #35 in DetailedRequirements
-/*String cdePublicId;
+String cdePublicId;
 String cdeVersion;
 String nciCategory;
 String questionCongruenceStatus;
@@ -25,7 +20,7 @@ String raveControlType;
 String controlTypeResult;
 String cdeValueDomainType;
 //missing field for row #47 - String dataDictionaryName;
-String 	raveCodedData;
+List<String> raveCodedData = new ArrayList<String>();
 String codedDataResult;
 String allowableCdeValue;
 String raveUserString;
@@ -45,7 +40,7 @@ String lengthResult;
 String cdeMaxLength;
 String raveDisplayFormat;
 String formatResult;	
-String cdeDisplayFormat;*/
+String cdeDisplayFormat;
 
 public String getRaveFormOId() {
 	return raveFormOId;
@@ -53,25 +48,7 @@ public String getRaveFormOId() {
 public void setRaveFormOId(String raveFormOId) {
 	this.raveFormOId = raveFormOId;
 }
-public String getCaDSRFormId() {
-	return caDSRFormId;
-}
-public void setCaDSRFormId(String caDSRFormId) {
-	this.caDSRFormId = caDSRFormId;
-}
-public int getCountTotalQuestions() {
-	return countTotalQuestions;
-}
-public void setCountTotalQuestions(int countTotalQuestions) {
-	this.countTotalQuestions = countTotalQuestions;
-}
-public String getVersion() {
-	return version;
-}
-public void setVersion(String version) {
-	this.version = version;
-}
-/*public String getFieldOrder() {
+public String getFieldOrder() {
 	return fieldOrder;
 }
 public void setFieldOrder(String fieldOrder) {
@@ -143,10 +120,10 @@ public String getCdeValueDomainType() {
 public void setCdeValueDomainType(String cdeValueDomainType) {
 	this.cdeValueDomainType = cdeValueDomainType;
 }
-public String getRaveCodedData() {
+public List<String> getRaveCodedData() {
 	return raveCodedData;
 }
-public void setRaveCodedData(String raveCodedData) {
+public void setRaveCodedData(List<String> raveCodedData) {
 	this.raveCodedData = raveCodedData;
 }
 public String getCodedDataResult() {
@@ -178,12 +155,6 @@ public String getAllowableCdeTextChoices() {
 }
 public void setAllowableCdeTextChoices(String allowableCdeTextChoices) {
 	this.allowableCdeTextChoices = allowableCdeTextChoices;
-}*/
-public List<CCCQuestion> getQuestions() {
-	return questions;
-}
-public void setQuestions(List<CCCQuestion> questions) {
-	this.questions = questions;
 }	
 
 }
