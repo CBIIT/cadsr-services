@@ -71,6 +71,7 @@ public class AlsParser {
         alsData.setCrfDrafts(getCrfDrafts(workbook.getSheetAt(0)));
         alsData.setForms(getForms(workbook.getSheetAt(1)));
         alsData.setFields(getFields(workbook.getSheetAt(2)));
+        //alsData.setDataDictionaryEntries(getDataDictionaryNamesList(workbook.getSheetAt(4)));
         alsData.setDataDictionaryEntries(getDataDictionaryEntries(workbook.getSheetAt(5)));
         alsData.setUnitDictionaryEntries(getUnitDictionaryEntries(workbook.getSheetAt(7)));
         
@@ -78,15 +79,18 @@ public class AlsParser {
         logger.debug("alsData : "+alsData.getRaveProtocolName());
         logger.debug("alsData Primary Form ID: "+alsData.getCrfDrafts().get(0).getPrimaryFormOid());
         logger.debug("CRFData objects: "+(alsData.getCrfDrafts()).size());
-        logger.debug("alsData Form ID: "+alsData.getForms().get(8).getFormOId());
-        logger.debug("alsData Form ID: "+alsData.getForms().get(5).getDraftFormName());        
+        logger.debug("alsData Form ID #9: "+alsData.getForms().get(8).getFormOId());
+        logger.debug("alsData Form Name #6: "+alsData.getForms().get(5).getDraftFormName());        
         logger.debug("alsData Draft Form Active : "+alsData.getForms().get(4).getDraftFormActive());
         logger.debug("Form objects: "+(alsData.getForms()).size());
         logger.debug("Field objects: "+(alsData.getFields()).size());
         logger.debug("Data dictionary objects: "+(alsData.getDataDictionaryEntries()).size());
+        int ddeSize = alsData.getDataDictionaryEntries().size()-1;
+        logger.debug("DDE name:"+alsData.getDataDictionaryEntries().get(ddeSize).getDataDictionaryName());
         logger.debug("Unit dictionary objects: "+(alsData.getUnitDictionaryEntries()).size());
 
-        workbook.close();		
+        workbook.close();
+        System.out.print("Done");
 
 	}
 	
@@ -255,10 +259,36 @@ public class AlsParser {
 	 * Populates a collection of Data Dictionary Entries parsed out of the ALS input file
 	 * 
 	 */		
-	private static List<ALSDataDictionaryEntry> getDataDictionaryEntries(Sheet sheet) {
-		List<ALSDataDictionaryEntry> dataDictionaryEntries = new ArrayList<ALSDataDictionaryEntry>();
-		if (sheet.getSheetName().equalsIgnoreCase("DataDictionaryEntries")) {
+	private static List<ALSDataDictionaryEntry> getDataDictionaryNamesList(Sheet sheet) {
+		List<ALSDataDictionaryEntry> ddnList = new ArrayList<ALSDataDictionaryEntry>();
+        int dataDictionaries = sheet.getLastRowNum();
+        for (int i=0; i<sheet.getLastRowNum(); i++ ) {
         	ALSDataDictionaryEntry dde = new ALSDataDictionaryEntry();
+        }
+    	Iterator<Row> rowIterator = sheet.rowIterator();
+    	Row row = rowIterator.next();        	
+        while (rowIterator.hasNext()) {    	
+        	row = rowIterator.next();
+        	if (row.getCell(0)!=null) {
+        			ALSDataDictionaryEntry dde = new ALSDataDictionaryEntry();
+        			dde.setDataDictionaryName(dataFormatter.formatCellValue(row.getCell(0)));
+        			ddnList.add(dde);
+        		}        
+        	}
+		return ddnList;		
+	}	
+	
+	
+	/**
+	 * @param Sheet 
+	 * @return List ALSDataDictionaryEntry
+	 * Populates a collection of Data Dictionary Entries parsed out of the ALS input file
+	 * 
+	 */		
+	private static List<ALSDataDictionaryEntry> getDataDictionaryEntries(Sheet sheet) {
+		List<ALSDataDictionaryEntry> ddeList = new ArrayList<ALSDataDictionaryEntry>();		
+		if (sheet.getSheetName().equalsIgnoreCase("DataDictionaryEntries")) {
+			ALSDataDictionaryEntry dde = new ALSDataDictionaryEntry();
         	List<Integer> ordinal = new ArrayList<Integer>();
         	List<String> cd = new ArrayList<String>();
         	List<String> uds = new ArrayList<String>();
@@ -269,39 +299,40 @@ public class AlsParser {
             while (rowIterator.hasNext()) {    	
             	row = rowIterator.next();
             	if (row.getCell(0)!=null) {
-            		if (ddName.equals(""))
-            			ddName = dataFormatter.formatCellValue(row.getCell(0));
-            		
-        			if (!ddName.equals(dataFormatter.formatCellValue(row.getCell(0)))) {
-        				if (dde.getCodedData().size() > 0)
-        					dataDictionaryEntries.add(dde);
-        				dde = new ALSDataDictionaryEntry();
-        				dde.setDataDictionaryName(dataFormatter.formatCellValue(row.getCell(0)));
-        				ordinal = new ArrayList<Integer>();
-        				cd = new ArrayList<String>();
-        				uds = new ArrayList<String>();
-        				specify = new ArrayList<Boolean>();
-        			} else {
-        				cd.add(dataFormatter.formatCellValue(row.getCell(1)));        				
+            		if (ddName.equals("")){
+            				ddName = dataFormatter.formatCellValue(row.getCell(0));
+            			}
+	        			if (!ddName.equals(dataFormatter.formatCellValue(row.getCell(0)))) {
+	        				dde.setCodedData(cd);
+	        				dde.setOrdinal(ordinal);
+	        				dde.setUserDataString(uds);
+	        				dde.setSpecify(specify);       
+	        				dde.setDataDictionaryName(ddName);
+	        				ddeList.add(dde);
+	        				ddName = dataFormatter.formatCellValue(row.getCell(0));
+	        				dde = new ALSDataDictionaryEntry();
+	        				dde.setDataDictionaryName(dataFormatter.formatCellValue(row.getCell(0)));
+	        				ordinal = new ArrayList<Integer>();
+	        				cd = new ArrayList<String>();
+	        				uds = new ArrayList<String>();
+	        				specify = new ArrayList<Boolean>();
+	        			} 
+        				cd.add(dataFormatter.formatCellValue(row.getCell(1)));
         				ordinal.add(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(2))));
         				uds.add(dataFormatter.formatCellValue(row.getCell(3)));
         				specify.add(Boolean.valueOf(dataFormatter.formatCellValue(row.getCell(4))));
-        			}
-            		
-		            	//dde.setDataDictionaryName(dataFormatter.formatCellValue(row.getCell(0)));
-		            	//dde.setCodedData(dataFormatter.formatCellValue(row.getCell(1)));
-		            	//dde.setOrdinal(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(2))));
-		            	//dde.setUserDataString(dataFormatter.formatCellValue(row.getCell(3)));
-		            	//dde.setSpecify(Boolean.valueOf(dataFormatter.formatCellValue(row.getCell(4))));
-        			//if (dde.getCodedData().size() > 0)
-    					//dataDictionaryEntries.add(dde);
             		}
-            	}					
+            	}
+			dde.setCodedData(cd);
+			dde.setOrdinal(ordinal);
+			dde.setUserDataString(uds);
+			dde.setSpecify(specify);       
+			dde.setDataDictionaryName(ddName);
+			ddeList.add(dde);
 		}	else {
 			logger.debug("Incorrect sheet name. Should be DataDictionaryEntries");
-		}							
-		
-		return dataDictionaryEntries;
+		}					
+		return ddeList;
 	}			
 	
 	/**
