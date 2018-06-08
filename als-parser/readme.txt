@@ -22,10 +22,6 @@ To create the application jar file use the following command
 mvn clean package
 
 
-To run the application using jar file from the main project directory:
-java -jar target/testspringboot-0.0.1-SNAPSHOT.jar
-
-
 Run the JAVA application
 1. Eclipse IDE
 Run the main class - AlsParser as a JAVA application
