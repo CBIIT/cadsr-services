@@ -1,5 +1,8 @@
 package gov.nih.nci.cadsr.data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ALSForm {
 	
 String formOId;
@@ -18,6 +21,8 @@ String ddeOption;
 String confirmationStyle;
 String linkFolderOid;
 String linkFormOid;
+
+List<ALSField> fields = new ArrayList<ALSField>();
 
 public String getFormOId() {
 	return formOId;
@@ -108,6 +113,12 @@ public String getLinkFormOid() {
 }
 public void setLinkFormOid(String linkFormOid) {
 	this.linkFormOid = linkFormOid;
+}
+public List<ALSField> getFields() {
+	return fields;
+}
+public void setFields(List<ALSField> fields) {
+	this.fields = fields;
 }
 
 }

@@ -1,5 +1,8 @@
 package gov.nih.nci.cadsr.data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ALSField {
 	
 String formOid;
@@ -47,6 +50,8 @@ String viewRestrictions;
 String entryRestrictions;
 String reviewGroups;
 Boolean isVisualVerify;
+
+List<ALSDataDictionaryEntry> ddeList = new ArrayList<ALSDataDictionaryEntry>();
 
 
 public String getFormOid() {
@@ -306,6 +311,12 @@ public Boolean getIsVisualVerify() {
 }
 public void setIsVisualVerify(Boolean isVisualVerify) {
 	this.isVisualVerify = isVisualVerify;
+}
+public List<ALSDataDictionaryEntry> getDdeList() {
+	return ddeList;
+}
+public void setDdeList(List<ALSDataDictionaryEntry> ddeList) {
+	this.ddeList = ddeList;
 }
 
 
