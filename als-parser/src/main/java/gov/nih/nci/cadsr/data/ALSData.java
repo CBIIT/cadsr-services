@@ -1,7 +1,9 @@
 package gov.nih.nci.cadsr.data;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ALSData {
 	
@@ -13,7 +15,7 @@ String reportDate;
 List<ALSCrfDraft> crfDrafts = new ArrayList<ALSCrfDraft>();
 List<ALSForm> forms = new ArrayList<ALSForm>();
 List<ALSField> fields = new ArrayList<ALSField>();
-List<ALSDataDictionaryEntry> dataDictionaryEntries = new ArrayList<ALSDataDictionaryEntry>();
+Map<String, ALSDataDictionaryEntry> dataDictionaryEntries = new HashMap<String, ALSDataDictionaryEntry>();
 List<ALSUnitDictionaryEntry> unitDictionaryEntries = new ArrayList<ALSUnitDictionaryEntry>();
 
 
@@ -54,12 +56,6 @@ public List<ALSField> getFields() {
 public void setFields(List<ALSField> fields) {
 	this.fields = fields;
 }
-public List<ALSDataDictionaryEntry> getDataDictionaryEntries() {
-	return dataDictionaryEntries;
-}
-public void setDataDictionaryEntries(List<ALSDataDictionaryEntry> dataDictionaryEntries) {
-	this.dataDictionaryEntries = dataDictionaryEntries;
-}
 public List<ALSUnitDictionaryEntry> getUnitDictionaryEntries() {
 	return unitDictionaryEntries;
 }
@@ -71,6 +67,12 @@ public String getReportDate() {
 }
 public void setReportDate(String reportDate) {
 	this.reportDate = reportDate;
+}
+public Map<String, ALSDataDictionaryEntry> getDataDictionaryEntries() {
+	return dataDictionaryEntries;
+}
+public void setDataDictionaryEntries(Map<String, ALSDataDictionaryEntry> dataDictionaryEntries) {
+	this.dataDictionaryEntries = dataDictionaryEntries;
 }
 
 

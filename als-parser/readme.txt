@@ -11,6 +11,9 @@ The main class is gov.nih.nci.cadsr.parser.AlsParser, which consists of the pars
 The data objects that will be used to store the input and the output for this program 
 will be under gov.nih.nci.cadsr.data
 
+The input (test) ALS file should be present in src/main/resources and is controlled by
+'INPUT_XLSX_FILE_PATH' in AlsParser.java
+
 
 To compile/build the application: 
 Run the following command from the project root folder [where POM.xml resides]

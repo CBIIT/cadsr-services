@@ -10,8 +10,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import gov.nih.nci.cadsr.data.ALSCrfDraft;
 import gov.nih.nci.cadsr.data.ALSData;
@@ -26,20 +28,22 @@ import gov.nih.nci.cadsr.data.CCCReport;
 public class AlsParser {
 	
 	public static final Logger logger = Logger.getLogger(AlsParser.class);
-	public static final String INPUT_XLSX_FILE_PATH = "/Users/santhanamv/Documents/FORMBUILD-595/June4/FORMBUILD-595/From-PeterZipFile-RAVE-ALS-10057-VS.xlsx";
+	public static final String INPUT_XLSX_FILE_PATH = "target/classes/From-PeterZipFile-RAVE-ALS-10057-VS.xlsx";
 	public static ALSData alsData;
 	public static CCCReport cccReport;
 	public static DataFormatter dataFormatter = new DataFormatter();		
 
 	public static void main(String[] args) throws IOException, InvalidFormatException {
 		
-		// Parsing the ALS file in Excel format (XLS). If this file has a XML extension
-		// It needs to be converted to an XLSX file before being parsed.
+		// Parsing the ALS file in Excel format (XLSX). If this file has an XML extension
+		// then it needs to be converted to an XLSX file before being provided as the input to the parser.
 		parseExcel();
 		buildAls();		
 		//Validating (Non-DB) & producing the final output
-		getOutput();
+		getOutputForReport();
 		
+		// Writing the output in excel format
+		writeExcel();
 
 	}
 
@@ -75,9 +79,7 @@ public class AlsParser {
 		logger.debug("alsData Draft Form Active : " + alsData.getForms().get(4).getDraftFormActive());
 		logger.debug("Form objects: " + (alsData.getForms()).size());
 		logger.debug("Field objects: " + (alsData.getFields()).size());
-		logger.debug("Data dictionary objects: " + (alsData.getDataDictionaryEntries()).size());
-		int ddeSize = alsData.getDataDictionaryEntries().size() - 1;
-		logger.debug("DDE name:" + alsData.getDataDictionaryEntries().get(ddeSize).getDataDictionaryName());
+		logger.debug("Data dictionary objects: " + (alsData.getDataDictionaryEntries().size()));
 		logger.debug("Unit dictionary objects: " + (alsData.getUnitDictionaryEntries()).size());
 
 		workbook.close();
@@ -275,8 +277,8 @@ public class AlsParser {
 	 *         Dictionary Entries parsed out of the ALS input file
 	 * 
 	 */
-	private static List<ALSDataDictionaryEntry> getDataDictionaryEntries(Sheet sheet) {
-		List<ALSDataDictionaryEntry> ddeList = new ArrayList<ALSDataDictionaryEntry>();
+	private static Map<String, ALSDataDictionaryEntry> getDataDictionaryEntries(Sheet sheet) {
+		Map<String, ALSDataDictionaryEntry> ddeMap = new HashMap<String, ALSDataDictionaryEntry>();
 		if (sheet.getSheetName().equalsIgnoreCase("DataDictionaryEntries")) {
 			ALSDataDictionaryEntry dde = new ALSDataDictionaryEntry();
 			List<Integer> ordinal = new ArrayList<Integer>();
@@ -298,7 +300,9 @@ public class AlsParser {
 						dde.setUserDataString(uds);
 						dde.setSpecify(specify);
 						dde.setDataDictionaryName(ddName);
-						ddeList.add(dde);
+						if (!(ddeMap.containsKey(dde.getDataDictionaryName()))) {
+							ddeMap.put(dde.getDataDictionaryName(), dde);
+						}
 						ddName = dataFormatter.formatCellValue(row.getCell(0));
 						dde = new ALSDataDictionaryEntry();
 						dde.setDataDictionaryName(dataFormatter.formatCellValue(row.getCell(0)));
@@ -318,11 +322,13 @@ public class AlsParser {
 			dde.setUserDataString(uds);
 			dde.setSpecify(specify);
 			dde.setDataDictionaryName(ddName);
-			ddeList.add(dde);
+			if (!(ddeMap.containsKey(dde.getDataDictionaryName()))) {
+				ddeMap.put(dde.getDataDictionaryName(), dde);
+			}
 		} else {
 			logger.debug("Incorrect sheet name. Should be DataDictionaryEntries");
 		}
-		return ddeList;
+		return ddeMap;
 	}
 
 	/**
@@ -361,12 +367,12 @@ public class AlsParser {
 	/**
 	 * @param  
 	 * @return 
-	 * Populates the output object after initial validation and parsing of data
+	 * Populates the output object for the report after initial validation and parsing of data
 	 * 
 	 */		
-	private static void getOutput() {
+	private static void getOutputForReport() {
 		cccReport = new CCCReport();
-		cccReport.setReportOwner("VS");
+		cccReport.setReportOwner("<NAME OF PERSON WHO THE REPORT IS FOR>"); // From the user input through the browser
 		cccReport.setReportDate(alsData.getReportDate());
 		cccReport.setRaveProtocolName(alsData.getRaveProtocolName());
 		cccReport.setRaveProtocolNumber(alsData.getRaveProtocolNumber());
@@ -374,8 +380,7 @@ public class AlsParser {
 		CCCForm form  = new CCCForm();
 		String formName = "";
 		List<CCCQuestion> questionsList = new ArrayList<CCCQuestion>();		
-		//ALSDataDictionaryEntry dde;
-		List<ALSDataDictionaryEntry> ddeList = alsData.getDataDictionaryEntries();
+		Map<String, ALSDataDictionaryEntry> ddeMap = alsData.getDataDictionaryEntries();
 		for (ALSField alsField : alsData.getFields()) {
 			if (formName.equals(""))
 				formName = alsField.getFormOid();
@@ -405,11 +410,12 @@ public class AlsParser {
 				question.setRaveControlType(alsField.getControlType());
 				question.setControlTypeResult("Match"); // Will be replaced with the caDSR db validation result
 				question.setCdeValueDomainType(""); // from caDSR DB - Value Domain	Enumerated/NonEnumerated
-				for (ALSDataDictionaryEntry dde : ddeList) {
-					if (dde.getDataDictionaryName().equals(alsField.getDataDictionaryName()))
+				
+				for (String key : ddeMap.keySet()) {
+					if (key.equals(alsField.getDataDictionaryName()))
 					{
-						question.setRaveCodedData(dde.getCodedData()); // Data dictionary name and its corresponding entries - All the Permissible values
-						question.setRaveUserString(dde.getUserDataString());
+						question.setRaveCodedData(ddeMap.get(key).getCodedData()); // Data dictionary name and its corresponding entries - All the Permissible values
+						question.setRaveUserString(ddeMap.get(key).getUserDataString());
 					}
 				}
 				question.setCodedDataResult("Error/Match");  // Will be replaced with the caDSR db validation result
@@ -447,7 +453,7 @@ public class AlsParser {
 	 * @param  
 	 * @return 
 	 * Attempting to build a relationship between the data objects from ALS file
-	 * Form -> Fields -> Data Dictionary Entries
+	 * Form -> Fields -> Data Dictionary Entry
 	 * This method is optional for the parser to work as the straightforward objects
 	 * of Forms, Fields & Data Dictionary Entries, just by themselves will work.
 	 * Having an interconnected data structure might help in better processing
@@ -461,12 +467,28 @@ public class AlsParser {
 					form.getFields().add(field);
 				}			
 			}
-			for (ALSDataDictionaryEntry dde: alsData.getDataDictionaryEntries()) {
-				if ( field.getDataDictionaryName().equals(dde.getDataDictionaryName())) {
-					field.getDdeList().add(dde);
+			for (String key: alsData.getDataDictionaryEntries().keySet()) {
+				if (field.getDataDictionaryName().equals(key)) {
+					if (!(field.getDdeMap().containsKey(key))) {
+						field.getDdeMap().put(key, alsData.getDataDictionaryEntries().get(key));
+					}
 				}						
-			}			
-			logger.debug("DDE list for "+ field.getFieldOid() +" : "+field.getDdeList().size());			
+			}
+			logger.debug("DDE Map for "+ field.getFieldOid() +" : "+field.getDdeMap().size());
 		}
 	}
+	
+	/**
+	 * @param  
+	 * @return 
+	 * Writing the final output report object into an excel 
+	 *  
+	 */			
+	private static void writeExcel () {
+		
+		// TODO - writing the report output to excel for download
+		
+	}	
+	
+	
 }

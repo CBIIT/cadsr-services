@@ -1,7 +1,7 @@
 package gov.nih.nci.cadsr.data;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ALSField {
 	
@@ -51,7 +51,7 @@ String entryRestrictions;
 String reviewGroups;
 Boolean isVisualVerify;
 
-List<ALSDataDictionaryEntry> ddeList = new ArrayList<ALSDataDictionaryEntry>();
+Map<String, ALSDataDictionaryEntry> ddeMap = new HashMap<String, ALSDataDictionaryEntry>();
 
 
 public String getFormOid() {
@@ -312,14 +312,11 @@ public Boolean getIsVisualVerify() {
 public void setIsVisualVerify(Boolean isVisualVerify) {
 	this.isVisualVerify = isVisualVerify;
 }
-public List<ALSDataDictionaryEntry> getDdeList() {
-	return ddeList;
+public Map<String, ALSDataDictionaryEntry> getDdeMap() {
+	return ddeMap;
 }
-public void setDdeList(List<ALSDataDictionaryEntry> ddeList) {
-	this.ddeList = ddeList;
+public void setDdeMap(Map<String, ALSDataDictionaryEntry> ddeMap) {
+	this.ddeMap = ddeMap;
 }
-
-
-
 
 }
