@@ -3,17 +3,24 @@ package gov.nih.nci.cadsr.parser;
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
-import java.io.File;
-import java.io.IOException;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import gov.nih.nci.cadsr.data.ALSCrfDraft;
 import gov.nih.nci.cadsr.data.ALSData;
@@ -28,22 +35,30 @@ import gov.nih.nci.cadsr.data.CCCReport;
 public class AlsParser {
 	
 	public static final Logger logger = Logger.getLogger(AlsParser.class);
-	public static final String INPUT_XLSX_FILE_PATH = "target/classes/From-PeterZipFile-RAVE-ALS-10057-VS.xlsx";
 	public static ALSData alsData;
 	public static CCCReport cccReport;
 	public static DataFormatter dataFormatter = new DataFormatter();		
 
 	public static void main(String[] args) throws IOException, InvalidFormatException {
 		
+		Properties prop = new Properties();
+    	InputStream input = null;
+        
+		String filename = "config.properties";
+		input = AlsParser.class.getClassLoader().getResourceAsStream(filename);
+		prop.load(input);		
+        String INPUT_XLSX_FILE_PATH = "target/classes/"+prop.getProperty("ALS-INPUT-FILE");
+        String OUTPUT_XLSX_FILE_PATH = "target/"+prop.getProperty("VALIDATOR-OUTPUT-FILE");
+		
 		// Parsing the ALS file in Excel format (XLSX). If this file has an XML extension
 		// then it needs to be converted to an XLSX file before being provided as the input to the parser.
-		parseExcel();
+        parseExcel(INPUT_XLSX_FILE_PATH); 
 		buildAls();		
 		//Validating (Non-DB) & producing the final output
 		getOutputForReport();
 		
 		// Writing the output in excel format
-		writeExcel();
+		writeExcel(OUTPUT_XLSX_FILE_PATH);
 
 	}
 
@@ -52,7 +67,7 @@ public class AlsParser {
 	 * Parsing an ALS input file into data objects for validating against the database
 	 * 
 	 */	
-	private static void parseExcel() throws IOException, InvalidFormatException {
+	private static void parseExcel(String INPUT_XLSX_FILE_PATH) throws IOException, InvalidFormatException {
 		Workbook workbook = WorkbookFactory.create(new File(INPUT_XLSX_FILE_PATH));
 
 		logger.debug("Workbook has " + workbook.getNumberOfSheets() + " Sheets : ");
@@ -67,7 +82,6 @@ public class AlsParser {
 		alsData.setCrfDrafts(getCrfDrafts(workbook.getSheetAt(0)));
 		alsData.setForms(getForms(workbook.getSheetAt(1)));
 		alsData.setFields(getFields(workbook.getSheetAt(2)));
-		// alsData.setDataDictionaryEntries(getDataDictionaryNamesList(workbook.getSheetAt(4)));
 		alsData.setDataDictionaryEntries(getDataDictionaryEntries(workbook.getSheetAt(5)));
 		alsData.setUnitDictionaryEntries(getUnitDictionaryEntries(workbook.getSheetAt(7)));
 
@@ -83,7 +97,7 @@ public class AlsParser {
 		logger.debug("Unit dictionary objects: " + (alsData.getUnitDictionaryEntries()).size());
 
 		workbook.close();
-		System.out.print("Done");
+		System.out.println("Done");
 
 	}
 
@@ -244,31 +258,6 @@ public class AlsParser {
 		}
 
 		return fields;
-	}
-
-	/**
-	 * @param Sheet
-	 * @return List ALSDataDictionaryEntry Populates a collection of Data
-	 *         Dictionary Entries parsed out of the ALS input file
-	 * 
-	 */
-	private static List<ALSDataDictionaryEntry> getDataDictionaryNamesList(Sheet sheet) {
-		List<ALSDataDictionaryEntry> ddnList = new ArrayList<ALSDataDictionaryEntry>();
-		int dataDictionaries = sheet.getLastRowNum();
-		for (int i = 0; i < sheet.getLastRowNum(); i++) {
-			ALSDataDictionaryEntry dde = new ALSDataDictionaryEntry();
-		}
-		Iterator<Row> rowIterator = sheet.rowIterator();
-		Row row = rowIterator.next();
-		while (rowIterator.hasNext()) {
-			row = rowIterator.next();
-			if (row.getCell(0) != null) {
-				ALSDataDictionaryEntry dde = new ALSDataDictionaryEntry();
-				dde.setDataDictionaryName(dataFormatter.formatCellValue(row.getCell(0)));
-				ddnList.add(dde);
-			}
-		}
-		return ddnList;
 	}
 
 	/**
@@ -484,9 +473,77 @@ public class AlsParser {
 	 * Writing the final output report object into an excel 
 	 *  
 	 */			
-	private static void writeExcel () {
+	private static void writeExcel (String OUTPUT_XLSX_FILE_PATH) {
 		
 		// TODO - writing the report output to excel for download
+		String fileName = OUTPUT_XLSX_FILE_PATH;
+		Row row;
+	        XSSFWorkbook workbook = new XSSFWorkbook();
+	        XSSFSheet sheet = workbook.createSheet("Summary");
+	        Map<String, String> summaryLabels = new LinkedHashMap<String, String>();
+	        summaryLabels.put("CDE Congruency Checker Report for ", cccReport.getReportOwner());
+	        summaryLabels.put("Rave Protocol name ", cccReport.getRaveProtocolName());
+	        summaryLabels.put("Rave Protocol number ", cccReport.getRaveProtocolNumber());
+	        summaryLabels.put("Date Validated ", cccReport.getReportDate());
+	        summaryLabels.put("# Forms in protocol ", String.valueOf(cccReport.getCccForms().size()));
+	        summaryLabels.put("# Total Forms Congruent ", String.valueOf(cccReport.getCccForms().size())); 
+	        summaryLabels.put("# Total Questions Checked ", String.valueOf(alsData.getFields().size()));
+	        summaryLabels.put("# Total Questions with Warnings ", "");
+	        summaryLabels.put("# Total Questions with Errors ", "");
+	        summaryLabels.put("# Total Questions without associated CDE ", "");
+	        summaryLabels.put("# Required NRDS Questions missing ", "");
+	        summaryLabels.put("# Required NRDS Questions Congruent ", "");
+	        summaryLabels.put("# Required NRDS Questions With Warnings ", "");
+	        summaryLabels.put("# Required NRDS Questions With Errors ", "");
+	        summaryLabels.put("# NCI Standard Template Mandatory Modules Questions not used in Protocol ", "");
+	        summaryLabels.put("# NCI Standard Template Mandatory Modules Questions Congruent ", "");
+	        summaryLabels.put("# NCI Standard Template Mandatory Modules Questions With Errors ", "");
+	        summaryLabels.put("# NCI Standard Template Mandatory Modules Questions With Warnings ", "");
+	        
+	        for (int i=10;i<16;i++) {
+		        XSSFSheet sheet2 = workbook.createSheet(cccReport.getCccForms().get(i).getRaveFormOId());	        	
+	        }
+
+
+	        int rowNum = 0;
+	        logger.debug("Creating excel");
+	        for(Map.Entry<String, String> label : summaryLabels.entrySet()) {
+	            row = sheet.createRow(rowNum++);	        	
+	            int colNum = 0;   
+	        	if ((label.getKey().equals("# Forms in protocol ")))
+		            row = sheet.createRow(rowNum++);
+	            Cell cell = row.createCell(colNum++);
+	            cell.setCellValue((String) label.getKey());
+	            cell = row.createCell(colNum + 10);
+	            cell.setCellValue((String) label.getValue());
+	        }
+	        row = sheet.createRow(rowNum++);
+	        row = sheet.createRow(rowNum++);
+            Cell newCell = row.createCell(0);	   
+            newCell.setCellValue("Report Summary - Click on Form Name to expand results");	        
+	        newCell = row.createCell(11);
+	        newCell.setCellValue("Validation Result");
+
+	        for (CCCForm form : cccReport.getCccForms()) {
+	        	row = sheet.createRow(rowNum++);	
+	            int colNum = 0;   
+	            Cell cell = row.createCell(colNum++);	   
+	            cell.setCellValue(form.getRaveFormOId());
+	            cell = row.createCell(colNum+10);	     
+	            cell.setCellValue("Congruent");
+	        }
+	        
+	        try {
+	            FileOutputStream outputStream = new FileOutputStream(fileName);
+	            workbook.write(outputStream);
+	            workbook.close();
+	        } catch (FileNotFoundException e) {
+	            e.printStackTrace();
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+
+	        System.out.println("File Writing Done");		
 		
 	}	
 	
