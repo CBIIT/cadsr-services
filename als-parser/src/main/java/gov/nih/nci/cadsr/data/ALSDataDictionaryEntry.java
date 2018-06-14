@@ -9,7 +9,6 @@ String dataDictionaryName;
 List<String> codedData = new ArrayList<String>();
 List<Integer> ordinal = new ArrayList<Integer>();
 List<String> userDataString = new ArrayList<String>();
-List<Boolean> specify = new ArrayList<Boolean>();
 
 public String getDataDictionaryName() {
 	return dataDictionaryName;
@@ -34,12 +33,6 @@ public List<String> getUserDataString() {
 }
 public void setUserDataString(List<String> userDataString) {
 	this.userDataString = userDataString;
-}
-public List<Boolean> getSpecify() {
-	return specify;
-}
-public void setSpecify(List<Boolean> specify) {
-	this.specify = specify;
 }
 
 }

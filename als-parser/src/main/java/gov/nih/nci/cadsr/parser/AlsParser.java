@@ -33,40 +33,46 @@ import gov.nih.nci.cadsr.data.CCCQuestion;
 import gov.nih.nci.cadsr.data.CCCReport;
 
 public class AlsParser {
-	
+
 	public static final Logger logger = Logger.getLogger(AlsParser.class);
 	public static ALSData alsData;
 	public static CCCReport cccReport;
-	public static DataFormatter dataFormatter = new DataFormatter();		
+	public static DataFormatter dataFormatter = new DataFormatter();
+	public static String formHeader_1 = "VIEW OF EXPANDED RESULTS FOR ";
+	public static String formHeader_2 = " FORM";	
+	public static String summaryFormsHeader = "Report Summary - Click on Form Name to expand results";
 
 	public static void main(String[] args) throws IOException, InvalidFormatException {
-		
+
 		Properties prop = new Properties();
-    	InputStream input = null;
-        
+		InputStream input = null;
+
 		String filename = "config.properties";
 		input = AlsParser.class.getClassLoader().getResourceAsStream(filename);
-		prop.load(input);		
-        String INPUT_XLSX_FILE_PATH = "target/classes/"+prop.getProperty("ALS-INPUT-FILE");
-        String OUTPUT_XLSX_FILE_PATH = "target/"+prop.getProperty("VALIDATOR-OUTPUT-FILE");
-		
-		// Parsing the ALS file in Excel format (XLSX). If this file has an XML extension
-		// then it needs to be converted to an XLSX file before being provided as the input to the parser.
-        parseExcel(INPUT_XLSX_FILE_PATH); 
-		buildAls();		
-		//Validating (Non-DB) & producing the final output
+		prop.load(input);
+		String INPUT_XLSX_FILE_PATH = "target/classes/" + prop.getProperty("ALS-INPUT-FILE");
+		String OUTPUT_XLSX_FILE_PATH = "target/" + prop.getProperty("VALIDATOR-OUTPUT-FILE");
+
+
+		// Parsing the ALS file in Excel format (XLSX). If this file has an XML
+		// extension
+		// then it needs to be converted to an XLSX file before being provided
+		// as the input to the parser.
+		parseExcel(INPUT_XLSX_FILE_PATH);
+		buildAls();
+		// Validating (Non-DB) & producing the final output
 		getOutputForReport();
-		
+
 		// Writing the output in excel format
 		writeExcel(OUTPUT_XLSX_FILE_PATH);
 
 	}
 
-	
 	/**
-	 * Parsing an ALS input file into data objects for validating against the database
+	 * Parsing an ALS input file into data objects for validating against the
+	 * database
 	 * 
-	 */	
+	 */
 	private static void parseExcel(String INPUT_XLSX_FILE_PATH) throws IOException, InvalidFormatException {
 		Workbook workbook = WorkbookFactory.create(new File(INPUT_XLSX_FILE_PATH));
 
@@ -90,7 +96,6 @@ public class AlsParser {
 		logger.debug("CRFData objects: " + (alsData.getCrfDrafts()).size());
 		logger.debug("alsData Form ID #9: " + alsData.getForms().get(8).getFormOId());
 		logger.debug("alsData Form Name #6: " + alsData.getForms().get(5).getDraftFormName());
-		logger.debug("alsData Draft Form Active : " + alsData.getForms().get(4).getDraftFormActive());
 		logger.debug("Form objects: " + (alsData.getForms()).size());
 		logger.debug("Field objects: " + (alsData.getFields()).size());
 		logger.debug("Data dictionary objects: " + (alsData.getDataDictionaryEntries().size()));
@@ -128,20 +133,8 @@ public class AlsParser {
 			alsData.setRaveProtocolNumber(cellValue);
 			ALSCrfDraft crfDraft = new ALSCrfDraft();
 			crfDraft.setDraftName(dataFormatter.formatCellValue(newRow.getCell(0)));
-			crfDraft.setDeleteExisting(Boolean.valueOf((dataFormatter.formatCellValue(newRow.getCell(1)))));
 			crfDraft.setProjectName(dataFormatter.formatCellValue(newRow.getCell(2)));
-			crfDraft.setProjectType(dataFormatter.formatCellValue(newRow.getCell(3)));
 			crfDraft.setPrimaryFormOid(dataFormatter.formatCellValue(newRow.getCell(4)));
-			crfDraft.setDefaultMatrixOid(dataFormatter.formatCellValue(newRow.getCell(5)));
-			crfDraft.setConfirmationMessage(dataFormatter.formatCellValue(newRow.getCell(6)));
-			crfDraft.setSignPrompt(dataFormatter.formatCellValue(newRow.getCell(7)));
-			crfDraft.setLabStandardGroup(dataFormatter.formatCellValue(newRow.getCell(8)));
-			crfDraft.setReferenceLabs(dataFormatter.formatCellValue(newRow.getCell(9)));
-			crfDraft.setAlertLabs(dataFormatter.formatCellValue(newRow.getCell(10)));
-			crfDraft.setSyncOidProject(dataFormatter.formatCellValue(newRow.getCell(11)));
-			crfDraft.setSyncOidDraft(dataFormatter.formatCellValue(newRow.getCell(12)));
-			crfDraft.setSyncOidProjectType(dataFormatter.formatCellValue(newRow.getCell(13)));
-			crfDraft.setSyncOidOriginalVersion(Boolean.valueOf((dataFormatter.formatCellValue(newRow.getCell(14)))));
 			crfDrafts.add(crfDraft);
 		} else {
 			logger.debug("Incorrect sheet name. Should be CRFDraft");
@@ -167,18 +160,6 @@ public class AlsParser {
 					form.setFormOId(dataFormatter.formatCellValue(row.getCell(0)));
 					form.setOrdinal(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(1))));
 					form.setDraftFormName(dataFormatter.formatCellValue(row.getCell(2)));
-					form.setDraftFormActive(dataFormatter.formatCellValue(row.getCell(3)));
-					form.setHelpText(dataFormatter.formatCellValue(row.getCell(4)));
-					form.setIsTemplate(Boolean.valueOf(dataFormatter.formatCellValue(row.getCell(5))));
-					form.setIsSignRequired(Boolean.valueOf(dataFormatter.formatCellValue(row.getCell(6))));
-					form.setIsEproForm(Boolean.valueOf(dataFormatter.formatCellValue(row.getCell(7))));
-					form.setViewRestrictions(dataFormatter.formatCellValue(row.getCell(8)));
-					form.setEntryRestrictions(dataFormatter.formatCellValue(row.getCell(9)));
-					form.setLogDirection(dataFormatter.formatCellValue(row.getCell(10)));
-					form.setDdeOption(dataFormatter.formatCellValue(row.getCell(11)));
-					form.setConfirmationStyle(dataFormatter.formatCellValue(row.getCell(12)));
-					form.setLinkFolderOid(dataFormatter.formatCellValue(row.getCell(13)));
-					form.setLinkFormOid(dataFormatter.formatCellValue(row.getCell(14)));
 					forms.add(form);
 				}
 			}
@@ -207,48 +188,12 @@ public class AlsParser {
 					field.setFormOid(dataFormatter.formatCellValue(row.getCell(0)));
 					field.setFieldOid(dataFormatter.formatCellValue(row.getCell(1)));
 					field.setOrdinal(dataFormatter.formatCellValue(row.getCell(2)));
-					field.setDraftFieldNumber(dataFormatter.formatCellValue(row.getCell(3)));
 					field.setDraftFieldName(dataFormatter.formatCellValue(row.getCell(4)));
-					field.setDraftFieldActive(Boolean.valueOf(dataFormatter.formatCellValue(row.getCell(5))));
-					field.setVariableOid(dataFormatter.formatCellValue(row.getCell(6)));
 					field.setDataFormat(dataFormatter.formatCellValue(row.getCell(7)));
 					field.setDataDictionaryName(dataFormatter.formatCellValue(row.getCell(8)));
-					field.setUnitDictionaryName(dataFormatter.formatCellValue(row.getCell(9)));
-					field.setCodingDictionary(dataFormatter.formatCellValue(row.getCell(10)));
 					field.setControlType(dataFormatter.formatCellValue(row.getCell(11)));
-					field.setAcceptableFileExtensions(dataFormatter.formatCellValue(row.getCell(12)));
-					field.setIndentlevel(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(13))));
 					field.setPreText(dataFormatter.formatCellValue(row.getCell(14)));
 					field.setFixedUnit(dataFormatter.formatCellValue(row.getCell(15)));
-					field.setHeaderText(dataFormatter.formatCellValue(row.getCell(16)));
-					field.setHelpText(dataFormatter.formatCellValue(row.getCell(17)));
-					field.setSourceDocument(Boolean.valueOf(dataFormatter.formatCellValue(row.getCell(18))));
-					field.setIsLog(Boolean.valueOf(dataFormatter.formatCellValue(row.getCell(19))));
-					field.setDefaultValue(dataFormatter.formatCellValue(row.getCell(20)));
-					field.setSasLabel(dataFormatter.formatCellValue(row.getCell(21)));
-					field.setSasFormat(dataFormatter.formatCellValue(row.getCell(22)));
-					field.setEproFormat(dataFormatter.formatCellValue(row.getCell(23)));
-					field.setIsRequired(Boolean.valueOf(dataFormatter.formatCellValue(row.getCell(24))));
-					field.setQueryFutureDate(Boolean.valueOf(dataFormatter.formatCellValue(row.getCell(25))));
-					field.setIsVisible(Boolean.valueOf(dataFormatter.formatCellValue(row.getCell(26))));
-					field.setIsTranslationRequired(Boolean.valueOf(dataFormatter.formatCellValue(row.getCell(27))));
-					field.setAnalyteName(dataFormatter.formatCellValue(row.getCell(28)));
-					field.setIsClinicalSignificance(Boolean.valueOf(dataFormatter.formatCellValue(row.getCell(29))));
-					field.setQueryNonConformance(Boolean.valueOf(dataFormatter.formatCellValue(row.getCell(30))));
-					field.setOtherVisits(Boolean.valueOf(dataFormatter.formatCellValue(row.getCell(31))));
-					field.setCanSetRecordDate(Boolean.valueOf(dataFormatter.formatCellValue(row.getCell(32))));
-					field.setCanSetDataPageDate(Boolean.valueOf(dataFormatter.formatCellValue(row.getCell(33))));
-					field.setCanSetInstanceDate(Boolean.valueOf(dataFormatter.formatCellValue(row.getCell(34))));
-					field.setCanSetSubjectDate(Boolean.valueOf(dataFormatter.formatCellValue(row.getCell(35))));
-					field.setDoesNotBreakSignature(Boolean.valueOf(dataFormatter.formatCellValue(row.getCell(36))));
-					field.setLowerRange(dataFormatter.formatCellValue(row.getCell(37)));
-					field.setUpperRange(dataFormatter.formatCellValue(row.getCell(38)));
-					field.setNcLowerRange(dataFormatter.formatCellValue(row.getCell(39)));
-					field.setNcUpperRange(dataFormatter.formatCellValue(row.getCell(40)));
-					field.setViewRestrictions(dataFormatter.formatCellValue(row.getCell(41)));
-					field.setEntryRestrictions(dataFormatter.formatCellValue(row.getCell(42)));
-					field.setReviewGroups(dataFormatter.formatCellValue(row.getCell(43)));
-					field.setIsVisualVerify(Boolean.valueOf(dataFormatter.formatCellValue(row.getCell(44))));
 					fields.add(field);
 				}
 			}
@@ -287,7 +232,6 @@ public class AlsParser {
 						dde.setCodedData(cd);
 						dde.setOrdinal(ordinal);
 						dde.setUserDataString(uds);
-						dde.setSpecify(specify);
 						dde.setDataDictionaryName(ddName);
 						if (!(ddeMap.containsKey(dde.getDataDictionaryName()))) {
 							ddeMap.put(dde.getDataDictionaryName(), dde);
@@ -309,7 +253,6 @@ public class AlsParser {
 			dde.setCodedData(cd);
 			dde.setOrdinal(ordinal);
 			dde.setUserDataString(uds);
-			dde.setSpecify(specify);
 			dde.setDataDictionaryName(ddName);
 			if (!(ddeMap.containsKey(dde.getDataDictionaryName()))) {
 				ddeMap.put(dde.getDataDictionaryName(), dde);
@@ -352,13 +295,13 @@ public class AlsParser {
 
 		return dataDictionaryEntries;
 	}
-	
+
 	/**
-	 * @param  
-	 * @return 
-	 * Populates the output object for the report after initial validation and parsing of data
+	 * @param
+	 * @return Populates the output object for the report after initial
+	 *         validation and parsing of data
 	 * 
-	 */		
+	 */
 	private static void getOutputForReport() {
 		cccReport = new CCCReport();
 		cccReport.setReportOwner("<NAME OF PERSON WHO THE REPORT IS FOR>"); // From the user input through the browser
@@ -366,186 +309,217 @@ public class AlsParser {
 		cccReport.setRaveProtocolName(alsData.getRaveProtocolName());
 		cccReport.setRaveProtocolNumber(alsData.getRaveProtocolNumber());
 		List<CCCForm> formsList = new ArrayList<CCCForm>();
-		CCCForm form  = new CCCForm();
+		CCCForm form = new CCCForm();
 		String formName = "";
-		List<CCCQuestion> questionsList = new ArrayList<CCCQuestion>();		
+		List<CCCQuestion> questionsList = new ArrayList<CCCQuestion>();
 		Map<String, ALSDataDictionaryEntry> ddeMap = alsData.getDataDictionaryEntries();
 		for (ALSField alsField : alsData.getFields()) {
 			if (formName.equals(""))
 				formName = alsField.getFormOid();
-			if (!formName.equals("OID"))
-			{
-			if (!formName.equals(alsField.getFormOid())) {
-				form.setQuestions(questionsList);
-				form.setRaveFormOId(formName);
-				formsList.add(form);				
-				formName = alsField.getFormOid();				
-				form = new CCCForm();
-				questionsList = new ArrayList<CCCQuestion>();
-			}
-			CCCQuestion question = new CCCQuestion();
-			question.setFieldOrder(alsField.getOrdinal()); // which sheet is it from - Forms/Fields?
-			String draftFieldName = alsField.getDraftFieldName();
-			if (draftFieldName.indexOf("PID") > -1 && draftFieldName.indexOf("_V") > -1) {
-				String idVersion = draftFieldName.substring(draftFieldName.indexOf("PID"), draftFieldName.length());
-				question.setCdePublicId(idVersion.substring(3, idVersion.indexOf("_")));
-				question.setCdeVersion((idVersion.substring(idVersion.indexOf("_V")+2, idVersion.length())).replaceAll("_", "."));
-				question.setNciCategory("NRDS"); //"NRDS" "Mandatory Module: {CRF ID/V}", "Optional Module {CRF ID/V}", "Conditional Module: {CRF ID/V}"
-				question.setQuestionCongruenceStatus("MATCH");//Valid results are "ERROR" "Match"
-				question.setMessage("Error message"); // Will be replaced with the caDSR db validation result error message, if any.
-				question.setRaveFieldLabel(alsField.getPreText());
-				question.setRaveFieldLabelResult("Error/Match"); // Will be replaced with the caDSR db validation result
-				question.setCdePermitQuestionTextChoices(""); // From the caDSR DB - docText
-				question.setRaveControlType(alsField.getControlType());
-				question.setControlTypeResult("Match"); // Will be replaced with the caDSR db validation result
-				question.setCdeValueDomainType(""); // from caDSR DB - Value Domain	Enumerated/NonEnumerated
-				
-				for (String key : ddeMap.keySet()) {
-					if (key.equals(alsField.getDataDictionaryName()))
-					{
-						question.setRaveCodedData(ddeMap.get(key).getCodedData()); // Data dictionary name and its corresponding entries - All the Permissible values
-						question.setRaveUserString(ddeMap.get(key).getUserDataString());
-					}
+			if (!formName.equals("OID")) {
+				if (!formName.equals(alsField.getFormOid())) {
+					form.setQuestions(questionsList);
+					form.setRaveFormOId(formName);
+					formsList.add(form);
+					formName = alsField.getFormOid();
+					form = new CCCForm();
+					questionsList = new ArrayList<CCCQuestion>();
 				}
-				question.setCodedDataResult("Error/Match");  // Will be replaced with the caDSR db validation result
-				question.setAllowableCdeValue("");
+				CCCQuestion question = new CCCQuestion();
+				question.setFieldOrder(alsField.getOrdinal()); // which sheet is
+																// it from -
+																// Forms/Fields?
+				String draftFieldName = alsField.getDraftFieldName();
+				if (draftFieldName.indexOf("PID") > -1 && draftFieldName.indexOf("_V") > -1) {
+					String idVersion = draftFieldName.substring(draftFieldName.indexOf("PID"), draftFieldName.length());
+					question.setCdePublicId(idVersion.substring(3, idVersion.indexOf("_")));
+					question.setCdeVersion((idVersion.substring(idVersion.indexOf("_V") + 2, idVersion.length()))
+							.replaceAll("_", "."));
+					question.setNciCategory("NRDS"); // "NRDS" "Mandatory Module: {CRF ID/V}", "Optional Module {CRF ID/V}", "Conditional Module: {CRF ID/V}"
+					question.setQuestionCongruenceStatus("MATCH");// Valid results are "ERROR"/"Match"
+					question.setMessage("Error message"); // Will be replaced with the caDSR db validation result error message, if any.
+					question.setRaveFieldLabel(alsField.getPreText());
+					question.setRaveFieldLabelResult("Error/Match"); // Will be replaced with the caDSR db validation result
+					question.setCdePermitQuestionTextChoices(""); // From the caDSR DB - docText
+					question.setRaveControlType(alsField.getControlType());
+					question.setControlTypeResult("Match"); // Will be replaced with the caDSR db validation result
+					question.setCdeValueDomainType(""); // from caDSR DB - Value Domain Enumerated/NonEnumerated
 
-				question.setPvResult("Error/match"); // Will be replaced with the caDSR db validation result
-				question.setAllowableCdeTextChoices("A|B|C|D"); // Test values - will be replaced with the PV value meanings from caDSR db
-				questionsList.add(question);
-			} else {
-				question.setRaveFieldLabel(alsField.getPreText());
-				questionsList.add(question);
-			}
+					for (String key : ddeMap.keySet()) {
+						if (key.equals(alsField.getDataDictionaryName())) {
+							question.setRaveCodedData(ddeMap.get(key).getCodedData()); // Data dictionary name and its corresponding entries - All the Permissible values
+							question.setRaveUserString(ddeMap.get(key).getUserDataString());
+						}
+					}
+					question.setCodedDataResult("Error/Match"); // Will be replaced with the caDSR db validation result
+					question.setAllowableCdeValue("");
+
+					question.setPvResult("Error/match"); // Will be replaced with the caDSR db validation result
+					question.setAllowableCdeTextChoices("A|B|C|D"); // Test values - will be replaced with the PV value meanings from caDSR db
+					questionsList.add(question);
+				} else {
+					question.setRaveFieldLabel(alsField.getPreText());
+					questionsList.add(question);
+				}
 			}
 		}
 		form.setQuestions(questionsList);
-		form.setRaveFormOId(formName);		
-		formsList.add(form);	
+		form.setRaveFormOId(formName);
+		formsList.add(form);
 		cccReport.setCccForms(formsList);
-		for (CCCForm forms:cccReport.getCccForms()){
-			logger.debug("Form name: "+forms.getRaveFormOId());
-			logger.debug("Questions list: "+forms.getQuestions().size());
-			for (CCCQuestion question:forms.getQuestions()){
-				if (question.getRaveCodedData()!=null && question.getRaveCodedData().size()!=0)
-					logger.debug("Question coded data list: "+question.getRaveCodedData().size());
-				if (question.getRaveUserString()!=null && question.getRaveUserString().size()!=0)
-				logger.debug("Questions user string data list: "+question.getRaveUserString().size());				
+		for (CCCForm forms : cccReport.getCccForms()) {
+			logger.debug("Form name: " + forms.getRaveFormOId());
+			logger.debug("Questions list: " + forms.getQuestions().size());
+			for (CCCQuestion question : forms.getQuestions()) {
+				if (question.getRaveCodedData() != null && question.getRaveCodedData().size() != 0)
+					logger.debug("Question coded data list: " + question.getRaveCodedData().size());
+				if (question.getRaveUserString() != null && question.getRaveUserString().size() != 0)
+					logger.debug("Questions user string data list: " + question.getRaveUserString().size());
 			}
 		}
-		logger.debug("Output object forms count: "+cccReport.getCccForms().size());
-		
-	}	
-	
-	
+		logger.debug("Output object forms count: " + cccReport.getCccForms().size());
+
+	}
+
 	/**
-	 * @param  
-	 * @return 
-	 * Attempting to build a relationship between the data objects from ALS file
-	 * Form -> Fields -> Data Dictionary Entry
-	 * This method is optional for the parser to work as the straightforward objects
-	 * of Forms, Fields & Data Dictionary Entries, just by themselves will work.
-	 * Having an interconnected data structure might help in better processing
-	 * for validation 
-	 *  
-	 */			
-	private static void buildAls () {
+	 * @param
+	 * @return Attempting to build a relationship between the data objects from
+	 *         ALS file Form -> Fields -> Data Dictionary Entry This method is
+	 *         optional for the parser to work as the straightforward objects of
+	 *         Forms, Fields & Data Dictionary Entries, just by themselves will
+	 *         work. Having an interconnected data structure might help in
+	 *         better processing for validation
+	 * 
+	 */
+	private static void buildAls() {
 		for (ALSField field : alsData.getFields()) {
-			for (ALSForm form: alsData.getForms()) {
-				if ( field.getFormOid().equals(form.getFormOId())) {
+			for (ALSForm form : alsData.getForms()) {
+				if (field.getFormOid().equals(form.getFormOId())) {
 					form.getFields().add(field);
-				}			
+				}
 			}
-			for (String key: alsData.getDataDictionaryEntries().keySet()) {
+			for (String key : alsData.getDataDictionaryEntries().keySet()) {
 				if (field.getDataDictionaryName().equals(key)) {
 					if (!(field.getDdeMap().containsKey(key))) {
 						field.getDdeMap().put(key, alsData.getDataDictionaryEntries().get(key));
 					}
-				}						
+				}
 			}
-			logger.debug("DDE Map for "+ field.getFieldOid() +" : "+field.getDdeMap().size());
+			logger.debug("DDE Map for " + field.getFieldOid() + " : " + field.getDdeMap().size());
 		}
 	}
-	
+
 	/**
-	 * @param  
-	 * @return 
-	 * Writing the final output report object into an excel 
-	 *  
-	 */			
-	private static void writeExcel (String OUTPUT_XLSX_FILE_PATH) {
-		
+	 * @param
+	 * @return Writing the final output report object into an excel
+	 * 
+	 */
+	private static void writeExcel(String OUTPUT_XLSX_FILE_PATH) {
+
 		// TODO - writing the report output to excel for download
 		String fileName = OUTPUT_XLSX_FILE_PATH;
 		Row row;
-	        XSSFWorkbook workbook = new XSSFWorkbook();
-	        XSSFSheet sheet = workbook.createSheet("Summary");
-	        Map<String, String> summaryLabels = new LinkedHashMap<String, String>();
-	        summaryLabels.put("CDE Congruency Checker Report for ", cccReport.getReportOwner());
-	        summaryLabels.put("Rave Protocol name ", cccReport.getRaveProtocolName());
-	        summaryLabels.put("Rave Protocol number ", cccReport.getRaveProtocolNumber());
-	        summaryLabels.put("Date Validated ", cccReport.getReportDate());
-	        summaryLabels.put("# Forms in protocol ", String.valueOf(cccReport.getCccForms().size()));
-	        summaryLabels.put("# Total Forms Congruent ", String.valueOf(cccReport.getCccForms().size())); 
-	        summaryLabels.put("# Total Questions Checked ", String.valueOf(alsData.getFields().size()));
-	        summaryLabels.put("# Total Questions with Warnings ", "");
-	        summaryLabels.put("# Total Questions with Errors ", "");
-	        summaryLabels.put("# Total Questions without associated CDE ", "");
-	        summaryLabels.put("# Required NRDS Questions missing ", "");
-	        summaryLabels.put("# Required NRDS Questions Congruent ", "");
-	        summaryLabels.put("# Required NRDS Questions With Warnings ", "");
-	        summaryLabels.put("# Required NRDS Questions With Errors ", "");
-	        summaryLabels.put("# NCI Standard Template Mandatory Modules Questions not used in Protocol ", "");
-	        summaryLabels.put("# NCI Standard Template Mandatory Modules Questions Congruent ", "");
-	        summaryLabels.put("# NCI Standard Template Mandatory Modules Questions With Errors ", "");
-	        summaryLabels.put("# NCI Standard Template Mandatory Modules Questions With Warnings ", "");
-	        
-	        for (int i=10;i<16;i++) {
-		        XSSFSheet sheet2 = workbook.createSheet(cccReport.getCccForms().get(i).getRaveFormOId());	        	
-	        }
+		XSSFWorkbook workbook = new XSSFWorkbook();
+		XSSFSheet sheet = workbook.createSheet("Summary");
+		Map<String, String> summaryLabels = new LinkedHashMap<String, String>();
+		summaryLabels.put("CDE Congruency Checker Report for ", cccReport.getReportOwner());
+		summaryLabels.put("Rave Protocol name ", cccReport.getRaveProtocolName());
+		summaryLabels.put("Rave Protocol number ", cccReport.getRaveProtocolNumber());
+		summaryLabels.put("Date Validated ", cccReport.getReportDate());
+		summaryLabels.put("# Forms in protocol ", String.valueOf(cccReport.getCccForms().size()));
+		summaryLabels.put("# Total Forms Congruent ", String.valueOf(cccReport.getCccForms().size()));
+		summaryLabels.put("# Total Questions Checked ", String.valueOf(alsData.getFields().size()));
+		summaryLabels.put("# Total Questions with Warnings ", "");
+		summaryLabels.put("# Total Questions with Errors ", "");
+		summaryLabels.put("# Total Questions without associated CDE ", "");
+		summaryLabels.put("# Required NRDS Questions missing ", "");
+		summaryLabels.put("# Required NRDS Questions Congruent ", "");
+		summaryLabels.put("# Required NRDS Questions With Warnings ", "");
+		summaryLabels.put("# Required NRDS Questions With Errors ", "");
+		summaryLabels.put("# NCI Standard Template Mandatory Modules Questions not used in Protocol ", "");
+		summaryLabels.put("# NCI Standard Template Mandatory Modules Questions Congruent ", "");
+		summaryLabels.put("# NCI Standard Template Mandatory Modules Questions With Errors ", "");
+		summaryLabels.put("# NCI Standard Template Mandatory Modules Questions With Warnings ", "");
 
+		int rowNum = 0;
+		logger.debug("Creating excel");
+		for (Map.Entry<String, String> label : summaryLabels.entrySet()) {
+			row = sheet.createRow(rowNum++);
+			int colNum = 0;
+			if ((label.getKey().equals("# Forms in protocol ")))
+				row = sheet.createRow(rowNum++);
+			Cell cell = row.createCell(colNum++);
+			cell.setCellValue((String) label.getKey());
+			cell = row.createCell(colNum + 10);
+			cell.setCellValue((String) label.getValue());
+		}
+		row = sheet.createRow(rowNum++);
+		row = sheet.createRow(rowNum++);
+		Cell newCell = row.createCell(0);
+		newCell.setCellValue(summaryFormsHeader);
+		newCell = row.createCell(11);
+		newCell.setCellValue("Validation Result");
+		List<CCCForm> forms = cccReport.getCccForms(); 
+		for (CCCForm form : forms) {
+			row = sheet.createRow(rowNum++);
+			int colNum = 0;
+			Cell cell = row.createCell(colNum++);
+			cell.setCellValue(form.getRaveFormOId());
+			cell = row.createCell(colNum + 10);
+			cell.setCellValue("Congruent");
+		}
 
-	        int rowNum = 0;
-	        logger.debug("Creating excel");
-	        for(Map.Entry<String, String> label : summaryLabels.entrySet()) {
-	            row = sheet.createRow(rowNum++);	        	
-	            int colNum = 0;   
-	        	if ((label.getKey().equals("# Forms in protocol ")))
-		            row = sheet.createRow(rowNum++);
-	            Cell cell = row.createCell(colNum++);
-	            cell.setCellValue((String) label.getKey());
-	            cell = row.createCell(colNum + 10);
-	            cell.setCellValue((String) label.getValue());
-	        }
-	        row = sheet.createRow(rowNum++);
-	        row = sheet.createRow(rowNum++);
-            Cell newCell = row.createCell(0);	   
-            newCell.setCellValue("Report Summary - Click on Form Name to expand results");	        
-	        newCell = row.createCell(11);
-	        newCell.setCellValue("Validation Result");
+		String[] rowHeaders = { "Rave Form OID", "caDSR Form ID", "Version", "Total Number Of Questions Checked",
+				"Field Order", "CDE Public ID", "CDE Version", "NCI Category", "Question Congruency Status", "Message",
+				"Rave Field Label", "Rave Field Label Result", "CDE Permitted Question Text Choices",
+				"Rave Control Type", "Control Type", "CDE Value Domain Type", "Rave Coded Data", "Coded Data Result",
+				"Allowable CDE  Value", "Rave User String", "PV  Result", "Allowable CDE  Value Meaning Text Choices",
+				"Rave Field Data Type", "Dataype Result", "CDE Data Type", "Rave UOM", "UOM  Result", "CDE UOM",
+				"Rave Length", "Length  Result", "CDE Maximum Length", "Rave Display Format", "Format  Result",
+				"CDE Display Format" };
+		for (int i = 0; i < 5; i++) {
+			XSSFSheet sheet2 = workbook.createSheet(forms.get(i).getRaveFormOId());
+			row = sheet2.createRow(0);
+			newCell = row.createCell(0);
+			newCell.setCellValue(formHeader_1 + forms.get(i).getRaveFormOId() + formHeader_2);
+			row = sheet2.createRow(1);
+			int colNum = 0;
+			// Print row headers in the form sheet
+			for (String rowHeader : rowHeaders) {			
+				newCell = row.createCell(colNum++);
+				newCell.setCellValue(rowHeader);
+				//sheet2.autoSizeColumn(colNum);					
+			}
+			row = sheet2.createRow(2);
+			newCell = row.createCell(0);
+			newCell.setCellValue(forms.get(i).getRaveFormOId());
+			newCell = row.createCell(3);
+			newCell.setCellValue(forms.get(i).getQuestions().size());
+			
+			for (int j = 0; j < forms.get(i).getQuestions().size(); j++) {
+				CCCQuestion question = forms.get(i).getQuestions().get(j);
+				row = sheet2.createRow(j+4);
+				newCell = row.createCell(4);
+				newCell.setCellValue(question.getFieldOrder());
+				newCell = row.createCell(5);
+				newCell.setCellValue(question.getCdePublicId());				
+				newCell = row.createCell(6);
+				newCell.setCellValue(question.getCdeVersion());								
+			}
+		}
 
-	        for (CCCForm form : cccReport.getCccForms()) {
-	        	row = sheet.createRow(rowNum++);	
-	            int colNum = 0;   
-	            Cell cell = row.createCell(colNum++);	   
-	            cell.setCellValue(form.getRaveFormOId());
-	            cell = row.createCell(colNum+10);	     
-	            cell.setCellValue("Congruent");
-	        }
-	        
-	        try {
-	            FileOutputStream outputStream = new FileOutputStream(fileName);
-	            workbook.write(outputStream);
-	            workbook.close();
-	        } catch (FileNotFoundException e) {
-	            e.printStackTrace();
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        }
+		try {
+			FileOutputStream outputStream = new FileOutputStream(fileName);
+			workbook.write(outputStream);
+			workbook.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
-	        System.out.println("File Writing Done");		
-		
-	}	
-	
-	
+		System.out.println("File Writing Done");
+
+	}
+
 }
