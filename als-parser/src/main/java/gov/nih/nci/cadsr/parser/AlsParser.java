@@ -50,7 +50,8 @@ public class AlsParser {
 
 	public static void main(String[] args) {
 
-		getCCCReport();
+		CCCReport cccReport = getCCCReport();
+		logger.debug("CCC report protocol - "+cccReport.getRaveProtocolName()+cccReport.getRaveProtocolNumber() + "Forms : "+cccReport.getCccForms().size());
 	}
 	
 	
@@ -73,7 +74,7 @@ public class AlsParser {
 		ALSData alsData = parseExcel(INPUT_XLSX_FILE_PATH);
 		alsData = buildAls(alsData);
 		// Validating (Non-DB) & producing the final output
-		getOutputForReport(alsData);
+		cccReport  = getOutputForReport(alsData);
 		// Writing the output in excel format
 		writeExcel(OUTPUT_XLSX_FILE_PATH, alsData);
 		} catch (IOException ioe) {
@@ -287,7 +288,7 @@ public class AlsParser {
 	 *         validation and parsing of data
 	 * 
 	 */
-	private static void getOutputForReport(ALSData alsData) throws NullPointerException {
+	private static CCCReport getOutputForReport(ALSData alsData) throws NullPointerException {
 		cccReport = new CCCReport();
 		cccReport.setReportOwner("<NAME OF PERSON WHO THE REPORT IS FOR>"); // From the user input through the browser
 		cccReport.setReportDate(alsData.getReportDate());
@@ -364,7 +365,7 @@ public class AlsParser {
 			}
 		}
 		logger.debug("Output object forms count: " + cccReport.getCccForms().size());
-
+		return cccReport;
 	}
 
 	/**
