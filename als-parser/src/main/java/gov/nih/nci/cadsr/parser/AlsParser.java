@@ -27,45 +27,62 @@ import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.ALSDataDictionaryEntry;
 import gov.nih.nci.cadsr.data.ALSField;
 import gov.nih.nci.cadsr.data.ALSForm;
-import gov.nih.nci.cadsr.data.ALSUnitDictionaryEntry;
+import gov.nih.nci.cadsr.data.CCCError;
 import gov.nih.nci.cadsr.data.CCCForm;
 import gov.nih.nci.cadsr.data.CCCQuestion;
 import gov.nih.nci.cadsr.data.CCCReport;
 
 public class AlsParser {
 
-	public static final Logger logger = Logger.getLogger(AlsParser.class);
-	public static ALSData alsData;
-	public static CCCReport cccReport;
-	public static DataFormatter dataFormatter = new DataFormatter();
-	public static String formHeader_1 = "VIEW OF EXPANDED RESULTS FOR ";
-	public static String formHeader_2 = " FORM";	
-	public static String summaryFormsHeader = "Report Summary - Click on Form Name to expand results";
+	private static final Logger logger = Logger.getLogger(AlsParser.class);
+	private static CCCError cccError = getErrorObject();
+	private static CCCReport cccReport;
+	private static DataFormatter dataFormatter = new DataFormatter();
+	private static String reportDateFormat = "MM/dd/yyyy";
+	private static String formHeader_1 = "VIEW OF EXPANDED RESULTS FOR ";
+	private static String formHeader_2 = " FORM";	
+	private static String summaryFormsHeader = "Report Summary - Click on Form Name to expand results";
+	private static String crfDraftSheetName = "CRFDraft";
+	private static String formsSheetName = "Forms";
+	private static String fieldsSheetName = "Fields";
+	private static String dataDictionarySheetName = "DataDictionaryEntries";	
+	private static String errorSheetMissing = "Sheet missing in the ALS input file";
 
-	public static void main(String[] args) throws IOException, InvalidFormatException {
+	public static void main(String[] args) {
 
 		Properties prop = new Properties();
 		InputStream input = null;
-
-		String filename = "config.properties";
+		String filename = "config.properties";		
+		try {
 		input = AlsParser.class.getClassLoader().getResourceAsStream(filename);
 		prop.load(input);
 		String INPUT_XLSX_FILE_PATH = "target/classes/" + prop.getProperty("ALS-INPUT-FILE");
 		String OUTPUT_XLSX_FILE_PATH = "target/" + prop.getProperty("VALIDATOR-OUTPUT-FILE");
 
-
 		// Parsing the ALS file in Excel format (XLSX). If this file has an XML
 		// extension
 		// then it needs to be converted to an XLSX file before being provided
 		// as the input to the parser.
-		parseExcel(INPUT_XLSX_FILE_PATH);
-		buildAls();
+
+		ALSData alsData = parseExcel(INPUT_XLSX_FILE_PATH);
+		alsData = buildAls(alsData);
 		// Validating (Non-DB) & producing the final output
-		getOutputForReport();
-
+		getOutputForReport(alsData);
 		// Writing the output in excel format
-		writeExcel(OUTPUT_XLSX_FILE_PATH);
-
+		writeExcel(OUTPUT_XLSX_FILE_PATH, alsData);
+		} catch (IOException ioe) {
+			ioe.printStackTrace();			
+			cccError.setErrorDescription(ioe.getMessage());
+		} catch (InvalidFormatException ife) {
+			ife.printStackTrace();
+			cccError.setErrorDescription(ife.getMessage());			
+		} catch (NullPointerException npe) {
+			npe.printStackTrace();
+			cccError.setErrorDescription(npe.getMessage());			
+		} finally {
+			if (cccError.getErrorDescription()!=null)
+				logger.debug("Error Occurred: "+cccError.getErrorDescription());
+		}
 	}
 
 	/**
@@ -73,53 +90,52 @@ public class AlsParser {
 	 * database
 	 * 
 	 */
-	private static void parseExcel(String INPUT_XLSX_FILE_PATH) throws IOException, InvalidFormatException {
+	private static ALSData parseExcel(String INPUT_XLSX_FILE_PATH) throws IOException, InvalidFormatException, NullPointerException {
 		Workbook workbook = WorkbookFactory.create(new File(INPUT_XLSX_FILE_PATH));
-
-		logger.debug("Workbook has " + workbook.getNumberOfSheets() + " Sheets : ");
-
-		// print all the sheets in the workbook
-		/*
-		 * for (Sheet sheet : workbook) { logger.debug("Sheet name: "
-		 * +sheet.getSheetName()); }
-		 */
-
-		alsData = new ALSData();
-		alsData.setCrfDrafts(getCrfDrafts(workbook.getSheetAt(0)));
-		alsData.setForms(getForms(workbook.getSheetAt(1)));
-		alsData.setFields(getFields(workbook.getSheetAt(2)));
-		alsData.setDataDictionaryEntries(getDataDictionaryEntries(workbook.getSheetAt(5)));
-		alsData.setUnitDictionaryEntries(getUnitDictionaryEntries(workbook.getSheetAt(7)));
-
-		logger.debug("alsData : " + alsData.getRaveProtocolName());
-		logger.debug("alsData Primary Form ID: " + alsData.getCrfDrafts().get(0).getPrimaryFormOid());
-		logger.debug("CRFData objects: " + (alsData.getCrfDrafts()).size());
-		logger.debug("alsData Form ID #9: " + alsData.getForms().get(8).getFormOId());
-		logger.debug("alsData Form Name #6: " + alsData.getForms().get(5).getDraftFormName());
-		logger.debug("Form objects: " + (alsData.getForms()).size());
-		logger.debug("Field objects: " + (alsData.getFields()).size());
-		logger.debug("Data dictionary objects: " + (alsData.getDataDictionaryEntries().size()));
-		logger.debug("Unit dictionary objects: " + (alsData.getUnitDictionaryEntries()).size());
-
+		ALSData alsData = getAlsDataInstance();
+		Sheet sheet = workbook.getSheet(crfDraftSheetName);
+		if (sheet!=null)
+			alsData = getCrfDraft(sheet, alsData);
+		else 
+			setEmptySheetError(crfDraftSheetName);
+		sheet = workbook.getSheet(formsSheetName);
+		if (sheet!=null)
+			alsData.setForms(getForms(sheet));
+		else 
+			setEmptySheetError(formsSheetName);
+		sheet = workbook.getSheet(fieldsSheetName);
+		if (sheet!=null)
+			alsData.setFields(getFields(sheet));
+		else 
+			setEmptySheetError(fieldsSheetName);
+		sheet = workbook.getSheet(dataDictionarySheetName);
+		if (sheet!=null)
+			alsData.setDataDictionaryEntries(getDataDictionaryEntries(sheet));
+		else 
+			setEmptySheetError(dataDictionarySheetName);		
 		workbook.close();
-		System.out.println("Done");
-
+		return alsData;
+	}	
+	
+	
+	private static void setEmptySheetError(String sheetName) {
+		cccError.setErrorDescription(errorSheetMissing+" - "+sheetName);
 	}
-
+	
 	/**
 	 * @param Sheet
+	 * @param ALSData 
 	 * @return List ALSCrfDraft Populates a collection of ALSCrfDraft objects
 	 *         parsed out of the ALS input file
 	 * 
 	 */
 
-	private static List<ALSCrfDraft> getCrfDrafts(Sheet sheet) throws IOException {
-		DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+	private static ALSData getCrfDraft(Sheet sheet, ALSData alsData) throws IOException {
+		DateFormat dateFormat = new SimpleDateFormat(reportDateFormat);
 		Date date = new Date();
 		List<ALSCrfDraft> crfDrafts = new ArrayList<ALSCrfDraft>();
-		if (sheet.getSheetName().equalsIgnoreCase("CRFDraft")) {
 			logger.debug("I.Protocol Report Header ");
-			logger.debug("Name of person who ran the Congruence Checker");
+			logger.debug("Name of person who ran the Congruency Checker");
 			logger.debug("Date of Report - " + dateFormat.format(date));
 			alsData.setReportDate(dateFormat.format(date));
 			Row newRow = sheet.getRow(1);
@@ -131,15 +147,13 @@ public class AlsParser {
 			cellValue = dataFormatter.formatCellValue(newCell);
 			logger.debug("Rave Protocol Number - " + cellValue);
 			alsData.setRaveProtocolNumber(cellValue);
-			ALSCrfDraft crfDraft = new ALSCrfDraft();
+			ALSCrfDraft crfDraft = getAlsCrfDraftInstance();
 			crfDraft.setDraftName(dataFormatter.formatCellValue(newRow.getCell(0)));
 			crfDraft.setProjectName(dataFormatter.formatCellValue(newRow.getCell(2)));
 			crfDraft.setPrimaryFormOid(dataFormatter.formatCellValue(newRow.getCell(4)));
 			crfDrafts.add(crfDraft);
-		} else {
-			logger.debug("Incorrect sheet name. Should be CRFDraft");
-		}
-		return crfDrafts;
+			alsData.setCrfDrafts(crfDrafts);
+			return alsData;
 	}
 
 	/**
@@ -150,12 +164,11 @@ public class AlsParser {
 	 */
 	private static List<ALSForm> getForms(Sheet sheet) throws IOException {
 		List<ALSForm> forms = new ArrayList<ALSForm>();
-		if (sheet.getSheetName().equalsIgnoreCase("Forms")) {
 			Iterator<Row> rowIterator = sheet.rowIterator();
 			Row row = rowIterator.next();
 			while (rowIterator.hasNext()) {
 				row = rowIterator.next();
-				ALSForm form = new ALSForm();
+				ALSForm form = getAlsFormInstance();
 				if (row.getCell(0) != null) {
 					form.setFormOId(dataFormatter.formatCellValue(row.getCell(0)));
 					form.setOrdinal(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(1))));
@@ -163,10 +176,6 @@ public class AlsParser {
 					forms.add(form);
 				}
 			}
-
-		} else {
-			logger.debug("Incorrect sheet name. Should be Forms");
-		}
 		return forms;
 	}
 
@@ -183,7 +192,7 @@ public class AlsParser {
 			Row row = rowIterator.next();
 			while (rowIterator.hasNext()) {
 				row = rowIterator.next();
-				ALSField field = new ALSField();
+				ALSField field = getAlsFieldInstance();
 				if (row.getCell(0) != null) {
 					field.setFormOid(dataFormatter.formatCellValue(row.getCell(0)));
 					field.setFieldOid(dataFormatter.formatCellValue(row.getCell(1)));
@@ -197,7 +206,6 @@ public class AlsParser {
 					fields.add(field);
 				}
 			}
-
 		} else {
 			logger.debug("Incorrect sheet name. Should be Fields");
 		}
@@ -264,45 +272,12 @@ public class AlsParser {
 	}
 
 	/**
-	 * @param Sheet
-	 * @return List ALSUnitDictionaryEntry Populates a collection of Unit
-	 *         Dictionary Entries parsed out of the ALS input file
-	 * 
-	 */
-	private static List<ALSUnitDictionaryEntry> getUnitDictionaryEntries(Sheet sheet) {
-		List<ALSUnitDictionaryEntry> dataDictionaryEntries = new ArrayList<ALSUnitDictionaryEntry>();
-		if (sheet.getSheetName().equalsIgnoreCase("UnitDictionaryEntries")) {
-			Iterator<Row> rowIterator = sheet.rowIterator();
-			Row row = rowIterator.next();
-			while (rowIterator.hasNext()) {
-				row = rowIterator.next();
-				if (row.getCell(0) != null) {
-					ALSUnitDictionaryEntry ude = new ALSUnitDictionaryEntry();
-					ude.setUnitDictionaryName(dataFormatter.formatCellValue(row.getCell(0)));
-					ude.setCodedUnit(dataFormatter.formatCellValue(row.getCell(1)));
-					ude.setOrdinal(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(2))));
-					ude.setConstantA(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(3))));
-					ude.setConstantB(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(4))));
-					ude.setConstantC(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(5))));
-					ude.setConstantK(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(6))));
-					ude.setUnitString(dataFormatter.formatCellValue(row.getCell(7)));
-					dataDictionaryEntries.add(ude);
-				}
-			}
-		} else {
-			logger.debug("Incorrect sheet name. Should be UnitDictionaryEntries");
-		}
-
-		return dataDictionaryEntries;
-	}
-
-	/**
 	 * @param
 	 * @return Populates the output object for the report after initial
 	 *         validation and parsing of data
 	 * 
 	 */
-	private static void getOutputForReport() {
+	private static void getOutputForReport(ALSData alsData) {
 		cccReport = new CCCReport();
 		cccReport.setReportOwner("<NAME OF PERSON WHO THE REPORT IS FOR>"); // From the user input through the browser
 		cccReport.setReportDate(alsData.getReportDate());
@@ -333,10 +308,11 @@ public class AlsParser {
 				if (draftFieldName.indexOf("PID") > -1 && draftFieldName.indexOf("_V") > -1) {
 					String idVersion = draftFieldName.substring(draftFieldName.indexOf("PID"), draftFieldName.length());
 					question.setCdePublicId(idVersion.substring(3, idVersion.indexOf("_")));
-					question.setCdeVersion((idVersion.substring(idVersion.indexOf("_V") + 2, idVersion.length()))
+					//TODO remove any excessive decimals - as of now this still allows more than one decimal in version
+					question.setCdeVersion((idVersion.substring(idVersion.indexOf("_V") + 2, idVersion.length()))  
 							.replaceAll("_", "."));
 					question.setNciCategory("NRDS"); // "NRDS" "Mandatory Module: {CRF ID/V}", "Optional Module {CRF ID/V}", "Conditional Module: {CRF ID/V}"
-					question.setQuestionCongruenceStatus("MATCH");// Valid results are "ERROR"/"Match"
+					question.setQuestionCongruencyStatus("MATCH");// Valid results are "ERROR"/"Match"
 					question.setMessage("Error message"); // Will be replaced with the caDSR db validation result error message, if any.
 					question.setRaveFieldLabel(alsField.getPreText());
 					question.setRaveFieldLabelResult("Error/Match"); // Will be replaced with the caDSR db validation result
@@ -391,7 +367,7 @@ public class AlsParser {
 	 *         better processing for validation
 	 * 
 	 */
-	private static void buildAls() {
+	private static ALSData buildAls(ALSData alsData) {
 		for (ALSField field : alsData.getFields()) {
 			for (ALSForm form : alsData.getForms()) {
 				if (field.getFormOid().equals(form.getFormOId())) {
@@ -405,8 +381,8 @@ public class AlsParser {
 					}
 				}
 			}
-			logger.debug("DDE Map for " + field.getFieldOid() + " : " + field.getDdeMap().size());
 		}
+		return alsData;
 	}
 
 	/**
@@ -414,9 +390,8 @@ public class AlsParser {
 	 * @return Writing the final output report object into an excel
 	 * 
 	 */
-	private static void writeExcel(String OUTPUT_XLSX_FILE_PATH) {
+	private static void writeExcel(String OUTPUT_XLSX_FILE_PATH, ALSData alsData) {
 
-		// TODO - writing the report output to excel for download
 		String fileName = OUTPUT_XLSX_FILE_PATH;
 		Row row;
 		XSSFWorkbook workbook = new XSSFWorkbook();
@@ -504,7 +479,31 @@ public class AlsParser {
 				newCell = row.createCell(5);
 				newCell.setCellValue(question.getCdePublicId());				
 				newCell = row.createCell(6);
-				newCell.setCellValue(question.getCdeVersion());								
+				newCell.setCellValue(question.getCdeVersion());
+				newCell = row.createCell(7);
+				newCell.setCellValue(question.getNciCategory());				
+				newCell = row.createCell(8);
+				newCell.setCellValue(question.getQuestionCongruencyStatus());
+				newCell = row.createCell(9);
+				newCell.setCellValue(question.getMessage());
+				newCell = row.createCell(10);
+				newCell.setCellValue(question.getRaveFieldLabel());
+				newCell = row.createCell(11);
+				newCell.setCellValue(question.getRaveFieldLabelResult());
+				newCell = row.createCell(12);
+				newCell.setCellValue(question.getCdePermitQuestionTextChoices());
+				newCell = row.createCell(13);
+				newCell.setCellValue(question.getRaveControlType());				
+				newCell = row.createCell(14);
+				newCell.setCellValue(question.getControlTypeResult());								
+				newCell = row.createCell(15);
+				newCell.setCellValue(question.getCdeValueDomainType());
+				/*List<String> raveCodedData = question.getRaveCodedData();
+				for (String pv : raveCodedData) {
+					row = sheet2.createRow(row.getRowNum()+1);
+					newCell = row.createCell(16);
+					newCell.setCellValue(pv);
+				}*/
 			}
 		}
 
@@ -517,9 +516,32 @@ public class AlsParser {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-		System.out.println("File Writing Done");
-
 	}
+	
+	private static ALSData getAlsDataInstance() {
+		ALSData alsData = new ALSData();
+		return alsData;
+	}
+
+	private static ALSCrfDraft getAlsCrfDraftInstance() {
+		ALSCrfDraft alsCrfData = new ALSCrfDraft();
+		return alsCrfData;
+	}
+	
+	private static ALSForm getAlsFormInstance() {
+		ALSForm alsForm = new ALSForm();
+		return alsForm;
+	}
+		
+	private static ALSField getAlsFieldInstance() {
+		ALSField alsField = new ALSField();
+		return alsField;
+	}
+	
+	private static CCCError getErrorObject() {
+		CCCError cccError = new CCCError();
+		return cccError;
+	}
+	
 
 }

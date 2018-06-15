@@ -5,7 +5,7 @@
 ALS Parser is a Maven-built JAVA application. It requires a standard Maven set up on the computer.
 
 ALS Parser will parse a RAVE ALS Excel file provided by the customer to validate the CDEs in it against the 
-caDSR database to producce a congruence check report. 
+caDSR database to produce a congruency check report. 
 
 The main class is gov.nih.nci.cadsr.parser.AlsParser, which consists of the parsing logic.
 The data objects that will be used to store the input and the output for this program 

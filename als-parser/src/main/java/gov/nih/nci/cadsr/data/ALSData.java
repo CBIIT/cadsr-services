@@ -16,7 +16,6 @@ List<ALSCrfDraft> crfDrafts = new ArrayList<ALSCrfDraft>();
 List<ALSForm> forms = new ArrayList<ALSForm>();
 List<ALSField> fields = new ArrayList<ALSField>();
 Map<String, ALSDataDictionaryEntry> dataDictionaryEntries = new HashMap<String, ALSDataDictionaryEntry>();
-List<ALSUnitDictionaryEntry> unitDictionaryEntries = new ArrayList<ALSUnitDictionaryEntry>();
 
 
 public String getReportOwner() {
@@ -55,12 +54,6 @@ public List<ALSField> getFields() {
 }
 public void setFields(List<ALSField> fields) {
 	this.fields = fields;
-}
-public List<ALSUnitDictionaryEntry> getUnitDictionaryEntries() {
-	return unitDictionaryEntries;
-}
-public void setUnitDictionaryEntries(List<ALSUnitDictionaryEntry> unitDictionaryEntries) {
-	this.unitDictionaryEntries = unitDictionaryEntries;
 }
 public String getReportDate() {
 	return reportDate;

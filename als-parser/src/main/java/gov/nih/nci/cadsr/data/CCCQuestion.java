@@ -11,7 +11,7 @@ String fieldOrder;
 String cdePublicId;
 String cdeVersion;
 String nciCategory;
-String questionCongruenceStatus;
+String questionCongruencyStatus;
 String message;
 String raveFieldLabel;
 String raveFieldLabelResult;
@@ -72,11 +72,11 @@ public String getNciCategory() {
 public void setNciCategory(String nciCategory) {
 	this.nciCategory = nciCategory;
 }
-public String getQuestionCongruenceStatus() {
-	return questionCongruenceStatus;
+public String getQuestionCongruencyStatus() {
+	return questionCongruencyStatus;
 }
-public void setQuestionCongruenceStatus(String questionCongruenceStatus) {
-	this.questionCongruenceStatus = questionCongruenceStatus;
+public void setQuestionCongruencyStatus(String questionCongruencyStatus) {
+	this.questionCongruencyStatus = questionCongruencyStatus;
 }
 public String getMessage() {
 	return message;

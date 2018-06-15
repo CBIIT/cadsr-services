@@ -37,11 +37,13 @@
 	
     <category name="gov.nih.nci.cadsr" additivity="false">
         <priority value="DEBUG" />
+		<appender-ref ref="CONSOLE" />        
         <appender-ref ref="ALSPARSER_LOG" />
     </category>
     
 	<root>
 		<priority value="DEBUG" />
-		<appender-ref ref="ALSPARSER_LOG" />
+		<appender-ref ref="CONSOLE" />			
+		<appender-ref ref="ALSPARSER_LOG" />	
 	</root>
 </log4j:configuration>
