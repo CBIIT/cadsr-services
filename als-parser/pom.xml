@@ -25,9 +25,10 @@
 				<filtering>false</filtering>
 				<includes>
 					<include>**/*.xml</include>
-					<include>**/*.xlsx</include>					
+					<include>**/*.xlsx</include>
+					<include>**/*.properties</include>
 				</includes>
-			</resource>			
+			</resource>
 		</resources>
 		<plugins>
 			<plugin>
