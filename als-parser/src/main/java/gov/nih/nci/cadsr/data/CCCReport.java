@@ -42,6 +42,8 @@ List<CCCForm> cccForms = new ArrayList<CCCForm>();
 List<NrdsCde> nrdsCdeList = new ArrayList<NrdsCde>();
 List<StandardCrfCde> standardCrfCdeList = new ArrayList<StandardCrfCde>();
 
+CCCError cccError = new CCCError();
+
 public String getReportOwner() {
 	return reportOwner;
 }
@@ -192,6 +194,14 @@ public List<StandardCrfCde> getStandardCrfCdeList() {
 
 public void setStandardCrfCdeList(List<StandardCrfCde> standardCrfCdeList) {
 	this.standardCrfCdeList = standardCrfCdeList;
+}
+
+public CCCError getCccError() {
+	return cccError;
+}
+
+public void setCccError(CCCError cccError) {
+	this.cccError = cccError;
 }
 
 }

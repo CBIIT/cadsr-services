@@ -50,6 +50,12 @@ public class AlsParser {
 
 	public static void main(String[] args) {
 
+		getCCCReport();
+	}
+	
+	
+	public static CCCReport getCCCReport() {
+		CCCReport cccReport = new CCCReport();
 		Properties prop = new Properties();
 		InputStream input = null;
 		String filename = "config.properties";		
@@ -75,14 +81,18 @@ public class AlsParser {
 			cccError.setErrorDescription(ioe.getMessage());
 		} catch (InvalidFormatException ife) {
 			ife.printStackTrace();
-			cccError.setErrorDescription(ife.getMessage());			
+			cccError.setErrorDescription(ife.getMessage());
 		} catch (NullPointerException npe) {
 			npe.printStackTrace();
 			cccError.setErrorDescription(npe.getMessage());			
 		} finally {
-			if (cccError.getErrorDescription()!=null)
+			if (cccError.getErrorDescription()!=null) {
 				logger.debug("Error Occurred: "+cccError.getErrorDescription());
-		}
+				cccReport.setCccError(cccError);
+			}				
+		}		
+		
+		return cccReport;
 	}
 
 	/**
@@ -185,7 +195,7 @@ public class AlsParser {
 	 *         parsed out of the ALS input file
 	 * 
 	 */
-	private static List<ALSField> getFields(Sheet sheet) throws IOException {
+	private static List<ALSField> getFields(Sheet sheet) throws NullPointerException {
 		List<ALSField> fields = new ArrayList<ALSField>();
 		if (sheet.getSheetName().equalsIgnoreCase("Fields")) {
 			Iterator<Row> rowIterator = sheet.rowIterator();
@@ -219,7 +229,7 @@ public class AlsParser {
 	 *         Dictionary Entries parsed out of the ALS input file
 	 * 
 	 */
-	private static Map<String, ALSDataDictionaryEntry> getDataDictionaryEntries(Sheet sheet) {
+	private static Map<String, ALSDataDictionaryEntry> getDataDictionaryEntries(Sheet sheet) throws NullPointerException {
 		Map<String, ALSDataDictionaryEntry> ddeMap = new HashMap<String, ALSDataDictionaryEntry>();
 		if (sheet.getSheetName().equalsIgnoreCase("DataDictionaryEntries")) {
 			ALSDataDictionaryEntry dde = new ALSDataDictionaryEntry();
@@ -277,7 +287,7 @@ public class AlsParser {
 	 *         validation and parsing of data
 	 * 
 	 */
-	private static void getOutputForReport(ALSData alsData) {
+	private static void getOutputForReport(ALSData alsData) throws NullPointerException {
 		cccReport = new CCCReport();
 		cccReport.setReportOwner("<NAME OF PERSON WHO THE REPORT IS FOR>"); // From the user input through the browser
 		cccReport.setReportDate(alsData.getReportDate());
@@ -390,7 +400,7 @@ public class AlsParser {
 	 * @return Writing the final output report object into an excel
 	 * 
 	 */
-	private static void writeExcel(String OUTPUT_XLSX_FILE_PATH, ALSData alsData) {
+	private static void writeExcel(String OUTPUT_XLSX_FILE_PATH, ALSData alsData) throws IOException, InvalidFormatException, NullPointerException {
 
 		String fileName = OUTPUT_XLSX_FILE_PATH;
 		Row row;
@@ -500,7 +510,7 @@ public class AlsParser {
 				newCell.setCellValue(question.getCdeValueDomainType());
 				/*List<String> raveCodedData = question.getRaveCodedData();
 				for (String pv : raveCodedData) {
-					row = sheet2.createRow(row.getRowNum()+1);
+					row = sheet2.createRow(j);
 					newCell = row.createCell(16);
 					newCell.setCellValue(pv);
 				}*/
@@ -542,6 +552,5 @@ public class AlsParser {
 		CCCError cccError = new CCCError();
 		return cccError;
 	}
-	
 
 }
