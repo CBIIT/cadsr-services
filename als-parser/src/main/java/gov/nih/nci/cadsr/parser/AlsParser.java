@@ -369,6 +369,9 @@ public class AlsParser {
 
 					question.setPvResult("Error/match"); // Will be replaced with the caDSR db validation result
 					question.setAllowableCdeTextChoices("A|B|C|D"); // Test values - will be replaced with the PV value meanings from caDSR db
+					question.setRaveFieldDataType(alsField.getDataFormat());
+					question.setRaveLength(alsField.getFixedUnit());
+					question.setRaveDisplayFormat(alsField.getDataFormat());
 					questionsList.add(question);
 				} else {
 					question.setRaveFieldLabel(alsField.getPreText());
@@ -576,6 +579,8 @@ public class AlsParser {
 				newCell.setCellValue(question.getRaveLength());
 				newCell = row.createCell(newColNum++);
 				newCell.setCellValue(question.getLengthResult());				
+				newCell = row.createCell(newColNum++);
+				newCell.setCellValue(question.getCdeMaxLength());				
 				newCell = row.createCell(newColNum++);
 				newCell.setCellValue(question.getRaveDisplayFormat());								
 				newCell = row.createCell(newColNum++);
