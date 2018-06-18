@@ -21,7 +21,7 @@ String controlTypeResult;
 String cdeValueDomainType;
 //missing field for row #47 - String dataDictionaryName;
 List<String> raveCodedData = new ArrayList<String>();
-String codedDataResult;
+List<String> codedDataResult = new ArrayList<String>();
 String allowableCdeValue;
 List<String> raveUserString;
 String pvResult;
@@ -126,10 +126,10 @@ public List<String> getRaveCodedData() {
 public void setRaveCodedData(List<String> raveCodedData) {
 	this.raveCodedData = raveCodedData;
 }
-public String getCodedDataResult() {
+public List<String> getCodedDataResult() {
 	return codedDataResult;
 }
-public void setCodedDataResult(String codedDataResult) {
+public void setCodedDataResult(List<String> codedDataResult) {
 	this.codedDataResult = codedDataResult;
 }
 public String getAllowableCdeValue() {
@@ -155,6 +155,78 @@ public String getAllowableCdeTextChoices() {
 }
 public void setAllowableCdeTextChoices(String allowableCdeTextChoices) {
 	this.allowableCdeTextChoices = allowableCdeTextChoices;
+}
+public String getRaveFieldDataType() {
+	return raveFieldDataType;
+}
+public void setRaveFieldDataType(String raveFieldDataType) {
+	this.raveFieldDataType = raveFieldDataType;
+}
+public String getDatatypeResult() {
+	return datatypeResult;
+}
+public void setDatatypeResult(String datatypeResult) {
+	this.datatypeResult = datatypeResult;
+}
+public String getCdeDataType() {
+	return cdeDataType;
+}
+public void setCdeDataType(String cdeDataType) {
+	this.cdeDataType = cdeDataType;
+}
+public String getRaveUOM() {
+	return raveUOM;
+}
+public void setRaveUOM(String raveUOM) {
+	this.raveUOM = raveUOM;
+}
+public String getUomResult() {
+	return uomResult;
+}
+public void setUomResult(String uomResult) {
+	this.uomResult = uomResult;
+}
+public String getCdeUOM() {
+	return cdeUOM;
+}
+public void setCdeUOM(String cdeUOM) {
+	this.cdeUOM = cdeUOM;
+}
+public String getRaveLength() {
+	return raveLength;
+}
+public void setRaveLength(String raveLength) {
+	this.raveLength = raveLength;
+}
+public String getLengthResult() {
+	return lengthResult;
+}
+public void setLengthResult(String lengthResult) {
+	this.lengthResult = lengthResult;
+}
+public String getCdeMaxLength() {
+	return cdeMaxLength;
+}
+public void setCdeMaxLength(String cdeMaxLength) {
+	this.cdeMaxLength = cdeMaxLength;
+}
+public String getRaveDisplayFormat() {
+	return raveDisplayFormat;
+}
+public void setRaveDisplayFormat(String raveDisplayFormat) {
+	this.raveDisplayFormat = raveDisplayFormat;
+}
+public String getFormatResult() {
+	return formatResult;
+}
+public void setFormatResult(String formatResult) {
+	this.formatResult = formatResult;
+}
+public String getCdeDisplayFormat() {
+	return cdeDisplayFormat;
+}
+public void setCdeDisplayFormat(String cdeDisplayFormat) {
+	this.cdeDisplayFormat = cdeDisplayFormat;
 }	
 
 }

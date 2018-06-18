@@ -1,11 +1,5 @@
 package gov.nih.nci.cadsr.parser;
 
-import org.apache.log4j.Logger;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -22,6 +16,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import gov.nih.nci.cadsr.data.ALSCrfDraft;
 import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.ALSDataDictionaryEntry;
@@ -35,18 +40,42 @@ import gov.nih.nci.cadsr.data.CCCReport;
 public class AlsParser {
 
 	private static final Logger logger = Logger.getLogger(AlsParser.class);
-	private static CCCError cccError = getErrorObject();
 	private static CCCReport cccReport;
 	private static DataFormatter dataFormatter = new DataFormatter();
 	private static String reportDateFormat = "MM/dd/yyyy";
 	private static String formHeader_1 = "VIEW OF EXPANDED RESULTS FOR ";
 	private static String formHeader_2 = " FORM";	
 	private static String summaryFormsHeader = "Report Summary - Click on Form Name to expand results";
+	private static String summaryFormsValidResult = "Validation Result";
+	private static int summaryFormsValidResultColNum = 11;
+	private static String checkerReportOwnerLbl = "CDE Congruency Checker Report for ";
+	private static String raveProtocolNameLbl = "Rave Protocol name ";
+	private static String raveProtocolNumLbl = "Rave Protocol number ";
+	private static String reportDateLbl = "Date Validated ";
+	private static String formCountLbl = "# Forms in protocol ";
+	private static String totalCountFormLbl = "# Total Forms Congruent ";
+	private static String totalQuestCheckLbl = "# Total Questions Checked ";
+	private static String totalQuestWarnLbl = "# Total Questions with Warnings ";
+	private static String totalQuestErrorLbl = "# Total Questions with Errors ";
+	private static String totalunassociatedQuestLbl = "# Total Questions without associated CDE ";
+	private static String reqQuestMissLbl = "# Required NRDS Questions missing ";
+	private static String reqNrdsQuestCongLbl = "# Required NRDS Questions Congruent ";
+	private static String reqNrdsQuestWarnLbl = "# Required NRDS Questions With Warnings ";
+	private static String reqNrdsQuestErrorLbl = "# Required NRDS Questions With Errors ";
+	private static String nciStdTempQuestLbl = "# NCI Standard Template Mandatory Modules Questions not used in Protocol ";
+	private static String nciStdTempCongLbl = "# NCI Standard Template Mandatory Modules Questions Congruent ";
+	private static String nciStdTempErrorLbl = "# NCI Standard Template Mandatory Modules Questions With Errors ";
+	private static String nciStdTempWarnLbl = "# NCI Standard Template Mandatory Modules Questions With Warnings ";	
 	private static String crfDraftSheetName = "CRFDraft";
 	private static String formsSheetName = "Forms";
 	private static String fieldsSheetName = "Fields";
 	private static String dataDictionarySheetName = "DataDictionaryEntries";	
 	private static String errorSheetMissing = "Sheet missing in the ALS input file";
+	private static int formStartRow = 4;
+	private static int formStartColumn = 4;	
+	private static int allowableCdeValueCol = 19;
+	private static int codedDataColStart = 16;
+	private static int crfDraftStartRow = 1;
 
 	public static void main(String[] args) {
 
@@ -55,8 +84,10 @@ public class AlsParser {
 	}
 	
 	
+	// Method to expose as service
 	public static CCCReport getCCCReport() {
 		CCCReport cccReport = new CCCReport();
+		CCCError cccError = getErrorObject();
 		Properties prop = new Properties();
 		InputStream input = null;
 		String filename = "config.properties";		
@@ -103,35 +134,33 @@ public class AlsParser {
 	 */
 	private static ALSData parseExcel(String INPUT_XLSX_FILE_PATH) throws IOException, InvalidFormatException, NullPointerException {
 		Workbook workbook = WorkbookFactory.create(new File(INPUT_XLSX_FILE_PATH));
+		CCCError cccError = getErrorObject();
 		ALSData alsData = getAlsDataInstance();
 		Sheet sheet = workbook.getSheet(crfDraftSheetName);
 		if (sheet!=null)
 			alsData = getCrfDraft(sheet, alsData);
-		else 
-			setEmptySheetError(crfDraftSheetName);
+		else
+			cccError.setErrorDescription(errorSheetMissing+" - "+crfDraftSheetName);
 		sheet = workbook.getSheet(formsSheetName);
 		if (sheet!=null)
 			alsData.setForms(getForms(sheet));
-		else 
-			setEmptySheetError(formsSheetName);
+		else
+			cccError.setErrorDescription(errorSheetMissing+" - "+formsSheetName);
 		sheet = workbook.getSheet(fieldsSheetName);
 		if (sheet!=null)
 			alsData.setFields(getFields(sheet));
-		else 
-			setEmptySheetError(fieldsSheetName);
+		else
+			cccError.setErrorDescription(errorSheetMissing+" - "+fieldsSheetName);
 		sheet = workbook.getSheet(dataDictionarySheetName);
 		if (sheet!=null)
 			alsData.setDataDictionaryEntries(getDataDictionaryEntries(sheet));
-		else 
-			setEmptySheetError(dataDictionarySheetName);		
+		else 		
+			cccError.setErrorDescription(errorSheetMissing+" - "+dataDictionarySheetName);		
 		workbook.close();
+		if (cccError.getErrorDescription()!=null)
+			alsData.setCccError(cccError);	
 		return alsData;
 	}	
-	
-	
-	private static void setEmptySheetError(String sheetName) {
-		cccError.setErrorDescription(errorSheetMissing+" - "+sheetName);
-	}
 	
 	/**
 	 * @param Sheet
@@ -145,11 +174,8 @@ public class AlsParser {
 		DateFormat dateFormat = new SimpleDateFormat(reportDateFormat);
 		Date date = new Date();
 		List<ALSCrfDraft> crfDrafts = new ArrayList<ALSCrfDraft>();
-			logger.debug("I.Protocol Report Header ");
-			logger.debug("Name of person who ran the Congruency Checker");
-			logger.debug("Date of Report - " + dateFormat.format(date));
 			alsData.setReportDate(dateFormat.format(date));
-			Row newRow = sheet.getRow(1);
+			Row newRow = sheet.getRow(crfDraftStartRow);
 			Cell newCell = newRow.getCell(2);
 			String cellValue = dataFormatter.formatCellValue(newCell);
 			logger.debug("Rave Protocol Name - " + cellValue);
@@ -336,9 +362,9 @@ public class AlsParser {
 						if (key.equals(alsField.getDataDictionaryName())) {
 							question.setRaveCodedData(ddeMap.get(key).getCodedData()); // Data dictionary name and its corresponding entries - All the Permissible values
 							question.setRaveUserString(ddeMap.get(key).getUserDataString());
+							//question.setCodedDataResult("CHECK"); // Will be replaced with the caDSR db validation result							
 						}
 					}
-					question.setCodedDataResult("Error/Match"); // Will be replaced with the caDSR db validation result
 					question.setAllowableCdeValue("");
 
 					question.setPvResult("Error/match"); // Will be replaced with the caDSR db validation result
@@ -408,25 +434,25 @@ public class AlsParser {
 		XSSFWorkbook workbook = new XSSFWorkbook();
 		XSSFSheet sheet = workbook.createSheet("Summary");
 		Map<String, String> summaryLabels = new LinkedHashMap<String, String>();
-		summaryLabels.put("CDE Congruency Checker Report for ", cccReport.getReportOwner());
-		summaryLabels.put("Rave Protocol name ", cccReport.getRaveProtocolName());
-		summaryLabels.put("Rave Protocol number ", cccReport.getRaveProtocolNumber());
-		summaryLabels.put("Date Validated ", cccReport.getReportDate());
-		summaryLabels.put("# Forms in protocol ", String.valueOf(cccReport.getCccForms().size()));
-		summaryLabels.put("# Total Forms Congruent ", String.valueOf(cccReport.getCccForms().size()));
-		summaryLabels.put("# Total Questions Checked ", String.valueOf(alsData.getFields().size()));
-		summaryLabels.put("# Total Questions with Warnings ", "");
-		summaryLabels.put("# Total Questions with Errors ", "");
-		summaryLabels.put("# Total Questions without associated CDE ", "");
-		summaryLabels.put("# Required NRDS Questions missing ", "");
-		summaryLabels.put("# Required NRDS Questions Congruent ", "");
-		summaryLabels.put("# Required NRDS Questions With Warnings ", "");
-		summaryLabels.put("# Required NRDS Questions With Errors ", "");
-		summaryLabels.put("# NCI Standard Template Mandatory Modules Questions not used in Protocol ", "");
-		summaryLabels.put("# NCI Standard Template Mandatory Modules Questions Congruent ", "");
-		summaryLabels.put("# NCI Standard Template Mandatory Modules Questions With Errors ", "");
-		summaryLabels.put("# NCI Standard Template Mandatory Modules Questions With Warnings ", "");
-
+		summaryLabels.put(checkerReportOwnerLbl, cccReport.getReportOwner());
+		summaryLabels.put(raveProtocolNameLbl, cccReport.getRaveProtocolName());
+		summaryLabels.put(raveProtocolNumLbl, cccReport.getRaveProtocolNumber());
+		summaryLabels.put(reportDateLbl, cccReport.getReportDate());
+		summaryLabels.put(formCountLbl, String.valueOf(cccReport.getCccForms().size()));
+		summaryLabels.put(totalCountFormLbl, String.valueOf(cccReport.getCccForms().size()));
+		summaryLabels.put(totalQuestCheckLbl, String.valueOf(alsData.getFields().size()));
+		summaryLabels.put(totalQuestWarnLbl, "");
+		summaryLabels.put(totalQuestErrorLbl, "");
+		summaryLabels.put(totalunassociatedQuestLbl, "");
+		summaryLabels.put(reqQuestMissLbl, "");
+		summaryLabels.put(reqNrdsQuestCongLbl, "");
+		summaryLabels.put(reqNrdsQuestWarnLbl, "");
+		summaryLabels.put(reqNrdsQuestErrorLbl, "");
+		summaryLabels.put(nciStdTempQuestLbl, "");
+		summaryLabels.put(nciStdTempCongLbl, "");
+		summaryLabels.put(nciStdTempErrorLbl, "");
+		summaryLabels.put(nciStdTempWarnLbl, "");
+		
 		int rowNum = 0;
 		logger.debug("Creating excel");
 		for (Map.Entry<String, String> label : summaryLabels.entrySet()) {
@@ -443,15 +469,15 @@ public class AlsParser {
 		row = sheet.createRow(rowNum++);
 		Cell newCell = row.createCell(0);
 		newCell.setCellValue(summaryFormsHeader);
-		newCell = row.createCell(11);
-		newCell.setCellValue("Validation Result");
+		newCell = row.createCell(summaryFormsValidResultColNum);
+		newCell.setCellValue(summaryFormsValidResult);
 		List<CCCForm> forms = cccReport.getCccForms(); 
 		for (CCCForm form : forms) {
 			row = sheet.createRow(rowNum++);
 			int colNum = 0;
 			Cell cell = row.createCell(colNum++);
 			cell.setCellValue(form.getRaveFormOId());
-			cell = row.createCell(colNum + 10);
+			cell = row.createCell(summaryFormsValidResultColNum);
 			cell.setCellValue("Congruent");
 		}
 
@@ -465,56 +491,99 @@ public class AlsParser {
 				"CDE Display Format" };
 		for (int i = 0; i < 5; i++) {
 			XSSFSheet sheet2 = workbook.createSheet(forms.get(i).getRaveFormOId());
-			row = sheet2.createRow(0);
+			rowNum = 0;
+			row = sheet2.createRow(rowNum++);
 			newCell = row.createCell(0);
 			newCell.setCellValue(formHeader_1 + forms.get(i).getRaveFormOId() + formHeader_2);
-			row = sheet2.createRow(1);
+			row = sheet2.createRow(rowNum++);
 			int colNum = 0;
 			// Print row headers in the form sheet
-			for (String rowHeader : rowHeaders) {			
+			for (String rowHeader : rowHeaders) {
 				newCell = row.createCell(colNum++);
 				newCell.setCellValue(rowHeader);
-				//sheet2.autoSizeColumn(colNum);					
 			}
-			row = sheet2.createRow(2);
+			colNum = 0;
+			row = sheet2.createRow(rowNum++);
 			newCell = row.createCell(0);
 			newCell.setCellValue(forms.get(i).getRaveFormOId());
+			colNum = colNum+3;
 			newCell = row.createCell(3);
 			newCell.setCellValue(forms.get(i).getQuestions().size());
-			
 			for (int j = 0; j < forms.get(i).getQuestions().size(); j++) {
+				int colNum2 = formStartColumn;
 				CCCQuestion question = forms.get(i).getQuestions().get(j);
-				row = sheet2.createRow(j+4);
-				newCell = row.createCell(4);
+				row = sheet2.createRow(rowNum++);
+				newCell = row.createCell(colNum2++);
 				newCell.setCellValue(question.getFieldOrder());
-				newCell = row.createCell(5);
+				newCell = row.createCell(colNum2++);
 				newCell.setCellValue(question.getCdePublicId());				
-				newCell = row.createCell(6);
+				newCell = row.createCell(colNum2++);
 				newCell.setCellValue(question.getCdeVersion());
-				newCell = row.createCell(7);
-				newCell.setCellValue(question.getNciCategory());				
-				newCell = row.createCell(8);
+				newCell = row.createCell(colNum2++);
+				newCell.setCellValue(question.getNciCategory());
+				newCell = row.createCell(colNum2++);
 				newCell.setCellValue(question.getQuestionCongruencyStatus());
-				newCell = row.createCell(9);
+				newCell = row.createCell(colNum2++);
 				newCell.setCellValue(question.getMessage());
-				newCell = row.createCell(10);
+				newCell = row.createCell(colNum2++);
 				newCell.setCellValue(question.getRaveFieldLabel());
-				newCell = row.createCell(11);
+				newCell = row.createCell(colNum2++);
 				newCell.setCellValue(question.getRaveFieldLabelResult());
-				newCell = row.createCell(12);
+				newCell = row.createCell(colNum2++);
 				newCell.setCellValue(question.getCdePermitQuestionTextChoices());
-				newCell = row.createCell(13);
+				newCell = row.createCell(colNum2++);
 				newCell.setCellValue(question.getRaveControlType());				
-				newCell = row.createCell(14);
+				newCell = row.createCell(colNum2++);
 				newCell.setCellValue(question.getControlTypeResult());								
-				newCell = row.createCell(15);
+				newCell = row.createCell(colNum2++);
 				newCell.setCellValue(question.getCdeValueDomainType());
-				/*List<String> raveCodedData = question.getRaveCodedData();
-				for (String pv : raveCodedData) {
-					row = sheet2.createRow(j);
-					newCell = row.createCell(16);
-					newCell.setCellValue(pv);
-				}*/
+				List<String> raveCodedData = question.getRaveCodedData();
+				List<String> raveUserString = question.getRaveUserString();
+				Row rowBeforeCD = row;
+				for (int m = 0; m < raveCodedData.size(); m++)	{
+					int colNum3 = codedDataColStart;
+					newCell = row.createCell(colNum3++);
+					newCell.setCellValue(raveCodedData.get(m));					
+					newCell = row.createCell(colNum3++);
+					newCell.setCellValue("CHECK"); // TODO - needs to get actual values from caDSR DB validation result 
+					newCell = row.createCell(colNum3);
+					newCell.setCellValue(raveCodedData.get(m).replaceAll("-", ", ")); // substituting pv values from ALS for now TODO - needs to get actual values from caDSR db			
+					if (m != raveCodedData.size()-1)
+						row = sheet2.createRow(rowNum++);
+				}
+				int rowNumAfterCD = rowNum;
+				row = rowBeforeCD;
+				int newColNum = allowableCdeValueCol;
+				newCell = row.createCell(newColNum++);
+				newCell.setCellValue(question.getAllowableCdeValue());
+				newCell = row.createCell(newColNum++);
+				newCell.setCellValue(question.getPvResult());				
+				newCell = row.createCell(newColNum++);
+				newCell.setCellValue(question.getAllowableCdeTextChoices());
+				newCell = row.createCell(newColNum++);
+				newCell.setCellValue(question.getRaveFieldDataType());				
+				newCell = row.createCell(newColNum++);
+				newCell.setCellValue(question.getDatatypeResult());								
+				newCell = row.createCell(newColNum++);
+				newCell.setCellValue(question.getCdeDataType());
+				newCell = row.createCell(newColNum++);
+				newCell.setCellValue(question.getRaveUOM());
+				newCell = row.createCell(newColNum++);
+				newCell.setCellValue(question.getUomResult());																				
+				newCell = row.createCell(newColNum++);
+				newCell.setCellValue(question.getCdeUOM());																								
+				newCell = row.createCell(newColNum++);
+				newCell.setCellValue(question.getRaveLength());
+				newCell = row.createCell(newColNum++);
+				newCell.setCellValue(question.getLengthResult());				
+				newCell = row.createCell(newColNum++);
+				newCell.setCellValue(question.getRaveDisplayFormat());								
+				newCell = row.createCell(newColNum++);
+				newCell.setCellValue(question.getFormatResult());												
+				newCell = row.createCell(newColNum);
+				newCell.setCellValue(question.getCdeDisplayFormat());
+				if (rowNumAfterCD > rowNum)
+					rowNum = rowNumAfterCD;
 			}
 		}
 

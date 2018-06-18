@@ -16,6 +16,7 @@ List<ALSCrfDraft> crfDrafts = new ArrayList<ALSCrfDraft>();
 List<ALSForm> forms = new ArrayList<ALSForm>();
 List<ALSField> fields = new ArrayList<ALSField>();
 Map<String, ALSDataDictionaryEntry> dataDictionaryEntries = new HashMap<String, ALSDataDictionaryEntry>();
+CCCError cccError = new CCCError();
 
 
 public String getReportOwner() {
@@ -66,6 +67,12 @@ public Map<String, ALSDataDictionaryEntry> getDataDictionaryEntries() {
 }
 public void setDataDictionaryEntries(Map<String, ALSDataDictionaryEntry> dataDictionaryEntries) {
 	this.dataDictionaryEntries = dataDictionaryEntries;
+}
+public CCCError getCccError() {
+	return cccError;
+}
+public void setCccError(CCCError cccError) {
+	this.cccError = cccError;
 }
 
 
