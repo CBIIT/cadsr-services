@@ -39,6 +39,11 @@ public class AlsParser implements Parser{
 	private static String dataDictionarySheetName = "DataDictionaryEntries";	
 	private static String errorSheetMissing = "Sheet missing in the ALS input file";
 	private static int crfDraftStartRow = 1;
+	private static String err_msg_1 = "RAVE Protocol Name is missing in the ALS file.";
+	private static String err_msg_2 = "RAVE Protocol Number is missing in the ALS file.";
+	private static String err_msg_3 = "FORM OID missing.";
+	private static String err_msg_4 = "Ordinal of the form missing";	
+	private static String err_msg_5 = "Draft Form name of the form missing";	
 
 
 	/**
@@ -51,29 +56,29 @@ public class AlsParser implements Parser{
 		CCCError cccError = getErrorObject();
 		ALSData alsData = getAlsDataInstance();
 		Sheet sheet = workbook.getSheet(crfDraftSheetName);
-		if (sheet!=null) {
+		if (sheet!=null) 
 			alsData = getCrfDraft(sheet, alsData);
-		}
 		else
 			cccError.getErrors().add(errorSheetMissing+" - "+crfDraftSheetName);
 		sheet = workbook.getSheet(formsSheetName);
 		if (sheet!=null)
-			alsData.setForms(getForms(sheet));
+			alsData = getForms(sheet,alsData);
 		else
 			cccError.getErrors().add(errorSheetMissing+" - "+formsSheetName);
 		sheet = workbook.getSheet(fieldsSheetName);
 		if (sheet!=null)
-			alsData.setFields(getFields(sheet));
+			alsData = getFields(sheet,alsData);
 		else
 			cccError.getErrors().add(errorSheetMissing+" - "+fieldsSheetName);
 		sheet = workbook.getSheet(dataDictionarySheetName);
 		if (sheet!=null)
-			alsData.setDataDictionaryEntries(getDataDictionaryEntries(sheet));
+			alsData = getDataDictionaryEntries(sheet, alsData);
 		else 		
 			cccError.getErrors().add(errorSheetMissing+" - "+dataDictionarySheetName);		
 		workbook.close();
 		if (cccError.getErrors().size() > 0)
-			alsData.setCccError(cccError);	
+			alsData.setCccError(cccError);
+		logger.debug("Parsing done ");
 		return alsData;
 	}	
 	
@@ -95,7 +100,7 @@ public class AlsParser implements Parser{
 			if (!newRow.getCell(0).equals(""))
 				crfDraft.setDraftName(dataFormatter.formatCellValue(newRow.getCell(0)));
 			if (newRow.getCell(2).equals("")) {
-					cccError.getErrors().add("RAVE Protocol Name is missing in the ALS file."); 
+					cccError.getErrors().add(err_msg_1); 
 				}
 			else {
 				Cell newCell = newRow.getCell(2);
@@ -103,7 +108,7 @@ public class AlsParser implements Parser{
 				crfDraft.setProjectName(cellValue); 
 				}
 			if (newRow.getCell(4).equals("")) {
-				cccError.getErrors().add("RAVE Protocol Number is missing in the ALS file."); 
+				cccError.getErrors().add(err_msg_2); 
 				}				
 			else {
 				Cell newCell = newRow.getCell(4);
@@ -124,8 +129,9 @@ public class AlsParser implements Parser{
 	 *         the ALS input file
 	 * 
 	 */
-	protected static List<ALSForm> getForms(Sheet sheet) throws IOException {
+	protected static ALSData getForms(Sheet sheet, ALSData alsData) throws IOException {
 		List<ALSForm> forms = new ArrayList<ALSForm>();
+		CCCError cccError = getErrorObject();		
 			Iterator<Row> rowIterator = sheet.rowIterator();
 			Row row = rowIterator.next();
 			while (rowIterator.hasNext()) {
@@ -133,12 +139,25 @@ public class AlsParser implements Parser{
 				ALSForm form = getAlsFormInstance();
 				if (row.getCell(0) != null) {
 					form.setFormOId(dataFormatter.formatCellValue(row.getCell(0)));
-					form.setOrdinal(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(1))));
-					form.setDraftFormName(dataFormatter.formatCellValue(row.getCell(2)));
-					forms.add(form);
+					if (row.getCell(1) != null)	
+						form.setOrdinal(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(1))));
+					else 
+						cccError.getErrors().add(err_msg_4);
+					if (row.getCell(2) != null)
+						form.setDraftFormName(dataFormatter.formatCellValue(row.getCell(2)));
+					else 
+						cccError.getErrors().add(err_msg_5);					
+				} else {
+					cccError.getErrors().add(err_msg_3);
+				}
+				if (cccError.getErrors().size() > 0) {
+						alsData.setCccError(cccError);	
+					} else { 					
+						forms.add(form);
+						alsData.setForms(forms); 
 				}
 			}
-		return forms;
+		return alsData;
 	}
 
 	/**
@@ -147,9 +166,9 @@ public class AlsParser implements Parser{
 	 *         parsed out of the ALS input file
 	 * 
 	 */
-	protected static List<ALSField> getFields(Sheet sheet) throws NullPointerException {
+	protected static ALSData getFields(Sheet sheet, ALSData alsData) throws NullPointerException {
 		List<ALSField> fields = new ArrayList<ALSField>();
-		if (sheet.getSheetName().equalsIgnoreCase("Fields")) {
+		CCCError cccError = getErrorObject();		
 			Iterator<Row> rowIterator = sheet.rowIterator();
 			Row row = rowIterator.next();
 			while (rowIterator.hasNext()) {
@@ -168,11 +187,8 @@ public class AlsParser implements Parser{
 					fields.add(field);
 				}
 			}
-		} else {
-			logger.debug("Incorrect sheet name. Should be Fields");
-		}
-
-		return fields;
+		alsData.setFields(fields);
+		return alsData;
 	}
 
 	/**
@@ -181,10 +197,10 @@ public class AlsParser implements Parser{
 	 *         Dictionary Entries parsed out of the ALS input file
 	 * 
 	 */
-	protected static Map<String, ALSDataDictionaryEntry> getDataDictionaryEntries(Sheet sheet) throws NullPointerException {
+	protected static ALSData getDataDictionaryEntries(Sheet sheet, ALSData alsData) throws NullPointerException {
 		Map<String, ALSDataDictionaryEntry> ddeMap = new HashMap<String, ALSDataDictionaryEntry>();
-		if (sheet.getSheetName().equalsIgnoreCase("DataDictionaryEntries")) {
 			ALSDataDictionaryEntry dde = new ALSDataDictionaryEntry();
+			CCCError cccError = getErrorObject();			
 			List<Integer> ordinal = new ArrayList<Integer>();
 			List<String> cd = new ArrayList<String>();
 			List<String> uds = new ArrayList<String>();
@@ -227,10 +243,8 @@ public class AlsParser implements Parser{
 			if (!(ddeMap.containsKey(dde.getDataDictionaryName()))) {
 				ddeMap.put(dde.getDataDictionaryName(), dde);
 			}
-		} else {
-			logger.debug("Incorrect sheet name. Should be DataDictionaryEntries");
-		}
-		return ddeMap;
+		alsData.setDataDictionaryEntries(ddeMap);		
+		return alsData;
 	}
 
 	
