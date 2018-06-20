@@ -1,6 +1,5 @@
 package gov.nih.nci.cadsr.data;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +12,7 @@ String reportDate;
 String raveProtocolName;
 String raveProtocolNumber;
 
+int totalFormsCount;
 int countQuestionsChecked;
 int countCongruentQuestions;
 int countQuestionsWithWarnings;
@@ -28,12 +28,13 @@ int countQuestionsWithoutCde;
  */
 
 // NCI standard questions requirement
-int countNciMissing;
 int countNciCongruent;
+int countNciMissing;
 int countNciwWithWarnings;
 int countNciWithErrors;
 
 // NRDS mandatory questions requirement
+int countNrdsCongruent;
 int countNrdsMissing;
 int countNrdsWithWarnings;
 int countNrdsWithErrors;
@@ -74,6 +75,14 @@ public String getRaveProtocolNumber() {
 
 public void setRaveProtocolNumber(String raveProtocolNumber) {
 	this.raveProtocolNumber = raveProtocolNumber;
+}
+
+public int getTotalFormsCount() {
+	return totalFormsCount;
+}
+
+public void setTotalFormsCount(int totalFormsCount) {
+	this.totalFormsCount = totalFormsCount;
 }
 
 public int getCountQuestionsChecked() {
@@ -146,6 +155,14 @@ public int getCountNciWithErrors() {
 
 public void setCountNciWithErrors(int countNciWithErrors) {
 	this.countNciWithErrors = countNciWithErrors;
+}
+
+public int getCountNrdsCongruent() {
+	return countNrdsCongruent;
+}
+
+public void setCountNrdsCongruent(int countNrdsCongruent) {
+	this.countNrdsCongruent = countNrdsCongruent;
 }
 
 public int getCountNrdsMissing() {

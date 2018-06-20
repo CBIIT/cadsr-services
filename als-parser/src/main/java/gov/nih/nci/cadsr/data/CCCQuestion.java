@@ -7,7 +7,6 @@ public class CCCQuestion {
 
 String raveFormOId;
 String fieldOrder;
-// placeholder for missing field on row #35 in DetailedRequirements
 String cdePublicId;
 String cdeVersion;
 String nciCategory;
@@ -19,15 +18,12 @@ String cdePermitQuestionTextChoices;
 String raveControlType;
 String controlTypeResult;
 String cdeValueDomainType;
-//missing field for row #47 - String dataDictionaryName;
 List<String> raveCodedData = new ArrayList<String>();
 List<String> codedDataResult = new ArrayList<String>();
 String allowableCdeValue;
 List<String> raveUserString;
 String pvResult;
 String allowableCdeTextChoices;
-
-//Below section of properties do not have a source, data type or any other info related to them. Seen below is their placeholder.
 
 String raveFieldDataType;
 String datatypeResult;

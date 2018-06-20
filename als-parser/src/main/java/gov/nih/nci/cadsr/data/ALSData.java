@@ -8,11 +8,9 @@ import java.util.Map;
 public class ALSData {
 	
 String reportOwner; // From the user input through the browser
-String raveProtocolName;
-String raveProtocolNumber;
 String reportDate;
 
-List<ALSCrfDraft> crfDrafts = new ArrayList<ALSCrfDraft>();
+ALSCrfDraft crfDraft = new ALSCrfDraft();
 List<ALSForm> forms = new ArrayList<ALSForm>();
 List<ALSField> fields = new ArrayList<ALSField>();
 Map<String, ALSDataDictionaryEntry> dataDictionaryEntries = new HashMap<String, ALSDataDictionaryEntry>();
@@ -25,18 +23,6 @@ public String getReportOwner() {
 public void setReportOwner(String reportOwner) {
 	this.reportOwner = reportOwner;
 }
-public String getRaveProtocolName() {
-	return raveProtocolName;
-}
-public void setRaveProtocolName(String raveProtocolName) {
-	this.raveProtocolName = raveProtocolName;
-}
-public String getRaveProtocolNumber() {
-	return raveProtocolNumber;
-}
-public void setRaveProtocolNumber(String raveProtocolNumber) {
-	this.raveProtocolNumber = raveProtocolNumber;
-}
 
 public List<ALSForm> getForms() {
 	return forms;
@@ -44,11 +30,11 @@ public List<ALSForm> getForms() {
 public void setForms(List<ALSForm> forms) {
 	this.forms = forms;
 }
-public List<ALSCrfDraft> getCrfDrafts() {
-	return crfDrafts;
+public ALSCrfDraft getCrfDraft() {
+	return crfDraft;
 }
-public void setCrfDrafts(List<ALSCrfDraft> crfDrafts) {
-	this.crfDrafts = crfDrafts;
+public void setCrfDraft(ALSCrfDraft crfDraft) {
+	this.crfDraft = crfDraft;
 }
 public List<ALSField> getFields() {
 	return fields;
