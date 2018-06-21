@@ -241,17 +241,16 @@ public class AlsParser implements Parser{
 					if (row.getCell(cell_fieldFixedUnit)!=null)
 						field.setFixedUnit(dataFormatter.formatCellValue(row.getCell(cell_fieldFixedUnit)));
 					else
-						cccError.getErrors().add(err_msg_14);					
+						cccError.getErrors().add(err_msg_14);
+					fields.add(field);
 				} else {
 					cccError.getErrors().add(err_msg_6);	
 				}
 			}
 			if (cccError.getErrors().size() > 0) {
 				alsData.setCccError(cccError);	
-			} else { 					
-				fields.add(field); 
-		}			
-		alsData.setFields(fields);
+			}
+		alsData.setFields(fields);					
 		return alsData;
 	}
 
@@ -323,9 +322,8 @@ public class AlsParser implements Parser{
 			}
 			if (cccError.getErrors().size() > 0) {
 				alsData.setCccError(cccError);	
-			} else { 					
-				alsData.setDataDictionaryEntries(ddeMap); 
 		}		
+		alsData.setDataDictionaryEntries(ddeMap); 			
 		return alsData;
 	}
 
