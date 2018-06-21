@@ -203,11 +203,12 @@ public class AlsParser implements Parser{
 	protected static ALSData getFields(Sheet sheet, ALSData alsData) throws NullPointerException {
 		List<ALSField> fields = new ArrayList<ALSField>();
 		CCCError cccError = getErrorObject();
-		ALSField field = getAlsFieldInstance();		
+		ALSField field;		
 			Iterator<Row> rowIterator = sheet.rowIterator();
 			Row row = rowIterator.next();
 			while (rowIterator.hasNext()) {
 				row = rowIterator.next();
+				field = getAlsFieldInstance();				
 				if (row.getCell(cell_field_formOid) != null) {
 					field.setFormOid(dataFormatter.formatCellValue(row.getCell(cell_field_formOid)));
 					if (row.getCell(cell_fieldOid)!=null)
