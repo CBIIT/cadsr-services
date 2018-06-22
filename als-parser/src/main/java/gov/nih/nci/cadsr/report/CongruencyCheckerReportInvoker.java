@@ -72,6 +72,7 @@ public class CongruencyCheckerReportInvoker {
 			input = CongruencyCheckerReportInvoker.class.getClassLoader().getResourceAsStream(filename);
 			prop.load(input);
 			String INPUT_XLSX_FILE_PATH = "target/classes/" + prop.getProperty("ALS-INPUT-FILE");
+			String OUTPUT_XLSX_FILE_PATH = "target/" + prop.getProperty("VALIDATOR-OUTPUT-FILE");
 			ALSData alsData = alsParser.parse (INPUT_XLSX_FILE_PATH);
 			cccReport  = generateReport.getFinalReportOutput(alsData);
 			for (CCCForm forms : cccReport.getCccForms()) {
@@ -84,6 +85,7 @@ public class CongruencyCheckerReportInvoker {
 						logger.debug("Questions user string data list: " + question.getRaveUserString().size());
 				}
 			}
+			writeExcel(OUTPUT_XLSX_FILE_PATH, cccReport);
 			logger.debug("Output object forms count: " + cccReport.getCccForms().size());			
 			} catch (IOException ioe) {
 				ioe.printStackTrace();			
@@ -99,7 +101,7 @@ public class CongruencyCheckerReportInvoker {
 	 * @return Implementation for Writing the final output report object into an excel (as a feasibility check)
 	 * 
 	 */
-	public void writeExcel(String OUTPUT_XLSX_FILE_PATH, CCCReport cccReport) throws IOException, InvalidFormatException, NullPointerException {
+	public static void writeExcel(String OUTPUT_XLSX_FILE_PATH, CCCReport cccReport) throws IOException, InvalidFormatException, NullPointerException {
 
 		Row row;
 		XSSFWorkbook workbook = new XSSFWorkbook();
