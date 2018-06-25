@@ -26,16 +26,16 @@ String pvResult;
 String allowableCdeTextChoices;
 
 String raveFieldDataType;
-String datatypeResult;
+String datatypeCheckerResult;
 String cdeDataType;
 String raveUOM;
-String uomResult;
+String uomCheckerResult;
 String cdeUOM;
 String raveLength;
-String lengthResult;
-String cdeMaxLength;
+String lengthCheckerResult;
+int cdeMaxLength;
 String raveDisplayFormat;
-String formatResult;	
+String formatCheckerResult;	
 String cdeDisplayFormat;
 
 public String getRaveFormOId() {
@@ -158,11 +158,11 @@ public String getRaveFieldDataType() {
 public void setRaveFieldDataType(String raveFieldDataType) {
 	this.raveFieldDataType = raveFieldDataType;
 }
-public String getDatatypeResult() {
-	return datatypeResult;
+public String getDatatypeCheckerResult() {
+	return datatypeCheckerResult;
 }
-public void setDatatypeResult(String datatypeResult) {
-	this.datatypeResult = datatypeResult;
+public void setDatatypeCheckerResult(String datatypeCheckerResult) {
+	this.datatypeCheckerResult = datatypeCheckerResult;
 }
 public String getCdeDataType() {
 	return cdeDataType;
@@ -176,11 +176,11 @@ public String getRaveUOM() {
 public void setRaveUOM(String raveUOM) {
 	this.raveUOM = raveUOM;
 }
-public String getUomResult() {
-	return uomResult;
+public String getUomCheckerResult() {
+	return uomCheckerResult;
 }
-public void setUomResult(String uomResult) {
-	this.uomResult = uomResult;
+public void setUomCheckerResult(String uomCheckerResult) {
+	this.uomCheckerResult = uomCheckerResult;
 }
 public String getCdeUOM() {
 	return cdeUOM;
@@ -194,16 +194,16 @@ public String getRaveLength() {
 public void setRaveLength(String raveLength) {
 	this.raveLength = raveLength;
 }
-public String getLengthResult() {
-	return lengthResult;
+public String getLengthCheckerResult() {
+	return lengthCheckerResult;
 }
-public void setLengthResult(String lengthResult) {
-	this.lengthResult = lengthResult;
+public void setLengthCheckerResult(String lengthCheckerResult) {
+	this.lengthCheckerResult = lengthCheckerResult;
 }
-public String getCdeMaxLength() {
+public int getCdeMaxLength() {
 	return cdeMaxLength;
 }
-public void setCdeMaxLength(String cdeMaxLength) {
+public void setCdeMaxLength(int cdeMaxLength) {
 	this.cdeMaxLength = cdeMaxLength;
 }
 public String getRaveDisplayFormat() {
@@ -212,11 +212,11 @@ public String getRaveDisplayFormat() {
 public void setRaveDisplayFormat(String raveDisplayFormat) {
 	this.raveDisplayFormat = raveDisplayFormat;
 }
-public String getFormatResult() {
-	return formatResult;
+public String getFormatCheckerResult() {
+	return formatCheckerResult;
 }
-public void setFormatResult(String formatResult) {
-	this.formatResult = formatResult;
+public void setFormatCheckerResult(String formatCheckerResult) {
+	this.formatCheckerResult = formatCheckerResult;
 }
 public String getCdeDisplayFormat() {
 	return cdeDisplayFormat;

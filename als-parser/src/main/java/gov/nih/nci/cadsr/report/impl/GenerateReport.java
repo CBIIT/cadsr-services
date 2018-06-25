@@ -74,8 +74,23 @@ public class GenerateReport implements ReportOutput {
 					question.setPvResult("Error/match"); // Will be replaced with the caDSR db validation result
 					question.setAllowableCdeTextChoices("A|B|C|D"); // Test values - will be replaced with the PV value meanings from caDSR db
 					question.setRaveFieldDataType(alsField.getDataFormat());
+					question.setDatatypeCheckerResult("Error/Match"); // Will be replaced with the caDSR db validation result
+					question.setCdeDataType(""); // Will be set with the caDSR db value domain data type after a comparison with data format
+					String raveUOM = null;
+					if (alsField.getFixedUnit()!=null)
+						raveUOM = alsField.getFixedUnit();
+					else 
+						if (alsField.getUnitDictionaryName()!=null)
+							raveUOM = alsField.getUnitDictionaryName();
+					question.setRaveUOM(raveUOM);
+					question.setUomCheckerResult("Error/Match"); // Will be replaced with the caDSR db validation result
+					question.setCdeUOM(""); // caDSR DB Value domain UOM, if it doesnt match with RAVE UOM					
 					question.setRaveLength(alsField.getFixedUnit());
+					question.setLengthCheckerResult("");
+					question.setCdeMaxLength(0);// caDSR DB Value domain max length
 					question.setRaveDisplayFormat(alsField.getDataFormat());
+					question.setFormatCheckerResult("");
+					question.setCdeDisplayFormat(""); // caDSR DB Value domain display format
 					questionsList.add(question);
 				} else {
 					question.setRaveFieldLabel(alsField.getPreText());

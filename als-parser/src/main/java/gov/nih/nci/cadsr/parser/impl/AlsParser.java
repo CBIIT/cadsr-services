@@ -25,6 +25,7 @@ import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.ALSDataDictionaryEntry;
 import gov.nih.nci.cadsr.data.ALSField;
 import gov.nih.nci.cadsr.data.ALSForm;
+import gov.nih.nci.cadsr.data.ALSUnitDictionaryEntry;
 import gov.nih.nci.cadsr.data.CCCError;
 import gov.nih.nci.cadsr.parser.Parser;
 
@@ -51,6 +52,7 @@ public class AlsParser implements Parser{
 	private static int cell_draftFieldName = 4;
 	private static int cell_fieldDataFormat = 7;
 	private static int cell_fieldDataDictionaryName = 8;
+	private static int cell_fieldUnitDictionaryName = 9;	
 	private static int cell_fieldControlType = 11;
 	private static int cell_fieldPreText = 14;
 	private static int cell_fieldFixedUnit = 15;
@@ -59,6 +61,15 @@ public class AlsParser implements Parser{
 	private static int cell_ddeOrdinal = 2;
 	private static int cell_ddeUserDataString = 3;
 	private static int cell_ddeSpecify = 4;
+	private static int cell_udName = 0;
+	private static int cell_udCodedUnit = 1;
+	private static int cell_udOrdinal = 2;
+	private static int cell_udConstantA = 3;
+	private static int cell_udConstantB = 4;
+	private static int cell_udConstantC = 5;	
+	private static int cell_udConstantK = 6;
+	private static int cell_udUnitString = 7;
+
 	
 	private static String err_msg_1 = "RAVE Protocol Name is missing in the ALS file.";
 	private static String err_msg_2 = "RAVE Protocol Number is missing in the ALS file.";
@@ -79,6 +90,7 @@ public class AlsParser implements Parser{
 	private static String err_msg_17 = "Ordinal is missing in Data Dictionary Entries sheet.";
 	private static String err_msg_18 = "User Data String is missing in Data Dictionary Entries sheet.";
 	private static String err_msg_19 = "Specify is missing in Data Dictionary Entries sheet."; // TODO May not be needed if we leave out Specify. If so, remove.
+	private static String err_msg_20 = "Unit Dictionary Name missing in Unit Dictionary Entries sheet.";	
 
 	/**
 	 * Parsing an ALS input file into data objects for validating against the
@@ -91,22 +103,28 @@ public class AlsParser implements Parser{
 		ALSData alsData = getAlsDataInstance();
 		Sheet sheet = workbook.getSheet(crfDraftSheetName);
 		if (sheet!=null) 
-			alsData = getCrfDraft(sheet, alsData);
+			alsData = getCrfDraft(sheet, alsData, cccError);
 		else
 			cccError.getErrors().add(errorSheetMissing+" - "+crfDraftSheetName);
 		sheet = workbook.getSheet(formsSheetName);
+		if (alsData.getCccError()!=null)
+			cccError = alsData.getCccError();
 		if (sheet!=null)
-			alsData = getForms(sheet,alsData);
+			alsData = getForms(sheet,alsData, cccError);
 		else
 			cccError.getErrors().add(errorSheetMissing+" - "+formsSheetName);
 		sheet = workbook.getSheet(fieldsSheetName);
+		if (alsData.getCccError()!=null)
+			cccError = alsData.getCccError();		
 		if (sheet!=null)
-			alsData = getFields(sheet,alsData);
+			alsData = getFields(sheet,alsData, cccError);
 		else
 			cccError.getErrors().add(errorSheetMissing+" - "+fieldsSheetName);
 		sheet = workbook.getSheet(dataDictionarySheetName);
+		if (alsData.getCccError()!=null)
+			cccError = alsData.getCccError();	
 		if (sheet!=null)
-			alsData = getDataDictionaryEntries(sheet, alsData);
+			alsData = getDataDictionaryEntries(sheet, alsData, cccError);
 		else 		
 			cccError.getErrors().add(errorSheetMissing+" - "+dataDictionarySheetName);		
 		workbook.close();
@@ -124,10 +142,9 @@ public class AlsParser implements Parser{
 	 * 
 	 */
 
-	protected static ALSData getCrfDraft(Sheet sheet, ALSData alsData) throws IOException {
+	protected static ALSData getCrfDraft(Sheet sheet, ALSData alsData, CCCError cccError) throws IOException {
 		DateFormat dateFormat = new SimpleDateFormat(reportDateFormat);
 		Date date = new Date();
-		CCCError cccError = getErrorObject();
 			alsData.setReportDate(dateFormat.format(date));
 			Row newRow = sheet.getRow(crfDraftStartRow);
 			ALSCrfDraft crfDraft = getAlsCrfDraftInstance();
@@ -163,9 +180,8 @@ public class AlsParser implements Parser{
 	 *         the ALS input file
 	 * 
 	 */
-	protected static ALSData getForms(Sheet sheet, ALSData alsData) throws IOException {
+	protected static ALSData getForms(Sheet sheet, ALSData alsData, CCCError cccError) throws IOException {
 		List<ALSForm> forms = new ArrayList<ALSForm>();
-		CCCError cccError = getErrorObject();		
 			Iterator<Row> rowIterator = sheet.rowIterator();
 			Row row = rowIterator.next();
 			while (rowIterator.hasNext()) {
@@ -200,9 +216,8 @@ public class AlsParser implements Parser{
 	 *         parsed out of the ALS input file
 	 * 
 	 */
-	protected static ALSData getFields(Sheet sheet, ALSData alsData) throws NullPointerException {
+	protected static ALSData getFields(Sheet sheet, ALSData alsData, CCCError cccError) throws NullPointerException {
 		List<ALSField> fields = new ArrayList<ALSField>();
-		CCCError cccError = getErrorObject();
 		ALSField field;		
 			Iterator<Row> rowIterator = sheet.rowIterator();
 			Row row = rowIterator.next();
@@ -217,32 +232,24 @@ public class AlsParser implements Parser{
 						cccError.getErrors().add(err_msg_7);
 					if (row.getCell(cell_fieldOrdinal)!=null)	
 						field.setOrdinal(dataFormatter.formatCellValue(row.getCell(cell_fieldOrdinal)));
-					else 
-						cccError.getErrors().add(err_msg_8);
 					if (row.getCell(cell_draftFieldName)!=null)
 						field.setDraftFieldName(dataFormatter.formatCellValue(row.getCell(cell_draftFieldName)));
 					else 
 						cccError.getErrors().add(err_msg_9); 
 					if (row.getCell(cell_fieldDataFormat)!=null)
 						field.setDataFormat(dataFormatter.formatCellValue(row.getCell(cell_fieldDataFormat)));
-					else 
-						cccError.getErrors().add(err_msg_10);
 					if (row.getCell(cell_fieldDataDictionaryName)!=null)
 						field.setDataDictionaryName(dataFormatter.formatCellValue(row.getCell(cell_fieldDataDictionaryName)));
-					else 
-						cccError.getErrors().add(err_msg_11);
+					if (row.getCell(cell_fieldUnitDictionaryName)!=null)
+						field.setUnitDictionaryName(dataFormatter.formatCellValue(row.getCell(cell_fieldUnitDictionaryName)));
 					if (row.getCell(cell_fieldControlType)!=null)
 						field.setControlType(dataFormatter.formatCellValue(row.getCell(cell_fieldControlType)));
 					else 
 						cccError.getErrors().add(err_msg_12);
 					if (row.getCell(cell_fieldPreText)!=null)
 						field.setPreText(dataFormatter.formatCellValue(row.getCell(cell_fieldPreText)));
-					else 
-						cccError.getErrors().add(err_msg_13);
 					if (row.getCell(cell_fieldFixedUnit)!=null)
 						field.setFixedUnit(dataFormatter.formatCellValue(row.getCell(cell_fieldFixedUnit)));
-					else
-						cccError.getErrors().add(err_msg_14);
 					fields.add(field);
 				} else {
 					cccError.getErrors().add(err_msg_6);	
@@ -251,7 +258,7 @@ public class AlsParser implements Parser{
 			if (cccError.getErrors().size() > 0) {
 				alsData.setCccError(cccError);	
 			}
-		alsData.setFields(fields);					
+			alsData.setFields(fields);				
 		return alsData;
 	}
 
@@ -261,10 +268,9 @@ public class AlsParser implements Parser{
 	 *         Dictionary Entries parsed out of the ALS input file
 	 * 
 	 */
-	protected static ALSData getDataDictionaryEntries(Sheet sheet, ALSData alsData) throws NullPointerException {
+	protected static ALSData getDataDictionaryEntries(Sheet sheet, ALSData alsData, CCCError cccError) throws NullPointerException {
 		Map<String, ALSDataDictionaryEntry> ddeMap = new HashMap<String, ALSDataDictionaryEntry>();
 			ALSDataDictionaryEntry dde = new ALSDataDictionaryEntry();
-			CCCError cccError = getErrorObject();			
 			List<Integer> ordinal = new ArrayList<Integer>();
 			List<String> cd = new ArrayList<String>();
 			List<String> uds = new ArrayList<String>();
@@ -327,6 +333,50 @@ public class AlsParser implements Parser{
 		alsData.setDataDictionaryEntries(ddeMap); 			
 		return alsData;
 	}
+	
+	/**
+	 * @param Sheet
+	 * @return List ALSUnitDictionaryEntry Populates a collection of Data
+	 *         Dictionary Entries parsed out of the ALS input file
+	 * 
+	 */
+	protected static ALSData getUnitDictionaryEntries(Sheet sheet, ALSData alsData, CCCError cccError) throws NullPointerException {
+		//TODO Parsing Unit Dictionary Entry into an object
+		List <ALSUnitDictionaryEntry> udeList = new ArrayList<ALSUnitDictionaryEntry>();
+		ALSUnitDictionaryEntry ude;
+		Iterator<Row> rowIterator = sheet.rowIterator();
+		Row row = rowIterator.next();
+		while (rowIterator.hasNext()) {
+			row = rowIterator.next();
+			ude = getUnitDictionaryInstance();
+			if (row.getCell(cell_udName) != null) {
+				ude.setUnitDictionaryName(dataFormatter.formatCellValue(row.getCell(cell_udName)));
+				if (row.getCell(cell_udCodedUnit) != null)	
+					ude.setCodedUnit(dataFormatter.formatCellValue(row.getCell(cell_udCodedUnit)));				
+				if (row.getCell(cell_udOrdinal) != null)	
+					ude.setOrdinal(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_udOrdinal))));
+				if (row.getCell(cell_udConstantA) != null)	
+					ude.setOrdinal(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_udConstantA))));
+				if (row.getCell(cell_udConstantB) != null)	
+					ude.setOrdinal(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_udConstantB))));
+				if (row.getCell(cell_udConstantC) != null)	
+					ude.setOrdinal(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_udConstantC))));				
+				if (row.getCell(cell_udConstantK) != null)	
+					ude.setOrdinal(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_udConstantK))));								
+				if (row.getCell(cell_udUnitString) != null) {
+					ude.setUnitDictionaryName(dataFormatter.formatCellValue(row.getCell(cell_udUnitString)));
+			} else {
+				cccError.getErrors().add(err_msg_20);
+			}
+		}
+			udeList.add(ude);
+		}
+		if (cccError.getErrors().size() > 0) {
+			alsData.setCccError(cccError);	
+		}		
+		alsData.setUnitDictionaryEntries(udeList);		
+		return alsData;		
+	}	
 
 	
 	protected static ALSData getAlsDataInstance() {
@@ -348,6 +398,11 @@ public class AlsParser implements Parser{
 		ALSField alsField = new ALSField();
 		return alsField;
 	}
+	
+	protected static ALSUnitDictionaryEntry getUnitDictionaryInstance() {
+		ALSUnitDictionaryEntry ude = new ALSUnitDictionaryEntry();
+		return ude;
+	}	
 	
 	protected static CCCError getErrorObject() {
 		CCCError cccError = new CCCError();

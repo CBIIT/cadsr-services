@@ -11,6 +11,7 @@ String ordinal;
 String draftFieldName;
 String dataFormat;
 String dataDictionaryName;
+String unitDictionaryName;
 String controlType;
 String preText;
 String fixedUnit;
@@ -47,6 +48,12 @@ public String getDataDictionaryName() {
 }
 public void setDataDictionaryName(String dataDictionaryName) {
 	this.dataDictionaryName = dataDictionaryName;
+}
+public String getUnitDictionaryName() {
+	return unitDictionaryName;
+}
+public void setUnitDictionaryName(String unitDictionaryName) {
+	this.unitDictionaryName = unitDictionaryName;
 }
 public String getDataFormat() {
 	return dataFormat;

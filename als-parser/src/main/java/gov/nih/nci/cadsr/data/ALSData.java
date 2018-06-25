@@ -14,6 +14,7 @@ ALSCrfDraft crfDraft = new ALSCrfDraft();
 List<ALSForm> forms = new ArrayList<ALSForm>();
 List<ALSField> fields = new ArrayList<ALSField>();
 Map<String, ALSDataDictionaryEntry> dataDictionaryEntries = new HashMap<String, ALSDataDictionaryEntry>();
+List<ALSUnitDictionaryEntry> unitDictionaryEntries = new ArrayList<ALSUnitDictionaryEntry>();
 CCCError cccError = new CCCError();
 
 
@@ -53,6 +54,12 @@ public Map<String, ALSDataDictionaryEntry> getDataDictionaryEntries() {
 }
 public void setDataDictionaryEntries(Map<String, ALSDataDictionaryEntry> dataDictionaryEntries) {
 	this.dataDictionaryEntries = dataDictionaryEntries;
+}
+public List<ALSUnitDictionaryEntry> getUnitDictionaryEntries() {
+	return unitDictionaryEntries;
+}
+public void setUnitDictionaryEntries(List<ALSUnitDictionaryEntry> unitDictionaryEntries) {
+	this.unitDictionaryEntries = unitDictionaryEntries;
 }
 public CCCError getCccError() {
 	return cccError;
