@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,6 +24,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import gov.nih.nci.cadsr.data.ALSCrfDraft;
 import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.ALSDataDictionaryEntry;
+import gov.nih.nci.cadsr.data.ALSError;
 import gov.nih.nci.cadsr.data.ALSField;
 import gov.nih.nci.cadsr.data.ALSForm;
 import gov.nih.nci.cadsr.data.ALSUnitDictionaryEntry;
@@ -69,6 +71,10 @@ public class AlsParser implements Parser{
 	private static int cell_udConstantC = 5;	
 	private static int cell_udConstantK = 6;
 	private static int cell_udUnitString = 7;
+	private static String errorSeverity_fatal = "FATAL";
+	private static String errorSeverity_error = "ERROR";
+	private static String errorSeverity_warn = "WARNING";
+	private static List<String> controlTypes = Arrays.asList("CheckBox","DateTime","DropDownList","Dynamic SearchList","Text","FileUpload","LongText","RadioButton","SearchList"); 
 
 	
 	private static String err_msg_1 = "RAVE Protocol Name is missing in the ALS file.";
@@ -90,7 +96,10 @@ public class AlsParser implements Parser{
 	private static String err_msg_17 = "Ordinal is missing in Data Dictionary Entries sheet.";
 	private static String err_msg_18 = "User Data String is missing in Data Dictionary Entries sheet.";
 	private static String err_msg_19 = "Specify is missing in Data Dictionary Entries sheet."; // TODO May not be needed if we leave out Specify. If so, remove.
-	private static String err_msg_20 = "Unit Dictionary Name missing in Unit Dictionary Entries sheet.";	
+	private static String err_msg_20 = "Unit Dictionary Name missing in Unit Dictionary Entries sheet.";
+	private static String err_msg_21 = "Question doesn't contain a CDE public id and version.";	
+	private static String err_msg_22 = "This is an unknown control type.";		
+	private static String err_msg_23 = "CDE public id and version should be numeric.";	
 
 	/**
 	 * Parsing an ALS input file into data objects for validating against the
@@ -98,37 +107,71 @@ public class AlsParser implements Parser{
 	 * 
 	 */
 	public ALSData parse (String INPUT_XLSX_FILE_PATH) throws IOException, InvalidFormatException, NullPointerException {
-		Workbook workbook = WorkbookFactory.create(new File(INPUT_XLSX_FILE_PATH));
 		CCCError cccError = getErrorObject();
 		ALSData alsData = getAlsDataInstance();
-		Sheet sheet = workbook.getSheet(crfDraftSheetName);
-		if (sheet!=null) 
-			alsData = getCrfDraft(sheet, alsData, cccError);
-		else
-			cccError.getErrors().add(errorSheetMissing+" - "+crfDraftSheetName);
-		sheet = workbook.getSheet(formsSheetName);
-		if (alsData.getCccError()!=null)
-			cccError = alsData.getCccError();
-		if (sheet!=null)
-			alsData = getForms(sheet,alsData, cccError);
-		else
-			cccError.getErrors().add(errorSheetMissing+" - "+formsSheetName);
-		sheet = workbook.getSheet(fieldsSheetName);
-		if (alsData.getCccError()!=null)
-			cccError = alsData.getCccError();		
-		if (sheet!=null)
-			alsData = getFields(sheet,alsData, cccError);
-		else
-			cccError.getErrors().add(errorSheetMissing+" - "+fieldsSheetName);
-		sheet = workbook.getSheet(dataDictionarySheetName);
-		if (alsData.getCccError()!=null)
-			cccError = alsData.getCccError();	
-		if (sheet!=null)
-			alsData = getDataDictionaryEntries(sheet, alsData, cccError);
-		else 		
-			cccError.getErrors().add(errorSheetMissing+" - "+dataDictionarySheetName);		
-		workbook.close();
-		if (cccError.getErrors().size() > 0)
+		ALSError alsError;		
+		try {
+				Workbook workbook = WorkbookFactory.create(new File(INPUT_XLSX_FILE_PATH));
+				Sheet sheet = workbook.getSheet(crfDraftSheetName);
+				if (sheet!=null) 
+					alsData = getCrfDraft(sheet, alsData, cccError);
+				else
+					{
+						alsError = getErrorInstance();
+						alsError.setErrorDesc(errorSheetMissing+" - "+crfDraftSheetName);
+						cccError.addAlsError(alsError); 
+					}
+				sheet = workbook.getSheet(formsSheetName);
+				if (alsData.getCccError()!=null)
+					cccError = alsData.getCccError();
+				if (sheet!=null)
+					alsData = getForms(sheet,alsData, cccError);
+				else
+				{
+					alsError = getErrorInstance();					
+					alsError.setErrorDesc(errorSheetMissing+" - "+formsSheetName);
+					cccError.addAlsError(alsError); 
+				}					
+				sheet = workbook.getSheet(fieldsSheetName);
+				if (alsData.getCccError()!=null)
+					cccError = alsData.getCccError();		
+				if (sheet!=null)
+					alsData = getFields(sheet,alsData, cccError);
+				else
+				{
+					alsError = getErrorInstance();					
+					alsError.setErrorDesc(errorSheetMissing+" - "+fieldsSheetName);
+					cccError.addAlsError(alsError); 
+				}										
+				sheet = workbook.getSheet(dataDictionarySheetName);
+				if (alsData.getCccError()!=null)
+					cccError = alsData.getCccError();	
+				if (sheet!=null)
+					alsData = getDataDictionaryEntries(sheet, alsData, cccError);
+				else 		
+				{
+					alsError = getErrorInstance();					
+					alsError.setErrorDesc(errorSheetMissing+" - "+dataDictionarySheetName);
+					cccError.addAlsError(alsError); 
+				}					
+				workbook.close();
+		} catch (IOException ioe) {
+			alsError = getErrorInstance();					
+			alsError.setErrorDesc(ioe.getMessage());
+			alsError.setErrorSeverity(errorSeverity_fatal);
+			cccError.addAlsError(alsError);
+		} catch (InvalidFormatException ife) {
+			alsError = getErrorInstance();
+			alsError.setErrorDesc(ife.getMessage());
+			alsError.setErrorSeverity(errorSeverity_fatal);			
+			cccError.addAlsError(alsError);
+		} catch (NullPointerException npe) {
+			alsError = getErrorInstance();
+			alsError.setErrorDesc(npe.getMessage());
+			alsError.setErrorSeverity(errorSeverity_fatal);			
+			cccError.addAlsError(alsError);
+		}
+		if (cccError.getAlsErrors().size() > 0)
 			alsData.setCccError(cccError);
 		logger.debug("Parsing done ");
 		return alsData;
@@ -145,21 +188,28 @@ public class AlsParser implements Parser{
 	protected static ALSData getCrfDraft(Sheet sheet, ALSData alsData, CCCError cccError) throws IOException {
 		DateFormat dateFormat = new SimpleDateFormat(reportDateFormat);
 		Date date = new Date();
+		ALSError alsError;		
 			alsData.setReportDate(dateFormat.format(date));
 			Row newRow = sheet.getRow(crfDraftStartRow);
 			ALSCrfDraft crfDraft = getAlsCrfDraftInstance();
-			if (!newRow.getCell(cell_crfDraftName).equals(""))
+			if (newRow.getCell(cell_crfDraftName)!=null && !newRow.getCell(cell_crfDraftName).equals(""))
 				crfDraft.setDraftName(dataFormatter.formatCellValue(newRow.getCell(cell_crfDraftName)));
-			if (newRow.getCell(cell_crfDraftProjectName).equals("")) {
-					cccError.getErrors().add(err_msg_1); 
+			if (newRow.getCell(cell_crfDraftProjectName) == null || newRow.getCell(cell_crfDraftProjectName).equals("")) {
+					alsError = getErrorInstance();				
+					alsError.setErrorDesc(err_msg_1+"Sheet: "+sheet.getSheetName()+" Row: "+newRow.getRowNum()+" Cell: "+cell_crfDraftProjectName+".");
+					alsError.setErrorSeverity(errorSeverity_error);
+					cccError.addAlsError(alsError);
 				}
 			else {
 				Cell newCell = newRow.getCell(cell_crfDraftProjectName);
 				String cellValue = dataFormatter.formatCellValue(newCell);
 				crfDraft.setProjectName(cellValue); 
 				}
-			if (newRow.getCell(cell_crfDraftPrimaryFormOid).equals("")) {
-				cccError.getErrors().add(err_msg_2); 
+			if (newRow.getCell(cell_crfDraftPrimaryFormOid)== null || newRow.getCell(cell_crfDraftPrimaryFormOid).equals("")) {
+					alsError = getErrorInstance();			
+					alsError.setErrorDesc(err_msg_2+"Sheet: "+sheet.getSheetName()+" Row: "+newRow.getRowNum()+" Cell: "+cell_crfDraftPrimaryFormOid+".");
+					alsError.setErrorSeverity(errorSeverity_error);
+					cccError.addAlsError(alsError); 
 				}				
 			else {
 				Cell newCell = newRow.getCell(cell_crfDraftPrimaryFormOid);
@@ -169,7 +219,7 @@ public class AlsParser implements Parser{
 			if (crfDraft.getPrimaryFormOid()!=null && crfDraft.getProjectName()!=null) {
 				alsData.setCrfDraft(crfDraft);
 			}
-			if (cccError.getErrors().size() > 0)
+			if (cccError.getAlsErrors().size() > 0)
 				alsData.setCccError(cccError);	
 			return alsData;
 	}
@@ -182,6 +232,7 @@ public class AlsParser implements Parser{
 	 */
 	protected static ALSData getForms(Sheet sheet, ALSData alsData, CCCError cccError) throws IOException {
 		List<ALSForm> forms = new ArrayList<ALSForm>();
+		ALSError alsError;		
 			Iterator<Row> rowIterator = sheet.rowIterator();
 			Row row = rowIterator.next();
 			while (rowIterator.hasNext()) {
@@ -191,16 +242,27 @@ public class AlsParser implements Parser{
 					form.setFormOId(dataFormatter.formatCellValue(row.getCell(cell_formOid)));
 					if (row.getCell(cell_formOrdinal) != null)	
 						form.setOrdinal(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_formOrdinal))));
-					else 
-						cccError.getErrors().add(err_msg_4);
+					else {
+							alsError = getErrorInstance();
+							alsError.setErrorDesc((err_msg_4)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_formOrdinal+".");
+							alsError.setErrorSeverity(errorSeverity_warn);
+							cccError.addAlsError(alsError);
+						}
 					if (row.getCell(cell_formDraftName) != null)
 						form.setDraftFormName(dataFormatter.formatCellValue(row.getCell(cell_formDraftName)));
-					else 
-						cccError.getErrors().add(err_msg_5);					
+					else  {
+							alsError = getErrorInstance();
+							alsError.setErrorDesc((err_msg_5)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_formDraftName+".");
+							alsError.setErrorSeverity(errorSeverity_warn);							
+							cccError.addAlsError(alsError);
+						}					
 				} else {
-					cccError.getErrors().add(err_msg_3);
-				}
-				if (cccError.getErrors().size() > 0) {
+						alsError = getErrorInstance();
+						alsError.setErrorDesc((err_msg_3)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_formOid+".");
+						alsError.setErrorSeverity(errorSeverity_error);
+						cccError.addAlsError(alsError);
+					}
+				if (cccError.getAlsErrors().size() > 0) {
 						alsData.setCccError(cccError);	
 					} else { 					
 						forms.add(form);
@@ -219,6 +281,7 @@ public class AlsParser implements Parser{
 	protected static ALSData getFields(Sheet sheet, ALSData alsData, CCCError cccError) throws NullPointerException {
 		List<ALSField> fields = new ArrayList<ALSField>();
 		ALSField field;		
+		ALSError alsError;		
 			Iterator<Row> rowIterator = sheet.rowIterator();
 			Row row = rowIterator.next();
 			while (rowIterator.hasNext()) {
@@ -229,33 +292,67 @@ public class AlsParser implements Parser{
 					if (row.getCell(cell_fieldOid)!=null)
 						field.setFieldOid(dataFormatter.formatCellValue(row.getCell(cell_fieldOid)));
 					else 
-						cccError.getErrors().add(err_msg_7);
+					{
+						alsError = getErrorInstance();
+						alsError.setErrorDesc((err_msg_7)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_fieldOid+".");
+						alsError.setErrorSeverity(errorSeverity_error);
+						cccError.addAlsError(alsError);
+					}
 					if (row.getCell(cell_fieldOrdinal)!=null)	
 						field.setOrdinal(dataFormatter.formatCellValue(row.getCell(cell_fieldOrdinal)));
-					if (row.getCell(cell_draftFieldName)!=null)
-						field.setDraftFieldName(dataFormatter.formatCellValue(row.getCell(cell_draftFieldName)));
-					else 
-						cccError.getErrors().add(err_msg_9); 
+					if (row.getCell(cell_draftFieldName)!=null) {
+						String draftFieldName = dataFormatter.formatCellValue(row.getCell(cell_draftFieldName));
+						field.setDraftFieldName(draftFieldName);
+						if (!(draftFieldName.indexOf("PID") > -1 && draftFieldName.indexOf("_V") > -1)) {
+							alsError = getErrorInstance();
+							alsError.setErrorDesc(err_msg_21+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_draftFieldName+".");
+							alsError.setErrorSeverity(errorSeverity_warn);
+							alsData.getCccError().addAlsError(alsError);							
+						}
+					}
+					else
+					{
+						alsError = getErrorInstance();
+						alsError.setErrorDesc((err_msg_9)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_draftFieldName+".");
+						alsError.setErrorSeverity(errorSeverity_error);						
+						cccError.addAlsError(alsError);
+					} 
 					if (row.getCell(cell_fieldDataFormat)!=null)
 						field.setDataFormat(dataFormatter.formatCellValue(row.getCell(cell_fieldDataFormat)));
 					if (row.getCell(cell_fieldDataDictionaryName)!=null)
 						field.setDataDictionaryName(dataFormatter.formatCellValue(row.getCell(cell_fieldDataDictionaryName)));
 					if (row.getCell(cell_fieldUnitDictionaryName)!=null)
 						field.setUnitDictionaryName(dataFormatter.formatCellValue(row.getCell(cell_fieldUnitDictionaryName)));
-					if (row.getCell(cell_fieldControlType)!=null)
-						field.setControlType(dataFormatter.formatCellValue(row.getCell(cell_fieldControlType)));
-					else 
-						cccError.getErrors().add(err_msg_12);
+					if (row.getCell(cell_fieldControlType)!=null) {
+						String controlType = dataFormatter.formatCellValue(row.getCell(cell_fieldControlType));
+						field.setControlType(controlType);
+							if (!controlTypes.contains(controlType)) {
+								alsError = getErrorInstance();
+								alsError.setErrorDesc(err_msg_22+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_fieldControlType+".");
+								alsError.setErrorSeverity(errorSeverity_warn);
+								alsData.getCccError().addAlsError(alsError);				
+							}
+						}
+					else
+					{
+						alsError = getErrorInstance();
+						alsError.setErrorDesc((err_msg_12)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_fieldControlType+".");
+						alsError.setErrorSeverity(errorSeverity_error);
+						cccError.addAlsError(alsError);
+					} 
 					if (row.getCell(cell_fieldPreText)!=null)
 						field.setPreText(dataFormatter.formatCellValue(row.getCell(cell_fieldPreText)));
 					if (row.getCell(cell_fieldFixedUnit)!=null)
 						field.setFixedUnit(dataFormatter.formatCellValue(row.getCell(cell_fieldFixedUnit)));
 					fields.add(field);
 				} else {
-					cccError.getErrors().add(err_msg_6);	
+					alsError = getErrorInstance();
+					alsError.setErrorDesc((err_msg_6)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_field_formOid+".");
+					alsError.setErrorSeverity(errorSeverity_error);
+					cccError.addAlsError(alsError);	
 				}
 			}
-			if (cccError.getErrors().size() > 0) {
+			if (cccError.getAlsErrors().size() > 0) {
 				alsData.setCccError(cccError);	
 			}
 			alsData.setFields(fields);				
@@ -271,6 +368,7 @@ public class AlsParser implements Parser{
 	protected static ALSData getDataDictionaryEntries(Sheet sheet, ALSData alsData, CCCError cccError) throws NullPointerException {
 		Map<String, ALSDataDictionaryEntry> ddeMap = new HashMap<String, ALSDataDictionaryEntry>();
 			ALSDataDictionaryEntry dde = new ALSDataDictionaryEntry();
+			ALSError alsError;	
 			List<Integer> ordinal = new ArrayList<Integer>();
 			List<String> cd = new ArrayList<String>();
 			List<String> uds = new ArrayList<String>();
@@ -302,23 +400,46 @@ public class AlsParser implements Parser{
 					}
 					if (row.getCell(cell_ddeCodedData)!=null)
 						cd.add(dataFormatter.formatCellValue(row.getCell(cell_ddeCodedData)));
-					else 
-						cccError.getErrors().add(err_msg_16);
+					else
+						{
+							alsError = getErrorInstance();
+							alsError.setErrorDesc((err_msg_16)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_ddeCodedData+".");
+							alsError.setErrorSeverity(errorSeverity_error);
+							cccError.addAlsError(alsError);	
+						}
 					if (row.getCell(cell_ddeOrdinal)!=null)
 						ordinal.add(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_ddeOrdinal))));
 					else
-						cccError.getErrors().add(err_msg_17);
+						{
+							alsError = getErrorInstance();
+							alsError.setErrorDesc((err_msg_17)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_ddeOrdinal+".");
+							alsError.setErrorSeverity(errorSeverity_warn);
+							cccError.addAlsError(alsError);	
+						}
 					if (row.getCell(cell_ddeUserDataString)!=null)
 						uds.add(dataFormatter.formatCellValue(row.getCell(cell_ddeUserDataString)));
 					else
-						cccError.getErrors().add(err_msg_18);
+						{
+							alsError = getErrorInstance();
+							alsError.setErrorDesc((err_msg_18)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_ddeUserDataString+".");
+							alsError.setErrorSeverity(errorSeverity_error);
+							cccError.addAlsError(alsError);	
+						}
 					if (row.getCell(cell_ddeSpecify)!=null)
 						specify.add(Boolean.valueOf(dataFormatter.formatCellValue(row.getCell(cell_ddeSpecify))));
 					else
-						cccError.getErrors().add(err_msg_19);
+					{
+						alsError = getErrorInstance();
+						alsError.setErrorDesc((err_msg_19)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_ddeSpecify+".");
+						alsError.setErrorSeverity(errorSeverity_warn);
+						cccError.addAlsError(alsError);	
+					}
 				} else {
-					cccError.getErrors().add(err_msg_15);
-				}				
+					alsError = getErrorInstance();
+					alsError.setErrorDesc((err_msg_15)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_ddeDataDictionaryName+".");
+					alsError.setErrorSeverity(errorSeverity_error);
+					cccError.addAlsError(alsError);
+				}
 			}
 			dde.setCodedData(cd);
 			dde.setOrdinal(ordinal);
@@ -327,7 +448,7 @@ public class AlsParser implements Parser{
 			if (!(ddeMap.containsKey(dde.getDataDictionaryName()))) {
 				ddeMap.put(dde.getDataDictionaryName(), dde);
 			}
-			if (cccError.getErrors().size() > 0) {
+			if (cccError.getAlsErrors().size() > 0) {
 				alsData.setCccError(cccError);	
 		}		
 		alsData.setDataDictionaryEntries(ddeMap); 			
@@ -341,9 +462,9 @@ public class AlsParser implements Parser{
 	 * 
 	 */
 	protected static ALSData getUnitDictionaryEntries(Sheet sheet, ALSData alsData, CCCError cccError) throws NullPointerException {
-		//TODO Parsing Unit Dictionary Entry into an object
 		List <ALSUnitDictionaryEntry> udeList = new ArrayList<ALSUnitDictionaryEntry>();
 		ALSUnitDictionaryEntry ude;
+		ALSError alsError;			
 		Iterator<Row> rowIterator = sheet.rowIterator();
 		Row row = rowIterator.next();
 		while (rowIterator.hasNext()) {
@@ -364,20 +485,22 @@ public class AlsParser implements Parser{
 				if (row.getCell(cell_udConstantK) != null)	
 					ude.setOrdinal(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_udConstantK))));								
 				if (row.getCell(cell_udUnitString) != null) {
-					ude.setUnitDictionaryName(dataFormatter.formatCellValue(row.getCell(cell_udUnitString)));
-			} else {
-				cccError.getErrors().add(err_msg_20);
-			}
-		}
+					ude.setUnitString(dataFormatter.formatCellValue(row.getCell(cell_udUnitString)));
+			} 
+		}	else {
+				alsError = getErrorInstance();
+				alsError.setErrorDesc((err_msg_20)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_udName+".");
+				alsError.setErrorSeverity(errorSeverity_error);
+				cccError.addAlsError(alsError);
+		}			
 			udeList.add(ude);
 		}
-		if (cccError.getErrors().size() > 0) {
+		if (cccError.getAlsErrors().size() > 0) {
 			alsData.setCccError(cccError);	
 		}		
 		alsData.setUnitDictionaryEntries(udeList);		
 		return alsData;		
 	}	
-
 	
 	protected static ALSData getAlsDataInstance() {
 		ALSData alsData = new ALSData();
@@ -408,5 +531,10 @@ public class AlsParser implements Parser{
 		CCCError cccError = new CCCError();
 		return cccError;
 	}
+	
+	protected static ALSError getErrorInstance() {
+		ALSError alsError = new ALSError();
+		return alsError;
+	}	
 
 }

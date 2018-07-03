@@ -15,8 +15,10 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.codehaus.jackson.map.ObjectMapper;
 
 import gov.nih.nci.cadsr.data.ALSData;
+import gov.nih.nci.cadsr.data.ALSError;
 import gov.nih.nci.cadsr.data.CCCForm;
 import gov.nih.nci.cadsr.data.CCCQuestion;
 import gov.nih.nci.cadsr.data.CCCReport;
@@ -74,6 +76,9 @@ public class CongruencyCheckerReportInvoker {
 			String INPUT_XLSX_FILE_PATH = "target/classes/" + prop.getProperty("ALS-INPUT-FILE");
 			String OUTPUT_XLSX_FILE_PATH = "target/" + prop.getProperty("VALIDATOR-OUTPUT-FILE");
 			ALSData alsData = alsParser.parse (INPUT_XLSX_FILE_PATH);
+			for (ALSError alsError1 : alsData.getCccError().getAlsErrors()) {
+				logger.debug("Error: "+alsError1.getErrorDesc()+" Severity: "+alsError1.getErrorSeverity());
+			}			
 			cccReport  = generateReport.getFinalReportOutput(alsData);
 			for (CCCForm forms : cccReport.getCccForms()) {
 				logger.debug("Form name: " + forms.getRaveFormOId());
@@ -86,6 +91,7 @@ public class CongruencyCheckerReportInvoker {
 				}
 			}
 			writeExcel(OUTPUT_XLSX_FILE_PATH, cccReport);
+			//writeToJSON(cccReport);
 			logger.debug("Output object forms count: " + cccReport.getCccForms().size());			
 			} catch (IOException ioe) {
 				ioe.printStackTrace();			
@@ -272,4 +278,18 @@ public class CongruencyCheckerReportInvoker {
 			e.printStackTrace();
 		}
 	}		
+	
+	
+	private static void writeToJSON (CCCReport cccReport) {
+		
+		ObjectMapper jsonMapper = new ObjectMapper();
+		try {
+            String jsonStr = jsonMapper.writeValueAsString(cccReport);
+            logger.debug(jsonStr);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }		
+		
+	}
 }
