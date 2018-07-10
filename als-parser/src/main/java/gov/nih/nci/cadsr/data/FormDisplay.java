@@ -1,3 +1,6 @@
+/**
+ * Copyright (C) 2018 Leidos Biomedical Research, Inc. - All rights reserved.
+ */
 package gov.nih.nci.cadsr.data;
 
 import java.util.ArrayList;
@@ -6,8 +9,6 @@ import java.util.List;
 public class FormDisplay {
 	
 	String formName;
-	String context;
-	String workflowStatus;
 	Boolean isValid;
 	List<ALSError> errors = new ArrayList<ALSError>();
 	
@@ -16,18 +17,6 @@ public class FormDisplay {
 	}
 	public void setFormName(String formName) {
 		this.formName = formName;
-	}
-	public String getContext() {
-		return context;
-	}
-	public void setContext(String context) {
-		this.context = context;
-	}
-	public String getWorkflowStatus() {
-		return workflowStatus;
-	}
-	public void setWorkflowStatus(String workflowStatus) {
-		this.workflowStatus = workflowStatus;
 	}
 	public Boolean getIsValid() {
 		return isValid;
