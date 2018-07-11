@@ -15,6 +15,6 @@ public interface Parser {
 	 * Parsing an ALS input file into data objects for validating against the caDSR database
 	 * 
 	 */
-	public ALSData parse (String INPUT_XLSX_FILE_PATH) throws IOException, InvalidFormatException, NullPointerException;
+	public ALSData parse (String INPUT_XLSX_FILE_PATH, String fileName) throws IOException, InvalidFormatException, NullPointerException;
 
 }

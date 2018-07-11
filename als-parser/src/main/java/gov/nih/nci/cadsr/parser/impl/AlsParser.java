@@ -110,9 +110,10 @@ public class AlsParser implements Parser{
 	 * database
 	 * 
 	 */
-	public ALSData parse (String INPUT_XLSX_FILE_PATH) throws IOException, InvalidFormatException, NullPointerException {
+	public ALSData parse (String INPUT_XLSX_FILE_PATH, String fileName) throws IOException, InvalidFormatException, NullPointerException {
 		CCCError cccError = getErrorObject();
 		ALSData alsData = getAlsDataInstance();
+		alsData.setFileName(fileName);
 		ALSError alsError;		
 		try {
 				Workbook workbook = WorkbookFactory.create(new File(INPUT_XLSX_FILE_PATH));
@@ -200,7 +201,7 @@ public class AlsParser implements Parser{
 				crfDraft.setDraftName(dataFormatter.formatCellValue(newRow.getCell(cell_crfDraftName)));
 			if (newRow.getCell(cell_crfDraftProjectName) == null || newRow.getCell(cell_crfDraftProjectName).equals("")) {
 					alsError = getErrorInstance();				
-					alsError.setErrorDesc(err_msg_1+"Sheet: "+sheet.getSheetName()+" Row: "+newRow.getRowNum()+" Cell: "+cell_crfDraftProjectName+".");
+					alsError.setErrorDesc(err_msg_1+" Sheet: "+sheet.getSheetName()+" Row: "+newRow.getRowNum()+" Cell: "+cell_crfDraftProjectName+".");
 					alsError.setErrorSeverity(errorSeverity_error);
 					cccError.addAlsError(alsError);
 				}
@@ -211,7 +212,7 @@ public class AlsParser implements Parser{
 				}
 			if (newRow.getCell(cell_crfDraftPrimaryFormOid)== null || newRow.getCell(cell_crfDraftPrimaryFormOid).equals("")) {
 					alsError = getErrorInstance();			
-					alsError.setErrorDesc(err_msg_2+"Sheet: "+sheet.getSheetName()+" Row: "+newRow.getRowNum()+" Cell: "+cell_crfDraftPrimaryFormOid+".");
+					alsError.setErrorDesc(err_msg_2+" Sheet: "+sheet.getSheetName()+" Row: "+newRow.getRowNum()+" Cell: "+cell_crfDraftPrimaryFormOid+".");
 					alsError.setErrorSeverity(errorSeverity_error);
 					cccError.addAlsError(alsError); 
 				}				
@@ -248,7 +249,7 @@ public class AlsParser implements Parser{
 						form.setOrdinal(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_formOrdinal))));
 					else {
 							alsError = getErrorInstance();
-							alsError.setErrorDesc((err_msg_4)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_formOrdinal+".");
+							alsError.setErrorDesc((err_msg_4)+" Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_formOrdinal+".");
 							alsError.setErrorSeverity(errorSeverity_warn);
 							cccError.addAlsError(alsError);
 						}
@@ -256,13 +257,13 @@ public class AlsParser implements Parser{
 						form.setDraftFormName(dataFormatter.formatCellValue(row.getCell(cell_formDraftName)));
 					else  {
 							alsError = getErrorInstance();
-							alsError.setErrorDesc((err_msg_5)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_formDraftName+".");
+							alsError.setErrorDesc((err_msg_5)+" Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_formDraftName+".");
 							alsError.setErrorSeverity(errorSeverity_warn);							
 							cccError.addAlsError(alsError);
 						}					
 				} else {
 						alsError = getErrorInstance();
-						alsError.setErrorDesc((err_msg_3)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_formOid+".");
+						alsError.setErrorDesc((err_msg_3)+" Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_formOid+".");
 						alsError.setErrorSeverity(errorSeverity_error);
 						cccError.addAlsError(alsError);
 					}
@@ -298,7 +299,7 @@ public class AlsParser implements Parser{
 					else 
 					{
 						alsError = getErrorInstance();
-						alsError.setErrorDesc((err_msg_7)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_fieldOid+".");
+						alsError.setErrorDesc((err_msg_7)+" Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_fieldOid+".");
 						alsError.setErrorSeverity(errorSeverity_error);
 						cccError.addAlsError(alsError);
 					}
@@ -309,26 +310,28 @@ public class AlsParser implements Parser{
 					    }
 					    catch (NumberFormatException e) {
 							alsError = getErrorInstance();
-							alsError.setErrorDesc(err_msg_24+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_fieldOrdinal+".");
+							alsError.setErrorDesc(err_msg_24+" Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_fieldOrdinal+".");
 							alsError.setErrorSeverity(errorSeverity_warn);
 							alsData.getCccError().addAlsError(alsError);				    		
 					    }						
 					}
 					if (row.getCell(cell_draftFieldName)!=null) {
 						String draftFieldName = dataFormatter.formatCellValue(row.getCell(cell_draftFieldName));
+						String idVersion = "";
 						field.setDraftFieldName(draftFieldName);
 						if (!(draftFieldName.indexOf("PID") > -1 && draftFieldName.indexOf("_V") > -1)) {
 							alsError = getErrorInstance();
-							alsError.setErrorDesc(err_msg_21+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_draftFieldName+".");
+							alsError.setErrorDesc(err_msg_21+" Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_draftFieldName+".");
 							alsError.setErrorSeverity(errorSeverity_warn);
 							alsData.getCccError().addAlsError(alsError);							
 						} else {
 							try {
-						        Integer.parseInt(field.getDraftFieldName());
+								idVersion = draftFieldName.substring(draftFieldName.indexOf("PID"), draftFieldName.length());
+						        Integer.parseInt(idVersion);
 						    }
 						    catch (NumberFormatException e) {
 								alsError = getErrorInstance();
-								alsError.setErrorDesc(err_msg_23+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_draftFieldName+".");
+								alsError.setErrorDesc(err_msg_23+ " " + idVersion +" Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_draftFieldName+".");
 								alsError.setErrorSeverity(errorSeverity_error);
 								alsData.getCccError().addAlsError(alsError);				    		
 						    }
@@ -337,7 +340,7 @@ public class AlsParser implements Parser{
 					else
 					{
 						alsError = getErrorInstance();
-						alsError.setErrorDesc((err_msg_9)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_draftFieldName+".");
+						alsError.setErrorDesc((err_msg_9)+" Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_draftFieldName+".");
 						alsError.setErrorSeverity(errorSeverity_error);						
 						cccError.addAlsError(alsError);
 					} 
@@ -352,7 +355,7 @@ public class AlsParser implements Parser{
 						field.setControlType(controlType);
 							if (!controlTypes.contains(controlType)) {
 								alsError = getErrorInstance();
-								alsError.setErrorDesc(err_msg_22+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_fieldControlType+".");
+								alsError.setErrorDesc(err_msg_22+" Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_fieldControlType+".");
 								alsError.setErrorSeverity(errorSeverity_warn);
 								alsData.getCccError().addAlsError(alsError);				
 							}
@@ -360,7 +363,7 @@ public class AlsParser implements Parser{
 					else
 					{
 						alsError = getErrorInstance();
-						alsError.setErrorDesc((err_msg_12)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_fieldControlType+".");
+						alsError.setErrorDesc((err_msg_12)+" Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_fieldControlType+".");
 						alsError.setErrorSeverity(errorSeverity_error);
 						cccError.addAlsError(alsError);
 					} 
@@ -376,7 +379,7 @@ public class AlsParser implements Parser{
 					fields.add(field);
 				} else {
 					alsError = getErrorInstance();
-					alsError.setErrorDesc((err_msg_6)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_field_formOid+".");
+					alsError.setErrorDesc((err_msg_6)+" Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_field_formOid+".");
 					alsError.setErrorSeverity(errorSeverity_error);
 					cccError.addAlsError(alsError);	
 				}
@@ -432,7 +435,7 @@ public class AlsParser implements Parser{
 					else
 						{
 							alsError = getErrorInstance();
-							alsError.setErrorDesc((err_msg_16)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_ddeCodedData+".");
+							alsError.setErrorDesc((err_msg_16)+" Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_ddeCodedData+".");
 							alsError.setErrorSeverity(errorSeverity_error);
 							cccError.addAlsError(alsError);	
 						}
@@ -441,7 +444,7 @@ public class AlsParser implements Parser{
 					else
 						{
 							alsError = getErrorInstance();
-							alsError.setErrorDesc((err_msg_17)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_ddeOrdinal+".");
+							alsError.setErrorDesc((err_msg_17)+" Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_ddeOrdinal+".");
 							alsError.setErrorSeverity(errorSeverity_warn);
 							cccError.addAlsError(alsError);	
 						}
@@ -450,7 +453,7 @@ public class AlsParser implements Parser{
 					else
 						{
 							alsError = getErrorInstance();
-							alsError.setErrorDesc((err_msg_18)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_ddeUserDataString+".");
+							alsError.setErrorDesc((err_msg_18)+" Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_ddeUserDataString+".");
 							alsError.setErrorSeverity(errorSeverity_error);
 							cccError.addAlsError(alsError);	
 						}
@@ -459,13 +462,13 @@ public class AlsParser implements Parser{
 					else
 					{
 						alsError = getErrorInstance();
-						alsError.setErrorDesc((err_msg_19)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_ddeSpecify+".");
+						alsError.setErrorDesc((err_msg_19)+" Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_ddeSpecify+".");
 						alsError.setErrorSeverity(errorSeverity_warn);
 						cccError.addAlsError(alsError);	
 					}
 				} else {
 					alsError = getErrorInstance();
-					alsError.setErrorDesc((err_msg_15)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_ddeDataDictionaryName+".");
+					alsError.setErrorDesc((err_msg_15)+" Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_ddeDataDictionaryName+".");
 					alsError.setErrorSeverity(errorSeverity_error);
 					cccError.addAlsError(alsError);
 				}
@@ -518,7 +521,7 @@ public class AlsParser implements Parser{
 			} 
 		}	else {
 				alsError = getErrorInstance();
-				alsError.setErrorDesc((err_msg_20)+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_udName+".");
+				alsError.setErrorDesc((err_msg_20)+" Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_udName+".");
 				alsError.setErrorSeverity(errorSeverity_error);
 				cccError.addAlsError(alsError);
 		}			

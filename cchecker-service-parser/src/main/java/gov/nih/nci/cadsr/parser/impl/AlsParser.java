@@ -100,10 +100,11 @@ public class AlsParser implements Parser{
 	 * database
 	 * 
 	 */
-	public ALSData parse (String INPUT_XLSX_FILE_PATH) throws IOException, InvalidFormatException, NullPointerException {
+	public ALSData parse (String INPUT_XLSX_FILE_PATH, String fileName) throws IOException, InvalidFormatException, NullPointerException {
 		Workbook workbook = WorkbookFactory.create(new File(INPUT_XLSX_FILE_PATH));
 		CCCError cccError = getErrorObject();
 		ALSData alsData = getAlsDataInstance();
+		alsData.setFileName(fileName);
 		Sheet sheet = workbook.getSheet(crfDraftSheetName);
 		if (sheet!=null) 
 			alsData = getCrfDraft(sheet, alsData, cccError);
