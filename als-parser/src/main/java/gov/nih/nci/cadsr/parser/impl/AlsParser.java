@@ -103,6 +103,7 @@ public class AlsParser implements Parser{
 	private static String err_msg_21 = "Question doesn't contain a CDE public id and version.";	
 	private static String err_msg_22 = "This is an unknown control type.";		
 	private static String err_msg_23 = "CDE public id and version should be numeric.";	
+	private static String err_msg_24 = "Ordinal should be numeric.";	
 
 	/**
 	 * Parsing an ALS input file into data objects for validating against the
@@ -301,8 +302,18 @@ public class AlsParser implements Parser{
 						alsError.setErrorSeverity(errorSeverity_error);
 						cccError.addAlsError(alsError);
 					}
-					if (row.getCell(cell_fieldOrdinal)!=null)	
+					if (row.getCell(cell_fieldOrdinal)!=null)	{
 						field.setOrdinal(dataFormatter.formatCellValue(row.getCell(cell_fieldOrdinal)));
+						try {
+					        Integer.parseInt(field.getOrdinal());
+					    }
+					    catch (NumberFormatException e) {
+							alsError = getErrorInstance();
+							alsError.setErrorDesc(err_msg_24+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_fieldOrdinal+".");
+							alsError.setErrorSeverity(errorSeverity_warn);
+							alsData.getCccError().addAlsError(alsError);				    		
+					    }						
+					}
 					if (row.getCell(cell_draftFieldName)!=null) {
 						String draftFieldName = dataFormatter.formatCellValue(row.getCell(cell_draftFieldName));
 						field.setDraftFieldName(draftFieldName);
@@ -311,6 +322,16 @@ public class AlsParser implements Parser{
 							alsError.setErrorDesc(err_msg_21+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_draftFieldName+".");
 							alsError.setErrorSeverity(errorSeverity_warn);
 							alsData.getCccError().addAlsError(alsError);							
+						} else {
+							try {
+						        Integer.parseInt(field.getDraftFieldName());
+						    }
+						    catch (NumberFormatException e) {
+								alsError = getErrorInstance();
+								alsError.setErrorDesc(err_msg_23+"Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_draftFieldName+".");
+								alsError.setErrorSeverity(errorSeverity_error);
+								alsData.getCccError().addAlsError(alsError);				    		
+						    }
 						}
 					}
 					else
@@ -347,6 +368,11 @@ public class AlsParser implements Parser{
 						field.setPreText(dataFormatter.formatCellValue(row.getCell(cell_fieldPreText)));
 					if (row.getCell(cell_fieldFixedUnit)!=null)
 						field.setFixedUnit(dataFormatter.formatCellValue(row.getCell(cell_fieldFixedUnit)));
+					for (ALSForm form : alsData.getForms()) {
+						if (field.getFormOid().equalsIgnoreCase(form.getFormOId())) {
+							form.getFields().add(field);
+						}
+					}
 					fields.add(field);
 				} else {
 					alsError = getErrorInstance();

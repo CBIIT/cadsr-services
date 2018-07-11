@@ -8,16 +8,11 @@ import java.util.List;
 
 public class FormDisplay {
 	
-	String formName;
 	Boolean isValid;
 	List<ALSError> errors = new ArrayList<ALSError>();
+	ALSForm form;
+	int questionsCount;
 	
-	public String getFormName() {
-		return formName;
-	}
-	public void setFormName(String formName) {
-		this.formName = formName;
-	}
 	public Boolean getIsValid() {
 		return isValid;
 	}
@@ -29,6 +24,18 @@ public class FormDisplay {
 	}
 	public void setErrors(List<ALSError> errors) {
 		this.errors = errors;
+	}
+	public ALSForm getForm() {
+		return form;
+	}
+	public void setForm(ALSForm form) {
+		this.form = form;
+	}
+	public int getQuestionsCount() {
+		return questionsCount;
+	}
+	public void setQuestionsCount(int questionsCount) {
+		this.questionsCount = questionsCount;
 	}
 
 }

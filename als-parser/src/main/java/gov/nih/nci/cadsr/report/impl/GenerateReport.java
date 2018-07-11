@@ -24,7 +24,7 @@ public class GenerateReport implements ReportOutput {
 	 *         validation and parsing of data
 	 * 
 	 */
-	public CCCReport getFinalReportOutput(ALSData alsData) throws NullPointerException {
+	public CCCReport getFinalReportData(ALSData alsData) throws NullPointerException {
 		CCCReport cccReport = new CCCReport();
 		cccReport.setReportOwner(alsData.getReportOwner());
 		cccReport.setReportDate(alsData.getReportDate());

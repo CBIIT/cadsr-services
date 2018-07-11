@@ -13,6 +13,6 @@ public interface ReportOutput {
 	 * @return Populates the CDE Congruency Checker Report object
 	 * 
 	 */
-	public CCCReport getFinalReportOutput(ALSData alsData) throws NullPointerException;
+	public CCCReport getFinalReportData(ALSData alsData) throws NullPointerException;
 
 }
