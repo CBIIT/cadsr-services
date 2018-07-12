@@ -23,7 +23,7 @@ import gov.nih.nci.cadsr.parser.impl.AlsParser;
 @RestController
 @EnableAutoConfiguration
 public class AlsParserController {
-	private final Logger logger = LoggerFactory.getLogger(AlsParserController.class);
+	private final static Logger logger = LoggerFactory.getLogger(AlsParserController.class);
 	private static String UPLOADED_FOLDER = CCheckerParserService.UPLOADED_FOLDER;
 	public final String strNoFilePath = "Server problems Parser component no file information received";
 	//TODO consider sSpring singleton bean usage
@@ -38,7 +38,7 @@ public class AlsParserController {
 			return createALSDataError(strNoFilePath, HttpStatus.SERVICE_UNAVAILABLE);
 		}
 		String filePath = buildFilePath(fileName);
-		logger.debug("Parse file in path: " + filePath);
+		logger.info("Parse file in path: " + filePath + ", fileName: " + fileName);
 		try {
 			ALSData alsData = alsParser.parse(filePath, fileName);
 			HttpHeaders httpHeaders = new HttpHeaders();

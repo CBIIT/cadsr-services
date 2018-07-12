@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @EnableAutoConfiguration
 //(exclude={DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 public class CCheckerParserService {
-	private final Logger logger = LoggerFactory.getLogger(CCheckerParserService.class);
+	private static final Logger logger = LoggerFactory.getLogger(CCheckerParserService.class);
     static String UPLOADED_FOLDER;
 	@RequestMapping("/")
 	String home() {
