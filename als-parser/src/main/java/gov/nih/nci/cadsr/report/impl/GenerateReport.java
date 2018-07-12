@@ -9,6 +9,7 @@ import java.util.Map;
 
 import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.ALSDataDictionaryEntry;
+import gov.nih.nci.cadsr.data.ALSError;
 import gov.nih.nci.cadsr.data.ALSField;
 import gov.nih.nci.cadsr.data.CCCError;
 import gov.nih.nci.cadsr.data.CCCForm;
@@ -35,6 +36,7 @@ public class GenerateReport implements ReportOutput {
 		List<CCCForm> formsList = new ArrayList<CCCForm>();
 		CCCForm form = new CCCForm();
 		String formName = "";
+		ALSError alsError;	
 		List<CCCQuestion> questionsList = new ArrayList<CCCQuestion>();
 		Map<String, ALSDataDictionaryEntry> ddeMap = alsData.getDataDictionaryEntries();
 		for (ALSField alsField : alsData.getFields()) {
@@ -54,9 +56,24 @@ public class GenerateReport implements ReportOutput {
 				String draftFieldName = alsField.getDraftFieldName();
 				if (draftFieldName.indexOf("PID") > -1 && draftFieldName.indexOf("_V") > -1) {
 					String idVersion = draftFieldName.substring(draftFieldName.indexOf("PID"), draftFieldName.length());
-					question.setCdePublicId(idVersion.substring(3, idVersion.indexOf("_")));
-					question.setCdeVersion((idVersion.substring(idVersion.indexOf("_V") + 2, idVersion.length()))  
-							.replaceAll("_", "."));
+					try {
+						idVersion = draftFieldName.substring(draftFieldName.indexOf("PID"), draftFieldName.length());
+						String id = idVersion.substring(3, idVersion.indexOf("_"));
+						String version = (idVersion.substring(idVersion.indexOf("_V") + 2, idVersion.length()));
+				        question.setCdePublicId(id.trim());
+				        String[] versionTokens = version.split("\\_");
+				        Integer.parseInt(versionTokens[0]);
+				        Integer.parseInt(versionTokens[1]);
+				        version = versionTokens[0] + "." + versionTokens[1];
+				        question.setCdeVersion(version);				        
+				    }
+				    catch (NumberFormatException e) {
+				    	e.printStackTrace();
+						/*alsError = getErrorInstance();
+						alsError.setErrorDesc(err_msg_23+ " " + idVersion +" Sheet: "+sheet.getSheetName()+" Row: "+row.getRowNum()+" Cell: "+cell_draftFieldName+".");
+						alsError.setErrorSeverity(errorSeverity_error);
+						alsData.getCccError().addAlsError(alsError);*/				    		
+				    }
 					question.setNciCategory("NRDS"); // "NRDS" "Mandatory Module: {CRF ID/V}", "Optional Module {CRF ID/V}", "Conditional Module: {CRF ID/V}"
 					question.setQuestionCongruencyStatus("MATCH");// Valid results are "ERROR"/"Match"
 					question.setMessage("Error message"); // Will be replaced with the caDSR db validation result error message, if any.
@@ -112,5 +129,10 @@ public class GenerateReport implements ReportOutput {
 		CCCError cccError = new CCCError();
 		return cccError;
 	}	
+	
+	protected ALSError getErrorInstance() {
+		ALSError alsError = new ALSError();
+		return alsError;
+	}		
 
 }

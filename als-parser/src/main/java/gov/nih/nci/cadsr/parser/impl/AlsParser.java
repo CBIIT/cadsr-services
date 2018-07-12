@@ -327,7 +327,13 @@ public class AlsParser implements Parser{
 						} else {
 							try {
 								idVersion = draftFieldName.substring(draftFieldName.indexOf("PID"), draftFieldName.length());
-						        Integer.parseInt(idVersion);
+								String id = idVersion.substring(3, idVersion.indexOf("_"));
+								String version = (idVersion.substring(idVersion.indexOf("_V") + 2, idVersion.length()));
+						        Integer.parseInt(id.trim());
+						        String[] versionTokens = version.split("\\_");
+						        Integer.parseInt(versionTokens[0]);
+						        Integer.parseInt(versionTokens[1]);
+						        version = versionTokens[0] + "." + versionTokens[1];						        
 						    }
 						    catch (NumberFormatException e) {
 								alsError = getErrorInstance();
