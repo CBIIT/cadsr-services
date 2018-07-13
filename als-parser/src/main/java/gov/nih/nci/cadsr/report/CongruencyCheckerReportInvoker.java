@@ -25,6 +25,7 @@ import gov.nih.nci.cadsr.data.ALSError;
 import gov.nih.nci.cadsr.data.CCCForm;
 import gov.nih.nci.cadsr.data.CCCQuestion;
 import gov.nih.nci.cadsr.data.CCCReport;
+import gov.nih.nci.cadsr.service.FormService;
 import gov.nih.nci.cadsr.parser.Parser;
 import gov.nih.nci.cadsr.parser.impl.AlsParser;
 import gov.nih.nci.cadsr.report.impl.GenerateReport;
@@ -58,11 +59,9 @@ public class CongruencyCheckerReportInvoker {
 	private static String nciStdTempCongLbl = "# NCI Standard Template Mandatory Modules Questions Congruent ";
 	private static String nciStdTempErrorLbl = "# NCI Standard Template Mandatory Modules Questions With Errors ";
 	private static String nciStdTempWarnLbl = "# NCI Standard Template Mandatory Modules Questions With Warnings ";	
-	private static int formStartRow = 4;
 	private static int formStartColumn = 4;	
 	private static int allowableCdeValueCol = 19;
 	private static int codedDataColStart = 16;
-	private static int crfDraftStartRow = 1;
 	
 	
 	
@@ -79,8 +78,11 @@ public class CongruencyCheckerReportInvoker {
 			String INPUT_XLSX_FILE_PATH = "target/classes/" + prop.getProperty("ALS-INPUT-FILE");
 			String OUTPUT_XLSX_FILE_PATH = "target/" + prop.getProperty("VALIDATOR-OUTPUT-FILE");
 			ALSData alsData = alsParser.parse (INPUT_XLSX_FILE_PATH, prop.getProperty("ALS-INPUT-FILE"));
+			FormService.getFormsListJSON(alsData);
+			// Set Forms list to be sent to UI for selection, in ALSData
+			alsData.setFormsUiData(FormService.getFormsUiData(alsData));
 			for (ALSError alsError1 : alsData.getCccError().getAlsErrors()) {
-				logger.debug("Error: "+alsError1.getErrorDesc()+" Severity: "+alsError1.getErrorSeverity());
+				logger.debug("Error description: "+alsError1.getErrorDesc()+" Severity: "+alsError1.getErrorSeverity());
 			}			
 			cccReport  = generateReport.getFinalReportData(alsData);
 			for (CCCForm forms : cccReport.getCccForms()) {
