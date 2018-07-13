@@ -19,12 +19,16 @@ http://localhost:8080/gateway
 It is served by:
 cchecker-gateway/src/main/resources/templates/welcome.html
 
-GatewayBootWebApplication is a spring boot service for a standalone Tomcat.
+GatewayBootWebApplication is a spring boot service to be deployed to a standalone Tomcat.
 
 If cchecker-service-parser microservice is running we can call a test service parsefileservice:
 To call parser using curl and using prepared ALS file:
-curl http://localhost:8080/gateway/parsefileservice?filename=RAVE-ALS-10057-VS.xlsx
+curl http://localhost:8080/gateway/parsefileservice?filepath=/local/content/cchecker/RAVE-ALS-10057-VS.xlsx
 
-To upload a file select an existed rather small file as /local/content/source/data.txt, and run "curl" command.
+To upload a file to the server, select an existed rather small file as /local/content/source/data.txt, and run "curl" command.
 Go to a different terminal, and run:
 curl -F file=@"/local/content/source/data.txt" http://localhost:8080/uploadfileservice
+
+http://localhost:8080/gateway/parsefileservice?filepath=/local/content/cchecker/RAVE-ALS-10057-VS.xlsx
+
+curl -F file=@"/local/content/cchecker/RAVE-ALS-10057-VS.xlsx" http://localhost:8080/gateway/parseservice?owner=owner1

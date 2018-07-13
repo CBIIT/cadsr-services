@@ -24,23 +24,24 @@ import gov.nih.nci.cadsr.parser.impl.AlsParser;
 @EnableAutoConfiguration
 public class AlsParserController {
 	private final static Logger logger = LoggerFactory.getLogger(AlsParserController.class);
-	private static String UPLOADED_FOLDER = CCheckerParserService.UPLOADED_FOLDER;
+
 	public final String strNoFilePath = "Server problems Parser component no file information received";
 	//TODO consider sSpring singleton bean usage
 	private static final Parser alsParser = new AlsParser();
 	@PostMapping("/rest/alsparserservice")
 	//@ResponseBody
-	public ResponseEntity<ALSData>parseAls(@RequestParam("filename") String fileName) {
-		logger.debug("Parse file: " + fileName);
-		if (StringUtils.isBlank(fileName)) {
+	public ResponseEntity<ALSData>parseAls(@RequestParam("filepath") String filePath) {
+		logger.debug("Parse file: " + filePath);
+		if (StringUtils.isBlank(filePath)) {
 			//no filepath received
 			logger.error(strNoFilePath);;
 			return createALSDataError(strNoFilePath, HttpStatus.SERVICE_UNAVAILABLE);
 		}
-		String filePath = buildFilePath(fileName);
-		logger.info("Parse file in path: " + filePath + ", fileName: " + fileName);
+
+		logger.info("Parse file in path: " + filePath);
 		try {
-			ALSData alsData = alsParser.parse(filePath, fileName);
+			//TODO we do not need filename here consider to remove the second parameter, but keep the class member and a setter method.
+			ALSData alsData = alsParser.parse(filePath);
 			HttpHeaders httpHeaders = new HttpHeaders();
 			httpHeaders.add("Content-Type", "application/json");	
 
@@ -53,10 +54,6 @@ public class AlsParserController {
 			return createALSDataError("error in parser: " + e, HttpStatus.valueOf(400));
 		}
 
-	}
-	
-	protected String buildFilePath(String fileName) {
-		return UPLOADED_FOLDER + fileName;
 	}
 	
 	private ResponseEntity<ALSData> createALSDataError(String strError, HttpStatus httpStatus) {

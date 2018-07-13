@@ -3,7 +3,6 @@
  */
 package gov.nih.nci.cadsr.microservices;
 
-import java.io.File;
 import java.io.InputStream;
 import java.util.Properties;
 
@@ -12,8 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 //(exclude={DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 public class CCheckerParserService {
 	private static final Logger logger = LoggerFactory.getLogger(CCheckerParserService.class);
-    static String UPLOADED_FOLDER;
 	@RequestMapping("/")
 	String home() {
 		return "CCheckerParserService is running!\n";
@@ -35,15 +31,7 @@ public class CCheckerParserService {
 		//
 		Properties properties = new Properties();
 		properties.load(input);
-		String propVal;
-		if ((propVal = properties.getProperty("UPLOADED_FOLDER")) != null)
-			UPLOADED_FOLDER = propVal;
-		else UPLOADED_FOLDER = "/local/content/cchecker";
 
-		File uploadeDir = new File(UPLOADED_FOLDER);
-		if (! uploadeDir.exists())	{
-			uploadeDir.mkdirs();//OK for testing only
-		}
 		SpringApplication.run(CCheckerParserService.class, args);
 	}
 }

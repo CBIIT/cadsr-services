@@ -111,10 +111,10 @@ public class AlsParser implements Parser{
 	 * database
 	 * 
 	 */
-	public ALSData parse (String INPUT_XLSX_FILE_PATH, String fileName) throws IOException, InvalidFormatException, NullPointerException {
+	public ALSData parse (String INPUT_XLSX_FILE_PATH) throws IOException, InvalidFormatException, NullPointerException {
 		CCCError cccError = getErrorObject();
 		ALSData alsData = getAlsDataInstance();
-		alsData.setFileName(fileName);
+		alsData.setFilePath(INPUT_XLSX_FILE_PATH);
 		ALSError alsError;		
 		try {
 				Workbook workbook = WorkbookFactory.create(new File(INPUT_XLSX_FILE_PATH));

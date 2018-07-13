@@ -78,7 +78,7 @@ public class CongruencyCheckerReportInvoker {
 			prop.load(input);
 			String INPUT_XLSX_FILE_PATH = "target/classes/" + prop.getProperty("ALS-INPUT-FILE");
 			String OUTPUT_XLSX_FILE_PATH = "target/" + prop.getProperty("VALIDATOR-OUTPUT-FILE");
-			ALSData alsData = alsParser.parse (INPUT_XLSX_FILE_PATH, prop.getProperty("ALS-INPUT-FILE"));
+			ALSData alsData = alsParser.parse (INPUT_XLSX_FILE_PATH);
 			for (ALSError alsError1 : alsData.getCccError().getAlsErrors()) {
 				logger.debug("Error: "+alsError1.getErrorDesc()+" Severity: "+alsError1.getErrorSeverity());
 			}			
