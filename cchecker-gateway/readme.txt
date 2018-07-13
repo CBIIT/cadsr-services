@@ -24,3 +24,7 @@ GatewayBootWebApplication is a spring boot service for a standalone Tomcat.
 If cchecker-service-parser microservice is running we can call a test service parsefileservice:
 To call parser using curl and using prepared ALS file:
 curl http://localhost:8080/gateway/parsefileservice?filename=RAVE-ALS-10057-VS.xlsx
+
+To upload a file select an existed rather small file as /local/content/source/data.txt, and run "curl" command.
+Go to a different terminal, and run:
+curl -F file=@"/local/content/source/data.txt" http://localhost:8080/uploadfileservice

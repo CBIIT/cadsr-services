@@ -3,10 +3,6 @@
  */
 package gov.nih.nci.cadsr.cchecker;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,7 +25,7 @@ import gov.nih.nci.cadsr.data.ALSData;
 	public class GatewayBootController {
 		static String CCHECKER_PARSER_URL;
 		{
-			loadApplicationProperties();
+			loadProperties();
 		}
 		private final static Logger logger = LoggerFactory.getLogger(GatewayBootController.class);
 		/**
@@ -91,22 +87,9 @@ import gov.nih.nci.cadsr.data.ALSData;
 	        
 	        return result;
 	    }
-	    /**
-	     * If properties not found throws runtime exception
-	     */
-	    protected static void loadApplicationProperties() {
-			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-			InputStream input = classLoader.getResourceAsStream("cchecker-gateway.properties");
-			//
-			Properties properties = new Properties();
-			try {
-				properties.load(input);
-			} 
-			catch (IOException e) {
-				logger.error("Failer to load application properties", e);
-				throw new RuntimeException(e);
-			}
-			CCHECKER_PARSER_URL = properties.getProperty("CCHECKER_PARSER_URL");
-			logger.debug("!!!!!!!! Loaded GatewayBootController properties: " + properties);
+
+	    protected static void loadProperties() {
+			CCHECKER_PARSER_URL = GatewayBootWebApplication.CCHECKER_PARSER_URL;
+			logger.debug("GatewayBootController CCHECKER_PARSER_URL: " + CCHECKER_PARSER_URL);
 	    }
 	}

@@ -3,6 +3,7 @@
  */
 package gov.nih.nci.cadsr.cchecker;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
@@ -19,19 +20,32 @@ import org.springframework.boot.web.support.SpringBootServletInitializer;
 public class GatewayBootWebApplication extends SpringBootServletInitializer {
 	private final static Logger logger = LoggerFactory.getLogger(GatewayBootWebApplication.class);
 	static String CCHECKER_PARSER_URL;
-    @Override
+	//Save the uploaded file to this folder
+	static String UPLOADED_FOLDER;
+	@Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        return application.sources(GatewayBootWebApplication.class);
-    }
-
-    public static void main(String[] args) throws Exception {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		InputStream input = classLoader.getResourceAsStream("cchecker-gateway.properties");
 		//
 		Properties properties = new Properties();
-		properties.load(input);
+		try {
+			properties.load(input);
+		} catch (IOException e) {
+			logger.error("!!! Loaded CChecker Gateway properties load failure" + e);
+		    /**
+		     * If properties not found throws runtime exception
+		     */
+			e.printStackTrace();
+			throw new RuntimeException (e);
+		}
 		CCHECKER_PARSER_URL = properties.getProperty("CCHECKER_PARSER_URL");
+		UPLOADED_FOLDER =  properties.getProperty("UPLOADED_FOLDER");
 		logger.debug("!!! Loaded CChecker Gateway properties: " + properties);
+
+        return application.sources(GatewayBootWebApplication.class);
+    }
+
+    public static void main(String[] args) throws Exception {
         SpringApplication.run(GatewayBootWebApplication.class, args);
     }
 
