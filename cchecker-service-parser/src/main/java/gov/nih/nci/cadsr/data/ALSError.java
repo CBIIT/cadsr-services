@@ -7,13 +7,14 @@ public class ALSError {
 	
 String errorDesc;
 String sheetName;
-String rowNumber;
-String colNumber;
+int rowNumber;
+int colNumber;
 String formOid;
 String fieldOid;
 String dataDictionaryName;
 String unitDictionaryName;
 String errorSeverity; // FATAL, ERROR, WARNING
+String cellValue;
 
 public String getErrorDesc() {
 	return errorDesc;
@@ -57,17 +58,23 @@ public String getSheetName() {
 public void setSheetName(String sheetName) {
 	this.sheetName = sheetName;
 }
-public String getRowNumber() {
+public int getRowNumber() {
 	return rowNumber;
 }
-public void setRowNumber(String rowNumber) {
+public void setRowNumber(int rowNumber) {
 	this.rowNumber = rowNumber;
 }
-public String getColNumber() {
+public int getColNumber() {
 	return colNumber;
 }
-public void setColNumber(String colNumber) {
+public void setColNumber(int colNumber) {
 	this.colNumber = colNumber;
+}
+public String getCellValue() {
+	return cellValue;
+}
+public void setCellValue(String cellValue) {
+	this.cellValue = cellValue;
 }
 @Override
 public String toString() {
