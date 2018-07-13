@@ -8,8 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
-import java.util.List;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -31,6 +29,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import gov.nih.nci.cadsr.data.ALSData;
+import gov.nih.nci.cadsr.data.FormsUiData;
+import gov.nih.nci.cadsr.service.FormService;
 
 	@Controller
 	public class GatewayBootController {
@@ -125,8 +125,9 @@ import gov.nih.nci.cadsr.data.ALSData;
 			Path pathSavedFile;
 			//create a Cookie
 			Cookie cookie = generateCookie();
+			String idseq = cookie.getValue();
 			try {
-				pathSavedFile = saveUploadedFile(uploadfile, cookie.getValue() + ".xlsx");
+				pathSavedFile = saveUploadedFile(uploadfile, idseq + ".xlsx");
 			} 
 			catch (IOException e) {
 				String errorMessage = "Error saving uploaded file: " + uploadfile.getName() + ' ' + e;
@@ -150,14 +151,14 @@ import gov.nih.nci.cadsr.data.ALSData;
 			alsData.setFileName(orgFileName);
 			alsData.setReportOwner(reportOwner);
 			
+			FormsUiData formUiData = FormService.buildFormsUiData(alsData);
 			response.addCookie(cookie);
 			
-			//FIXME create FormUiList
+			//TODO save ALSData in DB
 			
-			//TODO We could always return this type, put this to annotations then
-			//FIXME return FormUiList
+			//TODO We could always return FormsUiData type, put this to annotations then
 			httpHeaders.add("Content-Type", "application/json");
-			return new ResponseEntity<>(alsData, httpHeaders, HttpStatus.OK);
+			return new ResponseEntity<>(formUiData, httpHeaders, HttpStatus.OK);
 		}
 
 		/**
