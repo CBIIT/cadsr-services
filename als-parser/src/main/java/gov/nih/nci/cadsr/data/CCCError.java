@@ -41,4 +41,10 @@ public void addAlsError(ALSError alsError) {
 	alsErrors.add(alsError);
 }
 
+@Override
+public String toString() {
+	return "CCCError [alsErrors=" + alsErrors + ", raveProtocolName=" + raveProtocolName + ", raveProtocolNumber="
+			+ raveProtocolNumber + "]";
+}
+
 }
