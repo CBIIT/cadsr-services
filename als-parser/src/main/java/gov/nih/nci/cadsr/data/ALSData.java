@@ -13,6 +13,7 @@ public class ALSData {
 String reportOwner; // From the user input through the browser
 String reportDate;
 String fileName;
+String filePath;
 
 ALSCrfDraft crfDraft = new ALSCrfDraft();
 List<ALSForm> forms = new ArrayList<ALSForm>();
@@ -59,6 +60,12 @@ public String getFileName() {
 }
 public void setFileName(String fileName) {
 	this.fileName = fileName;
+}
+public String getFilePath() {
+	return filePath;
+}
+public void setFilePath(String filePath) {
+	this.filePath = filePath;
 }
 public Map<String, ALSDataDictionaryEntry> getDataDictionaryEntries() {
 	return dataDictionaryEntries;

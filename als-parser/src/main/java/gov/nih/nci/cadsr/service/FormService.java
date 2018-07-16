@@ -29,14 +29,14 @@ public class FormService {
 		
 		ObjectMapper jsonMapper = new ObjectMapper();
 		List<FormDisplay> formsList = new ArrayList<FormDisplay>();
-		logger.debug("FileName: "+alsData.getFileName());
+		logger.debug("Filepath: "+alsData.getFilePath());
 		try {
 			for (ALSForm form : alsData.getForms()) {
 				FormDisplay fd = new FormDisplay();
-				fd.setForm(form);
+				fd.setFormName(form.getDraftFormName());
 				fd.setIsValid(true);
 				int qCount = form.getFields().size();
-				logger.debug("JSON Forms List: "+fd.getForm().getDraftFormName()+ " Questions count: "+qCount);
+				logger.debug("JSON Forms List: "+fd.getFormName()+ " Questions count: "+qCount);
 				fd.setQuestionsCount(qCount);
 				formsList.add(fd);
 			}
@@ -48,12 +48,12 @@ public class FormService {
 		
 	}	
 	
-	public static FormsUiData getFormsUiData (ALSData alsData) {
+	public static FormsUiData buildFormsUiData (ALSData alsData) {
 		List<FormDisplay> formsList = new ArrayList<FormDisplay>();
 		FormsUiData formUiData = new FormsUiData();
 			for (ALSForm form : alsData.getForms()) {
 				FormDisplay fd = new FormDisplay();
-				fd.setForm(form);
+				fd.setFormName(form.getDraftFormName());
 				fd.setIsValid(true);
 				int qCount = form.getFields().size();
 				fd.setQuestionsCount(qCount);
@@ -61,8 +61,7 @@ public class FormService {
 			}	
 			formUiData.setFormsList(formsList);
 			return formUiData;
-	}		
-	
+	}
 	
 	public static List<FormDisplay> getSelectedForms (String selFormsJson) {
 		ObjectMapper jsonMapper = new ObjectMapper();		
@@ -76,7 +75,7 @@ public class FormService {
 			logger.debug("JSON: " + selFormsJson);
 			selectedFormsList = jsonMapper.readValue(selFormsJson, new TypeReference<List<FormDisplay>>(){});
 			for (FormDisplay fd : selectedFormsList) {
-				logger.debug("Selected Forms: "+fd.getForm().getDraftFormName());
+				logger.debug("Selected Forms: "+fd.getFormName());
 			}
 		} catch (JsonParseException e) {
 			e.printStackTrace();

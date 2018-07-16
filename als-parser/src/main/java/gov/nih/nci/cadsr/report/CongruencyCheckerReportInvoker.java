@@ -77,10 +77,10 @@ public class CongruencyCheckerReportInvoker {
 			prop.load(input);
 			String INPUT_XLSX_FILE_PATH = "target/classes/" + prop.getProperty("ALS-INPUT-FILE");
 			String OUTPUT_XLSX_FILE_PATH = "target/" + prop.getProperty("VALIDATOR-OUTPUT-FILE");
-			ALSData alsData = alsParser.parse (INPUT_XLSX_FILE_PATH, prop.getProperty("ALS-INPUT-FILE"));
+			ALSData alsData = alsParser.parse (INPUT_XLSX_FILE_PATH);
 			FormService.getFormsListJSON(alsData);
 			// Set Forms list to be sent to UI for selection, in ALSData
-			alsData.setFormsUiData(FormService.getFormsUiData(alsData));
+			alsData.setFormsUiData(FormService.buildFormsUiData(alsData));
 			for (ALSError alsError1 : alsData.getCccError().getAlsErrors()) {
 				logger.debug("Error description: "+alsError1.getErrorDesc()+" Severity: "+alsError1.getErrorSeverity());
 			}			
