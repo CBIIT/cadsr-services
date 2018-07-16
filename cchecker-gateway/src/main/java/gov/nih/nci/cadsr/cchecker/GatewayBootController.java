@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.List;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -29,6 +30,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import gov.nih.nci.cadsr.data.ALSData;
+import gov.nih.nci.cadsr.data.ALSError;
+import gov.nih.nci.cadsr.data.CCCError;
 import gov.nih.nci.cadsr.data.FormsUiData;
 import gov.nih.nci.cadsr.service.FormService;
 
@@ -36,6 +39,8 @@ import gov.nih.nci.cadsr.service.FormService;
 	public class GatewayBootController {
 		static String CCHECKER_PARSER_URL;
 		static String UPLOADED_FOLDER;
+		//FIXME shall be defined in ALSError
+		static final String FATAL_ERROR_STATUS = "FATAL";
 		{
 			loadProperties();
 		}
@@ -116,8 +121,8 @@ import gov.nih.nci.cadsr.service.FormService;
 			
 			//upload file
 			if (uploadfile.isEmpty()) {
-				httpHeaders.add("Content-Type", "text/plain");
-				return new ResponseEntity<String>("Please submit a file!", httpHeaders,  HttpStatus.BAD_REQUEST);
+				String errorMessage = "Please submit a file!";
+				return buildErrorResponse(errorMessage, HttpStatus.BAD_REQUEST);
 			}
 			String orgFileName = uploadfile.getOriginalFilename();
 			logger.info("ALS file upload request: " + orgFileName);
@@ -131,9 +136,7 @@ import gov.nih.nci.cadsr.service.FormService;
 			} 
 			catch (IOException e) {
 				String errorMessage = "Error saving uploaded file: " + uploadfile.getName() + ' ' + e;
-				httpHeaders.add("Content-Type", "text/plain");
-				logger.error(errorMessage) ;
-				return new ResponseEntity<String>(errorMessage, httpHeaders, HttpStatus.SERVICE_UNAVAILABLE);
+				return buildErrorResponse(errorMessage, HttpStatus.SERVICE_UNAVAILABLE);
 			}
 			
 			String saveAbsPath = pathSavedFile.toFile().getAbsolutePath();
@@ -143,24 +146,43 @@ import gov.nih.nci.cadsr.service.FormService;
 			ALSDataWrapper wrapper = submitPostRequest(saveAbsPath);
 			HttpStatus parserStatusCode = wrapper.getStatusCode();
 			if (! HttpStatus.OK.equals(parserStatusCode)) {
-				httpHeaders.add("Content-Type", "text/plain");
-				return new ResponseEntity<>("Error on parsing file: " + uploadfile.getOriginalFilename(), httpHeaders,  parserStatusCode);
+				String errorMessage = "Error on parsing file: " + uploadfile.getOriginalFilename();
+				return buildErrorResponse(errorMessage, parserStatusCode);
 			}
 			
 			ALSData alsData = wrapper.getAlsData();
+			//check for fatal errors
+			CCCError cccError = alsData.getCccError();
+			List<ALSError> parserErrorList;
+			if (cccError != null) {
+				parserErrorList = cccError.getAlsErrors();
+				if ((parserErrorList != null) && (!parserErrorList.isEmpty())) {
+					ALSError alsError = parserErrorList.get(0);
+					if (FATAL_ERROR_STATUS.equals(alsError.getErrorSeverity())) {
+						String errorMessage = "Error in uploaded file: " + alsError.getErrorDesc();
+						return buildErrorResponse(errorMessage, HttpStatus.BAD_REQUEST);
+					}
+				}
+			}
+			//set file name and owner			
 			alsData.setFileName(orgFileName);
 			alsData.setReportOwner(reportOwner);
-			
+			//set session cookie
 			FormsUiData formUiData = FormService.buildFormsUiData(alsData);
 			response.addCookie(cookie);
 			
-			//TODO save ALSData in DB
+			//TODO implement save ALSData in DB
 			
-			//TODO We could always return FormsUiData type, put this to annotations then
+			//TODO If decided always return json type, put this to annotations then
 			httpHeaders.add("Content-Type", "application/json");
-			return new ResponseEntity<>(formUiData, httpHeaders, HttpStatus.OK);
+			return new ResponseEntity<FormsUiData>(formUiData, httpHeaders, HttpStatus.OK);
 		}
-
+		private ResponseEntity<String> buildErrorResponse(String errorMessage, HttpStatus httpStatus) {
+			HttpHeaders httpHeaders = new HttpHeaders();
+			httpHeaders.add("Content-Type", "text/plain");
+			logger.error(errorMessage);
+			return new ResponseEntity<String>(errorMessage, httpHeaders, HttpStatus.BAD_REQUEST);
+		}
 		/**
 		 * Creates a new file from its parameter.
 		 * 

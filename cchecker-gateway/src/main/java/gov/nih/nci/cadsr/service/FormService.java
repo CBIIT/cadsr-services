@@ -22,7 +22,7 @@ public class FormService {
 		FormsUiData formUiData = new FormsUiData();
 			for (ALSForm form : alsData.getForms()) {
 				FormDisplay fd = new FormDisplay();
-				fd.setForm(form);
+				fd.setFormName(form.getDraftFormName());
 				fd.setIsValid(true);
 				int qCount = form.getFields().size();
 				fd.setQuestionsCount(qCount);

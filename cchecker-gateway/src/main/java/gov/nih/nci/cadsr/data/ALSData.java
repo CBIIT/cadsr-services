@@ -20,7 +20,7 @@ List<ALSForm> forms = new ArrayList<ALSForm>();
 List<ALSField> fields = new ArrayList<ALSField>();
 Map<String, ALSDataDictionaryEntry> dataDictionaryEntries = new HashMap<String, ALSDataDictionaryEntry>();
 List<ALSUnitDictionaryEntry> unitDictionaryEntries = new ArrayList<ALSUnitDictionaryEntry>();
-CCCError cccError = new CCCError();
+CCCError cccError = new CCCError(); 
 
 
 public String getReportOwner() {

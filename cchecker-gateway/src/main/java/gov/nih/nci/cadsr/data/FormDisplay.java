@@ -10,7 +10,7 @@ public class FormDisplay {
 	
 	Boolean isValid;
 	List<ALSError> errors = new ArrayList<ALSError>();
-	ALSForm form;
+	String formName;
 	int questionsCount;
 	
 	public Boolean getIsValid() {
@@ -25,12 +25,12 @@ public class FormDisplay {
 	public void setErrors(List<ALSError> errors) {
 		this.errors = errors;
 	}
-	public ALSForm getForm() {
-		return form;
+	public String getFormName() {
+		return formName;
 	}
-	public void setForm(ALSForm form) {
-		this.form = form;
-	}
+	public void setFormName(String formName) {
+		this.formName = formName;
+	}	
 	public int getQuestionsCount() {
 		return questionsCount;
 	}
