@@ -9,3 +9,11 @@ docker configuration for cchecker
 2. cd cadsr-services/cchecker-docker
 3. run ./build.sh
 4. When tomcat starts and window output stops tomcat is started
+
+## To start docker container once installed ##
+* This only needs to be done if the container is already installed and has previously been stopped
+
+1. docker start -a cadsr-services
+
+## To stop docker container once installed ##
+1. docker stop cadsr-services
