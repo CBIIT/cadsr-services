@@ -26,7 +26,7 @@ import gov.nih.nci.cadsr.service.model.cdeData.CdeDetails;
 @EnableAutoConfiguration
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class RestCDEController {
-	private final Logger logger = LoggerFactory.getLogger(RestCDEController.class);
+	private static final Logger logger = LoggerFactory.getLogger(RestCDEController.class);
 
     @Autowired
     private DataElementRepository dataElemenRepository;
