@@ -20,6 +20,14 @@
 		<ojdbc.version>12.1.0.2.0</ojdbc.version>
 		<commons.version>3.0</commons.version>
 	</properties>
+	<repositories>
+		<repository>
+			<id>ncimvn-repo</id>
+			<name>NCI Nexus Repository for Maven</name>
+			<url>https://ncimvn.nci.nih.gov/nexus/content/repositories/public/</url>
+			<layout>default</layout>
+		</repository>	
+	</repositories>	
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
