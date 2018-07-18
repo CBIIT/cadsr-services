@@ -32,7 +32,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.ALSError;
 import gov.nih.nci.cadsr.data.CCCError;
+import gov.nih.nci.cadsr.data.CCCReport;
 import gov.nih.nci.cadsr.data.FormsUiData;
+import gov.nih.nci.cadsr.report.CongruencyCheckerReportInvoker;
 import gov.nih.nci.cadsr.service.FormService;
 
 	@Controller
@@ -207,5 +209,25 @@ import gov.nih.nci.cadsr.service.FormService;
 			UPLOADED_FOLDER = GatewayBootWebApplication.UPLOADED_FOLDER;
 			logger.debug("GatewayBootController CCHECKER_PARSER_URL: " + CCHECKER_PARSER_URL);
 			logger.debug("GatewayBootController UPLOADED_FOLDER: " + UPLOADED_FOLDER);
+	    }
+	    //TODO remove testReportService service
+		/**
+		 * 
+		 * @param request
+		 * @param response
+		 * @param filename
+		 * @return ALSData
+		 */
+	    @GetMapping("/testreportservice")
+	    @ResponseBody
+	    public CCCReport testReportService(HttpServletRequest request, HttpServletResponse response, 
+	    		@RequestParam(name="filepath", required=true) String filepath, @RequestParam(name="owner", defaultValue="guest") String reportOwner) {
+	    	ALSDataWrapper alsDataWrapper;
+	    	Cookie cookie = generateCookie();
+	    	alsDataWrapper = submitPostRequest(filepath);
+	    	response.addCookie(cookie);
+	    	CCCReport cccReport = CongruencyCheckerReportInvoker.builTestReport(alsDataWrapper.getAlsData());
+	    	cccReport.setReportOwner(reportOwner);
+	        return cccReport;
 	    }
 	}

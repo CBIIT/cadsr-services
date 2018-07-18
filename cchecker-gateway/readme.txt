@@ -33,3 +33,9 @@ http://localhost:8080/gateway/parsefileservice?filepath=/local/content/cchecker/
 
 curl -F file=@"/local/content/cchecker/RAVE-ALS-10057-VS.xlsx" http://localhost:8080/gateway/parseservice?owner=owner1
 curl -F file=@"/local/content/cchecker/RAVE-ALS-10057-VS.xlsx" -F owner="owner1" http://localhost:8080/gateway/parseservice
+
+curl -F file=@"/local/content/cchecker/data.txt" -F owner="owner1" http://localhost:8080/gateway/parseservice
+
+We added "testreportservice" for testing Congruence Checker Report representation. It sends generated test data based on input file.
+The supporting class is "CCCReport".
+curl http://localhost:8080/gateway/testreportservice?filepath=/local/content/cchecker/RAVE-ALS-10057-VS.xlsx
