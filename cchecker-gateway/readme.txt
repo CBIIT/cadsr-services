@@ -46,8 +46,10 @@ Find any file created by parseservice with UID-like name on /local/content/cchec
  
 take a file with a UID based name as "A154087D-A6D9-47A9-9AF1-A7AC4CB93C01" and use this UID as a cookie for testing this service.
 curl -v --cookie "_cchecker=A154087D-A6D9-47A9-9AF1-A7AC4CB93C01" -X POST \
--H "Content-Type: application/json" --d "@/local/content/cchecker/formnamelist.json" http://localhost:8080/gateway/checkservice \
-Other request parameters which as all "false by default:
+-H "Content-Type: application/json" --d "@/local/content/cchecker/formnamelist.json" http://localhost:8080/gateway/checkservice
+"formnamelist.json" file contains a json array of string. Each String is a form name.
+Example: ["Enrollment","Other Form 1"]
+Other request parameters which are all "false" by default:
 checkUOM=true/false
 checkCRF=true/false
 displayExceptions=true/false
