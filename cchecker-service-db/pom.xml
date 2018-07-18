@@ -17,6 +17,8 @@
 		<commons-logging.version>1.2</commons-logging.version>
 		<jackson.version>2.9.5</jackson.version>
 		<log4j.version>1.2.14</log4j.version>
+		<ojdbc.version>12.1.0.2.0</ojdbc.version>
+		<commons.version>3.0</commons.version>
 	</properties>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -196,7 +198,12 @@
 		<dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.0</version>
+            <version>${commons.version}</version>
+		</dependency>
+		<dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>ojdbc7</artifactId>
+            <version>${ojdbc.version}</version>
 		</dependency>
 	</dependencies>
 </project>
