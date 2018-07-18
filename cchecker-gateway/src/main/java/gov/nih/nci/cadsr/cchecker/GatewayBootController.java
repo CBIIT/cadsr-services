@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +33,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.ALSError;
 import gov.nih.nci.cadsr.data.CCCError;
+import gov.nih.nci.cadsr.data.CCCForm;
 import gov.nih.nci.cadsr.data.CCCReport;
 import gov.nih.nci.cadsr.data.FormsUiData;
 import gov.nih.nci.cadsr.report.CongruencyCheckerReportInvoker;
@@ -41,8 +43,10 @@ import gov.nih.nci.cadsr.service.FormService;
 	public class GatewayBootController {
 		static String CCHECKER_PARSER_URL;
 		static String UPLOADED_FOLDER;
+		static final String sessionCookieName = "_cchecker";
 		//FIXME shall be defined in ALSError
 		static final String FATAL_ERROR_STATUS = "FATAL";
+		static final String EXCEL_FILE_EXT = ".xlsx";
 		{
 			loadProperties();
 		}
@@ -65,7 +69,7 @@ import gov.nih.nci.cadsr.service.FormService;
 	    }
 
 		protected Cookie generateCookie() {
-	    	Cookie cookie = new Cookie("_cchecker", generateIdseq());
+	    	Cookie cookie = new Cookie(sessionCookieName, generateIdseq());
 	    	cookie.setMaxAge(24 * 60 * 60);  // (24 hours in seconds)
 	    	cookie.setPath("/");
 	    	return cookie;
@@ -134,7 +138,7 @@ import gov.nih.nci.cadsr.service.FormService;
 			Cookie cookie = generateCookie();
 			String idseq = cookie.getValue();
 			try {
-				pathSavedFile = saveUploadedFile(uploadfile, idseq + ".xlsx");
+				pathSavedFile = saveUploadedFile(uploadfile, idseq + EXCEL_FILE_EXT);
 			} 
 			catch (IOException e) {
 				String errorMessage = "Error saving uploaded file: " + uploadfile.getName() + ' ' + e;
@@ -178,6 +182,57 @@ import gov.nih.nci.cadsr.service.FormService;
 			//TODO If decided always return json type, put this to annotations then
 			httpHeaders.add("Content-Type", "application/json");
 			return new ResponseEntity<FormsUiData>(formUiData, httpHeaders, HttpStatus.OK);
+		}
+		@PostMapping("/checkservice")
+		public ResponseEntity<?> parseService(HttpServletRequest request, HttpServletResponse response,
+				@RequestParam(name="checkUOM", required = false, defaultValue="false") boolean checkUOM,
+				@RequestParam(name="checkCRF", required = false, defaultValue="false") boolean checkCRF,
+				@RequestParam(name="displayExceptions", required = false, defaultValue="false") boolean displayExceptions,
+				RequestEntity<List<String>> requestEntity) {
+			logger.debug("request received parseService");
+			//check for session cookie
+			Cookie cookie = retrieveCookie(request);
+			if (cookie == null) {
+				return buildErrorResponse("Session is not found", HttpStatus.BAD_REQUEST);
+			}
+			List<String> formNames = requestEntity.getBody();
+			logger.debug("Selected forms received: " + formNames);
+			
+			//FIXME call Validator service instead of the example code below
+			//TODO this is test code only getting file data
+			String filepath = buildFilePath(cookie.getValue());
+	    	ALSDataWrapper alsDataWrapper = submitPostRequest(filepath);
+	    	response.addCookie(cookie);
+	    	CCCReport cccReport = CongruencyCheckerReportInvoker.builTestReport(alsDataWrapper.getAlsData());
+	    	cccReport.setReportOwner(alsDataWrapper.getAlsData().getReportOwner());
+			HttpHeaders httpHeaders = new HttpHeaders();
+			httpHeaders.add("Content-Type", "application/json");
+			return new ResponseEntity<CCCReport>(cccReport, httpHeaders, HttpStatus.OK);
+			
+		}
+		
+		private Cookie retrieveCookie(HttpServletRequest request) {
+			Cookie[] cookieArr = request.getCookies();
+			Cookie sessionCookie = null;
+			if (cookieArr != null) {			
+				for (Cookie currCookie : cookieArr) {
+					if (sessionCookieName.equals(currCookie.getName())) {
+						logger.debug("found sesion cookie: " + currCookie.getValue());
+						sessionCookie = currCookie;
+						break;
+					}
+				}
+			}
+			return sessionCookie;
+		}
+		/**
+		 * This method is for feasibility only.
+		 * We will retrieve ALSData from DB.
+		 * 
+		 * @return String file to ALS Excel file
+		 */
+		private String buildFilePath(String sessionUID) {
+			return UPLOADED_FOLDER + sessionUID + EXCEL_FILE_EXT;
 		}
 		private ResponseEntity<String> buildErrorResponse(String errorMessage, HttpStatus httpStatus) {
 			HttpHeaders httpHeaders = new HttpHeaders();
