@@ -38,4 +38,4 @@ curl -F file=@"/local/content/cchecker/data.txt" -F owner="owner1" http://localh
 
 We added "testreportservice" for testing Congruence Checker Report representation. It sends generated test data based on input file.
 The supporting class is "CCCReport".
-curl http://localhost:8080/gateway/testreportservice?filepath=/local/content/cchecker/RAVE-ALS-10057-VS.xlsx
+curl http://localhost:8080/gateway/testreportservice?owner=owner1&filepath=/local/content/cchecker/RAVE-ALS-10057-VS.xlsx
