@@ -13,6 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "extractCss":true,
             "outputPath": "dist/cchecker-ui",
             "index": "src/index.html",
             "main": "src/main.ts",
