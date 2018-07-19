@@ -6,6 +6,7 @@ import { AlsFormComponent } from './als-form/als-form.component';
 import { AlsFormListComponent } from './als-form-list/als-form-list.component';
 import { AlsUploadFormComponent } from './als-upload-form/als-upload-form.component';
 import { AlsReportComponent } from './als-report/als-report.component';
+import { NavigationComponent } from './navigation/navigation.component';
 
 @NgModule({
   declarations: [
@@ -13,7 +14,8 @@ import { AlsReportComponent } from './als-report/als-report.component';
     AlsFormComponent,
     AlsFormListComponent,
     AlsUploadFormComponent,
-    AlsReportComponent
+    AlsReportComponent,
+    NavigationComponent
   ],
   imports: [
     BrowserModule
