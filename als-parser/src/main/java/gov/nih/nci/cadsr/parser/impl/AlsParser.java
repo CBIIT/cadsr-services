@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
@@ -174,8 +175,13 @@ public class AlsParser implements Parser{
 				
 				workbook.close();
 		} catch (IOException ioe) {
-			alsError = getErrorInstance();					
-			alsError.setErrorDesc(ioe.getMessage());
+			alsError = getErrorInstance();
+			if (ioe.getMessage().indexOf("Invalid header signature") > -1) {
+				logger.debug(ioe.getMessage());
+				alsError.setErrorDesc("Invalid file format, please check if the uploaded file is in XLS format.");
+			} else {
+				alsError.setErrorDesc(ioe.getMessage());				
+			}
 			alsError.setErrorSeverity(errorSeverity_fatal);
 			cccError.addAlsError(alsError);
 		} catch (InvalidFormatException ife) {
@@ -409,34 +415,32 @@ public class AlsParser implements Parser{
 							alsError.setErrorSeverity(errorSeverity_warn);
 							alsData.getCccError().addAlsError(alsError);							
 						} else {
-							try {
 								idVersion = draftFieldName.substring(draftFieldName.indexOf("PID"), draftFieldName.length());
 								String id = idVersion.substring(3, idVersion.indexOf("_"));
 								String version = (idVersion.substring(idVersion.indexOf("_V") + 2, idVersion.length()));
-						        Integer.parseInt(id.trim());
+						        id = id.trim();
 						        String[] versionTokens = version.split("\\_");
 						        Integer.parseInt(versionTokens[0]);
 						        Integer.parseInt(versionTokens[1]);
 						        version = versionTokens[0] + "." + versionTokens[1];
-						    }
-						    catch (NumberFormatException e) {
-								alsError = getErrorInstance();
-								alsError.setErrorDesc(err_msg_23+ " " + idVersion +" { Excel Coordinates | Sheet: "+sheet.getSheetName()+" | Row: "+row.getRowNum()+" | Cell: "+cell_draftFieldName+"}.");
-								alsError.setCellValue(idVersion);
-								alsError.setSheetName(sheet.getSheetName());
-								alsError.setRowNumber(row.getRowNum());
-								alsError.setColNumber(cell_draftFieldName);
-								if (formOid!=null)
-									alsError.setFormOid(formOid);
-								if (fieldOid!=null)
-									alsError.setFieldOid(fieldOid);
-								if (dataDictionaryName!=null)
-									alsError.setDataDictionaryName(dataDictionaryName);
-								if (unitDictionaryName!=null)
-									alsError.setUnitDictionaryName(unitDictionaryName);								
-								alsError.setErrorSeverity(errorSeverity_error);
-								alsData.getCccError().addAlsError(alsError);				    		
-						    }
+						        if (!NumberUtils.isNumber(id) || !NumberUtils.isNumber(version)) {
+									alsError = getErrorInstance();
+									alsError.setErrorDesc(err_msg_23+ " " + idVersion +" { Excel Coordinates | Sheet: "+sheet.getSheetName()+" | Row: "+row.getRowNum()+" | Cell: "+cell_draftFieldName+"}.");
+									alsError.setCellValue(idVersion);
+									alsError.setSheetName(sheet.getSheetName());
+									alsError.setRowNumber(row.getRowNum());
+									alsError.setColNumber(cell_draftFieldName);
+									if (formOid!=null)
+										alsError.setFormOid(formOid);
+									if (fieldOid!=null)
+										alsError.setFieldOid(fieldOid);
+									if (dataDictionaryName!=null)
+										alsError.setDataDictionaryName(dataDictionaryName);
+									if (unitDictionaryName!=null)
+										alsError.setUnitDictionaryName(unitDictionaryName);								
+									alsError.setErrorSeverity(errorSeverity_error);
+									alsData.getCccError().addAlsError(alsError);						        	
+						        }
 						}
 					}
 					else

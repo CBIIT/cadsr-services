@@ -12,7 +12,7 @@ String raveFormOId;
 String caDSRFormId;
 int countTotalQuestions;
 String version;
-//String fieldOrder;
+String congruencyStatus; // Congruent, Errors, Warnings
 
 List<CCCQuestion> questions = new ArrayList<CCCQuestion>();
 
@@ -39,6 +39,12 @@ public String getVersion() {
 }
 public void setVersion(String version) {
 	this.version = version;
+}
+public String getCongruencyStatus() {
+	return congruencyStatus;
+}
+public void setCongruencyStatus(String congruencyStatus) {
+	this.congruencyStatus = congruencyStatus;
 }
 public List<CCCQuestion> getQuestions() {
 	return questions;
