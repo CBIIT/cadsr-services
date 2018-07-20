@@ -92,7 +92,10 @@ form {
 }
 
 form label {
-    font-size:15px;
+    font-size:14px;
+}
+form input {
+	font-size:14px !important;
 }
 /* end boostrap overrides */
 

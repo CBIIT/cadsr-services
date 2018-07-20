@@ -10,7 +10,7 @@ export class AlsUploadFormComponent implements OnInit {
   name:string;
   alsFile:File;
   submitted:boolean;
-
+  
   constructor(private router:Router) { 
     this.submitted = false;
   }
