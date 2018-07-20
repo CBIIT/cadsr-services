@@ -27,7 +27,6 @@ export class AlsUploadFormComponent implements OnInit {
 
   // submit name, file to server for processing //
   uploadFile() {
-    window.r = this.router;
     console.log("Submit to server");
     this.router.navigate(['/forms'])
 
