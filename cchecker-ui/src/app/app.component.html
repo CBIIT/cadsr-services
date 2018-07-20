@@ -7,10 +7,10 @@
         <li id="title"><h2>Congruency Checker</h2></li>
         <li id="links">
           <ul>
-              <li>link</li>
-              <li>link</li>
-              <li>link</li>
-              <li>link</li>
+              <li><a [routerLink]="['/']">Home</a></li>
+              <li><a [routerLink]="['/']">Link 1</a></li>
+              <li><a [routerLink]="['/']">Link 2</a></li>
+              <li><a [routerLink]="['/']">Link 3</a></li>
             </ul>
         </li>
     </ul>
@@ -24,7 +24,9 @@
     </div>
 
     <div id="component">
-      <router-outlet></router-outlet>
+      <div>
+        <router-outlet></router-outlet>
+      </div>
     </div>      
   </div>
   <!-- End of Main content -->
@@ -32,10 +34,12 @@
 
   <!-- Footer -->
   <div id="footer">
-      Department of Health and Human Services  |   National Institutes of Health  |   National Cancer Institute  |  USA.gov
-
-
-      NIH...Turning Discovery Into Health®    
+      <p>
+        Department of Health and Human Services  |   National Institutes of Health  |   National Cancer Institute  |  USA.gov
+      </p>
+      <p>
+        NIH...Turning Discovery Into Health®    
+      </p>              
   </div>
   <!-- End Footer -->
 
