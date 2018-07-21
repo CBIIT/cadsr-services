@@ -1,0 +1,56 @@
+table {
+    width:100%;
+    border-left:1px solid #282828;
+    box-shadow: 4px 5px 1px #ccc;
+}
+th {
+    vertical-align:top;
+    padding:5px 0px 5px 15px;
+    background-color:#282828;
+    color:#fff;
+}
+td {
+    vertical-align:top;
+    padding:5px 0px 5px 15px;
+    border-bottom:1px solid #282828;
+}
+a:hover {
+    text-decoration: none;
+}
+span.formName{
+    display:inline;
+    vertical-align:middle;
+    padding-right:10px;
+}
+.checkbox {
+    width:40px;
+}
+.status {
+    text-align:center 
+}
+.success {
+    background-color:#015e12;
+    color:#fff;
+}
+.fail {
+    background-color:#7f0a0a;
+    color:#fff;
+}
+.rowError {
+    padding:10px 0px 10px 40px;
+    background-color:#aaa;
+    color:#000;
+}
+.questionCount {
+    text-align:center 
+}
+.columnStatus {
+    width:100px;
+    text-align:center;
+}
+.rowOdd {
+    background-color:#eee;
+}
+.rowEven {
+    background-color:#fff;
+}
