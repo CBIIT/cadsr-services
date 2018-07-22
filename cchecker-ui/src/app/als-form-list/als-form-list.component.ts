@@ -48,5 +48,5 @@ export class AlsFormListComponent implements OnInit {
   setCheckedItemsArray = () => Object.assign([],this.data['formsList'].filter((r) => r.isValid ).map((e) => e.formName)); 
 
   // shows or hides error row //
-  setExpandCollapse = (e:boolean) => { e['expand']=!e['expand']; console.log(e['expand']; return false };
+  setExpandCollapse = (e:boolean) => { e['expand']=!e['expand']; return false };
 };
