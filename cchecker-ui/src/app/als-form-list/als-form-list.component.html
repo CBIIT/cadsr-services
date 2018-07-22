@@ -1,48 +1,63 @@
 <h2>
-    ALS Form List
+   ALS Form List
 </h2>
 <p>Some description up here</p>
 <table class="alsFormList">
-    <tr>
-        <th>
-            <input type="checkbox">
-        </th>  
-        <th>
-            Form Name
-        </th>
-        <th class="questionCount">
-            Question Count
-        </th>
-        <th class="status">
-            Status
-        </th>
-     
-    </tr>
-    <ng-container *ngFor="let record of sortedData().formsList; let i = index">
-        <!-- render this row always -->
-            <tr [ngClass]="{'rowOdd':i%2==0,'rowEven':i%2==1}">
-                <td class="checkbox">
-                    <input type="checkbox">
-                </td>
-                <td>
-                    <a *ngIf="!record.isValid" href="#" (click)="showDetails(record)">
-                        <span class="fa fa-lg formName" [ngClass]="{'fa-minus-square':record.expand,'fa-plus-square':!record.expand}"></span>
-                    </a><span class="formName">{{record.formName}}</span>
-                    
-                </td>
-                <td class="questionCount">{{record.questionsCount}}</td>
-                <td class="status" [ngClass]="{'success':record.isValid,'fail':!record.isValid}">{{getStatus(record.isValid)}}</td>
-            </tr>
-        <!-- end render this row always -->
+   <tr>
+      <th>
+         <input type="checkbox">
+      </th>
+      <th>
+         Form Name
+      </th>
+      <th class="questionCount">
+         Question Count
+      </th>
+      <th class="status">
+         Status
+      </th>
+   </tr>
 
-        <!-- render and hide this row only if there is an error -->
-            <tr *ngIf="record.expand" [ngClass]="{'rowError':record.expand}">
-                <td></td>
-                <td colspan="4" >
-                    Display some error
-                </td>
-            </tr>
-        <!-- end render and hide this row only if there is an error -->
+   <tr>
+      <th>
+         <input type="checkbox">
+      </th>
+      <th>
+         Form Name
+      </th>
+      <th class="questionCount">
+         Question Count
+      </th>
+      <th class="status">
+         Status
+      </th>
+   </tr>   
+   
+   
 
-    </ng-container>
+   <ng-container *ngFor="let record of sortedData(); let i = index">
+      <!-- render this row always -->
+      <tr [ngClass]="{'rowOdd':i%2==0,'rowEven':i%2==1}">
+         <td class="checkbox">
+            <input type="checkbox" *ngIf="record.isValid">
+            <span *ngIf="!record.isValid" class="fa fa-times-circle fa-lg"></span>
+         </td>
+         <td>
+            <a *ngIf="!record.isValid" href="#" (click)="showHideError(record)">
+            <span class="fa fa-lg formName" [ngClass]="{'fa-minus-square':record.expand,'fa-plus-square':!record.expand}"></span>
+            </a><span class="formName">{{record.formName}}</span>
+         </td>
+         <td class="questionCount">{{record.questionsCount}}</td>
+         <td class="status" [ngClass]="{'success':record.isValid,'fail':!record.isValid}">{{getStatus(record.isValid)}}</td>
+      </tr>
+      <!-- end render this row always -->
+      <!-- render and hide this row only if there is an error -->
+      <tr *ngIf="record['expand']" [ngClass]="{'rowError':record.expand}">
+      <td></td>
+      <td colspan="4" >
+         Display some error
+      </td>
+      </tr>
+      <!-- end render and hide this row only if there is an error -->
+   </ng-container>
 </table>
