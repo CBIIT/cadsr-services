@@ -15,6 +15,8 @@ export class AlsFormListComponent implements OnInit {
   constructor() {
     // test data //
     this.data = {"formsList":[{"isValid":false,"errors":[],"formName":"Enrollment","questionsCount":31},{"isValid":true,"errors":[],"formName":"Histology and Disease","questionsCount":10},{"isValid":false,"errors":[],"formName":"Administrative Enrollment","questionsCount":10},{"isValid":false,"errors":[],"formName":"Eligibility Checklist","questionsCount":128},{"isValid":true,"errors":[],"formName":"Patient Eligibility","questionsCount":5},{"isValid":true,"errors":[],"formName":"Molecular Marker","questionsCount":4}],"checkUom":null,"checkStdCrfCde":null,"mustDisplayException":null};
+    // end test data //
+
     this.checkedItems = this.setCheckedItemsArray();
     this.selectAllCheckbox = true; // select all forms checkbox. default to all //
     this.validItemsLength = this.checkedItems.length;
