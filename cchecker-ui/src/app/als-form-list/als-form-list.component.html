@@ -5,7 +5,7 @@
 <table class="alsFormList">
    <tr>
       <th>
-         <input type="checkbox">
+         <input type="checkbox" name="selectAllforms" (change)="setCheckAllStatus($event)" [checked]="selectAllCheckbox">
       </th>
       <th>
          Form Name
@@ -22,7 +22,7 @@
       <!-- render this row always -->
       <tr [ngClass]="{'rowOdd':i%2==0,'rowEven':i%2==1}">
          <td class="checkbox">
-            <input type="checkbox" *ngIf="record.isValid">
+            <input type="checkbox" *ngIf="record.isValid" (change)="setCheckedItem(record)" name="checkedItem" value="a" [checked]="getCheckedStatus(record)">
             <span *ngIf="!record.isValid" class="fa fa-times-circle fa-lg"></span>
          </td>
          <td>
