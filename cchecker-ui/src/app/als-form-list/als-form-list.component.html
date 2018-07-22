@@ -18,7 +18,7 @@
       </th>
    </tr>   
 
-   <ng-container *ngFor="let record of sortedData(); let i = index">
+   <ng-container *ngFor="let record of getSortedData(); let i = index">
       <!-- render this row always -->
       <tr [ngClass]="{'rowOdd':i%2==0,'rowEven':i%2==1}">
          <td class="checkbox">
@@ -26,12 +26,12 @@
             <span *ngIf="!record.isValid" class="fa fa-times-circle fa-lg"></span>
          </td>
          <td>
-            <a *ngIf="!record.isValid" href="#" (click)="showHideError(record)">
+            <a *ngIf="!record.isValid" href="#" (click)="setExpandCollapse(record)">
             <span class="fa fa-lg formName" [ngClass]="{'fa-minus-square':record.expand,'fa-plus-square':!record.expand}"></span>
             </a><span class="formName">{{record.formName}}</span>
          </td>
          <td class="questionCount">{{record.questionsCount}}</td>
-         <td class="status" [ngClass]="{'success':record.isValid,'fail':!record.isValid}">{{getStatus(record.isValid)}}</td>
+         <td class="status" [ngClass]="{'success':record.isValid,'fail':!record.isValid}">{{getReadableErrorStatus(record.isValid)}}</td>
       </tr>
       <!-- end render this row always -->
       <!-- render and hide this row only if there is an error -->
