@@ -5,86 +5,62 @@ package gov.nih.nci.cadsr.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.RestTemplate;
 
 import gov.nih.nci.cadsr.data.ALSData;
+import gov.nih.nci.cadsr.data.ALSError;
 import gov.nih.nci.cadsr.data.ALSForm;
 import gov.nih.nci.cadsr.data.FormDisplay;
 import gov.nih.nci.cadsr.data.FormsUiData;
+import gov.nih.nci.cadsr.service.model.cdeData.CdeDetails;
 
 public class FormService {
 
 	private static final Logger logger = Logger.getLogger(FormService.class);
-	
-	public static void getFormsListJSON (ALSData alsData) {
-		
-		ObjectMapper jsonMapper = new ObjectMapper();
-		List<FormDisplay> formsList = new ArrayList<FormDisplay>();
-		logger.debug("Filepath: "+alsData.getFilePath());
-		try {
-			for (ALSForm form : alsData.getForms()) {
-				FormDisplay fd = new FormDisplay();
-				fd.setFormName(form.getDraftFormName());
-				fd.setIsValid(true);
-				int qCount = form.getFields().size();
-				logger.debug("JSON Forms List: "+fd.getFormName()+ " Questions count: "+qCount);
-				fd.setQuestionsCount(qCount);
-				formsList.add(fd);
-			}
-            String jsonStr = jsonMapper.writeValueAsString(formsList);
-            jsonMapper.writeValue(new File("/local/content/cchecker/forms.json"), jsonStr);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-		
-	}	
+	private static String errorSeverity_warn = "WARNING";
 	
 	public static FormsUiData buildFormsUiData (ALSData alsData) {
 		List<FormDisplay> formsList = new ArrayList<FormDisplay>();
 		FormsUiData formUiData = new FormsUiData();
 			for (ALSForm form : alsData.getForms()) {
 				FormDisplay fd = new FormDisplay();
-				fd.setFormName(form.getDraftFormName());
+				fd.setFormName(form.getFormOId());
 				fd.setIsValid(true);
+				for (ALSError error : alsData.getCccError().getAlsErrors()) {
+					if (error.getFormOid()!=null && error.getFormOid().equalsIgnoreCase(form.getFormOId()) && !error.getErrorSeverity().equals(errorSeverity_warn) ) {
+						fd.getErrors().add(error);
+					}
+				}
+				if (!fd.getErrors().isEmpty())
+					fd.setIsValid(false);	
 				int qCount = form.getFields().size();
 				fd.setQuestionsCount(qCount);
 				formsList.add(fd);
 			}	
 			formUiData.setFormsList(formsList);
 			return formUiData;
-	}
-	
-	public static List<FormDisplay> getSelectedForms (String selFormsJson) {
-		ObjectMapper jsonMapper = new ObjectMapper();		
-		List<FormDisplay> selectedFormsList = new ArrayList<FormDisplay>();
-		logger.debug("First JSON: " + selFormsJson);
-		try {
-			//selectedFormsList = jsonMapper.readValue(new File("/local/content/cchecker/forms.json"), new TypeReference<List<FormDisplay>>(){});
-			//selFormsJson = new String ( Files.readAllBytes( Paths.get("/local/content/cchecker/forms.json") ) );
-			//selFormsJson = selFormsJson.substring(1, selFormsJson.length()-1);
-			//selFormsJson.replaceAll("\\", "");
-			logger.debug("JSON: " + selFormsJson);
-			selectedFormsList = jsonMapper.readValue(selFormsJson, new TypeReference<List<FormDisplay>>(){});
-			for (FormDisplay fd : selectedFormsList) {
-				logger.debug("Selected Forms: "+fd.getFormName());
-			}
-		} catch (JsonParseException e) {
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return selectedFormsList;
 	}
 
 }
