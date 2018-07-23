@@ -8,5 +8,5 @@ else
   docker rm $1
   rm -rf $3
   docker build -t alpineangular .
-  docker run --name $1 -p 8080:80 alpineangular
+  docker run --name $1 -p $2:80 alpineangular
 fi
