@@ -41,6 +41,29 @@ public class FormService {
 	private static final Logger logger = Logger.getLogger(FormService.class);
 	private static String errorSeverity_warn = "WARNING";
 	
+	public static void getFormsListJSON (ALSData alsData) {
+		
+		ObjectMapper jsonMapper = new ObjectMapper();
+		List<FormDisplay> formsList = new ArrayList<FormDisplay>();
+		logger.debug("Filepath: "+alsData.getFilePath());
+		try {
+			for (ALSForm form : alsData.getForms()) {
+				FormDisplay fd = new FormDisplay();
+				fd.setFormName(form.getFormOId());
+				fd.setIsValid(true);
+				int qCount = form.getFields().size();
+				logger.debug("JSON Forms List: "+fd.getFormName()+ " Questions count: "+qCount);
+				fd.setQuestionsCount(qCount);
+				formsList.add(fd);
+			}
+            String jsonStr = jsonMapper.writeValueAsString(formsList);
+            jsonMapper.writeValue(new File("/local/content/cchecker/forms.json"), jsonStr);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+		
+	}	
+	
 	public static FormsUiData buildFormsUiData (ALSData alsData) {
 		List<FormDisplay> formsList = new ArrayList<FormDisplay>();
 		FormsUiData formUiData = new FormsUiData();
@@ -62,5 +85,30 @@ public class FormService {
 			formUiData.setFormsList(formsList);
 			return formUiData;
 	}
+	
+	public static List<FormDisplay> getSelectedForms (String selFormsJson) {
+		ObjectMapper jsonMapper = new ObjectMapper();		
+		List<FormDisplay> selectedFormsList = new ArrayList<FormDisplay>();
+		logger.debug("First JSON: " + selFormsJson);
+		try {
+			//selectedFormsList = jsonMapper.readValue(new File("/local/content/cchecker/forms.json"), new TypeReference<List<FormDisplay>>(){});
+			//selFormsJson = new String ( Files.readAllBytes( Paths.get("/local/content/cchecker/forms.json") ) );
+			//selFormsJson = selFormsJson.substring(1, selFormsJson.length()-1);
+			//selFormsJson.replaceAll("\\", "");
+			logger.debug("JSON: " + selFormsJson);
+			selectedFormsList = jsonMapper.readValue(selFormsJson, new TypeReference<List<FormDisplay>>(){});
+			for (FormDisplay fd : selectedFormsList) {
+				logger.debug("Selected Forms: "+fd.getFormName());
+			}
+		} catch (JsonParseException e) {
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return selectedFormsList;
+	}
+	
 
 }
