@@ -3,6 +3,8 @@
  */
 package gov.nih.nci.cadsr.service.validator;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,6 +13,9 @@ import java.util.Properties;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -46,15 +51,16 @@ public class ValidatorService {
 	
 	public static CCCQuestion validate(ALSField field, CCCQuestion question, CdeDetails cdeDetails) {
 		StringBuffer message = new StringBuffer();
+		try {
 		if (cdeDetails == null) {
 			message.append(msg1);
 			question.setQuestionCongruencyStatus(congStatus_errors);
 		} else {
-			if (cdeDetails.getDataElement().getDataElementDetails().getWorkflowStatus().equalsIgnoreCase(retiredString)) {
+			if (cdeDetails.getDataElement()!=null && cdeDetails.getDataElement().getDataElementDetails().getWorkflowStatus().equalsIgnoreCase(retiredString)) {
 				message.append(msg2);	
 				question.setQuestionCongruencyStatus(congStatus_warn);
 			}
-			if (cdeDetails.getDataElement().getDataElementDetails().getVersion() >  Float.valueOf(question.getCdeVersion())) {
+			if (cdeDetails.getDataElement()!=null && (cdeDetails.getDataElement().getDataElementDetails().getVersion() >  Float.valueOf(question.getCdeVersion()))) {
 				message.append(msg3);
 				question.setQuestionCongruencyStatus(congStatus_warn);
 			}
@@ -116,18 +122,35 @@ public class ValidatorService {
 				question.setQuestionCongruencyStatus(congStatus_errors);
 			}
 			
-			if (question.getRaveUOM().equals(cdeDetails.getValueDomain().getValueDomainDetails().getUnitOfMeasure())) {
+			if (question.getRaveUOM()!=null && question.getRaveUOM().equals(cdeDetails.getValueDomain().getValueDomainDetails().getUnitOfMeasure())) {
 				question.setUomCheckerResult(matchString);
 			} else {
 				question.setUomCheckerResult(errorString);
 				question.setQuestionCongruencyStatus(congStatus_errors);
 			}
-			if (Float.valueOf(question.getRaveLength()) < Float.valueOf(cdeDetails.getValueDomain().getValueDomainDetails().getMaximumLength())) {
-				question.setLengthCheckerResult(matchString);
+			
+			String raveLength = question.getRaveLength();
+			if (raveLength!=null && raveLength.indexOf("characters")>-1) {
+				raveLength.replaceAll("\\p{P}","");		
+				int index = 0;
+				if ((raveLength.indexOf("(") > -1) || (raveLength.indexOf(")") > -1)) {
+					index = 1;
+				}  else {
+					index = 0;
+				}
+				raveLength = raveLength.substring(index,raveLength.indexOf("characters"));
+				logger.debug("Max length: "+cdeDetails.getValueDomain().getValueDomainDetails().getMaximumLength()+ "  Rave length: " +raveLength);
+				if (Float.valueOf(raveLength) < Float.valueOf(cdeDetails.getValueDomain().getValueDomainDetails().getMaximumLength())) {
+					question.setLengthCheckerResult(matchString);
+				} else {
+					question.setLengthCheckerResult(errorString);
+					question.setQuestionCongruencyStatus(congStatus_errors);	
+				}
 			} else {
 				question.setLengthCheckerResult(errorString);
 				question.setQuestionCongruencyStatus(congStatus_errors);
-			}
+			} 
+
 			if (field.getDataFormat().equals(cdeDetails.getValueDomain().getValueDomainDetails().getDisplayFormat())) {
 				question.setFormatCheckerResult(matchString);
 			} else {
@@ -139,6 +162,11 @@ public class ValidatorService {
 			//PV checker result
 
 		}
+		} catch (NullPointerException npe) {
+			npe.printStackTrace();		
+		} catch (NumberFormatException nfe) {
+			nfe.printStackTrace();
+		}		
 		if (message==null || message.equals("") )
 			question.setQuestionCongruencyStatus(congStatus_congruent);
 		else

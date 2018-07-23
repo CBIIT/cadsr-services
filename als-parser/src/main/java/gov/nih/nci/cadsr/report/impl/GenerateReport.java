@@ -11,6 +11,7 @@ import java.util.Map;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.log4j.Logger;
 
+import gov.nih.nci.cadsr.dao.model.PermissibleValuesModel;
 import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.ALSDataDictionaryEntry;
 import gov.nih.nci.cadsr.data.ALSError;
@@ -82,13 +83,9 @@ public class GenerateReport implements ReportOutput {
 								logger.debug("CDE public ID and version should be numeric");
 							}
 						question.setNciCategory("NRDS"); // "NRDS" "Mandatory Module: {CRF ID/V}", "Optional Module {CRF ID/V}", "Conditional Module: {CRF ID/V}"
-						//question.setQuestionCongruencyStatus("MATCH");// Valid results are "ERROR"/"Match"
-						//question.setMessage("Error message"); // Will be replaced with the caDSR db validation result error message, if any.
 						question.setRaveFieldLabel(alsField.getPreText());
-						//question.setRaveFieldLabelResult("Error/Match"); // Will be replaced with the caDSR db validation result
 						question.setCdePermitQuestionTextChoices(""); // From the caDSR DB - docText
 						question.setRaveControlType(alsField.getControlType());
-						//question.setControlTypeResult("Match"); // Will be replaced with the caDSR db validation result
 						question.setCdeValueDomainType(""); // from caDSR DB - Value Domain Enumerated/NonEnumerated
 		
 						for (String key : ddeMap.keySet()) {
@@ -98,11 +95,6 @@ public class GenerateReport implements ReportOutput {
 							}
 						}
 						question.setAllowableCdeValue("");
-						//question.setPvResult("Error/match"); // Will be replaced with the caDSR db validation result
-						//question.setAllowableCdeTextChoices("A|B|C|D"); // Test values - will be replaced with the PV value meanings from caDSR db
-						//question.setRaveFieldDataType(alsField.getDataFormat());
-						//question.setDatatypeCheckerResult("Error/Match"); // Will be replaced with the caDSR db validation result
-						//question.setCdeDataType(""); // Will be set with the caDSR db value domain data type after a comparison with data format
 						String raveUOM = null;
 						if (alsField.getFixedUnit()!=null)
 							raveUOM = alsField.getFixedUnit();
@@ -110,22 +102,16 @@ public class GenerateReport implements ReportOutput {
 							if (alsField.getUnitDictionaryName()!=null)
 								raveUOM = alsField.getUnitDictionaryName();
 						question.setRaveUOM(raveUOM);
-						//question.setUomCheckerResult("Error/Match"); // Will be replaced with the caDSR db validation result
-						//question.setCdeUOM(""); // caDSR DB Value domain UOM, if it doesnt match with RAVE UOM					
 						question.setRaveLength(alsField.getFixedUnit());
-						//question.setLengthCheckerResult("");
-						//question.setCdeMaxLength(0);// caDSR DB Value domain max length
 						question.setRaveDisplayFormat(alsField.getDataFormat());
-						//question.setFormatCheckerResult("");
-						//question.setCdeDisplayFormat(""); // caDSR DB Value domain display format
-						
 						question.setQuestionCongruencyStatus(congStatus_congruent);
 						// TODO This should call the service [Should be HTTPResponse] - VS
-						//CdeDetails cdeDetails = retrieveDataElement();
+						CdeDetails cdeDetails = null;
+						cdeDetails = retrieveDataElement(question.getCdePublicId(), question.getCdeVersion());// [CDE service]
 						
 						// TODO Call to the validation of the CDEDetails against the ALSField & Question objects  
-						//question = validate(alsField, question, cdeDetails); [ValidatorService]
-						
+						question = validate(alsField, question, cdeDetails); //[ValidatorService]
+
 						if (question.getMessage() == null || question.getMessage().equals("")) { 
 							form.setCongruencyStatus(congStatus_congruent);
 						} else {
@@ -139,8 +125,7 @@ public class GenerateReport implements ReportOutput {
 										}
 									} else 
 										form.setCongruencyStatus(question.getQuestionCongruencyStatus());
-								}
-						
+								}						
 					} else {
 							question.setRaveFieldLabel(alsField.getPreText());
 							questionsList.add(question);
