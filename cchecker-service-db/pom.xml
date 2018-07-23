@@ -19,6 +19,8 @@
 		<log4j.version>1.2.14</log4j.version>
 		<ojdbc.version>12.1.0.2.0</ojdbc.version>
 		<commons.version>3.0</commons.version>
+		<jackson.version>2.9.5</jackson.version>
+		<jackson-mapper-asl.version>1.9.13</jackson-mapper-asl.version>
 	</properties>
 	<repositories>
 		<repository>
@@ -212,6 +214,11 @@
             <groupId>com.oracle</groupId>
             <artifactId>ojdbc7</artifactId>
             <version>${ojdbc.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-mapper-asl</artifactId>
+			<version>${jackson-mapper-asl.version}</version>
 		</dependency>
 	</dependencies>
 </project>

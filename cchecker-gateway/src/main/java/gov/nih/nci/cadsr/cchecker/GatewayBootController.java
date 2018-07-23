@@ -184,7 +184,7 @@ import gov.nih.nci.cadsr.service.FormService;
 			return new ResponseEntity<FormsUiData>(formUiData, httpHeaders, HttpStatus.OK);
 		}
 		@PostMapping("/checkservice")
-		public ResponseEntity<?> parseService(HttpServletRequest request, HttpServletResponse response,
+		public ResponseEntity<?> checkService(HttpServletRequest request, HttpServletResponse response,
 				@RequestParam(name="checkUOM", required = false, defaultValue="false") boolean checkUOM,
 				@RequestParam(name="checkCRF", required = false, defaultValue="false") boolean checkCRF,
 				@RequestParam(name="displayExceptions", required = false, defaultValue="false") boolean displayExceptions,
