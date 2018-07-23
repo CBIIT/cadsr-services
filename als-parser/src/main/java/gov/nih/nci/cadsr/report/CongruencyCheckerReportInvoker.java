@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,8 @@ import gov.nih.nci.cadsr.data.ALSError;
 import gov.nih.nci.cadsr.data.CCCForm;
 import gov.nih.nci.cadsr.data.CCCQuestion;
 import gov.nih.nci.cadsr.data.CCCReport;
+import gov.nih.nci.cadsr.data.FormDisplay;
+import gov.nih.nci.cadsr.data.FormsUiData;
 import gov.nih.nci.cadsr.service.FormService;
 import gov.nih.nci.cadsr.parser.Parser;
 import gov.nih.nci.cadsr.parser.impl.AlsParser;
@@ -75,27 +78,33 @@ public class CongruencyCheckerReportInvoker {
 			try {
 			input = CongruencyCheckerReportInvoker.class.getClassLoader().getResourceAsStream(filename);
 			prop.load(input);
-			String INPUT_XLSX_FILE_PATH = "target/classes/" + prop.getProperty("ALS-INPUT-FILE");
+			String INPUT_XLSX_FILE_PATH = "/local/content/cchecker/" + prop.getProperty("ALS-INPUT-FILE");
 			String OUTPUT_XLSX_FILE_PATH = "target/" + prop.getProperty("VALIDATOR-OUTPUT-FILE");
 			ALSData alsData = alsParser.parse (INPUT_XLSX_FILE_PATH);
-			FormService.getFormsListJSON(alsData);
+			//FormService.getFormsListJSON(alsData);
 			// Set Forms list to be sent to UI for selection, in ALSData
-			alsData.setFormsUiData(FormService.buildFormsUiData(alsData));
+			//FormsUiData fuidata = FormService.buildFormsUiData(alsData);
+			List<String> selForms = new ArrayList<String>();
+			//for (FormDisplay fd: fuidata.getFormsList()) {
+			//	selForms.add(fd.getFormName());
+			//}
 			for (ALSError alsError1 : alsData.getCccError().getAlsErrors()) {
 				logger.debug("Error description: "+alsError1.getErrorDesc()+" Severity: "+alsError1.getErrorSeverity());
 			}			
-			cccReport  = generateReport.getFinalReportData(alsData);
-			for (CCCForm forms : cccReport.getCccForms()) {
-				//logger.debug("Form name: " + forms.getRaveFormOId());
-				//logger.debug("Questions list: " + forms.getQuestions().size());
-				for (CCCQuestion question : forms.getQuestions()) {
+			logger.debug("Selected Forms list size: "+selForms.size());
+			//cccReport  = generateReport.getFinalReportData(alsData, selForms, false, false, false);
+			//logger.debug("Report Error Forms list size: "+cccReport.getCccForms().size());
+			for (CCCForm form : cccReport.getCccForms()) {
+				logger.debug("Form name: " + form.getRaveFormOId());
+				logger.debug("Questions list: " + form.getQuestions().size());
+				for (CCCQuestion question : form.getQuestions()) {
 					/*if (question.getRaveCodedData() != null && question.getRaveCodedData().size() != 0)
 						logger.debug("Question coded data list: " + question.getRaveCodedData().size());
 					if (question.getRaveUserString() != null && question.getRaveUserString().size() != 0)
 						logger.debug("Questions user string data list: " + question.getRaveUserString().size());*/
 				}
 			}
-			writeExcel(OUTPUT_XLSX_FILE_PATH, cccReport);
+			//writeExcel(OUTPUT_XLSX_FILE_PATH, cccReport);
 			//writeToJSON(cccReport);
 			//logger.debug("Output object forms count: " + cccReport.getCccForms().size());			
 			} catch (IOException ioe) {
@@ -162,7 +171,7 @@ public class CongruencyCheckerReportInvoker {
 			Cell cell = row.createCell(colNum++);
 			cell.setCellValue(form.getRaveFormOId());
 			cell = row.createCell(summaryFormsValidResultColNum);
-			cell.setCellValue("Congruent");
+			cell.setCellValue(form.getCongruencyStatus());
 		}
 
 		String[] rowHeaders = { "Rave Form OID", "caDSR Form ID", "Version", "Total Number Of Questions Checked",
