@@ -54,3 +54,7 @@ span.formName{
 .rowEven {
     background-color:#fff;
 }
+
+.formCriteriaCheckboxes input {
+    margin-right:10px;
+}
