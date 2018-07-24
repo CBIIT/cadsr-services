@@ -42,8 +42,16 @@
       <!-- render and hide this row only if there is an error -->
       <tr *ngIf="record['expand']" [ngClass]="{'rowError':record.expand}">
       <td></td>
-      <td colspan="4" >
-         Display some error
+      <td colspan="4">
+          <div *ngFor="let error of record.errors">
+              {{error.errorDesc}}
+              <ul>
+                  <li>Cell Value: {{error.cellValue}}</li>
+                  <li>Sheet Name: {{error.sheetName}}</li>
+                  <li>Row: {{error.rowNumber}}</li>
+                  <li>Column: {{error.colNumber}}</li>
+              </ul>
+          </div>
       </td>
       </tr>
       <!-- end render and hide this row only if there is an error -->
