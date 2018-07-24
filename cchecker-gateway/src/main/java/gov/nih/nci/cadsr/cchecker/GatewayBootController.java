@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -33,7 +34,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.ALSError;
 import gov.nih.nci.cadsr.data.CCCError;
-import gov.nih.nci.cadsr.data.CCCForm;
 import gov.nih.nci.cadsr.data.CCCReport;
 import gov.nih.nci.cadsr.data.FormsUiData;
 import gov.nih.nci.cadsr.report.CongruencyCheckerReportInvoker;
@@ -42,14 +42,17 @@ import gov.nih.nci.cadsr.service.FormService;
 	@Controller
 	public class GatewayBootController {
 		static String CCHECKER_PARSER_URL;
+		static String CCHECKER_DB_SERVICE_URL;
 		static String UPLOADED_FOLDER;
 		static final String sessionCookieName = "_cchecker";
 		//FIXME shall be defined in ALSError
 		static final String FATAL_ERROR_STATUS = "FATAL";
 		static final String EXCEL_FILE_EXT = ".xlsx";
+		
 		{
 			loadProperties();
 		}
+		
 		private final static Logger logger = LoggerFactory.getLogger(GatewayBootController.class);
 		/**
 		 * 
@@ -63,7 +66,7 @@ import gov.nih.nci.cadsr.service.FormService;
 	    public ALSData parseFileService(HttpServletRequest request, HttpServletResponse response, @RequestParam(name="filepath", required=true) String filepath) {
 	    	ALSDataWrapper alsData;
 	    	Cookie cookie = generateCookie();
-	    	alsData = submitPostRequest(filepath);
+	    	alsData = submitPostRequestParser(filepath);
 	    	response.addCookie(cookie);
 	        return alsData.getAlsData();
 	    }
@@ -81,8 +84,12 @@ import gov.nih.nci.cadsr.service.FormService;
 	    protected String generateIdseq() {
 	    	return java.util.UUID.randomUUID().toString().toUpperCase();
 	    }
-	    
-	    protected ALSDataWrapper submitPostRequest(String filePath) {
+	    /**
+	     * 
+	     * @param filePath - file saved previously on the service file system.
+	     * @return ALSDataWrapper
+	     */
+	    protected ALSDataWrapper submitPostRequestParser(String filePath) {
 	        RestTemplate restTemplate = new RestTemplate();
 	        
 	        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(CCHECKER_PARSER_URL);
@@ -110,6 +117,34 @@ import gov.nih.nci.cadsr.service.FormService;
 	        }
 	        return wrapper;
 	    }
+	    protected StringResponseWrapper submitPostRequestSaveAls(ALSData alsData, String idseq) {
+	        RestTemplate restTemplate = new RestTemplate();
+	        
+	        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(CCHECKER_DB_SERVICE_URL);
+
+	        //add some String
+	        builder.queryParam(sessionCookieName, idseq);
+
+	        //another staff
+	        StringResponseWrapper wrapper = new StringResponseWrapper();
+	        HttpEntity<ALSData> requestData = new HttpEntity<>(alsData);
+	        ResponseEntity<String> responseEntity = restTemplate.postForEntity(
+	                builder.build().encode().toUri(),
+	                requestData,
+	                String.class);
+
+	        HttpStatus statusCode = responseEntity.getStatusCode();
+	        wrapper.setStatusCode(statusCode);
+	        if (statusCode == HttpStatus.OK) {
+	        	wrapper.setResponseData(responseEntity.getBody());
+	            logger.debug("parseservice result received" );
+	            
+	        }
+	        else {
+	        	logger.error("parsefileservice sent an error: " + statusCode);
+	        }
+	        return wrapper;
+	    }
 		/**
 		 * Upload one file.
 		 * 
@@ -121,8 +156,6 @@ import gov.nih.nci.cadsr.service.FormService;
 		public ResponseEntity<?> parseService(HttpServletRequest request, HttpServletResponse response,
 				@RequestParam(name="owner", defaultValue="guest") String reportOwner, @RequestParam("file") MultipartFile uploadfile) {
 			logger.debug("uploadFile started");
-			//TODO what context type shall be returned on an error - ? 
-			//FIXME we need user name here
 			HttpHeaders httpHeaders = new HttpHeaders();
 			
 			//upload file
@@ -149,7 +182,7 @@ import gov.nih.nci.cadsr.service.FormService;
 			logger.info("Successfully uploaded - " + orgFileName + " saved as " + saveAbsPath);
 
 			//call parser
-			ALSDataWrapper wrapper = submitPostRequest(saveAbsPath);
+			ALSDataWrapper wrapper = submitPostRequestParser(saveAbsPath);
 			HttpStatus parserStatusCode = wrapper.getStatusCode();
 			if (! HttpStatus.OK.equals(parserStatusCode)) {
 				String errorMessage = "Error on parsing file: " + uploadfile.getOriginalFilename();
@@ -170,16 +203,38 @@ import gov.nih.nci.cadsr.service.FormService;
 					}
 				}
 			}
+			
 			//set file name and owner			
 			alsData.setFileName(orgFileName);
 			alsData.setReportOwner(reportOwner);
-			//set session cookie
+	    	logger.debug("........before sending save alsData request. REPORT_OWNER: " + alsData.getReportOwner() + ", FILE_NAME: " + alsData.getFileName() + ", idseq: " + idseq);
+	    	
+			//implement save ALSData in DB
+	    	//FIXME I commented save request code until we decide how to configure DB into in a container
+//			StringResponseWrapper saveResponse = submitPostRequestSaveAls(alsData, idseq);
+//			HttpStatus responseStatusCode = saveResponse.getStatusCode();
+//			if (! HttpStatus.OK.equals(responseStatusCode)) {
+//				String errorMessage = "Error on saving ALS file: " + orgFileName + ", idseq: " + idseq;
+//				return buildErrorResponse(errorMessage, parserStatusCode);
+//			}
+//			else {
+//				logger.info("Saved ALS file: " + orgFileName + ", idseq: " + idseq);
+//			}
+//			
+			//build result from parser data
 			FormsUiData formUiData = FormService.buildFormsUiData(alsData);
+			
+			//set session cookie
+			Cookie sessionCookie = retrieveCookie(request);
+			if (sessionCookie != null) {
+				sessionCookie.setValue(idseq);
+			}
+			else {
+				sessionCookie = new Cookie(sessionCookieName, idseq);
+			}
 			response.addCookie(cookie);
 			
-			//TODO implement save ALSData in DB
-			
-			//TODO If decided always return json type, put this to annotations then
+			//If decided always return json type, put Content-Type to annotations then
 			httpHeaders.add("Content-Type", "application/json");
 			return new ResponseEntity<FormsUiData>(formUiData, httpHeaders, HttpStatus.OK);
 		}
@@ -201,7 +256,7 @@ import gov.nih.nci.cadsr.service.FormService;
 			//FIXME call Validator service instead of the example code below
 			//TODO this is test code only getting file data
 			String filepath = buildFilePath(cookie.getValue());
-	    	ALSDataWrapper alsDataWrapper = submitPostRequest(filepath);
+	    	ALSDataWrapper alsDataWrapper = submitPostRequestParser(filepath);
 	    	response.addCookie(cookie);
 	    	CCCReport cccReport = CongruencyCheckerReportInvoker.builTestReport(alsDataWrapper.getAlsData());
 	    	cccReport.setReportOwner(alsDataWrapper.getAlsData().getReportOwner());
@@ -234,7 +289,14 @@ import gov.nih.nci.cadsr.service.FormService;
 		private String buildFilePath(String sessionUID) {
 			return UPLOADED_FOLDER + sessionUID + EXCEL_FILE_EXT;
 		}
+		/**
+		 * 
+		 * @param errorMessage
+		 * @param httpStatus
+		 * @return ResponseEntity
+		 */
 		private ResponseEntity<String> buildErrorResponse(String errorMessage, HttpStatus httpStatus) {
+			//TODO what context type shall be returned on an error - ? Now text/plain 
 			HttpHeaders httpHeaders = new HttpHeaders();
 			httpHeaders.add("Content-Type", "text/plain");
 			logger.error(errorMessage);
@@ -262,8 +324,10 @@ import gov.nih.nci.cadsr.service.FormService;
 	    protected static void loadProperties() {
 			CCHECKER_PARSER_URL = GatewayBootWebApplication.CCHECKER_PARSER_URL;
 			UPLOADED_FOLDER = GatewayBootWebApplication.UPLOADED_FOLDER;
+			CCHECKER_DB_SERVICE_URL = GatewayBootWebApplication.CCHECKER_DB_SERVICE_URL;
 			logger.debug("GatewayBootController CCHECKER_PARSER_URL: " + CCHECKER_PARSER_URL);
 			logger.debug("GatewayBootController UPLOADED_FOLDER: " + UPLOADED_FOLDER);
+			logger.debug("GatewayBootController CCHECKER_DB_SERVICE_URL: " + CCHECKER_DB_SERVICE_URL);
 	    }
 	    //TODO remove testReportService service
 		/**
@@ -279,7 +343,7 @@ import gov.nih.nci.cadsr.service.FormService;
 	    		@RequestParam(name="filepath", required=true) String filepath, @RequestParam(name="owner", defaultValue="guest") String reportOwner) {
 	    	ALSDataWrapper alsDataWrapper;
 	    	Cookie cookie = generateCookie();
-	    	alsDataWrapper = submitPostRequest(filepath);
+	    	alsDataWrapper = submitPostRequestParser(filepath);
 	    	response.addCookie(cookie);
 	    	CCCReport cccReport = CongruencyCheckerReportInvoker.builTestReport(alsDataWrapper.getAlsData());
 	    	cccReport.setReportOwner(reportOwner);

@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @EnableAutoConfiguration
 public class CCheckerDbService {
-    private final Logger logger = LoggerFactory.getLogger(CCheckerDbService.class);
+    private static final Logger logger = LoggerFactory.getLogger(CCheckerDbService.class);
 
 	@RequestMapping("/")
 	String home() {

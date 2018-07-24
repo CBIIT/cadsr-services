@@ -22,6 +22,7 @@ public class GatewayBootWebApplication extends SpringBootServletInitializer {
 	static String CCHECKER_PARSER_URL;
 	//Save the uploaded file to this folder
 	static String UPLOADED_FOLDER;
+	static String CCHECKER_DB_SERVICE_URL;
 	@Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -40,6 +41,7 @@ public class GatewayBootWebApplication extends SpringBootServletInitializer {
 		}
 		CCHECKER_PARSER_URL = properties.getProperty("CCHECKER_PARSER_URL");
 		UPLOADED_FOLDER =  properties.getProperty("UPLOADED_FOLDER");
+		CCHECKER_DB_SERVICE_URL = properties.getProperty("CCHECKER_DB_SERVICE_URL");
 		logger.debug("!!! Loaded CChecker Gateway properties: " + properties);
 
         return application.sources(GatewayBootWebApplication.class);

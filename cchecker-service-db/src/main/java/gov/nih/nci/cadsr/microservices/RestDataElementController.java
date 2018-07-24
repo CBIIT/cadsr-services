@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @EnableAutoConfiguration
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class RestDataElementController {
-	private final Logger logger = LoggerFactory.getLogger(RestDataElementController.class);
+	private static final Logger logger = LoggerFactory.getLogger(RestDataElementController.class);
 
     @Autowired
     private DataElementRepository dataElemenRepository;
