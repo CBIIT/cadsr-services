@@ -27,7 +27,7 @@ public class FormService {
 				fd.setFormName(form.getDraftFormName());
 				fd.setIsValid(true);
 				for (ALSError error : alsData.getCccError().getAlsErrors()) {
-					if (error.getFormOid()!=null && error.getFormOid().equalsIgnoreCase(form.getFormOId()) && !error.getErrorSeverity().equals(errorSeverity_warn) ) {
+					if (error.getFormOid()!=null && error.getFormOid().equalsIgnoreCase(form.getFormOid()) && !error.getErrorSeverity().equals(errorSeverity_warn) ) {
 						fd.getErrors().add(error);
 					}
 				}
