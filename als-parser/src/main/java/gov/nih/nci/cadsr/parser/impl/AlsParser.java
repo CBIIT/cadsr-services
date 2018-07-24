@@ -271,7 +271,7 @@ public class AlsParser implements Parser{
 				row = rowIterator.next();
 				ALSForm form = getAlsFormInstance();
 				if (row.getCell(cell_formOid) != null) {
-					form.setFormOId(dataFormatter.formatCellValue(row.getCell(cell_formOid)));
+					form.setFormOid(dataFormatter.formatCellValue(row.getCell(cell_formOid)));
 					if (row.getCell(cell_formOrdinal) != null)	
 						form.setOrdinal(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_formOrdinal))));
 					else {
@@ -507,7 +507,7 @@ public class AlsParser implements Parser{
 					if (row.getCell(cell_fieldFixedUnit)!=null)
 						field.setFixedUnit(dataFormatter.formatCellValue(row.getCell(cell_fieldFixedUnit)));
 					for (ALSForm form : alsData.getForms()) {
-						if (field.getFormOid().equalsIgnoreCase(form.getFormOId())) {
+						if (field.getFormOid().equalsIgnoreCase(form.getFormOid())) {
 							form.getFields().add(field);
 						}
 					}

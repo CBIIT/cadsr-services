@@ -33,7 +33,7 @@ public class FormService {
 		try {
 			for (ALSForm form : alsData.getForms()) {
 				FormDisplay fd = new FormDisplay();
-				fd.setFormName(form.getFormOId());
+				fd.setFormName(form.getFormOid());
 				fd.setIsValid(true);
 				int qCount = form.getFields().size();
 				logger.debug("JSON Forms List: "+fd.getFormName()+ " Questions count: "+qCount);
@@ -53,10 +53,10 @@ public class FormService {
 		FormsUiData formUiData = new FormsUiData();
 			for (ALSForm form : alsData.getForms()) {
 				FormDisplay fd = new FormDisplay();
-				fd.setFormName(form.getFormOId());
+				fd.setFormName(form.getFormOid());
 				fd.setIsValid(true);
 				for (ALSError error : alsData.getCccError().getAlsErrors()) {
-					if (error.getFormOid()!=null && error.getFormOid().equalsIgnoreCase(form.getFormOId()) && !error.getErrorSeverity().equals(errorSeverity_warn) ) {
+					if (error.getFormOid()!=null && error.getFormOid().equalsIgnoreCase(form.getFormOid()) && !error.getErrorSeverity().equals(errorSeverity_warn) ) {
 						fd.getErrors().add(error);
 					}
 				}
@@ -93,6 +93,5 @@ public class FormService {
 		}
 		return selectedFormsList;
 	}
-	
-
+		
 }

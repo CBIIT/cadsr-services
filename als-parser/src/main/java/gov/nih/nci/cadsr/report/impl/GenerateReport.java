@@ -21,6 +21,8 @@ import gov.nih.nci.cadsr.data.CCCForm;
 import gov.nih.nci.cadsr.data.CCCQuestion;
 import gov.nih.nci.cadsr.data.CCCReport;
 import gov.nih.nci.cadsr.report.ReportOutput;
+import gov.nih.nci.cadsr.service.CdeService;
+import gov.nih.nci.cadsr.service.model.cdeData.CdeDetails;
 
 
 public class GenerateReport implements ReportOutput {
@@ -30,6 +32,7 @@ public class GenerateReport implements ReportOutput {
 	private static String congStatus_errors= "ERRORS";
 	private static String congStatus_warn = "WARNINGS";
 	private static String congStatus_congruent = "CONGRUENT";
+
 	/**
 	 * @param
 	 * @return Populates the output object for the report after initial
@@ -55,7 +58,7 @@ public class GenerateReport implements ReportOutput {
 					formName = alsField.getFormOid();
 				if (!formName.equals("OID")) {
 					if (!formName.equals(alsField.getFormOid())) {
-						if (questionsList.size() > 0)
+						if (!questionsList.isEmpty())
 							form.setQuestions(questionsList);
 						else
 							form.setCongruencyStatus(congStatus_congruent);
@@ -105,13 +108,18 @@ public class GenerateReport implements ReportOutput {
 						question.setRaveLength(alsField.getFixedUnit());
 						question.setRaveDisplayFormat(alsField.getDataFormat());
 						question.setQuestionCongruencyStatus(congStatus_congruent);
-						// TODO This should call the service [Should be HTTPResponse] - VS
 						CdeDetails cdeDetails = null;
-						cdeDetails = retrieveDataElement(question.getCdePublicId(), question.getCdeVersion());// [CDE service]
+						//if (alsField.getFormOid().equalsIgnoreCase("ENROLLLMENT") || alsField.getFormOid().equalsIgnoreCase("HISTOLOGY_AND_DISEASE") || alsField.getFormOid().equalsIgnoreCase("ELIGIBILITY_CHECKLIST")) {
+						try {
+							cdeDetails = CdeService.retrieveDataElement(question.getCdePublicId(), question.getCdeVersion());
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 						
 						// TODO Call to the validation of the CDEDetails against the ALSField & Question objects  
-						question = validate(alsField, question, cdeDetails); //[ValidatorService]
-
+						//question = validate(alsField, question, cdeDetails); //[ValidatorService]
+						//}
 						if (question.getMessage() == null || question.getMessage().equals("")) { 
 							form.setCongruencyStatus(congStatus_congruent);
 						} else {
@@ -133,7 +141,7 @@ public class GenerateReport implements ReportOutput {
 					}
 				}
 			}
-		if (questionsList.size() > 0)
+		if (!questionsList.isEmpty())
 			form.setQuestions(questionsList);
 		else
 			form.setCongruencyStatus(congStatus_congruent);			
@@ -152,5 +160,5 @@ public class GenerateReport implements ReportOutput {
 		ALSError alsError = new ALSError();
 		return alsError;
 	}		
-
+	
 }

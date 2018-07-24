@@ -81,21 +81,21 @@ public class CongruencyCheckerReportInvoker {
 			String INPUT_XLSX_FILE_PATH = "/local/content/cchecker/" + prop.getProperty("ALS-INPUT-FILE");
 			String OUTPUT_XLSX_FILE_PATH = "target/" + prop.getProperty("VALIDATOR-OUTPUT-FILE");
 			ALSData alsData = alsParser.parse (INPUT_XLSX_FILE_PATH);
-			//FormService.getFormsListJSON(alsData);
+			FormService.getFormsListJSON(alsData);
 			// Set Forms list to be sent to UI for selection, in ALSData
-			//FormsUiData fuidata = FormService.buildFormsUiData(alsData);
+			FormsUiData fuidata = FormService.buildFormsUiData(alsData);
 			List<String> selForms = new ArrayList<String>();
-			//for (FormDisplay fd: fuidata.getFormsList()) {
-			//	selForms.add(fd.getFormName());
-			//}
+			for (FormDisplay fd: fuidata.getFormsList()) {
+				selForms.add(fd.getFormName());
+			}
 			for (ALSError alsError1 : alsData.getCccError().getAlsErrors()) {
 				logger.debug("Error description: "+alsError1.getErrorDesc()+" Severity: "+alsError1.getErrorSeverity());
 			}			
 			logger.debug("Selected Forms list size: "+selForms.size());
-			//cccReport  = generateReport.getFinalReportData(alsData, selForms, false, false, false);
-			//logger.debug("Report Error Forms list size: "+cccReport.getCccForms().size());
+			cccReport  = generateReport.getFinalReportData(alsData, selForms, false, false, false);
+			logger.debug("Report Error Forms list size: "+cccReport.getCccForms().size());
 			for (CCCForm form : cccReport.getCccForms()) {
-				logger.debug("Form name: " + form.getRaveFormOId());
+				logger.debug("Form name: " + form.getRaveFormOid());
 				logger.debug("Questions list: " + form.getQuestions().size());
 				for (CCCQuestion question : form.getQuestions()) {
 					/*if (question.getRaveCodedData() != null && question.getRaveCodedData().size() != 0)
@@ -104,7 +104,7 @@ public class CongruencyCheckerReportInvoker {
 						logger.debug("Questions user string data list: " + question.getRaveUserString().size());*/
 				}
 			}
-			//writeExcel(OUTPUT_XLSX_FILE_PATH, cccReport);
+			writeExcel(OUTPUT_XLSX_FILE_PATH, cccReport);
 			//writeToJSON(cccReport);
 			//logger.debug("Output object forms count: " + cccReport.getCccForms().size());			
 			} catch (IOException ioe) {
@@ -169,7 +169,7 @@ public class CongruencyCheckerReportInvoker {
 			row = sheet.createRow(rowNum++);
 			int colNum = 0;
 			Cell cell = row.createCell(colNum++);
-			cell.setCellValue(form.getRaveFormOId());
+			cell.setCellValue(form.getRaveFormOid());
 			cell = row.createCell(summaryFormsValidResultColNum);
 			cell.setCellValue(form.getCongruencyStatus());
 		}
@@ -183,11 +183,11 @@ public class CongruencyCheckerReportInvoker {
 				"Rave Length", "Length  Result", "CDE Maximum Length", "Rave Display Format", "Format  Result",
 				"CDE Display Format" };
 		for (int i = 0; i < 5; i++) {
-			XSSFSheet sheet2 = workbook.createSheet(forms.get(i).getRaveFormOId());
+			XSSFSheet sheet2 = workbook.createSheet(forms.get(i).getRaveFormOid());
 			rowNum = 0;
 			row = sheet2.createRow(rowNum++);
 			newCell = row.createCell(0);
-			newCell.setCellValue(formHeader_1 + forms.get(i).getRaveFormOId() + formHeader_2);
+			newCell.setCellValue(formHeader_1 + forms.get(i).getRaveFormOid() + formHeader_2);
 			row = sheet2.createRow(rowNum++);
 			int colNum = 0;
 			// Print row headers in the form sheet
@@ -198,7 +198,7 @@ public class CongruencyCheckerReportInvoker {
 			colNum = 0;
 			row = sheet2.createRow(rowNum++);
 			newCell = row.createCell(0);
-			newCell.setCellValue(forms.get(i).getRaveFormOId());
+			newCell.setCellValue(forms.get(i).getRaveFormOid());
 			colNum = colNum+3;
 			newCell = row.createCell(3);
 			newCell.setCellValue(forms.get(i).getQuestions().size());
