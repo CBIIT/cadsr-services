@@ -81,7 +81,6 @@ public class CongruencyCheckerReportInvoker {
 			String INPUT_XLSX_FILE_PATH = "/local/content/cchecker/" + prop.getProperty("ALS-INPUT-FILE");
 			String OUTPUT_XLSX_FILE_PATH = "target/" + prop.getProperty("VALIDATOR-OUTPUT-FILE");
 			ALSData alsData = alsParser.parse (INPUT_XLSX_FILE_PATH);
-			FormService.getFormsListJSON(alsData);
 			// Set Forms list to be sent to UI for selection, in ALSData
 			FormsUiData fuidata = FormService.buildFormsUiData(alsData);
 			List<String> selForms = new ArrayList<String>();
