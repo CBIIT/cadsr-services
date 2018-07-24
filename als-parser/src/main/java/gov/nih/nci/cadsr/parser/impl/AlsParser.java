@@ -84,24 +84,24 @@ public class AlsParser implements Parser{
 	
 	private static String err_msg_1 = "RAVE Protocol Name is missing in the ALS file.";
 	private static String err_msg_2 = "RAVE Protocol Number is missing in the ALS file.";
-	private static String err_msg_3 = "FORM OID missing.";
-	private static String err_msg_4 = "Ordinal of the form missing";	
-	private static String err_msg_5 = "Draft Form name of the form missing";	
-	private static String err_msg_6 = "Form OID missing in the Fields sheet.";
-	private static String err_msg_7 = "Field OID missing in the Fields sheet.";
-	private static String err_msg_8 = "Field Ordinal missing in Fields sheet.";
-	private static String err_msg_9 = "Draft Field Name missing in Fields sheet.";	
-	private static String err_msg_10 = "Data Format missing in Fields sheet.";
-	private static String err_msg_11 = "Data Dictionary Name missing in Fields sheet.";
-	private static String err_msg_12 = "Control Type missing in Fields sheet.";
-	private static String err_msg_13 = "Pretext missing in Fields sheet.";
-	private static String err_msg_14 = "Fixed Unit missing in Fields sheet.";		
-	private static String err_msg_15 = "Data Dictionary Name is missing in Data Dictionary Entries sheet.";
-	private static String err_msg_16 = "Coded Data is missing in Data Dictionary Entries sheet.";
-	private static String err_msg_17 = "Ordinal is missing in Data Dictionary Entries sheet.";
-	private static String err_msg_18 = "User Data String is missing in Data Dictionary Entries sheet.";
-	private static String err_msg_19 = "Specify is missing in Data Dictionary Entries sheet."; // TODO May not be needed if we leave out Specify. If so, remove.
-	private static String err_msg_20 = "Unit Dictionary Name missing in Unit Dictionary Entries sheet.";
+	private static String err_msg_3 = "FORM OID is empty.";
+	private static String err_msg_4 = "Ordinal of the form is empty";	
+	private static String err_msg_5 = "Draft Form name of the form is empty";	
+	private static String err_msg_6 = "Form OID is empty.";
+	private static String err_msg_7 = "Field OID is empty.";
+	private static String err_msg_8 = "Field Ordinal is empty.";
+	private static String err_msg_9 = "Draft Field Name is empty.";	
+	private static String err_msg_10 = "Data Format is empty.";
+	private static String err_msg_11 = "Data Dictionary Name is empty.";
+	private static String err_msg_12 = "Control Type is empty.";
+	private static String err_msg_13 = "Pretext is empty.";
+	private static String err_msg_14 = "Fixed Unit is empty.";		
+	private static String err_msg_15 = "Data Dictionary Name is empty.";
+	private static String err_msg_16 = "Coded Data is empty.";
+	private static String err_msg_17 = "Ordinal is empty.";
+	private static String err_msg_18 = "User Data String is empty.";
+	private static String err_msg_19 = "Specify is empty."; // TODO May not be needed if we leave out Specify. If so, remove.
+	private static String err_msg_20 = "Unit Dictionary Name is empty.";
 	private static String err_msg_21 = "Question doesn't contain a CDE public id and version";	
 	private static String err_msg_22 = "This is an unknown control type.";		
 	private static String err_msg_23 = "CDE public id and version should be numeric.";	
@@ -220,7 +220,7 @@ public class AlsParser implements Parser{
 				crfDraft.setDraftName(dataFormatter.formatCellValue(newRow.getCell(cell_crfDraftName)));
 			if (newRow.getCell(cell_crfDraftProjectName) == null || newRow.getCell(cell_crfDraftProjectName).equals("")) {
 					alsError = getErrorInstance();
-					alsError.setErrorDesc(err_msg_1+" { Excel Coordinates | Sheet: "+sheet.getSheetName()+" | Row: "+newRow.getRowNum()+" | Cell: "+cell_crfDraftProjectName+"}.");
+					alsError.setErrorDesc(err_msg_1);
 					alsError.setSheetName(sheet.getSheetName());
 					alsError.setRowNumber(newRow.getRowNum());
 					alsError.setColNumber(cell_crfDraftProjectName);
@@ -235,7 +235,7 @@ public class AlsParser implements Parser{
 				}
 			if (newRow.getCell(cell_crfDraftPrimaryFormOid)== null || newRow.getCell(cell_crfDraftPrimaryFormOid).equals("")) {
 					alsError = getErrorInstance();			
-					alsError.setErrorDesc(err_msg_2+" { Excel Coordinates | Sheet: "+sheet.getSheetName()+" | Row: "+newRow.getRowNum()+" | Cell: "+cell_crfDraftPrimaryFormOid+"}.");
+					alsError.setErrorDesc(err_msg_2);
 					alsError.setSheetName(sheet.getSheetName());
 					alsError.setRowNumber(newRow.getRowNum());
 					alsError.setColNumber(cell_crfDraftPrimaryFormOid);
@@ -276,7 +276,7 @@ public class AlsParser implements Parser{
 						form.setOrdinal(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_formOrdinal))));
 					else {
 							alsError = getErrorInstance();
-							alsError.setErrorDesc((err_msg_4)+" { Excel Coordinates | Sheet: "+sheet.getSheetName()+" | Row: "+row.getRowNum()+" | Cell: "+cell_formOrdinal+"}.");
+							alsError.setErrorDesc(err_msg_4);
 							alsError.setSheetName(sheet.getSheetName());
 							alsError.setRowNumber(row.getRowNum());
 							alsError.setColNumber(cell_formOrdinal);
@@ -288,7 +288,7 @@ public class AlsParser implements Parser{
 						form.setDraftFormName(dataFormatter.formatCellValue(row.getCell(cell_formDraftName)));
 					else  {
 							alsError = getErrorInstance();
-							alsError.setErrorDesc((err_msg_5)+" { Excel Coordinates | Sheet: "+sheet.getSheetName()+" | Row: "+row.getRowNum()+" | Cell: "+cell_formDraftName+"}.");
+							alsError.setErrorDesc(err_msg_5);
 							alsError.setSheetName(sheet.getSheetName());
 							alsError.setRowNumber(row.getRowNum());
 							alsError.setColNumber(cell_formDraftName);
@@ -299,7 +299,7 @@ public class AlsParser implements Parser{
 				} else {
 					if (row.getCell(cell_formOrdinal) != null && row.getCell(cell_formDraftName) != null) {
 							alsError = getErrorInstance();
-							alsError.setErrorDesc((err_msg_3)+" { Excel Coordinates | Sheet: "+sheet.getSheetName()+" | Row: "+row.getRowNum()+" | Cell: "+cell_formOid+"}.");
+							alsError.setErrorDesc(err_msg_3);
 							alsError.setSheetName(sheet.getSheetName());
 							alsError.setRowNumber(row.getRowNum());
 							alsError.setColNumber(cell_formOid);
@@ -355,7 +355,7 @@ public class AlsParser implements Parser{
 							field.setFieldOid(fieldOid); 
 					} else {
 						alsError = getErrorInstance();
-						alsError.setErrorDesc((err_msg_7)+" { Excel Coordinates | Sheet: "+sheet.getSheetName()+" | Row: "+row.getRowNum()+" | Cell: "+cell_fieldOid+"}.");
+						alsError.setErrorDesc(err_msg_7);
 						alsError.setSheetName(sheet.getSheetName());
 						alsError.setRowNumber(row.getRowNum());
 						alsError.setColNumber(cell_fieldOid);			
@@ -377,7 +377,7 @@ public class AlsParser implements Parser{
 					    }
 					    catch (NumberFormatException e) {
 							alsError = getErrorInstance();
-							alsError.setErrorDesc(err_msg_24+" { Excel Coordinates | Sheet: "+sheet.getSheetName()+" | Row: "+row.getRowNum()+" | Cell: "+cell_fieldOrdinal+"}.");
+							alsError.setErrorDesc(err_msg_24);
 							alsError.setSheetName(sheet.getSheetName());
 							alsError.setRowNumber(row.getRowNum());
 							alsError.setColNumber(cell_fieldOrdinal);		
@@ -399,7 +399,7 @@ public class AlsParser implements Parser{
 						field.setDraftFieldName(draftFieldName);
 						if (!(draftFieldName.indexOf("PID") > -1 && draftFieldName.indexOf("_V") > -1)) {
 							alsError = getErrorInstance();
-							alsError.setErrorDesc(err_msg_21+" - "+draftFieldName+" { Excel Coordinates | Sheet: "+sheet.getSheetName()+" | Row: "+row.getRowNum()+" | Cell: "+cell_draftFieldName+"}.");
+							alsError.setErrorDesc(err_msg_21);
 							alsError.setCellValue(draftFieldName);
 							alsError.setSheetName(sheet.getSheetName());
 							alsError.setRowNumber(row.getRowNum());
@@ -425,7 +425,7 @@ public class AlsParser implements Parser{
 						        version = versionTokens[0] + "." + versionTokens[1];
 						        if (!NumberUtils.isNumber(id) || !NumberUtils.isNumber(version)) {
 									alsError = getErrorInstance();
-									alsError.setErrorDesc(err_msg_23+ " " + idVersion +" { Excel Coordinates | Sheet: "+sheet.getSheetName()+" | Row: "+row.getRowNum()+" | Cell: "+cell_draftFieldName+"}.");
+									alsError.setErrorDesc(err_msg_23);
 									alsError.setCellValue(idVersion);
 									alsError.setSheetName(sheet.getSheetName());
 									alsError.setRowNumber(row.getRowNum());
@@ -446,7 +446,7 @@ public class AlsParser implements Parser{
 					else
 					{
 						alsError = getErrorInstance();
-						alsError.setErrorDesc((err_msg_9)+" { Excel Coordinates | Sheet: "+sheet.getSheetName()+" | Row: "+row.getRowNum()+" | Cell: "+cell_draftFieldName+"}.");
+						alsError.setErrorDesc(err_msg_9);
 						alsError.setSheetName(sheet.getSheetName());
 						alsError.setRowNumber(row.getRowNum());
 						alsError.setColNumber(cell_draftFieldName);
@@ -468,7 +468,7 @@ public class AlsParser implements Parser{
 						field.setControlType(controlType);
 							if (!controlTypes.contains(controlType)) {
 								alsError = getErrorInstance();
-								alsError.setErrorDesc(err_msg_22+ " - " + controlType +" { Excel Coordinates | Sheet: "+sheet.getSheetName()+" | Row: "+row.getRowNum()+" | Cell: "+cell_fieldControlType+"}.");
+								alsError.setErrorDesc(err_msg_22);
 								alsError.setSheetName(sheet.getSheetName());
 								alsError.setRowNumber(row.getRowNum());
 								alsError.setColNumber(cell_fieldControlType);
@@ -487,7 +487,7 @@ public class AlsParser implements Parser{
 					else
 					{
 						alsError = getErrorInstance();
-						alsError.setErrorDesc((err_msg_12)+" { Excel Coordinates | Sheet: "+sheet.getSheetName()+" | Row: "+row.getRowNum()+" | Cell: "+cell_fieldControlType+"}.");
+						alsError.setErrorDesc(err_msg_12);
 						alsError.setSheetName(sheet.getSheetName());
 						alsError.setRowNumber(row.getRowNum());
 						alsError.setColNumber(cell_fieldControlType);	
@@ -515,7 +515,7 @@ public class AlsParser implements Parser{
 				} else {
 					if (row.getCell(cell_fieldOrdinal)!=null && row.getCell(cell_draftFieldName)!=null && row.getCell(cell_fieldControlType)!=null) {
 						alsError = getErrorInstance();
-						alsError.setErrorDesc((err_msg_6)+" { Excel Coordinates | Sheet: "+sheet.getSheetName()+" | Row: "+row.getRowNum()+" | Cell: "+cell_field_formOid+"}.");
+						alsError.setErrorDesc(err_msg_6);
 						alsError.setSheetName(sheet.getSheetName());
 						alsError.setRowNumber(row.getRowNum());
 						alsError.setColNumber(cell_field_formOid);						
@@ -575,7 +575,7 @@ public class AlsParser implements Parser{
 					else
 						{
 							alsError = getErrorInstance();
-							alsError.setErrorDesc((err_msg_16)+" { Excel Coordinates | Sheet: "+sheet.getSheetName()+" | Row: "+row.getRowNum()+" | Cell: "+cell_ddeCodedData+"}.");
+							alsError.setErrorDesc(err_msg_16);
 							alsError.setSheetName(sheet.getSheetName());
 							alsError.setRowNumber(row.getRowNum());
 							alsError.setColNumber(cell_ddeCodedData);
@@ -589,7 +589,7 @@ public class AlsParser implements Parser{
 					else
 						{
 							alsError = getErrorInstance();
-							alsError.setErrorDesc((err_msg_17)+" { Excel Coordinates | Sheet: "+sheet.getSheetName()+" | Row: "+row.getRowNum()+" | Cell: "+cell_ddeOrdinal+"}.");
+							alsError.setErrorDesc(err_msg_17);
 							alsError.setSheetName(sheet.getSheetName());
 							alsError.setRowNumber(row.getRowNum());
 							alsError.setColNumber(cell_ddeOrdinal);		
@@ -603,7 +603,7 @@ public class AlsParser implements Parser{
 					else
 						{
 							alsError = getErrorInstance();
-							alsError.setErrorDesc((err_msg_18)+" { Excel Coordinates | Sheet: "+sheet.getSheetName()+" | Row: "+row.getRowNum()+" | Cell: "+cell_ddeUserDataString+"}.");
+							alsError.setErrorDesc(err_msg_18);
 							alsError.setSheetName(sheet.getSheetName());
 							alsError.setRowNumber(row.getRowNum());
 							alsError.setColNumber(cell_ddeUserDataString);		
@@ -617,7 +617,7 @@ public class AlsParser implements Parser{
 					else
 					{
 						alsError = getErrorInstance();
-						alsError.setErrorDesc((err_msg_19)+" { Excel Coordinates | Sheet: "+sheet.getSheetName()+" | Row: "+row.getRowNum()+" | Cell: "+cell_ddeSpecify+"}.");
+						alsError.setErrorDesc(err_msg_19);
 						alsError.setSheetName(sheet.getSheetName());
 						alsError.setRowNumber(row.getRowNum());
 						alsError.setColNumber(cell_ddeSpecify);						
@@ -629,7 +629,7 @@ public class AlsParser implements Parser{
 				} else {
 					if (row.getCell(cell_ddeCodedData) != null && row.getCell(cell_ddeOrdinal) != null && row.getCell(cell_ddeUserDataString) != null && row.getCell(cell_ddeSpecify) != null) {
 						alsError = getErrorInstance();
-						alsError.setErrorDesc((err_msg_15)+" { Excel Coordinates | Sheet: "+sheet.getSheetName()+" | Row: "+row.getRowNum()+" | Cell: "+cell_ddeDataDictionaryName+"}.");
+						alsError.setErrorDesc(err_msg_15);
 						alsError.setSheetName(sheet.getSheetName());
 						alsError.setRowNumber(row.getRowNum());
 						alsError.setColNumber(cell_ddeDataDictionaryName);																		
@@ -687,7 +687,7 @@ public class AlsParser implements Parser{
 		}	else {
 			if (row.getCell(cell_udCodedUnit) != null && row.getCell(cell_udOrdinal) != null && row.getCell(cell_udConstantA) != null && row.getCell(cell_udConstantB) != null && row.getCell(cell_udUnitString) != null) {
 					alsError = getErrorInstance();
-					alsError.setErrorDesc((err_msg_20)+" { Excel Coordinates | Sheet: "+sheet.getSheetName()+" | Row: "+row.getRowNum()+" | Cell: "+cell_udName+"}.");
+					alsError.setErrorDesc(err_msg_20);
 					alsError.setSheetName(sheet.getSheetName());
 					alsError.setRowNumber(row.getRowNum());
 					alsError.setColNumber(cell_udName);																						
