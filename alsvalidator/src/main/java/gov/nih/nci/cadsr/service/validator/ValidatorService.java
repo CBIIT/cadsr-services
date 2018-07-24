@@ -3,33 +3,15 @@
  */
 package gov.nih.nci.cadsr.service.validator;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.client.RestTemplate;
 
 import gov.nih.nci.cadsr.dao.model.PermissibleValuesModel;
 import gov.nih.nci.cadsr.data.ALSField;
 import gov.nih.nci.cadsr.data.CCCQuestion;
-import gov.nih.nci.cadsr.data.DBValidationError;
 import gov.nih.nci.cadsr.service.model.cdeData.CdeDetails;
 import gov.nih.nci.cadsr.service.model.cdeData.dataElement.ReferenceDocument;
 
@@ -67,18 +49,20 @@ public class ValidatorService {
 			List<String> rdDocTextList = new ArrayList<String>();
 			StringBuffer rdDocs = new StringBuffer();
 			String rdDocText;
-			for (ReferenceDocument rd : cdeDetails.getDataElement().getReferenceDocuments()) {
-				rdDocText =  rd.getDocumentText();
-				rdDocTextList.add(rdDocText);
-				if (rd.getDocumentType().equalsIgnoreCase("Preferred Question Text") || rd.getDocumentType().equalsIgnoreCase("Alternate Question Text")) {
-					if (!rdDocs.equals(""))
-						rdDocs.append("|"+rdDocText);
-					else 
-						rdDocs.append(rdDocText);
+			if (cdeDetails.getDataElement()!=null) {
+				for (ReferenceDocument rd : cdeDetails.getDataElement().getReferenceDocuments()) {
+					rdDocText =  rd.getDocumentText();
+					rdDocTextList.add(rdDocText);
+					if (rd.getDocumentType().equalsIgnoreCase("Preferred Question Text") || rd.getDocumentType().equalsIgnoreCase("Alternate Question Text")) {
+						if (!rdDocs.equals(""))
+							rdDocs.append("|"+rdDocText);
+						else 
+							rdDocs.append(rdDocText);
+					}
+	
 				}
-
 			}
-			if (rdDocTextList.contains(question.getRaveFieldLabel())) {
+			if (!rdDocTextList.isEmpty() && rdDocTextList.contains(question.getRaveFieldLabel())) {
 				question.setRaveFieldLabelResult(matchString);
 			} else {
 				question.setRaveFieldLabelResult(errorString);
@@ -86,44 +70,65 @@ public class ValidatorService {
 			}		
 			question.setCdePermitQuestionTextChoices(rdDocs.toString());
 			//List<String> vdTypeList = new ArrayList<String>();
-			if (question.getRaveControlType().equals(cdeDetails.getValueDomain().getValueDomainDetails().getDataType())) {
-				question.setControlTypeResult(matchString);
-			} else {
-				question.setControlTypeResult(errorString);
-				question.setQuestionCongruencyStatus(congStatus_errors);
-			}
-			List<String> pvList = new ArrayList<String>();
-			for (PermissibleValuesModel pv : cdeDetails.getValueDomain().getPermissibleValues()) {
-				pvList.add(pv.getValue());
-			}
-			List<String> cdResult = new ArrayList<String>();
-			for (String codedData : question.getRaveCodedData()) {
-				if (pvList.contains(codedData)) {
-					cdResult.add(matchString);
+			if (question.getRaveControlType()!=null && cdeDetails.getValueDomain()!=null) {
+				if (question.getRaveControlType().equals(cdeDetails.getValueDomain().getValueDomainDetails().getDataType())) {
+					question.setControlTypeResult(matchString);
 				} else {
-					cdResult.add(errorString);
+					question.setControlTypeResult(errorString);
 					question.setQuestionCongruencyStatus(congStatus_errors);
 				}
+			} else {
+				question.setControlTypeResult(errorString);
+				question.setQuestionCongruencyStatus(congStatus_errors);				
 			}
-			if (cdResult.size()>0)
-				question.setCodedDataResult(cdResult);
-			if (field.getDataFormat().indexOf("$") > -1 
-			&& characterDataFormats.contains(cdeDetails.getValueDomain().getValueDomainDetails().getDataType()))  {
-				question.setDatatypeCheckerResult(matchString);
+			List<String> pvList = new ArrayList<String>();
+			if (cdeDetails.getValueDomain()!=null) {
+				for (PermissibleValuesModel pv : cdeDetails.getValueDomain().getPermissibleValues()) {
+					pvList.add(pv.getValue());
+				}
+			}
+			List<String> cdResult = new ArrayList<String>();
+			if (!pvList.isEmpty()) {
+				for (String codedData : question.getRaveCodedData()) {
+					if (pvList.contains(codedData)) {
+						cdResult.add(matchString);
+					} else {
+						cdResult.add(errorString);
+						question.setQuestionCongruencyStatus(congStatus_errors);
+					}
+				}
+				if (!cdResult.isEmpty())
+					question.setCodedDataResult(cdResult);
+				if (field.getDataFormat().indexOf("$") > -1 
+				&& characterDataFormats.contains(cdeDetails.getValueDomain().getValueDomainDetails().getDataType()))  {
+					question.setDatatypeCheckerResult(matchString);
+				} else {
+					question.setDatatypeCheckerResult(errorString);
+					question.setQuestionCongruencyStatus(congStatus_errors);
+				}
 			} else {
 				question.setDatatypeCheckerResult(errorString);
 				question.setQuestionCongruencyStatus(congStatus_errors);
 			}
-			if (field.getDataFormat().indexOf("$") == -1 
-					&& numericDataFormats.contains(cdeDetails.getValueDomain().getValueDomainDetails().getDataType()))  {
-				question.setDatatypeCheckerResult(matchString);
+			if (cdeDetails.getValueDomain()!=null) {
+				if (field.getDataFormat().indexOf("$") == -1 
+						&& numericDataFormats.contains(cdeDetails.getValueDomain().getValueDomainDetails().getDataType()))  {
+					question.setDatatypeCheckerResult(matchString);
+				} else {
+					question.setDatatypeCheckerResult(errorString);
+					question.setQuestionCongruencyStatus(congStatus_errors);
+				} 
 			} else {
 				question.setDatatypeCheckerResult(errorString);
 				question.setQuestionCongruencyStatus(congStatus_errors);
 			}
-			
-			if (question.getRaveUOM()!=null && question.getRaveUOM().equals(cdeDetails.getValueDomain().getValueDomainDetails().getUnitOfMeasure())) {
-				question.setUomCheckerResult(matchString);
+			if (cdeDetails.getValueDomain()!=null) {
+				if (question.getRaveUOM()!=null && question.getRaveUOM().equals(cdeDetails.getValueDomain().getValueDomainDetails().getUnitOfMeasure())) {
+					question.setUomCheckerResult(matchString);
+				} else {
+					question.setUomCheckerResult(errorString);
+					question.setQuestionCongruencyStatus(congStatus_errors);
+				} 
 			} else {
 				question.setUomCheckerResult(errorString);
 				question.setQuestionCongruencyStatus(congStatus_errors);
@@ -139,9 +144,13 @@ public class ValidatorService {
 					index = 0;
 				}
 				raveLength = raveLength.substring(index,raveLength.indexOf("characters"));
-				logger.debug("Max length: "+cdeDetails.getValueDomain().getValueDomainDetails().getMaximumLength()+ "  Rave length: " +raveLength);
-				if (Float.valueOf(raveLength) < Float.valueOf(cdeDetails.getValueDomain().getValueDomainDetails().getMaximumLength())) {
-					question.setLengthCheckerResult(matchString);
+				if (cdeDetails.getValueDomain()!=null) {	
+					if (Float.valueOf(raveLength) < Float.valueOf(cdeDetails.getValueDomain().getValueDomainDetails().getMaximumLength())) {
+						question.setLengthCheckerResult(matchString);
+					} else {
+						question.setLengthCheckerResult(errorString);
+						question.setQuestionCongruencyStatus(congStatus_errors);	
+					}
 				} else {
 					question.setLengthCheckerResult(errorString);
 					question.setQuestionCongruencyStatus(congStatus_errors);	
@@ -150,9 +159,13 @@ public class ValidatorService {
 				question.setLengthCheckerResult(errorString);
 				question.setQuestionCongruencyStatus(congStatus_errors);
 			} 
-
-			if (field.getDataFormat().equals(cdeDetails.getValueDomain().getValueDomainDetails().getDisplayFormat())) {
-				question.setFormatCheckerResult(matchString);
+			if (cdeDetails.getValueDomain()!=null) {
+				if (field.getDataFormat().equals(cdeDetails.getValueDomain().getValueDomainDetails().getDisplayFormat())) {
+					question.setFormatCheckerResult(matchString);
+				} else {
+					question.setFormatCheckerResult(errorString);
+					question.setQuestionCongruencyStatus(congStatus_errors);
+				} 
 			} else {
 				question.setFormatCheckerResult(errorString);
 				question.setQuestionCongruencyStatus(congStatus_errors);
@@ -172,63 +185,6 @@ public class ValidatorService {
 		else
 			question.setMessage(message.toString());			
 	return question;	
-	}
+	}		
 	
-	/**
-	 * retrieve CDE by calling cde details restful service
-	 * 
-	 * @param uploadfile
-	 * @return ResponseEntity
-	 */
-    @RequestMapping( value = "/rest/cdedetails" )
-    @ResponseBody
-	public CdeDetails retrieveDataElement(@RequestParam("publicId") String publicId,
-			@RequestParam("version") String versionNumber) throws Exception  {
-		logger.debug("Single file upload!");
-		CdeDetails cdeDetails = null;
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		InputStream input = classLoader.getResourceAsStream("boot.properties");		
-        if (checkLinkParameters(publicId, versionNumber)) {
-	        // Get the data model from the database
-        		String CDEBROWSER_REST_GET_CDE = null;
-        		Properties properties = new Properties();
-        		properties.load(input);
-        		String propVal;
-        		if ((propVal = properties.getProperty("CDEBROWSER_REST_GET_CDE")) != null) {
-        			CDEBROWSER_REST_GET_CDE = propVal;
-        		}	
-	        	String cdeBrowserRestApiUrl = String.format(CDEBROWSER_REST_GET_CDE, publicId, versionNumber);
-	            RestTemplate restTemplate = new RestTemplate();
-	    		HttpHeaders httpHeaders = new HttpHeaders();//we have to set up Accept header for a chance a server does not set up Content-Type header on response
-	            cdeDetails = restTemplate.getForObject(cdeBrowserRestApiUrl, CdeDetails.class);
-	            httpHeaders.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-	            HttpEntity<String> entity = new HttpEntity<>("parameters", httpHeaders);
-	            ResponseEntity<CdeDetails> responseEntity = restTemplate.exchange(cdeBrowserRestApiUrl, HttpMethod.GET, entity, CdeDetails.class);
-	            cdeDetails = responseEntity.getBody();
-        }
-        else {
-        	logger.info("Unexpected parameter values are ignored in retrieveDataElementDetailsByLink, publicId: " + publicId + ", versionNumber: " + versionNumber);
-        }
-        if (cdeDetails == null) {
-        	cdeDetails = new CdeDetails();
-        }
-
-		return cdeDetails;
-	}	
- 
-    
-    private boolean checkLinkParameters(String publicId, String versionNumber) {
-    	if ((NumberUtils.isNumber(versionNumber)) && (NumberUtils.isDigits(publicId))) {
-    		return true;
-    	}
-    	else return false;
-    }
-    
-    
-	
-	public static DBValidationError getDbErrorInstance() {
-		DBValidationError dbError = new DBValidationError();
-		return dbError;
-	}
-
 }
