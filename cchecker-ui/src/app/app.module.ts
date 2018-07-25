@@ -7,6 +7,7 @@ import { AlsFormListComponent } from './als-form-list/als-form-list.component';
 import { AlsUploadFormComponent } from './als-upload-form/als-upload-form.component';
 import { AlsReportComponent } from './als-report/als-report.component';
 import { NavigationComponent } from './navigation/navigation.component';
+import { HttpClientModule } from '@angular/common/http';
 
 const APP_ROUTES: Routes = [
   // Default empty path
@@ -25,6 +26,7 @@ const APP_ROUTES: Routes = [
   ],
   imports: [
     BrowserModule,
+    HttpClientModule,
     FormsModule,
     RouterModule.forRoot(APP_ROUTES)
   ],
