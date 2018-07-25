@@ -74,7 +74,8 @@ import gov.nih.nci.cadsr.service.FormService;
 
 		protected Cookie generateCookie() {
 	    	Cookie cookie = new Cookie(sessionCookieName, generateIdseq());
-	    	cookie.setMaxAge(24 * 60 * 60);  // (24 hours in seconds)
+	    	//cookie.setMaxAge(24 * 60 * 60);  // (24 hours in seconds)
+	    	cookie.setMaxAge(-1);  // negative value means that the cookie is not stored persistently and will be deleted when the Web browser exits
 	    	cookie.setPath("/");
 	    	return cookie;
 	    }
