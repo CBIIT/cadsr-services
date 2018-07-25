@@ -2,11 +2,9 @@
    ALS Form List
 </h2>
 <p>Some description up here</p>
-
 <div>
-    <button [disabled]="!checkedItems.length" class="btn btn-primary">Check Form<span *ngIf="checkedItems.length>1">s</span></button>
+    <button [disabled]="!checkedItems.length" class="btn btn-primary" (click)="checkForms()">Check Form<span *ngIf="checkedItems.length>1">s</span></button>
 </div><br />
-
 <table class="alsFormList">
    <tr>
       <th>
