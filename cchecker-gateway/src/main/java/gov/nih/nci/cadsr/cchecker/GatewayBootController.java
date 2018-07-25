@@ -44,6 +44,7 @@ import gov.nih.nci.cadsr.service.FormService;
 		static String CCHECKER_PARSER_URL;
 		static String CCHECKER_DB_SERVICE_URL;
 		static String UPLOADED_FOLDER;
+		static String ACCESS_CONTROL_ALLOW_ORIGIN;
 		static final String sessionCookieName = "_cchecker";
 		//FIXME shall be defined in ALSError
 		static final String FATAL_ERROR_STATUS = "FATAL";
@@ -156,7 +157,6 @@ import gov.nih.nci.cadsr.service.FormService;
 		public ResponseEntity<?> parseService(HttpServletRequest request, HttpServletResponse response,
 				@RequestParam(name="owner", defaultValue="guest") String reportOwner, @RequestParam("file") MultipartFile uploadfile) {
 			logger.debug("uploadFile started");
-			HttpHeaders httpHeaders = new HttpHeaders();
 			
 			//upload file
 			if (uploadfile.isEmpty()) {
@@ -235,7 +235,7 @@ import gov.nih.nci.cadsr.service.FormService;
 			response.addCookie(cookie);
 			
 			//If decided always return json type, put Content-Type to annotations then
-			httpHeaders.add("Content-Type", "application/json");
+			HttpHeaders httpHeaders = createHttpOkHeaders();
 			return new ResponseEntity<FormsUiData>(formUiData, httpHeaders, HttpStatus.OK);
 		}
 		@PostMapping("/checkservice")
@@ -260,8 +260,7 @@ import gov.nih.nci.cadsr.service.FormService;
 	    	response.addCookie(cookie);
 	    	CCCReport cccReport = CongruencyCheckerReportInvoker.builTestReport(alsDataWrapper.getAlsData());
 	    	cccReport.setReportOwner(alsDataWrapper.getAlsData().getReportOwner());
-			HttpHeaders httpHeaders = new HttpHeaders();
-			httpHeaders.add("Content-Type", "application/json");
+	    	HttpHeaders httpHeaders = createHttpOkHeaders();
 			return new ResponseEntity<CCCReport>(cccReport, httpHeaders, HttpStatus.OK);
 			
 		}
@@ -299,6 +298,7 @@ import gov.nih.nci.cadsr.service.FormService;
 			//TODO what context type shall be returned on an error - ? Now text/plain 
 			HttpHeaders httpHeaders = new HttpHeaders();
 			httpHeaders.add("Content-Type", "text/plain");
+			assignAccessControlHeader(httpHeaders);
 			logger.error(errorMessage);
 			return new ResponseEntity<String>(errorMessage, httpHeaders, HttpStatus.BAD_REQUEST);
 		}
@@ -318,6 +318,15 @@ import gov.nih.nci.cadsr.service.FormService;
 			Path pathNew = Files.write(path, bytes, StandardOpenOption.CREATE_NEW);
 			return pathNew;
 		}
+		protected void assignAccessControlHeader(HttpHeaders httpHeaders) {
+			httpHeaders.setAccessControlAllowOrigin(ACCESS_CONTROL_ALLOW_ORIGIN);
+		}
+		protected HttpHeaders createHttpOkHeaders() {
+			HttpHeaders httpHeaders = new HttpHeaders();
+			httpHeaders.add("Content-Type", "application/json");
+			httpHeaders.setAccessControlAllowOrigin(ACCESS_CONTROL_ALLOW_ORIGIN);
+			return httpHeaders;
+		}
 		/**
 		 * The properties are taken from the boot service.
 		 */
@@ -325,9 +334,11 @@ import gov.nih.nci.cadsr.service.FormService;
 			CCHECKER_PARSER_URL = GatewayBootWebApplication.CCHECKER_PARSER_URL;
 			UPLOADED_FOLDER = GatewayBootWebApplication.UPLOADED_FOLDER;
 			CCHECKER_DB_SERVICE_URL = GatewayBootWebApplication.CCHECKER_DB_SERVICE_URL;
+			ACCESS_CONTROL_ALLOW_ORIGIN = GatewayBootWebApplication.ACCESS_CONTROL_ALLOW_ORIGIN;
 			logger.debug("GatewayBootController CCHECKER_PARSER_URL: " + CCHECKER_PARSER_URL);
 			logger.debug("GatewayBootController UPLOADED_FOLDER: " + UPLOADED_FOLDER);
 			logger.debug("GatewayBootController CCHECKER_DB_SERVICE_URL: " + CCHECKER_DB_SERVICE_URL);
+			logger.debug("GatewayBootController ACCESS_CONTROL_ALLOW_ORIGIN: " + ACCESS_CONTROL_ALLOW_ORIGIN);
 	    }
 	    //TODO remove testReportService service
 		/**
