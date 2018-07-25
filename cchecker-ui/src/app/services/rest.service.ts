@@ -9,7 +9,10 @@ export class RestService {
   constructor(private http:HttpClient) {
    }
 
-  loadFormListData() {
-      return this.http.get('assets/formListData.json')
-  };
+  // load data from local file for testing //  
+  loadFormListData = () => this.http.get('assets/formListData.json');
+  
+  // upload file service //
+  uploadAlsFile = file => this.http.post('http://localhost:8080/gateway/parseservice?owner=me2',file);
+  
 }

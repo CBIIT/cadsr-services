@@ -1,7 +1,6 @@
 <h2>
     Upload ALS File
 </h2>
-
 <form #alsForm="ngForm">
     <div class="form-group">
         <label for="name">Name</label>
@@ -11,7 +10,7 @@
 
     <div class="form-group">
         <label for="alsFile">ALS File</label>
-        <input type="file" class="form-control" id="alsFile" required [(ngModel)]="alsFile" name="alsFile" #error_file="ngModel">
+        <input type="file" class="form-control" (change)="getFile($event)" id="alsFile" required [(ngModel)]="alsFile" name="alsFile" #error_file="ngModel">
         <div [hidden]="error_file.valid || (error_file.pristine && !submitted)" class="alert alert-danger">ALS File is required</div>
     </div>
 
