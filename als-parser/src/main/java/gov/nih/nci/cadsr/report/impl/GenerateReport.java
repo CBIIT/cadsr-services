@@ -50,6 +50,7 @@ public class GenerateReport implements ReportOutput {
 		List<CCCForm> formsList = new ArrayList<CCCForm>();
 		CCCForm form = new CCCForm();
 		String formName = "";
+		int totalQuestCount = 0;
 		List<CCCQuestion> questionsList = new ArrayList<CCCQuestion>();
 		Map<String, ALSDataDictionaryEntry> ddeMap = alsData.getDataDictionaryEntries();
 		for (ALSField alsField : alsData.getFields()) {
@@ -63,12 +64,15 @@ public class GenerateReport implements ReportOutput {
 						else
 							form.setCongruencyStatus(congStatus_congruent);
 						form.setRaveFormOId(formName);
+						form.setCountTotalQuestions(totalQuestCount);
 						formsList.add(form);
+						totalQuestCount = 0;
 						formName = alsField.getFormOid();
 						form = new CCCForm();
 						questionsList = new ArrayList<CCCQuestion>();
 					}
 					CCCQuestion question = new CCCQuestion();
+					totalQuestCount++;
 					question.setFieldOrder(alsField.getOrdinal()); 																																
 					String draftFieldName = alsField.getDraftFieldName();
 					if (draftFieldName.indexOf("PID") > -1 && draftFieldName.indexOf("_V") > -1) {
@@ -122,6 +126,8 @@ public class GenerateReport implements ReportOutput {
 						//}
 						if (question.getMessage() == null || question.getMessage().equals("")) { 
 							form.setCongruencyStatus(congStatus_congruent);
+							if (!question.getRaveCodedData().isEmpty() && !question.getRaveUserString().isEmpty())
+								questionsList.add(question);
 						} else {
 									questionsList.add(question); 
 									if (form.getCongruencyStatus()!=null) {

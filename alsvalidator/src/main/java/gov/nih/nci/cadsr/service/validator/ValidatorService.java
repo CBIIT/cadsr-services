@@ -20,6 +20,7 @@ public class ValidatorService {
 	private static final Logger logger = Logger.getLogger(ValidatorService.class);	
 	private static final String errorString = "ERROR";
 	private static final String matchString = "MATCH";
+	private static final String warningString = "WARNING";	
 	private static final String retiredString = "RETIRED";
 	private static final String msg1 = "CDE not in caDSR database";
 	private static final String msg2 = "CDE has been retired";
@@ -69,7 +70,6 @@ public class ValidatorService {
 				question.setQuestionCongruencyStatus(congStatus_errors);
 			}		
 			question.setCdePermitQuestionTextChoices(rdDocs.toString());
-			//List<String> vdTypeList = new ArrayList<String>();
 			if (question.getRaveControlType()!=null && cdeDetails.getValueDomain()!=null) {
 				if (question.getRaveControlType().equals(cdeDetails.getValueDomain().getValueDomainDetails().getDataType())) {
 					question.setControlTypeResult(matchString);
@@ -82,9 +82,14 @@ public class ValidatorService {
 				question.setQuestionCongruencyStatus(congStatus_errors);				
 			}
 			List<String> pvList = new ArrayList<String>();
+			int pvMaxLen = 0;
+			int vdMaxLen = 0;
 			if (cdeDetails.getValueDomain()!=null) {
+				vdMaxLen = cdeDetails.getValueDomain().getValueDomainDetails().getMaximumLength();
 				for (PermissibleValuesModel pv : cdeDetails.getValueDomain().getPermissibleValues()) {
 					pvList.add(pv.getValue());
+					if (pv.getValue().length() > pvMaxLen)
+						pvMaxLen = pv.getValue().length();
 				}
 			}
 			List<String> cdResult = new ArrayList<String>();
@@ -92,6 +97,7 @@ public class ValidatorService {
 				for (String codedData : question.getRaveCodedData()) {
 					if (pvList.contains(codedData)) {
 						cdResult.add(matchString);
+						logger.debug("CodedData: "+codedData+" PV list size: "+pvList.size());
 					} else {
 						cdResult.add(errorString);
 						question.setQuestionCongruencyStatus(congStatus_errors);
@@ -119,22 +125,29 @@ public class ValidatorService {
 					question.setQuestionCongruencyStatus(congStatus_errors);
 				} 
 			} else {
-				question.setDatatypeCheckerResult(errorString);
-				question.setQuestionCongruencyStatus(congStatus_errors);
-			}
-			if (cdeDetails.getValueDomain()!=null) {
-				if (question.getRaveUOM()!=null && question.getRaveUOM().equals(cdeDetails.getValueDomain().getValueDomainDetails().getUnitOfMeasure())) {
-					question.setUomCheckerResult(matchString);
-				} else {
-					question.setUomCheckerResult(errorString);
+				if (field.getDataFormat()!=null) {
+					question.setDatatypeCheckerResult(errorString);
 					question.setQuestionCongruencyStatus(congStatus_errors);
-				} 
-			} else {
-				question.setUomCheckerResult(errorString);
-				question.setQuestionCongruencyStatus(congStatus_errors);
+				}
+			}
+			if (question.getRaveUOM()!=null) {
+				if (cdeDetails.getValueDomain()!=null) {
+					if (question.getRaveUOM().equals(cdeDetails.getValueDomain().getValueDomainDetails().getUnitOfMeasure())) {
+						question.setUomCheckerResult(matchString);
+					} else {
+						question.setUomCheckerResult(warningString);
+						question.setQuestionCongruencyStatus(congStatus_warn);
+						question.setCdeUOM(cdeDetails.getValueDomain().getValueDomainDetails().getUnitOfMeasure());
+					}
+				} else {
+					question.setUomCheckerResult(warningString);
+					question.setQuestionCongruencyStatus(congStatus_warn);
+					question.setCdeUOM("");
+				}
 			}
 			
 			String raveLength = question.getRaveLength();
+			logger.debug("PV list:  "+pvList.size()+" PV Max Length: "+pvMaxLen+" VD Max Length: "+vdMaxLen+" RAVE Length:  "+raveLength+" RAVE UOM: "+question.getRaveUOM());
 			if (raveLength!=null && raveLength.indexOf("characters")>-1) {
 				raveLength.replaceAll("\\p{P}","");		
 				int index = 0;
@@ -144,31 +157,32 @@ public class ValidatorService {
 					index = 0;
 				}
 				raveLength = raveLength.substring(index,raveLength.indexOf("characters"));
-				if (cdeDetails.getValueDomain()!=null) {	
+				if (cdeDetails.getValueDomain()!=null) {
+					for (PermissibleValuesModel pv : cdeDetails.getValueDomain().getPermissibleValues())
+						logger.debug("pv value: "+pv.getValue());
 					if (Float.valueOf(raveLength) < Float.valueOf(cdeDetails.getValueDomain().getValueDomainDetails().getMaximumLength())) {
 						question.setLengthCheckerResult(matchString);
 					} else {
-						question.setLengthCheckerResult(errorString);
-						question.setQuestionCongruencyStatus(congStatus_errors);	
+						question.setLengthCheckerResult(warningString);
+						question.setQuestionCongruencyStatus(congStatus_warn);	
 					}
 				} else {
-					question.setLengthCheckerResult(errorString);
-					question.setQuestionCongruencyStatus(congStatus_errors);	
+					question.setLengthCheckerResult(warningString);
+					question.setQuestionCongruencyStatus(congStatus_warn);	
 				}
-			} else {
-				question.setLengthCheckerResult(errorString);
-				question.setQuestionCongruencyStatus(congStatus_errors);
 			} 
-			if (cdeDetails.getValueDomain()!=null) {
-				if (field.getDataFormat().equals(cdeDetails.getValueDomain().getValueDomainDetails().getDisplayFormat())) {
-					question.setFormatCheckerResult(matchString);
+			if (field.getDataFormat()!=null) {
+				if (cdeDetails.getValueDomain()!=null) {
+					if (field.getDataFormat().equals(cdeDetails.getValueDomain().getValueDomainDetails().getDisplayFormat())) {
+						question.setFormatCheckerResult(matchString);
+					} else {
+						question.setFormatCheckerResult(warningString);
+						question.setQuestionCongruencyStatus(congStatus_warn);
+					} 
 				} else {
-					question.setFormatCheckerResult(errorString);
-					question.setQuestionCongruencyStatus(congStatus_errors);
-				} 
-			} else {
-				question.setFormatCheckerResult(errorString);
-				question.setQuestionCongruencyStatus(congStatus_errors);
+					question.setFormatCheckerResult(warningString);
+					question.setQuestionCongruencyStatus(congStatus_warn);
+				}
 			}
 			
 			// TODO 
@@ -185,6 +199,6 @@ public class ValidatorService {
 		else
 			question.setMessage(message.toString());			
 	return question;	
-	}		
+	}	
 	
 }

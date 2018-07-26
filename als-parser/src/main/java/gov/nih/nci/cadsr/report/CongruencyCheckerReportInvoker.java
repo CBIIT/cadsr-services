@@ -87,15 +87,15 @@ public class CongruencyCheckerReportInvoker {
 			for (FormDisplay fd: fuidata.getFormsList()) {
 				selForms.add(fd.getFormName());
 			}
-			for (ALSError alsError1 : alsData.getCccError().getAlsErrors()) {
+			/*for (ALSError alsError1 : alsData.getCccError().getAlsErrors()) {
 				logger.debug("Error description: "+alsError1.getErrorDesc()+" Severity: "+alsError1.getErrorSeverity());
-			}			
-			logger.debug("Selected Forms list size: "+selForms.size());
+			}*/			
+			//logger.debug("Selected Forms list size: "+selForms.size());
 			cccReport  = generateReport.getFinalReportData(alsData, selForms, false, false, false);
 			logger.debug("Report Error Forms list size: "+cccReport.getCccForms().size());
 			for (CCCForm form : cccReport.getCccForms()) {
-				logger.debug("Form name: " + form.getRaveFormOid());
-				logger.debug("Questions list: " + form.getQuestions().size());
+				//logger.debug("Form name: " + form.getRaveFormOid());
+				//logger.debug("Questions list: " + form.getQuestions().size());
 				for (CCCQuestion question : form.getQuestions()) {
 					/*if (question.getRaveCodedData() != null && question.getRaveCodedData().size() != 0)
 						logger.debug("Question coded data list: " + question.getRaveCodedData().size());
@@ -200,7 +200,7 @@ public class CongruencyCheckerReportInvoker {
 			newCell.setCellValue(forms.get(i).getRaveFormOid());
 			colNum = colNum+3;
 			newCell = row.createCell(3);
-			newCell.setCellValue(forms.get(i).getQuestions().size());
+			newCell.setCellValue(forms.get(i).getCountTotalQuestions());
 			for (int j = 0; j < forms.get(i).getQuestions().size(); j++) {
 				int colNum2 = formStartColumn;
 				CCCQuestion question = forms.get(i).getQuestions().get(j);
