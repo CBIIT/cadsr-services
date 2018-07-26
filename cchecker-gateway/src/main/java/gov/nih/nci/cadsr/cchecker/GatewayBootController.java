@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -62,6 +63,7 @@ import gov.nih.nci.cadsr.service.FormService;
 		 * @param filename
 		 * @return ALSData
 		 */
+		@CrossOrigin
 	    @GetMapping("/parsefileservice")
 	    @ResponseBody
 	    public ALSData parseFileService(HttpServletRequest request, HttpServletResponse response, @RequestParam(name="filepath", required=true) String filepath) {
@@ -153,6 +155,7 @@ import gov.nih.nci.cadsr.service.FormService;
 		 * @param uploadfile
 		 * @return ResponseEntity
 		 */
+		@CrossOrigin
 		@PostMapping("/parseservice")
 		//@ResponseBody
 		public ResponseEntity<?> parseService(HttpServletRequest request, HttpServletResponse response,
@@ -239,6 +242,7 @@ import gov.nih.nci.cadsr.service.FormService;
 			HttpHeaders httpHeaders = createHttpOkHeaders();
 			return new ResponseEntity<FormsUiData>(formUiData, httpHeaders, HttpStatus.OK);
 		}
+		@CrossOrigin
 		@PostMapping("/checkservice")
 		public ResponseEntity<?> checkService(HttpServletRequest request, HttpServletResponse response,
 				@RequestParam(name="checkUOM", required = false, defaultValue="false") boolean checkUOM,
