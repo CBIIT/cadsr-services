@@ -13,6 +13,10 @@ export class RestService {
   loadFormListData = () => this.http.get('assets/formListData.json');
   
   // upload file service //
-  uploadAlsFile = file => this.http.post('http://localhost:8080/gateway/parseservice?owner=me2',file);
+  uploadAlsFile = file => this.http.post('http://localhost:8080/gateway/parseservice?owner=me2',file,{
+    observe:"events",
+    reportProgress:true
+  }
+    );
   
 }

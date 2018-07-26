@@ -14,5 +14,8 @@
         <div [hidden]="error_file.valid || (error_file.pristine && !submitted)" class="alert alert-danger">ALS File is required</div>
     </div>
 
-    <button type="submit" class="btn btn-primary" (click)="submitForm(error_name, error_file)">Submit</button>
+    <button [disabled]="submitted&&uploadProgress!=100" type="submit" class="btn btn-primary" (click)="submitForm(error_name, error_file)">Submit</button>
+    <div *ngIf="uploadProgress!=0"><br />
+        <app-progress-bar [percentage]="uploadProgress"></app-progress-bar>
+    </div>
 </form>

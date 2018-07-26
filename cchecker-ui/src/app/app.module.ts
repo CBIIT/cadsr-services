@@ -8,6 +8,7 @@ import { AlsUploadFormComponent } from './als-upload-form/als-upload-form.compon
 import { AlsReportComponent } from './als-report/als-report.component';
 import { NavigationComponent } from './navigation/navigation.component';
 import { HttpClientModule } from '@angular/common/http';
+import { ProgressBarComponent } from './progress-bar/progress-bar.component';
 
 const APP_ROUTES: Routes = [
   // Default empty path
@@ -22,7 +23,8 @@ const APP_ROUTES: Routes = [
     AlsFormListComponent,
     AlsUploadFormComponent,
     AlsReportComponent,
-    NavigationComponent
+    NavigationComponent,
+    ProgressBarComponent
   ],
   imports: [
     BrowserModule,

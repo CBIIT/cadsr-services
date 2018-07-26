@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { RestService } from '../services/rest.service';
+import { HttpEventType }  from '@angular/common/http';
+import { EventHandlerVars } from '../../../node_modules/@angular/compiler/src/compiler_util/expression_converter';
 
 @Component({
   selector: 'app-als-upload-form',
@@ -12,11 +14,12 @@ export class AlsUploadFormComponent implements OnInit {
   alsFile:File;
   submitted:boolean;
   file:FormData;
+  uploadProgress:Number;
 
   constructor(private router:Router, private restService:RestService) { 
     this.submitted = false;
+    this.uploadProgress = 0;
   }
-
   // always keeps current file as File object //
   getFile = event => {
     this.file = new FormData();
@@ -27,6 +30,7 @@ export class AlsUploadFormComponent implements OnInit {
   // user clicked submit //
   // validate form fields are valid and upload //
   submitForm(error_name, error_file) {
+    this.uploadProgress = 0;
     this.submitted = true; // set for form validation //
     if (error_name.valid && error_file) { // check form fields //
       this.uploadFile(error_file); // upload file to server //
@@ -37,7 +41,11 @@ export class AlsUploadFormComponent implements OnInit {
   // submit name, file to server for processing //
   uploadFile = formData=>  {
     this.restService.uploadAlsFile(this.file).subscribe(
-      data => console.log(data), 
+      event => {
+        if (event.type === HttpEventType.UploadProgress) {
+            this.uploadProgress = Math.round((event.loaded/event.total)*100)
+        }      
+      }, 
       error => console.log("Dispay ERROR"), 
       () => console.log("GO TO NEXT"));
   };
