@@ -7,6 +7,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,11 +17,15 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
+import org.springframework.jdbc.support.lob.DefaultLobHandler;
+import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -71,7 +77,46 @@ public class DataElementRepository {
     	});
     	return idseq;
     }
+    
+	/**
+	 * 
+	 * @param idseq expected to be a valid DB value
+	 * @return ALSData or null
+	 * @throws DataAccessException
+	 */
+	public ALSData retrieveAlsData(String idseq) {
+		ALSData alsData = null;
+		try {
+			byte[] alsDataByteArr = null;
+			LobHandler lobHandler = new DefaultLobHandler();
+			alsDataByteArr = (byte[]) jdbcTemplate.queryForObject(retrieveAlsQuery(), new Object[] { idseq },
+				new RowMapper<Object>() {
+						// queryForObject expects that at least one object is found, otherwise: DataAccessException
+						@Override
+						public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+							byte[] requestData = lobHandler.getBlobAsBytes(rs, "PARSER_BLOB");
+							return requestData;
+						}
+					});
+			alsData = readFromJSON(alsDataByteArr);
+		} 
+		catch (Exception e) {
+			logger.error("retrieveAlsData error on idseq: " + idseq, e);
+			e.printStackTrace();
+		}
+		return alsData;
+	}
+    
     /**
+     * 
+     * @return String
+     */
+    protected String retrieveAlsQuery(/*String idseq*/) {
+		return "SELECT PARSER_BLOB from SBREXT.CC_PARSER_DATA WHERE CCHECKER_IDSEQ = ?";
+    	//FIXME check format of idseq
+		//return "SELECT PARSER_BLOB from SBREXT.CC_PARSER_DATA WHERE CCHECKER_IDSEQ = '" + idseq +"'";
+	}
+	/**
      * Return java generated UUID to upper case.
      * We could use Oracle caDSR function 
      * 
@@ -88,8 +133,9 @@ public class DataElementRepository {
      * @param alsData shall be not null
      * @return byte[]
      */
-	private static byte[] writeToJSON (ALSData alsData) {
+	protected static byte[] writeToJSON (ALSData alsData) {
 		//FIXME decide on alsData JSON serialization
+		//FIXME do we need an exception here?
 		ObjectMapper jsonMapper = new ObjectMapper();
 		try {
             String jsonStr = jsonMapper.writeValueAsString(alsData);
@@ -106,7 +152,26 @@ public class DataElementRepository {
 			 throw ex;
 		}
 	}
-
+	/**
+	 * 
+	 * @param arr shall not be null
+	 * @return ALSData or null on any error
+	 */
+	protected static ALSData readFromJSON(byte[] arr) {
+		ALSData alsData = null;
+		if (arr != null) {
+		try {
+				ObjectMapper jsonMapper = new ObjectMapper();
+				alsData = jsonMapper.readValue(arr, ALSData.class);
+			}
+			catch (Exception e) {
+				String msg = "readFromJSON: error reading user data: " + e;
+				logger.error(msg, e);
+				e.printStackTrace();
+			}
+		}
+		return alsData;
+	}
     
     ////////////
     //FIXME this call does not work. The procedure needs the third 'out' parameter to be passes: p_de_search_res which is sys_refcursor;

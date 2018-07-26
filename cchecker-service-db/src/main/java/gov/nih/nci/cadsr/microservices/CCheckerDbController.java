@@ -48,20 +48,33 @@ public class CCheckerDbController {
 	}
 	@PostMapping("/rest/createalsdata")
 	//@ResponseBody
-	public ResponseEntity<String> createAldData(HttpServletRequest request, RequestEntity<ALSData> requestEntity,
+	public ResponseEntity<String> createAlsData(HttpServletRequest request, RequestEntity<ALSData> requestEntity,
 			@RequestParam(name="_cchecker", required=true) String idseq) {
-		logger.debug("createAldData called");
+		logger.debug("createAlsData called: " + idseq);
 		//FIXME idseq format check! check session token
 		ALSData alsData = requestEntity.getBody();
 		
 		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.add("Content-Type", "application/json");
-		httpHeaders.add("Accept", "text/plain");
+		httpHeaders.add("Content-Type", "text/plain");
 
 		String result = dataElemenRepository.createAlsData(alsData, idseq);
 		String res = result.toString();
 	
 		return new ResponseEntity<String>(res, httpHeaders, HttpStatus.OK);
+	}
+	@GetMapping("/rest/retrievealsdata")
+	//@ResponseBody
+	public ResponseEntity<ALSData> retrieveAlsData(HttpServletRequest request,
+			@RequestParam(name="_cchecker", required=true) String idseq) {
+		logger.debug("retrieveAlsData called: " + idseq);
+		//FIXME idseq format check! check session token
+
+		byte[] dbBlobByteArr = dataElemenRepository.retrieveAlsData(idseq);
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.add("Content-Type", "application/json");
+
+		ALSData alsData = null;
+		return new ResponseEntity<ALSData>(alsData, httpHeaders, HttpStatus.OK);
 	}
 
 }
