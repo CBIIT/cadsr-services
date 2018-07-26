@@ -69,11 +69,10 @@ public class CCheckerDbController {
 		logger.debug("retrieveAlsData called: " + idseq);
 		//FIXME idseq format check! check session token
 
-		byte[] dbBlobByteArr = dataElemenRepository.retrieveAlsData(idseq);
+		ALSData alsData = dataElemenRepository.retrieveAlsData(idseq);
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.add("Content-Type", "application/json");
 
-		ALSData alsData = null;
 		return new ResponseEntity<ALSData>(alsData, httpHeaders, HttpStatus.OK);
 	}
 
