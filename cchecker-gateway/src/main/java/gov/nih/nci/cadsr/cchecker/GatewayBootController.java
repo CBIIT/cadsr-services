@@ -303,7 +303,8 @@ import gov.nih.nci.cadsr.service.FormService;
 			//TODO what context type shall be returned on an error - ? Now text/plain 
 			HttpHeaders httpHeaders = new HttpHeaders();
 			httpHeaders.add("Content-Type", "text/plain");
-			assignAccessControlHeader(httpHeaders);
+			//We have configured springframework CrossOrigin so we do not need this header
+			//assignAccessControlHeader(httpHeaders);
 			logger.error(errorMessage);
 			return new ResponseEntity<String>(errorMessage, httpHeaders, HttpStatus.BAD_REQUEST);
 		}
@@ -329,7 +330,8 @@ import gov.nih.nci.cadsr.service.FormService;
 		protected HttpHeaders createHttpOkHeaders() {
 			HttpHeaders httpHeaders = new HttpHeaders();
 			httpHeaders.add("Content-Type", "application/json");
-			httpHeaders.setAccessControlAllowOrigin(ACCESS_CONTROL_ALLOW_ORIGIN);
+			//We have configured springframework CrossOrigin so we do not need this header
+			//httpHeaders.setAccessControlAllowOrigin(ACCESS_CONTROL_ALLOW_ORIGIN);
 			return httpHeaders;
 		}
 		/**
