@@ -26,7 +26,7 @@ export class AlsUploadFormComponent implements OnInit {
     const file = event.target.files[0];
     this.file.append('file', file, file.name);
   };
-
+  
   // user clicked submit //
   // validate form fields are valid and upload //
   submitForm(error_name, error_file) {
@@ -41,16 +41,19 @@ export class AlsUploadFormComponent implements OnInit {
   // submit name, file to server for processing //
   uploadFile = formData=>  {
     this.restService.uploadAlsFile(this.file).subscribe(
-      event => {
-        if (event.type === HttpEventType.UploadProgress) {
-            this.uploadProgress = Math.round((event.loaded/event.total)*100)
-        }      
+      e => {
+        if (e.type === HttpEventType.UploadProgress) {
+            this.uploadProgress = Math.round((e.loaded/e.total)*100)
+        };
       }, 
       error => console.log("Dispay ERROR"), 
-      () => console.log("GO TO NEXT"));
+      () => {
+        this.restService.formList = JSON.parse(event.target['response']);
+        this.router.navigateByUrl('/forms')
+      });
   };
 
-  ngOnInit() {
+  ngOnInit() {  
   }
 
 }

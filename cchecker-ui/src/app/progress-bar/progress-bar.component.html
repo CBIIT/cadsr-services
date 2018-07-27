@@ -1,6 +1,7 @@
 <div class="progressText">
-  <b [innerHtml]="getProgress()">Progress</b>
+  <h5 [innerHtml]="getProgress()">Progress</h5>
 </div>
-<div class="progressContainer">
-  <div class="progress" [style.width.%]="percentage"></div>
+
+<div class="progress" style="height: 40px;">
+  <div class="progress-bar" role="progressbar" [style.width.%]="percentage" [attr.aria-valuenow]="percentage" aria-valuemin="0" aria-valuemax="100"><b>{{percentage}}%</b></div>
 </div>

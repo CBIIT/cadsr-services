@@ -26,11 +26,8 @@ export class AlsFormListComponent implements OnInit {
 
   // gets form list data and sets checkedItems array //
   getFormListData() {
-      this.restService.loadFormListData().subscribe(
-        data => this.formListData = data, 
-        error => '', // call if error //
-        () => this.checkedItems = this.setCheckedItemsArray()
-      );    
+    this.formListData = this.restService.formList; 
+    this.checkedItems = this.setCheckedItemsArray()
   };
 
   getCheckedStatus = record => this.checkedItems.indexOf(record.formName) > -1;

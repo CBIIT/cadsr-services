@@ -5,9 +5,10 @@ import { HttpHeaders, HttpClient } from '@angular/common/http';
   providedIn: 'root'
 })
 export class RestService {
-
+  formList:Object;
   constructor(private http:HttpClient) {
-   }
+    this.formList = {'formsList':[]};
+  }
 
   // load data from local file for testing //  
   loadFormListData = () => this.http.get('assets/formListData.json');
