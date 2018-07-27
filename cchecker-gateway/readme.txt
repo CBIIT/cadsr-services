@@ -45,8 +45,8 @@ For a manual test take a look into your directory /local/contents/cchecker.
 Find any file created by parseservice with UID-like name on /local/content/cchecker.
  
 take a file with a UID based name as "A154087D-A6D9-47A9-9AF1-A7AC4CB93C01" and use this UID as a cookie for testing this service.
-curl -v --cookie "_cchecker=A154087D-A6D9-47A9-9AF1-A7AC4CB93C01" -X POST \
--H "Content-Type: application/json" --d "@/local/content/cchecker/formnamelist.json" http://localhost:8080/gateway/checkservice
+curl -v --cookie "_cchecker=855B4B76-A462-4B73-8727-3194517C6DE3" -X POST \
+-H "Content-Type: application/json" --data "@/local/content/cchecker/formnamelist.json" http://localhost:8080/gateway/checkservice
 "formnamelist.json" file contains a json array of string. Each String is a form name.
 Example: ["Enrollment","Other Form 1"]
 Other request parameters which are all "false" by default:

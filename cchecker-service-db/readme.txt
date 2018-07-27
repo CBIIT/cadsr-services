@@ -56,3 +56,6 @@ If environment is set up just run java command
 
 4. Index page of the running service application:
 http://localhost:4803
+
+5. Retrieve ALSData
+curl -v http://localhost:4803/rest/retrievealsdata?_cchecker=855B4B76-A462-4B73-8727-3194517C6DE3
