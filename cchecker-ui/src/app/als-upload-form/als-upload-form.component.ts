@@ -10,15 +10,16 @@ import { EventHandlerVars } from '../../../node_modules/@angular/compiler/src/co
   styleUrls: ['./als-upload-form.component.css']
 })
 export class AlsUploadFormComponent implements OnInit {
-  name:string;
-  alsFile:File;
-  submitted:boolean;
+  error:boolean;
+  errorMessage:String;
   file:FormData;
+  submitted:boolean;
   uploadProgress:Number;
 
   constructor(private router:Router, private restService:RestService) { 
     this.submitted = false;
     this.uploadProgress = 0;
+    this.error=false;
   }
   // always keeps current file as File object //
   getFile = event => {
@@ -30,9 +31,10 @@ export class AlsUploadFormComponent implements OnInit {
   // user clicked submit //
   // validate form fields are valid and upload //
   submitForm(error_name, error_file) {
+    this.error = false; // reset error //
     this.uploadProgress = 0;
     this.submitted = true; // set for form validation //
-    if (error_name.valid && error_file) { // check form fields //
+    if (error_name.valid && error_file.valid) { // check form fields //
       this.uploadFile(error_file); // upload file to server //
     };
     return false;
@@ -46,9 +48,9 @@ export class AlsUploadFormComponent implements OnInit {
             this.uploadProgress = Math.round((e.loaded/e.total)*100)
         };
       }, 
-      error => console.log("Dispay ERROR"), 
+      error => { this.errorMessage = event.target['response']; this.error = true },
       () => {
-        this.restService.formList = JSON.parse(event.target['response']);
+        this.restService.storeLocalFormListData(JSON.parse(event.target['response']));
         this.router.navigateByUrl('/forms')
       });
   };

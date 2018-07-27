@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { validateConfig } from '@angular/router/src/config';
 import { RestService } from '../services/rest.service';
-import { HttpClient } from '@angular/common/http'
+import { HttpClient } from '@angular/common/http';
+
 @Component({
   selector: 'app-als-form-list',
   templateUrl: './als-form-list.component.html',
@@ -26,7 +27,7 @@ export class AlsFormListComponent implements OnInit {
 
   // gets form list data and sets checkedItems array //
   getFormListData() {
-    this.formListData = this.restService.formList; 
+    this.formListData = this.restService.getFormListData(); 
     this.checkedItems = this.setCheckedItemsArray()
   };
 
