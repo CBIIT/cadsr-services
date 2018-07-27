@@ -14,5 +14,5 @@ RUN git clone https://github.com/CBIIT/cadsr-services \
 
 COPY entrypoint/run.sh /usr/bin/
 
-EXPOSE 8080 4801
+EXPOSE 1551 8080 4801
 ENTRYPOINT "/usr/bin/run.sh"
