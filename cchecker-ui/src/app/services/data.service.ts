@@ -11,9 +11,7 @@ export class DataService {
   }
 
   // store session storage copy of formList //
-  setFormListData = (data) => {
-    sessionStorage.setItem('formList',JSON.stringify(data)); // convert to string //
-  }
+  setFormListData = (data) => sessionStorage.setItem('formList',JSON.stringify(data)); // convert to string //
 
   // get formList data //
   getFormListData = () => sessionStorage.getItem('formList') ? JSON.parse(sessionStorage.getItem('formList')): this.formList;  
