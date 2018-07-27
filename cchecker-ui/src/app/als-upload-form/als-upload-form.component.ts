@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { RestService } from '../services/rest.service';
 import { HttpEventType }  from '@angular/common/http';
-import { EventHandlerVars } from '../../../node_modules/@angular/compiler/src/compiler_util/expression_converter';
+import { EventHandlerVars } from '@angular/compiler/src/compiler_util/expression_converter';
+import { DataService } from '../services/data.service';
 
 @Component({
   selector: 'app-als-upload-form',
@@ -16,7 +17,7 @@ export class AlsUploadFormComponent implements OnInit {
   submitted:boolean;
   uploadProgress:Number;
 
-  constructor(private router:Router, private restService:RestService) { 
+  constructor(private router:Router, private restService:RestService, private dataService:DataService) { 
     this.submitted = false;
     this.uploadProgress = 0;
     this.error=false;
@@ -50,7 +51,7 @@ export class AlsUploadFormComponent implements OnInit {
       }, 
       error => { this.errorMessage = event.target['response']; this.error = true },
       () => {
-        this.restService.storeLocalFormListData(JSON.parse(event.target['response']));
+        this.dataService.storeLocalFormListData(JSON.parse(event.target['response']));
         this.router.navigateByUrl('/forms')
       });
   };

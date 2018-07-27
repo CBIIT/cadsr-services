@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { validateConfig } from '@angular/router/src/config';
 import { RestService } from '../services/rest.service';
 import { HttpClient } from '@angular/common/http';
+import { DataService } from '../services/data.service';
 
 @Component({
   selector: 'app-als-form-list',
@@ -14,7 +15,7 @@ export class AlsFormListComponent implements OnInit {
   validItemsLength:Number;
   selectAllCheckbox:boolean;
 
-  constructor(private restService:RestService, private http:HttpClient) {
+  constructor(private http:HttpClient, private dataService:DataService) {
     this.selectAllCheckbox = true; // select all forms checkbox. default to all //
     this.checkedItems = []; // array of form names that are selected //
     this.formListData = {'formsList':[]} // data for form list table //
@@ -27,7 +28,7 @@ export class AlsFormListComponent implements OnInit {
 
   // gets form list data and sets checkedItems array //
   getFormListData() {
-    this.formListData = this.restService.getFormListData(); 
+    this.formListData = this.dataService.getFormListData(); 
     this.checkedItems = this.setCheckedItemsArray()
   };
 
