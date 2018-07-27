@@ -10,8 +10,8 @@ export class DataService {
     this.formList = {'formsList':[]};
   }
 
-  // store local copy of formList //
-  storeLocalFormListData = (data) => {
+  // store session storage copy of formList //
+  setFormListData = (data) => {
     sessionStorage.setItem('formList',JSON.stringify(data)); // convert to string //
   }
 

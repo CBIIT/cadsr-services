@@ -51,7 +51,7 @@ export class AlsUploadFormComponent implements OnInit {
       }, 
       error => { this.errorMessage = event.target['response']; this.error = true },
       () => {
-        this.dataService.storeLocalFormListData(JSON.parse(event.target['response']));
+        this.dataService.setFormListData(JSON.parse(event.target['response']));
         this.router.navigateByUrl('/forms')
       });
   };
