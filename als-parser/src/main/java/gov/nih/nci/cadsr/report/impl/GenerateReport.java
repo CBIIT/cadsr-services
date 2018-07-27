@@ -101,7 +101,7 @@ public class GenerateReport implements ReportOutput {
 								question.setRaveUserString(ddeMap.get(key).getUserDataString());
 							}
 						}
-						question.setAllowableCdeValue("");
+
 						String raveUOM = null;
 						if (alsField.getFixedUnit()!=null)
 							raveUOM = alsField.getFixedUnit();
@@ -112,6 +112,7 @@ public class GenerateReport implements ReportOutput {
 						question.setRaveLength(alsField.getFixedUnit());
 						question.setRaveDisplayFormat(alsField.getDataFormat());
 						question.setQuestionCongruencyStatus(congStatus_congruent);
+						// TODO This should call the service [Should be HTTPResponse] - VS
 						CdeDetails cdeDetails = null;
 						//if (alsField.getFormOid().equalsIgnoreCase("ENROLLLMENT") || alsField.getFormOid().equalsIgnoreCase("HISTOLOGY_AND_DISEASE") || alsField.getFormOid().equalsIgnoreCase("ELIGIBILITY_CHECKLIST")) {
 						try {
