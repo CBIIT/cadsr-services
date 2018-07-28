@@ -12,7 +12,7 @@ export class RestService {
   }
 
   // upload file service //
-  uploadAlsFile(file):Observable<HttpEvent<any>>{
+  uploadAlsFile(file){
     return this.http.post('http://localhost:8080/gateway/parseservice?owner=me2',file,
     {
       observe:"events",
