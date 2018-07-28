@@ -24,6 +24,7 @@ RUN npm install -g @angular/cli \
     && git config --global user.name "Your Name" 
 
 ADD conf/httpd.conf /etc/apache2
+ADD conf/.htaccess /etc/apache2/conf.d
 ADD run.sh /usr/bin/
 RUN chmod 777 /usr/bin/run.sh
 RUN mkdir /run/apache2/

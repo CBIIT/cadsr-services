@@ -9,6 +9,6 @@ else
 fi
 cd /root/cadsr-services/cchecker-ui
 npm install
-ng build --output-path /var/www/localhost/htdocs --watch &
-
+ng build --output-path /var/www/localhost/htdocs 
+cp /etc/apache2/conf.d/.htaccess /var/www/localhost/htdocs
 exec httpd -D FOREGROUND
