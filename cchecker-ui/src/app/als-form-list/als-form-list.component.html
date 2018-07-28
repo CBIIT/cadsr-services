@@ -5,7 +5,7 @@
 <div>
     <button [disabled]="!checkedItems.length" class="btn btn-primary" (click)="checkForms()">Check Form<span *ngIf="checkedItems.length>1">s</span></button>
 </div><br />
-<table class="alsFormList">
+<table cellspacing="0" cellpadding="0" margin="0"class="alsFormList">
    <tr>
       <th>
          <input type="checkbox" name="selectAllforms" (change)="setCheckAllStatus($event)" [checked]="selectAllCheckbox">

@@ -63,9 +63,17 @@
 #main #navigation ul li {
     color:#fff;
 	background-color: #282828;
-	border-width: 1px 1px 0px 1px;
-	border-style: solid;
-	border-color: #585858;
+    border-width: 0px 0px 0px 0px;
+
+}
+
+
+#main #navigation ul li.selected {
+	background-color:#337ab7;
+}
+
+#main #navigation ul li.selected {
+	background-color:#337ab7;
 }
 
 #main #navigation ul li:last-child {
@@ -93,6 +101,12 @@
 
 #main #navigation ul li a:hover {
 	background-color: #444;
+	color: #fff;
+	border-radius: 3px;
+}
+
+#main #navigation ul li.selected a:hover {
+	background-color: #337ab7;
 	color: #fff;
 	border-radius: 3px;
 }
