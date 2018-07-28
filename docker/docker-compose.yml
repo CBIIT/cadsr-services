@@ -1,0 +1,17 @@
+version: '2'
+services:
+  ui:
+    container_name: cchecker-ui
+    build: ./cchecker-ui-docker
+    ports:
+     - "80:80"
+  server:
+    container_name: cchecker-gateway
+    build: ./cchecker-server-docker
+    ports:
+     - "8080:8080"
+    environment:
+      db_driver: $db_driver
+      db_url: $db_url
+      db_user: $db_user
+      db_credential: $db_credential
