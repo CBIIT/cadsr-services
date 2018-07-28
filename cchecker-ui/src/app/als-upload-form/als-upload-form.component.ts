@@ -22,6 +22,7 @@ export class AlsUploadFormComponent implements OnInit {
     this.uploadProgress = 0;
     this.error=false;
   }
+  
   // always keeps current file as File object //
   getFile = event => {
     this.file = new FormData();
@@ -29,8 +30,7 @@ export class AlsUploadFormComponent implements OnInit {
     this.file.append('file', file, file.name);
   };
   
-  // user clicked submit //
-  // validate form fields are valid and upload //
+  // user clicked submit validate form fields are valid and upload //
   submitForm(error_name, error_file) {
     this.error = false; // reset error //
     this.uploadProgress = 0;
@@ -45,13 +45,15 @@ export class AlsUploadFormComponent implements OnInit {
   uploadFile = formData=>  {
     this.restService.uploadAlsFile(this.file).subscribe(
       e => {
-        if (e.type === HttpEventType.UploadProgress) {
+        if (e.type === HttpEventType.Response) { 
+          this.dataService.setFormListData(e.body);
+        }
+        else if (e.type === HttpEventType.UploadProgress) {
             this.uploadProgress = Math.round((e.loaded/e.total)*100)
         };
       }, 
       error => { this.errorMessage = event.target['response']; this.error = true },
       () => {
-        this.dataService.setFormListData(JSON.parse(event.target['response']));
         this.router.navigateByUrl('/forms')
       });
   };

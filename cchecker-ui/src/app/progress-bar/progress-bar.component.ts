@@ -11,6 +11,7 @@ export class ProgressBarComponent implements OnInit {
   constructor()   {
   }
 
+  // get progress bar text //
   getProgress = () => this.percentage<100 ? `Uploading`:'Complete';
 
   ngOnInit() {

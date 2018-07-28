@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpHeaders, HttpClient } from '@angular/common/http';
+import { HttpHeaders, HttpClient, HttpProgressEvent, HttpEvent, HttpEventType } from '@angular/common/http';
 import { DataService } from './data.service';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -11,9 +12,10 @@ export class RestService {
   }
 
   // upload file service //
-  uploadAlsFile = file => this.http.post('http://localhost:8080/gateway/parseservice?owner=me2',file,
-  {
-    observe:"events",
-    reportProgress:true
-  });
+  uploadAlsFile(file):Observable<HttpEvent<any>>{
+    return this.http.post('http://localhost:8080/gateway/parseservice?owner=me2',file,
+    {
+      observe:"events",
+      reportProgress:true
+    })} ;
 }

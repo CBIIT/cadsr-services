@@ -3,6 +3,7 @@ import { validateConfig } from '@angular/router/src/config';
 import { RestService } from '../services/rest.service';
 import { HttpClient } from '@angular/common/http';
 import { DataService } from '../services/data.service';
+import { HttpEventType }  from '@angular/common/http';
 
 @Component({
   selector: 'app-als-form-list',
@@ -15,7 +16,7 @@ export class AlsFormListComponent implements OnInit {
   validItemsLength:Number;
   selectAllCheckbox:boolean;
 
-  constructor(private http:HttpClient, private dataService:DataService) {
+  constructor(private http:HttpClient, private restService:RestService, private dataService:DataService) {
     this.selectAllCheckbox = true; // select all forms checkbox. default to all //
     this.checkedItems = []; // array of form names that are selected //
     this.formListData = {'formsList':[]} // data for form list table //
@@ -32,7 +33,9 @@ export class AlsFormListComponent implements OnInit {
     this.checkedItems = this.setCheckedItemsArray()
   };
 
+  // get checkbox status of record //
   getCheckedStatus = record => this.checkedItems.indexOf(record.formName) > -1;
+
   // get usable status message to display in table status column //
   getReadableErrorStatus = e => e ? 'Success':'Fail';
 
