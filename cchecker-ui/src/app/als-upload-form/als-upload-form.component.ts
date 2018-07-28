@@ -52,7 +52,16 @@ export class AlsUploadFormComponent implements OnInit {
             this.uploadProgress = Math.round((e.loaded/e.total)*100)
         };
       }, 
-      error => { this.errorMessage = event.target['response']; this.error = true },
+      error => { 
+        this.error = true;
+        this.uploadProgress = 0;
+        if (event.target['response']=='') {
+          this.errorMessage = 'Cannot communicate with the server'
+        }
+        else {
+          this.errorMessage = event.target['response']; 
+        }
+      },
       () => {
         this.router.navigateByUrl('/forms')
       });
