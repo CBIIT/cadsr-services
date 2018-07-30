@@ -40,7 +40,7 @@ To run boot from a command line:
 1. Go to project pom.xml directory
 
 2. Maven build
-mvn -Djdbc.driver=... -Ddb.url=<drivertype>:@<url>:<port>:<sid> -Ddb.user=... -Ddb.credential=... clean package 
+mvn -Ddb_driver=... -Ddb_url=<drivertype>:@<url>:<port>:<sid> -Ddb_user=... -Ddb_credential=... clean package 
 
 If environment is set up just run mvn command
 >mvn clean package
@@ -49,7 +49,7 @@ If environment is set up just run mvn command
 3. Service Port is 4803.
 
 To run the application using jar file from the main project directory passing environment dynamically:
->java -Djdbc.driver=... -Ddb.url=<drivertype>:@<url>:<port>:<sid> -Ddb.user=... -Ddb.credential=...  -jar target/cchecker-service-db-0.0.1-SNAPSHOT.jar
+>java -Ddb_driver=... -Ddb_url=<drivertype>:@<url>:<port>:<sid> -Ddb_user=... -Ddb_credential=...  -jar target/cchecker-service-db-0.0.1-SNAPSHOT.jar
 
 If environment is set up just run java command
 >java -jar target/cchecker-db-parser-0.0.1-SNAPSHOT.jar
