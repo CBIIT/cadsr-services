@@ -12,6 +12,7 @@ public class CCCReport {
 	
 String reportOwner;
 String reportDate;
+String fileName;
 String raveProtocolName;
 String raveProtocolNumber;
 
@@ -54,6 +55,13 @@ public String getReportOwner() {
 
 public void setReportOwner(String reportOwner) {
 	this.reportOwner = reportOwner;
+}
+
+public String getFileName() {
+	return fileName;
+}
+public void setFileName(String fileName) {
+	this.fileName = fileName;
 }
 
 public String getReportDate() {
