@@ -19,7 +19,7 @@ application.properties
 
 !!!
 We expect the next four environment variables to be passed to the application:
-jdbc_driver, db_url, db_user=SBR, db_credential
+db_driver, db_url, db_user=SBR, db_credential
 !!!
 
 Maven "package" copies all dependencies libraries to "target/lib" directory.
