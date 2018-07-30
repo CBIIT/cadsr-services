@@ -26,6 +26,8 @@ public class ValidatorService {
 	private static final String msg1 = "CDE not in caDSR database";
 	private static final String msg2 = "CDE has been retired";
 	private static final String msg3 = "Newer Versions exist";
+	private static final String msg4_1 = "caDSR Max Length too short. PVs MaxLength ";
+	private static final String msg4_2 = ", caDSR MaxLength ";		
 	private static String congStatus_errors = "ERRORS";
 	private static String congStatus_warn = "WARNINGS";
 	private static String congStatus_congruent = "CONGRUENT";
@@ -39,18 +41,20 @@ public class ValidatorService {
 	private static final String patternHolderChar = "d";
 
 	public static CCCQuestion validate(ALSField field, CCCQuestion question, CdeDetails cdeDetails) {
-		StringBuffer message = new StringBuffer();
+		//StringBuffer message = new StringBuffer();
 		try {
 		if (cdeDetails.getDataElement()==null && cdeDetails.getValueDomain()==null) {
-			message.append(msg1);
+			String message = question.getMessage();
+			message = message + msg1;
+			question.setMessage(message);
 			question.setQuestionCongruencyStatus(congStatus_errors);
 			logger.debug("CDE data not available for "+question.getCdePublicId());
 		} else {
 			//Checking for retired CDEs 
-			question = checkCdeRetired(cdeDetails,question,message);
+			question = checkCdeRetired(cdeDetails,question);
 
 			//Checking for different versions of CDEs			
-			question = checkCdeVersions(cdeDetails,question,message);
+			question = checkCdeVersions(cdeDetails,question);
 			
 			// Adding Reference documents' PQTs and AQTs in a list for comparison against the ALS field preText 
 			question = setRaveFieldLabelResult(cdeDetails,question);
@@ -94,10 +98,12 @@ public class ValidatorService {
 				
 			// Comparing RAVE UOM (FixedUnit) with the caDSR Value Domain Unit of Measure - UOM Checker Result	
 			question = setUomCheckerResult (question, cdeDetails.getValueDomain().getValueDomainDetails().getUnitOfMeasure());			
-		
-			
+					
 			// Comparing RAVE Length (FixedUnit) with the caDSR Value Domain Max length - RAVE Length Checker result
 			question = setLengthCheckerResult (question, cdeDetails.getValueDomain().getValueDomainDetails().getMaximumLength());
+			
+			// Comparing RAVE Length (FixedUnit) with the caDSR PVs Max length
+			question = checkCdeMaxLength (question, pvMaxLen, vdMaxLen, computeRaveLength(question.getRaveLength()));			
 			
 			//Comparing the ALS RAVE Data Format with caDSR Value Domain Display Format
 			question = checkFormatCheckerResult (question, field.getDataFormat(), cdeDetails.getValueDomain().getValueDomainDetails().getDisplayFormat());
@@ -109,28 +115,28 @@ public class ValidatorService {
 		} catch (NumberFormatException nfe) {
 			nfe.printStackTrace();
 		}		
-		if (message==null || message.equals("") )
-			question.setQuestionCongruencyStatus(congStatus_congruent);
-		else
-			question.setMessage(message.toString());
 	return question;	
 	}
 	
 	
-	protected static CCCQuestion checkCdeRetired(CdeDetails cdeDetails, CCCQuestion question, StringBuffer message) {
+	protected static CCCQuestion checkCdeRetired(CdeDetails cdeDetails, CCCQuestion question) {
 		//Checking for retired CDEs 
-		if (cdeDetails.getDataElement()!=null && cdeDetails.getDataElement().getDataElementDetails().getWorkflowStatus().equalsIgnoreCase(retiredString)) {
-			message.append(msg2);	
+		if (cdeDetails.getDataElement()!=null && cdeDetails.getDataElement().getDataElementDetails().getWorkflowStatus().equalsIgnoreCase(retiredString)) {	
+			String message = question.getMessage();
+			message = message + msg2;
+			question.setMessage(message);
 			question.setQuestionCongruencyStatus(congStatus_warn);
 		}		
 		return question;
 	}
 
 
-	protected static CCCQuestion checkCdeVersions(CdeDetails cdeDetails, CCCQuestion question, StringBuffer message) {
+	protected static CCCQuestion checkCdeVersions(CdeDetails cdeDetails, CCCQuestion question) {
 		//Checking for different versions of CDEs			
 		if (cdeDetails.getDataElement()!=null && (cdeDetails.getDataElement().getDataElementDetails().getVersion() >  Float.valueOf(question.getCdeVersion()))) {
-			message.append(msg3);
+			String message = question.getMessage();
+			message = message + msg3;
+			question.setMessage(message);
 			question.setQuestionCongruencyStatus(congStatus_warn);
 		}
 		return question;		
@@ -226,6 +232,7 @@ public class ValidatorService {
 	protected static CCCQuestion checkDataTypeCheckerResult (CCCQuestion question, String raveDataFormat, String vdDataType) {
 		// Comparing RAVE Data format with caDSR Value Domain Datatype - Datatype Checker Result
 		Boolean result = false;
+		logger.debug("Field Data Format: "+raveDataFormat+" vdDataType: "+vdDataType);
 		if (raveDataFormat!=null) {
 			if (raveDataFormat.startsWith("$")) {
 				if (characterDataFormats.contains(vdDataType)) 
@@ -270,20 +277,7 @@ public class ValidatorService {
 		// Comparing RAVE Length (FixedUnit) with the caDSR Value Domain Max length - RAVE Length Checker result
 		String raveLength = question.getRaveLength();
 		if (raveLength!=null) {
-			if (raveLength.indexOf(characters_string)>-1) {
-				raveLength.replaceAll(punct_pattern,"");
-				int index = 0;
-				if ((raveLength.indexOf("(") > -1) || (raveLength.indexOf(")") > -1)) {
-					index = 1;
-				}  else {
-					index = 0;
-				}
-				raveLength = raveLength.substring(index,raveLength.indexOf(characters_string));
-			} else if (StringUtils.countOccurrencesOf(raveLength, patternHolderChar) > 1) {
-				raveLength = String.valueOf(StringUtils.countOccurrencesOf(raveLength, patternHolderChar));
-			}	
-
-			if (Float.valueOf(raveLength) < Float.valueOf(vdMaxLength)) {
+			if (Float.valueOf(computeRaveLength(raveLength)) < Float.valueOf(vdMaxLength)) {
 				question.setLengthCheckerResult(matchString);
 			} else {
 				question.setLengthCheckerResult(warningString);
@@ -305,6 +299,36 @@ public class ValidatorService {
 				} 
 		}
 		return question;
+	}
+	
+
+	protected static CCCQuestion checkCdeMaxLength (CCCQuestion question, int pvMaxLen, int vdMaxLen, int cdeMaxLen) {
+		if (pvMaxLen > vdMaxLen) {
+			String message = question.getMessage();
+			message = message + msg4_1 + pvMaxLen + msg4_2 + vdMaxLen;
+			question.setMessage(message);
+		}
+		return question;
+	}
+	
+	protected static int computeRaveLength (String raveLength) {
+		if (raveLength!=null && !raveLength.equals("%")) {
+			if (raveLength.indexOf(characters_string)>-1) {
+				raveLength.replaceAll(punct_pattern,"");
+				int index = 0;
+				if ((raveLength.indexOf("(") > -1) || (raveLength.indexOf(")") > -1)) {
+					index = 1;
+				}  else {
+					index = 0;
+				}
+				raveLength = raveLength.substring(index,raveLength.indexOf(characters_string));
+			} else if (StringUtils.countOccurrencesOf(raveLength, patternHolderChar) > 1) {
+				raveLength = String.valueOf(StringUtils.countOccurrencesOf(raveLength, patternHolderChar));
+			}	
+		} else {
+			raveLength = "0";
+		}
+		return Integer.parseInt(raveLength.trim());
 	}
 
 }
