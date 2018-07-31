@@ -16,6 +16,7 @@ export class AlsUploadFormComponent implements OnInit {
   file:FormData;
   submitted:boolean;
   uploadProgress:Number;
+  alsFile:File;
 
   constructor(private router:Router, private restService:RestService, private dataService:DataService) { 
     this.submitted = false;
@@ -28,23 +29,28 @@ export class AlsUploadFormComponent implements OnInit {
     this.file = new FormData();
     const file = event.target.files[0];
     this.file.append('file', file, file.name);
+
+    console.log(this.file)
   };
   
   // user clicked submit validate form fields are valid and upload //
   submitForm(error_name, error_file) {
+    let tempFile = this.file; // for microsoft only //
+
     this.error = false; // reset error //
     this.uploadProgress = 0;
     this.submitted = true; // set for form validation //
-    if (error_name.valid && error_file.valid) { // check form fields //
-      this.uploadFile(error_file); // upload file to server //
+    if ((error_name.valid && error_file.valid) || (error_name.valid && this.file)) { // check form fields. checking for this.file because edge is broken // 
+      this.uploadFile(); // upload file to server //
     };
     return false;
   };
 
   // submit name, file to server for processing //
-  uploadFile = formData=>  {
+  uploadFile = () =>  {
     this.restService.uploadAlsFile(this.file).subscribe(
       e => {
+
         if (e.type === HttpEventType.Response) { 
           this.dataService.setFormListData(e.body);
         }
@@ -68,6 +74,7 @@ export class AlsUploadFormComponent implements OnInit {
   };
 
   ngOnInit() {  
+    this.file = null;  // reset file to null //
   }
 
 }

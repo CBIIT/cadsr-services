@@ -7,12 +7,20 @@ import { KeyRegistry } from '../../../node_modules/@angular/core/src/di/reflecti
 })
 export class ProgressBarComponent implements OnInit {
   @Input() percentage:Number;
+  @Input() statusMessage:String;
 
   constructor()   {
   }
 
   // get progress bar text //
-  getProgress = () => this.percentage<100 ? `Uploading`:'Complete';
+  getProgress = () => {
+    if (this.statusMessage) {
+      return this.statusMessage;
+    }
+    else {
+      this.percentage<100 ? `Uploading`:'Complete'
+    }
+  }
 
   ngOnInit() {
   }
