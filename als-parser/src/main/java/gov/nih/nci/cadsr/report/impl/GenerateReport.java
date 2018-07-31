@@ -111,7 +111,7 @@ public class GenerateReport implements ReportOutput {
 						question.setRaveLength(alsField.getFixedUnit());
 						question.setRaveDisplayFormat(alsField.getDataFormat());
 						question.setQuestionCongruencyStatus(congStatus_congruent);
-						question.setMessage("");
+						question.setMessage(pickFieldErrors(alsField, alsData.getCccError().getAlsErrors()));
 						// TODO This should call the service [Should be HTTPResponse] - VS
 						CdeDetails cdeDetails = null;
 						//if (alsField.getFormOid().equalsIgnoreCase("ENROLLLMENT") || alsField.getFormOid().equalsIgnoreCase("HISTOLOGY_AND_DISEASE") || alsField.getFormOid().equalsIgnoreCase("ELIGIBILITY_CHECKLIST")) {
@@ -125,10 +125,8 @@ public class GenerateReport implements ReportOutput {
 						// TODO Call to the validation of the CDEDetails against the ALSField & Question objects  
 						//question = validate(alsField, question, cdeDetails); //[ValidatorService]
 						//}
-						if (question.getMessage() == null || question.getMessage().equals("")) { 
+						if ((question.getMessage() == null || question.getMessage().equals("")) && question.getQuestionCongruencyStatus().equals(congStatus_congruent)) { 
 							form.setCongruencyStatus(congStatus_congruent);
-							if (!question.getRaveCodedData().isEmpty() && !question.getRaveUserString().isEmpty())
-								questionsList.add(question);
 						} else {
 									questionsList.add(question); 
 									if (form.getCongruencyStatus()!=null) {
@@ -148,12 +146,13 @@ public class GenerateReport implements ReportOutput {
 					}
 				}
 			}
-		if (!questionsList.isEmpty())
-			form.setQuestions(questionsList);
+		if (questionsList.isEmpty())
+			form.setCongruencyStatus(congStatus_congruent);
 		else
-			form.setCongruencyStatus(congStatus_congruent);			
+			form.setQuestions(questionsList);			
 		form.setRaveFormOId(formName);
-		formsList.add(form);
+		if (!form.getQuestions().isEmpty())
+			formsList.add(form);
 		cccReport.setCccForms(formsList);
 		return cccReport;
 	}	
@@ -167,5 +166,19 @@ public class GenerateReport implements ReportOutput {
 		ALSError alsError = new ALSError();
 		return alsError;
 	}		
+	
+	
+	protected static String pickFieldErrors(ALSField field, List<ALSError> errors) {
+		String errorMsg = null;
+		for (ALSError alsError : errors) {
+			if (alsError.getFieldOid()!=null && field.getFieldOid().equalsIgnoreCase(alsError.getFieldOid())) {
+				if (errorMsg!=null)
+					errorMsg = errorMsg + alsError.getErrorDesc();
+				else
+					errorMsg = alsError.getErrorDesc();
+			}
+		}			
+		return errorMsg;
+	} 
 	
 }
