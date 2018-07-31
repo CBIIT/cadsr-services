@@ -1,18 +1,32 @@
 table {
-    width:90%;
-    border-left:1px solid #282828;
-    box-shadow: 4px 5px 1px #ccc;
+    width:100%;
 }
 th {
     vertical-align:top;
-    padding:5px 0px 5px 15px;
-    background-color:#282828;
+    padding:10px 0px 10px 15px;
     color:#fff;
+    border-top:1px solid #ccc;
+    background-color:#282828;
 }
+th:first-child { 
+    border-left:1px solid #ccc;
+}
+th:last-child {
+    border-right:1px solid #ccc;
+
+}
+
 td {
     vertical-align:top;
-    padding:5px 0px 5px 15px;
-    border-bottom:1px solid #282828;
+    padding:10px 0px 10px 15px;
+}
+td:first-child{
+    border-left:1px solid #ccc;
+}
+
+td:last-child {
+    border-right:1px solid #ccc;
+ 
 }
 a:hover {
     text-decoration: none;
