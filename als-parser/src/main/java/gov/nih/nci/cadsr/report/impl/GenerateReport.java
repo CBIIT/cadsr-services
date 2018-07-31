@@ -93,7 +93,6 @@ public class GenerateReport implements ReportOutput {
 						question.setRaveFieldLabel(alsField.getPreText());
 						question.setCdePermitQuestionTextChoices(""); // From the caDSR DB - docText
 						question.setRaveControlType(alsField.getControlType());
-						question.setCdeValueDomainType(""); // from caDSR DB - Value Domain Enumerated/NonEnumerated
 		
 						for (String key : ddeMap.keySet()) {
 							if (key.equals(alsField.getDataDictionaryName())) {
@@ -112,6 +111,7 @@ public class GenerateReport implements ReportOutput {
 						question.setRaveLength(alsField.getFixedUnit());
 						question.setRaveDisplayFormat(alsField.getDataFormat());
 						question.setQuestionCongruencyStatus(congStatus_congruent);
+						question.setMessage("");
 						// TODO This should call the service [Should be HTTPResponse] - VS
 						CdeDetails cdeDetails = null;
 						//if (alsField.getFormOid().equalsIgnoreCase("ENROLLLMENT") || alsField.getFormOid().equalsIgnoreCase("HISTOLOGY_AND_DISEASE") || alsField.getFormOid().equalsIgnoreCase("ELIGIBILITY_CHECKLIST")) {

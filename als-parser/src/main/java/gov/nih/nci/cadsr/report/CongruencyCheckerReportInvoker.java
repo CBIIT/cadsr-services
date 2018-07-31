@@ -176,10 +176,10 @@ public class CongruencyCheckerReportInvoker {
 		String[] rowHeaders = { "Rave Form OID", "caDSR Form ID", "Version", "Total Number Of Questions Checked",
 				"Field Order", "CDE Public ID", "CDE Version", "NCI Category", "Question Congruency Status", "Message",
 				"Rave Field Label", "Rave Field Label Result", "CDE Permitted Question Text Choices",
-				"Rave Control Type", "Control Type", "CDE Value Domain Type", "Rave Coded Data", "Coded Data Result",
+				"Rave Control Type", "Control Type Checker Result", "CDE Value Domain Type", "Rave Coded Data", "Coded Data Result",
 				"Allowable CDE  Value", "Rave User String", "PV  Result", "Allowable CDE  Value Meaning Text Choices",
-				"Rave Field Data Type", "Dataype Result", "CDE Data Type", "Rave UOM", "UOM  Result", "CDE UOM",
-				"Rave Length", "Length  Result", "CDE Maximum Length", "Rave Display Format", "Format  Result",
+				"Rave Field Data Type", "Dataype Checker Result", "CDE Data Type", "Rave UOM", "UOM Checker Result", "CDE UOM",
+				"Rave Length", "Length Checker Result", "CDE Maximum Length", "Rave Display Format", "Format Checker Result",
 				"CDE Display Format" };
 		for (int i = 0; i < 5; i++) {
 			XSSFSheet sheet2 = workbook.createSheet(forms.get(i).getRaveFormOid());

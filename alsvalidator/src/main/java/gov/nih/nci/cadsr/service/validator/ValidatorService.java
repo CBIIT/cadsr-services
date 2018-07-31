@@ -28,6 +28,7 @@ public class ValidatorService {
 	private static final String msg3 = "Newer Versions exist";
 	private static final String msg4_1 = "caDSR Max Length too short. PVs MaxLength ";
 	private static final String msg4_2 = ", caDSR MaxLength ";		
+	private static final String msg5 = "This CDE is not enumerated but question in input file has Coded Data (Permissible values)";	
 	private static String congStatus_errors = "ERRORS";
 	private static String congStatus_warn = "WARNINGS";
 	private static String congStatus_congruent = "CONGRUENT";
@@ -39,14 +40,13 @@ public class ValidatorService {
 	private static final String characters_string = "characters";
 	private static final String punct_pattern = "\\p{P}";
 	private static final String patternHolderChar = "d";
+	private static final String patternHolderNum = "9";	
 
+	
 	public static CCCQuestion validate(ALSField field, CCCQuestion question, CdeDetails cdeDetails) {
-		//StringBuffer message = new StringBuffer();
 		try {
-		if (cdeDetails.getDataElement()==null && cdeDetails.getValueDomain()==null) {
-			String message = question.getMessage();
-			message = message + msg1;
-			question.setMessage(message);
+		if (cdeDetails.getDataElement()==null && cdeDetails.getValueDomain()==null) {			
+			question.setMessage(msg1);
 			question.setQuestionCongruencyStatus(congStatus_errors);
 			logger.debug("CDE data not available for "+question.getCdePublicId());
 		} else {
@@ -60,7 +60,7 @@ public class ValidatorService {
 			question = setRaveFieldLabelResult(cdeDetails,question);
 			
 			// Comparing the RAVE control type and the caDSR VD data type for Control Type Checker Result
-			question = setRaveControlTypeResult(cdeDetails,question);
+			question = setRaveControlTypeResult(cdeDetails.getValueDomain().getValueDomainDetails().getValueDomainType(), question);
 
 			// Gathering Permissible Values and Value Meanings in separate lists			
 			List<String> pvList = new ArrayList<String>();
@@ -122,9 +122,7 @@ public class ValidatorService {
 	protected static CCCQuestion checkCdeRetired(CdeDetails cdeDetails, CCCQuestion question) {
 		//Checking for retired CDEs 
 		if (cdeDetails.getDataElement()!=null && cdeDetails.getDataElement().getDataElementDetails().getWorkflowStatus().equalsIgnoreCase(retiredString)) {	
-			String message = question.getMessage();
-			message = message + msg2;
-			question.setMessage(message);
+			question.setMessage(question.getMessage()+"\n"+msg2);
 			question.setQuestionCongruencyStatus(congStatus_warn);
 		}		
 		return question;
@@ -134,9 +132,7 @@ public class ValidatorService {
 	protected static CCCQuestion checkCdeVersions(CdeDetails cdeDetails, CCCQuestion question) {
 		//Checking for different versions of CDEs			
 		if (cdeDetails.getDataElement()!=null && (cdeDetails.getDataElement().getDataElementDetails().getVersion() >  Float.valueOf(question.getCdeVersion()))) {
-			String message = question.getMessage();
-			message = message + msg3;
-			question.setMessage(message);
+			question.setMessage(question.getMessage()+"\n"+msg3);
 			question.setQuestionCongruencyStatus(congStatus_warn);
 		}
 		return question;		
@@ -175,21 +171,26 @@ public class ValidatorService {
 	}
 
 	
-	protected static CCCQuestion setRaveControlTypeResult (CdeDetails cdeDetails, CCCQuestion question) {
+	protected static CCCQuestion setRaveControlTypeResult (String vdType, CCCQuestion question) {
 		// Comparing the RAVE control type and the caDSR VD data type for Control Type Checker Result
-		if (cdeDetails.getValueDomain()!=null) {
 			if (question.getRaveControlType()!=null) {
-				if (question.getRaveControlType().equals(cdeDetails.getValueDomain().getValueDomainDetails().getDataType())) {
+				if (question.getRaveControlType().equalsIgnoreCase("TEXT") && vdType.equalsIgnoreCase("N")) {
+					question.setControlTypeResult(matchString);
+					if (!question.getRaveCodedData().isEmpty()) {
+						question.setMessage(question.getMessage()+"\n"+msg5);
+					}
+						
+				} else if (!question.getRaveControlType().equalsIgnoreCase("TEXT") && vdType.equalsIgnoreCase("E")) {
 					question.setControlTypeResult(matchString);
 				} else {
 					question.setControlTypeResult(errorString);
 					question.setQuestionCongruencyStatus(congStatus_errors);
 				}
+				question.setCdeValueDomainType(vdType);	
 			} else {
 				question.setControlTypeResult(errorString);
 				question.setQuestionCongruencyStatus(congStatus_errors);
 			}
-		}
 		return question;
 	}
 	
@@ -232,7 +233,6 @@ public class ValidatorService {
 	protected static CCCQuestion checkDataTypeCheckerResult (CCCQuestion question, String raveDataFormat, String vdDataType) {
 		// Comparing RAVE Data format with caDSR Value Domain Datatype - Datatype Checker Result
 		Boolean result = false;
-		logger.debug("Field Data Format: "+raveDataFormat+" vdDataType: "+vdDataType);
 		if (raveDataFormat!=null) {
 			if (raveDataFormat.startsWith("$")) {
 				if (characterDataFormats.contains(vdDataType)) 
@@ -303,11 +303,8 @@ public class ValidatorService {
 	
 
 	protected static CCCQuestion checkCdeMaxLength (CCCQuestion question, int pvMaxLen, int vdMaxLen, int cdeMaxLen) {
-		if (pvMaxLen > vdMaxLen) {
-			String message = question.getMessage();
-			message = message + msg4_1 + pvMaxLen + msg4_2 + vdMaxLen;
-			question.setMessage(message);
-		}
+		if (pvMaxLen > vdMaxLen)
+			question.setMessage(question.getMessage()+"\n"+msg4_1 + pvMaxLen + msg4_2 + vdMaxLen);
 		return question;
 	}
 	
@@ -324,6 +321,8 @@ public class ValidatorService {
 				raveLength = raveLength.substring(index,raveLength.indexOf(characters_string));
 			} else if (StringUtils.countOccurrencesOf(raveLength, patternHolderChar) > 1) {
 				raveLength = String.valueOf(StringUtils.countOccurrencesOf(raveLength, patternHolderChar));
+			} else if (StringUtils.countOccurrencesOf(raveLength, patternHolderNum) > 1) {
+				raveLength = String.valueOf(StringUtils.countOccurrencesOf(raveLength, patternHolderNum));
 			}	
 		} else {
 			raveLength = "0";
