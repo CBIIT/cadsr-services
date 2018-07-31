@@ -5,7 +5,6 @@ package gov.nih.nci.cadsr.microservices;
 
 import java.util.Map;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
@@ -22,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import gov.nih.nci.cadsr.data.ALSData;
+import gov.nih.nci.cadsr.data.CCCReport;
 
 @RestController
 @EnableAutoConfiguration
@@ -82,5 +82,40 @@ public class CCheckerDbController {
 		}
 		return new ResponseEntity<ALSData>(alsData, httpHeaders, httpStatus);
 	}
+	@GetMapping("/rest/retrievereporterror")
+	//@ResponseBody
+	public ResponseEntity<CCCReport> retrieveReportError(HttpServletRequest request,
+			@RequestParam(name="_cchecker", required=true) String idseq) {
+		logger.debug("retrieveErrorReport called: " + idseq);
+		//FIXME idseq format check! check session token
 
+		CCCReport alsData = dataElemenRepository.retrieveReportError(idseq);
+		HttpStatus httpStatus;
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.add("Content-Type", "application/json");
+		if (alsData != null) {
+			httpHeaders.add("Content-Type", "application/json");
+			httpStatus = HttpStatus.OK;
+		}
+		else {
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<CCCReport>(alsData, httpHeaders, httpStatus);
+	}
+	@PostMapping("/rest/createreporterror")
+	//@ResponseBody
+	public ResponseEntity<String> createReportError(HttpServletRequest request, RequestEntity<CCCReport> requestEntity,
+			@RequestParam(name="_cchecker", required=true) String idseq) {
+		logger.debug("createAlsData called: " + idseq);
+		//FIXME idseq format check! check session token
+		CCCReport reportData = requestEntity.getBody();
+		
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.add("Content-Type", "text/plain");
+
+		String result = dataElemenRepository.createReportError(reportData, idseq);
+		String res = result.toString();
+	
+		return new ResponseEntity<String>(res, httpHeaders, HttpStatus.OK);
+	}
 }
