@@ -45,8 +45,13 @@ public class GatewayBootController {
 	static String CCHECKER_PARSER_URL;
 	static String CCHECKER_DB_SERVICE_URL_CREATE;
 	static String CCHECKER_DB_SERVICE_URL_RETRIEVE;
-	
+	static String CCHECKER_DB_SERVICE_URL_CREATE_REPORT_ERROR;
+	static String CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_ERROR;
+	static String CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL;
+	static String CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL;	
 	private static String URL_RETRIEVE_ALS_FORMAT;
+	private static String URL_RETRIEVE_REPORT_ERROR_FORMAT;
+	private static String URL_RETRIEVE_REPORT_FULL_FORMAT;
 
 	static String UPLOADED_FOLDER;
 	static String ACCESS_CONTROL_ALLOW_ORIGIN;
@@ -135,38 +140,93 @@ public class GatewayBootController {
 	 * 
 	 * @param idseq
 	 *            - saved previously in DB not null
-	 * @return ALSDataWrapper
+	 * @return ALSData
 	 */
 	protected ALSData retrieveAlsData(String idseq) {
-		ALSData alsData = null;
+		return retrieveData(idseq, URL_RETRIEVE_ALS_FORMAT, ALSData.class);
+	}
+	/**
+	 * 
+	 * @param idseq
+	 *            - saved previously in DB not null
+	 * @return ALSData
+	 */
+	protected CCCReport retrieveReportError(String idseq) {
+		return retrieveData(idseq, URL_RETRIEVE_REPORT_ERROR_FORMAT, CCCReport.class);
+	}
+	/**
+	 * 
+	 * @param idseq
+	 *            - saved previously in DB not null
+	 * @return ALSData
+	 */
+	protected Object retrieveReportFull(String idseq) {
+		return retrieveData(idseq, URL_RETRIEVE_REPORT_FULL_FORMAT, Object.class);
+	}
+	/**
+	 * 
+	 * @param idseq
+	 *            - saved previously in DB not null
+	 * @return Data
+	 */
+	protected <T> T retrieveData(String idseq, String retrieveUrlStr, Class<T> clazz) {
+		T data = null;
 		if (idseq != null) {
 			RestTemplate restTemplate = new RestTemplate();
 
-			String urlStr = String.format(URL_RETRIEVE_ALS_FORMAT, idseq);
-			logger.debug("...retrieveAlsData" + urlStr);
+			String urlStr = String.format(retrieveUrlStr, idseq);
+			logger.debug("...retrieveData" + urlStr);
 
-			alsData = restTemplate.getForObject(urlStr, ALSData.class);
+			data = restTemplate.getForObject(urlStr, clazz);
 		}
-		return alsData;
+		return data;
 	}
-
 	/**
 	 * 
 	 * @param alsData
 	 * @param idseq
-	 * @return
+	 * @return StringResponseWrapper
 	 */
 	protected StringResponseWrapper submitPostRequestSaveAls(ALSData alsData, String idseq) {
+		return submitPostRequestCreateGeneric(alsData, idseq, CCHECKER_DB_SERVICE_URL_CREATE);
+	}
+	/**
+	 * 
+	 * @param CCCReport
+	 * @param idseq
+	 * @return StringResponseWrapper
+	 */
+	protected StringResponseWrapper submitPostRequestSaveReportError(CCCReport data, String idseq) {
+		return submitPostRequestCreateGeneric(data, idseq, CCHECKER_DB_SERVICE_URL_CREATE_REPORT_ERROR);
+	}
+	/**
+	 * This is a placeholder. Not implemented.
+	 * 
+	 * @param CCCReport
+	 * @param idseq
+	 * @return StringResponseWrapper
+	 */
+	protected StringResponseWrapper submitPostRequestSaveReportError(Object reportFullData, String idseq) {
+		//FIXME use a real Report Full Class
+		return submitPostRequestCreateGeneric(reportFullData, idseq, CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL);
+	}
+	/**
+	 * 
+	 * @param CCCReport
+	 * @param idseq
+	 * @return StringResponseWrapper
+	 */
+	protected <T>StringResponseWrapper submitPostRequestCreateGeneric(T data, String idseq, String createRequestUrlStr) {
 		RestTemplate restTemplate = new RestTemplate();
 
-		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(CCHECKER_DB_SERVICE_URL_CREATE);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(createRequestUrlStr);
 
 		// add some String
 		builder.queryParam(sessionCookieName, idseq);
 
 		// another staff
 		StringResponseWrapper wrapper = new StringResponseWrapper();
-		HttpEntity<ALSData> requestData = new HttpEntity<>(alsData);
+		HttpEntity<T> requestData = new HttpEntity<>(data);
 		ResponseEntity<String> responseEntity = restTemplate.postForEntity(builder.build().encode().toUri(),
 				requestData, String.class);
 
@@ -174,15 +234,15 @@ public class GatewayBootController {
 		wrapper.setStatusCode(statusCode);
 		if (statusCode == HttpStatus.OK) {
 			wrapper.setResponseData(responseEntity.getBody());
-			logger.debug("parseservice result received");
+			logger.debug(createRequestUrlStr + " OK result received");
 
 		} 
 		else {
-			logger.error("parsefileservice sent an error: " + statusCode);
+			logger.error(createRequestUrlStr + " sent an error: " + statusCode);
 		}
 		return wrapper;
 	}
-
+	
 	/**
 	 * Upload one file.
 	 * 
@@ -246,23 +306,19 @@ public class GatewayBootController {
 		// set file name and owner
 		alsData.setFileName(orgFileName);
 		alsData.setReportOwner(reportOwner);
-		logger.debug("........before sending save alsData request. REPORT_OWNER: " + alsData.getReportOwner()
+		logger.debug("...after ALS parser before sending save alsData request. REPORT_OWNER: " + alsData.getReportOwner()
 				+ ", FILE_NAME: " + alsData.getFileName() + ", idseq: " + idseq);
 
-		// implement save ALSData in DB
-		// FIXME I commented save request code until we decide how to configure
-		// DB into in a container
-		// StringResponseWrapper saveResponse =
-		// submitPostRequestSaveAls(alsData, idseq);
-		// HttpStatus responseStatusCode = saveResponse.getStatusCode();
-		// if (! HttpStatus.OK.equals(responseStatusCode)) {
-		// String errorMessage = "Error on saving ALS file: " + orgFileName + ",
-		// idseq: " + idseq;
-		// return buildErrorResponse(errorMessage, parserStatusCode);
-		// }
-		// else {
-		// logger.info("Saved ALS file: " + orgFileName + ", idseq: " + idseq);
-		// }
+		// save ALSData DB into in a container
+		 StringResponseWrapper saveResponse = submitPostRequestSaveAls(alsData, idseq);
+		 HttpStatus responseStatusCode = saveResponse.getStatusCode();
+		 if (! HttpStatus.OK.equals(responseStatusCode)) {
+			 String errorMessage = "Error on saving ALS file: " + orgFileName + ", owner: " + reportOwner + ", idseq: " + idseq;
+			 return buildErrorResponse(errorMessage, parserStatusCode);
+		 }
+		 else {
+			 logger.info("Saved ALS file: " + orgFileName + ", idseq: " + idseq + ", owner: " + reportOwner);
+		 }
 		//
 		// build result from parser data
 		FormsUiData formUiData = FormService.buildFormsUiData(alsData);
@@ -301,27 +357,63 @@ public class GatewayBootController {
 		logger.debug("Selected forms received: " + formNames);
 		ALSData alsData;
 
-		//TODO this is test code only getting file data to generate an example report
-		String filepath = buildFilePath(cookie.getValue());
-		ALSDataWrapper alsDataWrapper = submitPostRequestParser(filepath);
-		alsData = alsDataWrapper.getAlsData();
+		//this is test code only getting file data to generate an example report
+//		String filepath = buildFilePath(cookie.getValue());
+//		ALSDataWrapper alsDataWrapper = submitPostRequestParser(filepath);
+//		alsData = alsDataWrapper.getAlsData();
 		
-		//FIXME use this code when docker container is ready
-		//alsData = retrieveAlsData(sessionCookieValue);//this calls DB service
-		
+		//this calls DB service to retrieve saved ALS
+		alsData = retrieveAlsData(sessionCookieValue);//
+		HttpStatus errorCode =  HttpStatus.BAD_REQUEST;
 		if (alsData != null) {
 			response.addCookie(cookie);
 			// FIXME call Validator service instead of the example code below
 			CCCReport cccReport = CongruencyCheckerReportInvoker.builTestReport(alsData);
+			cccReport.setFileName(alsData.getFileName());
 			cccReport.setReportOwner(alsData.getReportOwner());
-			HttpHeaders httpHeaders = createHttpOkHeaders();
-			return new ResponseEntity<CCCReport>(cccReport, httpHeaders, HttpStatus.OK);
+			StringResponseWrapper saveResponse = submitPostRequestSaveReportError(cccReport, sessionCookieValue);
+			HttpStatus statusCode = saveResponse.getStatusCode();
+			if (HttpStatus.OK.equals(statusCode)) {
+				cccReport.setReportOwner(alsData.getReportOwner());
+				cccReport.setFileName(alsData.getFileName());
+				HttpHeaders httpHeaders = createHttpOkHeaders();
+				return new ResponseEntity<CCCReport>(cccReport, httpHeaders, HttpStatus.OK);
+			}
+			else {
+				logger.error("submitPostRequestSaveReportError received statusCode: " + statusCode);
+				errorCode = statusCode;//This can be user error or server error
+			}
+		}
+		return buildErrorResponse("Session data is not found based on: " + sessionCookieValue, errorCode);
+	}
+	
+	@CrossOrigin
+	@GetMapping("/retrievereporterror")
+	public ResponseEntity<?> retrieveErrorReport(HttpServletRequest request,
+			@RequestParam(name="_cchecker", required=true) String idseq) {
+		logger.debug("retrieveErrorReport called: " + idseq);
+
+		Cookie cookie = retrieveCookie(request);
+		if (cookie == null) {
+			return buildErrorResponse("Session is not found", HttpStatus.BAD_REQUEST);
+		}
+		String sessionCookieValue = cookie.getValue();
+		//FIXME idseq format check! check session token
+		logger.debug("checkService session cookie: " + sessionCookieValue);
+		CCCReport data = retrieveReportError(idseq);
+		HttpStatus httpStatus;
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.add("Content-Type", "application/json");
+		if (data != null) {
+			httpHeaders.add("Content-Type", "application/json");
+			httpStatus = HttpStatus.OK;
 		}
 		else {
-			return buildErrorResponse("Session data is not found based on: " + sessionCookieValue, HttpStatus.BAD_REQUEST);
+			httpStatus = HttpStatus.BAD_REQUEST;
 		}
-	}
-
+		return new ResponseEntity<CCCReport>(data, httpHeaders, httpStatus);
+	}	
+	
 	private Cookie retrieveCookie(HttpServletRequest request) {
 		Cookie[] cookieArr = request.getCookies();
 		Cookie sessionCookie = null;
@@ -405,14 +497,26 @@ public class GatewayBootController {
 		UPLOADED_FOLDER = GatewayBootWebApplication.UPLOADED_FOLDER;
 		CCHECKER_DB_SERVICE_URL_CREATE = GatewayBootWebApplication.CCHECKER_DB_SERVICE_URL_CREATE;
 		CCHECKER_DB_SERVICE_URL_RETRIEVE = GatewayBootWebApplication.CCHECKER_DB_SERVICE_URL_RETRIEVE;
+		CCHECKER_DB_SERVICE_URL_CREATE_REPORT_ERROR = GatewayBootWebApplication.CCHECKER_DB_SERVICE_URL_CREATE_REPORT_ERROR;
+		CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_ERROR = GatewayBootWebApplication.CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_ERROR;
+		CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL = GatewayBootWebApplication.CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL;
+		CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL = GatewayBootWebApplication.CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL;
 		ACCESS_CONTROL_ALLOW_ORIGIN = GatewayBootWebApplication.ACCESS_CONTROL_ALLOW_ORIGIN;
 		logger.debug("GatewayBootController CCHECKER_PARSER_URL: " + CCHECKER_PARSER_URL);
 		logger.debug("GatewayBootController UPLOADED_FOLDER: " + UPLOADED_FOLDER);
 		logger.debug("GatewayBootController CCHECKER_DB_SERVICE_URL_CREATE: " + CCHECKER_DB_SERVICE_URL_CREATE);
 		logger.debug("GatewayBootController CCHECKER_DB_SERVICE_URL_RETRIEVE: " + CCHECKER_DB_SERVICE_URL_RETRIEVE);
+		logger.debug("GatewayBootController CCHECKER_DB_SERVICE_URL_CREATE_REPORT_ERROR: " + CCHECKER_DB_SERVICE_URL_CREATE_REPORT_ERROR);
+		logger.debug("GatewayBootController CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_ERROR: " + CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_ERROR);
+		logger.debug("GatewayBootController CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL: " + CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL);
+		logger.debug("GatewayBootController CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL: " + CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL);
 		logger.debug("GatewayBootController ACCESS_CONTROL_ALLOW_ORIGIN: " + ACCESS_CONTROL_ALLOW_ORIGIN);
 		URL_RETRIEVE_ALS_FORMAT = CCHECKER_DB_SERVICE_URL_RETRIEVE + "?" + sessionCookieName + "=%s";
+		URL_RETRIEVE_REPORT_ERROR_FORMAT = CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_ERROR + "?" + sessionCookieName + "=%s";
+		URL_RETRIEVE_REPORT_FULL_FORMAT = CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL + "?" + sessionCookieName + "=%s";
 		logger.debug("GatewayBootController URL_RETRIEVE_ALS_FORMAT: " + URL_RETRIEVE_ALS_FORMAT);
+		logger.debug("GatewayBootController URL_RETRIEVE_REPORT_ERROR_FORMAT: " + URL_RETRIEVE_REPORT_ERROR_FORMAT);
+		logger.debug("GatewayBootController URL_RETRIEVE_REPORT_FULL_FORMAT: " + URL_RETRIEVE_REPORT_FULL_FORMAT);
 	}
 
 	// TODO remove testReportService service

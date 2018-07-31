@@ -22,6 +22,10 @@ public class GatewayBootWebApplication extends SpringBootServletInitializer {
 	static String CCHECKER_PARSER_URL;
 	static String CCHECKER_DB_SERVICE_URL_CREATE;
 	static String CCHECKER_DB_SERVICE_URL_RETRIEVE;
+	static String CCHECKER_DB_SERVICE_URL_CREATE_REPORT_ERROR;
+	static String CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_ERROR;
+	static String CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL;
+	static String CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL;
 	//Save the uploaded file to this folder
 	static String UPLOADED_FOLDER;
 	static String ACCESS_CONTROL_ALLOW_ORIGIN_HEADER = "Access-Control-Allow-Origin";
@@ -46,8 +50,12 @@ public class GatewayBootWebApplication extends SpringBootServletInitializer {
 		UPLOADED_FOLDER =  properties.getProperty("UPLOADED_FOLDER");
 		CCHECKER_DB_SERVICE_URL_CREATE = properties.getProperty("CCHECKER_DB_SERVICE_URL_CREATE");
 		CCHECKER_DB_SERVICE_URL_RETRIEVE = properties.getProperty("CCHECKER_DB_SERVICE_URL_RETRIEVE");
+		CCHECKER_DB_SERVICE_URL_CREATE_REPORT_ERROR = properties.getProperty("CCHECKER_DB_SERVICE_URL_CREATE_REPORT_ERROR");
+		CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_ERROR = properties.getProperty("CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_ERROR");
+		CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL = properties.getProperty("CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL");
+		CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL = properties.getProperty("CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL");
 		ACCESS_CONTROL_ALLOW_ORIGIN = properties.getProperty(ACCESS_CONTROL_ALLOW_ORIGIN_HEADER);
-		logger.debug("!!! Loaded CChecker Gateway properties: " + properties);
+		logger.info("!!! Loaded CChecker Gateway properties: " + properties);
 
         return application.sources(GatewayBootWebApplication.class);
     }

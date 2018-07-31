@@ -58,4 +58,4 @@ If environment is set up just run java command
 http://localhost:4803
 
 5. Retrieve ALSData
-curl -v http://localhost:4803/rest/retrievealsdata?_cchecker=855B4B76-A462-4B73-8727-3194517C6DE3
+curl -v http://localhost:4803/rest/retrievealsdata?_cchecker=0BCAEE78-9916-4ADA-B7CD-CE5854AFDD82
