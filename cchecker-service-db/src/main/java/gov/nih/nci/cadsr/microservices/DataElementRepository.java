@@ -87,8 +87,13 @@ public class DataElementRepository {
     @Transactional
     public String createReportError(CCCReport reportData, String idseq) {
     	//TODO do we need to check the data
-    	//We need to see maybe we need to delete the previous report
-    	logger.debug("createAlsData alsData REPORT_OWNER: " + reportData.getReportOwner() + ", FILE_NAME: " + reportData.getFileName() + ", idseq: " + idseq);
+    	//delete the previous session report
+    	logger.debug("createReportError REPORT_OWNER: " + reportData.getReportOwner() + ", FILE_NAME: " + reportData.getFileName() + ", idseq: " + idseq);
+    	jdbcTemplate.update(dbcon -> {
+    	    PreparedStatement ps = dbcon.prepareStatement("DELETE FROM SBREXT.CC_REPORT_ERROR WHERE CCHECKER_IDSEQ = ?");
+    	    ps.setString(1, idseq);
+    	    return ps;
+    	});
     	jdbcTemplate.update(dbcon -> {
     	    PreparedStatement ps = dbcon.prepareStatement(
     	    	"INSERT INTO SBREXT.CC_REPORT_ERROR (CCHECKER_IDSEQ, FILE_NAME, REPORT_OWNER, ERROR_REPORT_BLOB)  values(?, ?, ?, ?)");
