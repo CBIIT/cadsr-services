@@ -110,7 +110,7 @@ public class GenerateReport implements ReportOutput {
 						question.setRaveUOM(raveUOM);
 						question.setRaveLength(alsField.getFixedUnit());
 						question.setRaveDisplayFormat(alsField.getDataFormat());
-						question.setQuestionCongruencyStatus(congStatus_congruent);
+						//question.setQuestionCongruencyStatus(congStatus_congruent);
 						question.setMessage(pickFieldErrors(alsField, alsData.getCccError().getAlsErrors()));
 						// TODO This should call the service [Should be HTTPResponse] - VS
 						CdeDetails cdeDetails = null;
@@ -125,27 +125,33 @@ public class GenerateReport implements ReportOutput {
 						// TODO Call to the validation of the CDEDetails against the ALSField & Question objects  
 						//question = validate(alsField, question, cdeDetails); //[ValidatorService]
 						//}
-						if ((question.getMessage() == null || question.getMessage().equals("")) && question.getQuestionCongruencyStatus().equals(congStatus_congruent)) { 
+						if ((question.getMessage() == null || question.getMessage().equals(""))) { 
 							form.setCongruencyStatus(congStatus_congruent);
 						} else {
 									questionsList.add(question); 
 									if (form.getCongruencyStatus()!=null) {
 										if (!form.getCongruencyStatus().equals(congStatus_errors)) {
-											if (question.getQuestionCongruencyStatus().equalsIgnoreCase(congStatus_errors))
+											if (question.getQuestionCongruencyStatus()!=null && question.getQuestionCongruencyStatus().equalsIgnoreCase(congStatus_errors))
 												form.setCongruencyStatus(congStatus_errors);
-											else if (question.getQuestionCongruencyStatus().equals(congStatus_warn))
+											else if (question.getQuestionCongruencyStatus()!=null && question.getQuestionCongruencyStatus().equals(congStatus_warn))
 												form.setCongruencyStatus(congStatus_warn);
-										}
+										} else 
+											form.setCongruencyStatus(question.getQuestionCongruencyStatus());
 									} else 
 										form.setCongruencyStatus(question.getQuestionCongruencyStatus());
 								}						
 					} else {
 							question.setRaveFieldLabel(alsField.getPreText());
+							//if (!question.getQuestionCongruencyStatus().equalsIgnoreCase(congStatus_errors))
+								question.setQuestionCongruencyStatus(congStatus_warn);
+							//question.setMessage(msg_6);
+							question.setMessage(pickFieldErrors(alsField, alsData.getCccError().getAlsErrors()));
 							questionsList.add(question);
 						}
-					}
-				}
+					}				
+				}			
 			}
+
 		if (questionsList.isEmpty())
 			form.setCongruencyStatus(congStatus_congruent);
 		else
@@ -170,14 +176,22 @@ public class GenerateReport implements ReportOutput {
 	
 	protected static String pickFieldErrors(ALSField field, List<ALSError> errors) {
 		String errorMsg = null;
+		List<ALSError> fieldErrors = new ArrayList<ALSError>();
 		for (ALSError alsError : errors) {
-			if (alsError.getFieldOid()!=null && field.getFieldOid().equalsIgnoreCase(alsError.getFieldOid())) {
+			if (alsError.getFieldOid()!=null) {
+				if (field.getFieldOid().equalsIgnoreCase(alsError.getFieldOid()) && field.getFormOid().equalsIgnoreCase(alsError.getFormOid())) {
+					fieldErrors.add(alsError);
+				}
+			}
+		}
+		for (ALSError alsError : fieldErrors) {
+			//if (alsError.getFieldOid()!=null && field.getFieldOid().equalsIgnoreCase(alsError.getFieldOid())) {
 				if (errorMsg!=null)
 					errorMsg = errorMsg + alsError.getErrorDesc();
 				else
 					errorMsg = alsError.getErrorDesc();
-			}
-		}			
+			//}
+		}					
 		return errorMsg;
 	} 
 	

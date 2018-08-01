@@ -31,7 +31,6 @@ public class ValidatorService {
 	private static final String msg5 = "This CDE is not enumerated but question in input file has Coded Data (Permissible values)";	
 	private static String congStatus_errors = "ERRORS";
 	private static String congStatus_warn = "WARNINGS";
-	private static String congStatus_congruent = "CONGRUENT";
 	private static List<String> characterDataFormats = Arrays.asList("CHAR", "VARCHAR2", "CHARACTER", "ALPHANUMERIC", "java.lang.String", "java.lang.Character", 
 			"xsd:string");
 	private static List<String> numericDataFormats = Arrays.asList("NUMBER", "number", "numeric", "integer", "Integer", "java.lang.Integer", "xsd:integer");
@@ -50,6 +49,7 @@ public class ValidatorService {
 			question.setQuestionCongruencyStatus(congStatus_errors);
 			logger.debug("CDE data not available for "+question.getCdePublicId());
 		} else {
+			
 			//Checking for retired CDEs 
 			question = checkCdeRetired(cdeDetails,question);
 
@@ -123,7 +123,8 @@ public class ValidatorService {
 		//Checking for retired CDEs 
 		if (cdeDetails.getDataElement()!=null && cdeDetails.getDataElement().getDataElementDetails().getWorkflowStatus().equalsIgnoreCase(retiredString)) {	
 			question.setMessage(question.getMessage()+"\n"+msg2);
-			question.setQuestionCongruencyStatus(congStatus_warn);
+			if (!question.getQuestionCongruencyStatus().equalsIgnoreCase(congStatus_errors))
+				question.setQuestionCongruencyStatus(congStatus_warn);
 		}		
 		return question;
 	}
@@ -133,7 +134,8 @@ public class ValidatorService {
 		//Checking for different versions of CDEs			
 		if (cdeDetails.getDataElement()!=null && (cdeDetails.getDataElement().getDataElementDetails().getVersion() >  Float.valueOf(question.getCdeVersion()))) {
 			question.setMessage(question.getMessage()+"\n"+msg3);
-			question.setQuestionCongruencyStatus(congStatus_warn);
+			if (!question.getQuestionCongruencyStatus().equalsIgnoreCase(congStatus_errors))
+				question.setQuestionCongruencyStatus(congStatus_warn);
 		}
 		return question;		
 	}
@@ -233,6 +235,7 @@ public class ValidatorService {
 	protected static CCCQuestion checkDataTypeCheckerResult (CCCQuestion question, String raveDataFormat, String vdDataType) {
 		// Comparing RAVE Data format with caDSR Value Domain Datatype - Datatype Checker Result
 		Boolean result = false;
+		logger.debug("Field Data Format: "+raveDataFormat+" vdDataType: "+vdDataType);
 		if (raveDataFormat!=null) {
 			if (raveDataFormat.startsWith("$")) {
 				if (characterDataFormats.contains(vdDataType)) 
@@ -265,7 +268,8 @@ public class ValidatorService {
 					question.setUomCheckerResult(matchString);
 				} else {
 					question.setUomCheckerResult(warningString);
-					question.setQuestionCongruencyStatus(congStatus_warn);
+					if (!question.getQuestionCongruencyStatus().equalsIgnoreCase(congStatus_errors))
+						question.setQuestionCongruencyStatus(congStatus_warn);
 					question.setCdeUOM(unitOfMeasure);
 				}
 		}
@@ -281,7 +285,8 @@ public class ValidatorService {
 				question.setLengthCheckerResult(matchString);
 			} else {
 				question.setLengthCheckerResult(warningString);
-				question.setQuestionCongruencyStatus(congStatus_warn);
+				if (!question.getQuestionCongruencyStatus().equalsIgnoreCase(congStatus_errors))
+					question.setQuestionCongruencyStatus(congStatus_warn);
 			}
 		}		
 		return question;
@@ -295,7 +300,8 @@ public class ValidatorService {
 					question.setFormatCheckerResult(matchString);
 				} else {
 					question.setFormatCheckerResult(warningString);
-					question.setQuestionCongruencyStatus(congStatus_warn);
+					if (!question.getQuestionCongruencyStatus().equalsIgnoreCase(congStatus_errors))
+						question.setQuestionCongruencyStatus(congStatus_warn);
 				} 
 		}
 		return question;
