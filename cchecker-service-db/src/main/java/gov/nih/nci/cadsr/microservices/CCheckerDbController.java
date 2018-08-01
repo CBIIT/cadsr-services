@@ -106,7 +106,7 @@ public class CCheckerDbController {
 	//@ResponseBody
 	public ResponseEntity<String> createReportError(HttpServletRequest request, RequestEntity<CCCReport> requestEntity,
 			@RequestParam(name="_cchecker", required=true) String idseq) {
-		logger.debug("createAlsData called: " + idseq);
+		logger.debug("createReportError called: " + idseq);
 		//FIXME idseq format check! check session token
 		CCCReport reportData = requestEntity.getBody();
 		

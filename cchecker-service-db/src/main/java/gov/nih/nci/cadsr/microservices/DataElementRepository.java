@@ -62,6 +62,7 @@ public class DataElementRepository {
      * @param alsData not null and required fields not null
      * @return UUID - caDSR IDSEQ
      */
+    @Transactional
     public String createAlsData(ALSData alsData, String idseq) {
     	//TODO do we need to check the data
     	logger.debug("createAlsData alsData REPORT_OWNER: " + alsData.getReportOwner() + ", FILE_NAME: " + alsData.getFileName() + ", idseq: " + idseq);
@@ -83,8 +84,10 @@ public class DataElementRepository {
      * @param reportData not null and required fields not null
      * @return UUID - caDSR IDSEQ shall exist in CC_PARSER_DATA
      */
+    @Transactional
     public String createReportError(CCCReport reportData, String idseq) {
     	//TODO do we need to check the data
+    	//We need to see maybe we need to delete the previous report
     	logger.debug("createAlsData alsData REPORT_OWNER: " + reportData.getReportOwner() + ", FILE_NAME: " + reportData.getFileName() + ", idseq: " + idseq);
     	jdbcTemplate.update(dbcon -> {
     	    PreparedStatement ps = dbcon.prepareStatement(
