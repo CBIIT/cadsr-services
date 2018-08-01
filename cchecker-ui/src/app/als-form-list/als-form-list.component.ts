@@ -12,35 +12,51 @@ import { HttpEventType }  from '@angular/common/http';
 })
 export class AlsFormListComponent implements OnInit {
   checkedItems:String[];  // list of checked names //
-  formListData:Object;
-  validItemsLength:Number;
-  selectAllCheckbox:boolean;
+  checkStdCrfCde:Boolean; // form checkbox at bottom of page //
+  checkUom:Boolean; // form checkbox at bottom of page //
+  formListData:Object; // main form list object to populate table //
+  mustDisplayException:Boolean; // form checkbox at bottom of page //
+  selectAllCheckbox:Boolean; // checkbox to select/de-select all items in form list table //
+  validItemsLength:Number; // length of only success parsing status items //
 
   constructor(private http:HttpClient, private restService:RestService, private dataService:DataService) {
     this.selectAllCheckbox = true; // select all forms checkbox. default to all //
     this.checkedItems = []; // array of form names that are selected //
-    this.formListData = {'formsList':[]} // data for form list table //
-    this.getFormListData(); // get form list data from restService //
+    this.formListData = {'formsList':[],'checkUom':null,'checkStdCrfCde':null,'mustDisplayException':null}; // data for form list table //
+    this.getFormListData(); // get form list data from dataService //
+    this.checkedItems = this.setCheckedItemsArray(); // simple array for checked forms //
+    this.getFormListOptionCheckboxes();  // get 3 checkboxes at bottom and their values //   
    }
 
   ngOnInit() {
-    this.checkedItems = this.setCheckedItemsArray();
+
   }
+
+  // get checkbox status of record //
+  getCheckedStatus = record => this.checkedItems.indexOf(record.formName) > -1;
 
   // gets form list data and sets checkedItems array //
   getFormListData() {
     this.formListData = this.dataService.getFormListData(); 
-    this.checkedItems = this.setCheckedItemsArray()
+    this.checkedItems = this.setCheckedItemsArray();
   };
 
-  // get checkbox status of record //
-  getCheckedStatus = record => this.checkedItems.indexOf(record.formName) > -1;
+  // get 3 checkboxes and their values. Called on ngOnInit() //
+  getFormListOptionCheckboxes() {
+    const checkboxes = this.dataService.getFormListOptionCheckbox(['checkUom','checkStdCrfCde','mustDisplayException']);
+    for (let c in checkboxes) { 
+      this[c]=checkboxes[c];
+    };
+  };
 
   // get usable status message to display in table status column //
   getReadableErrorStatus = e => e ? 'Success':'Fail';
 
   // sorts data alphabetically by form name //
   getSortedData = () => this.formListData['formsList'].sort((a, b) => a.formName.toUpperCase()<b.formName.toUpperCase() ? -1 : 1);
+
+  // sets checked all items to all or none //
+  setCheckAllStatus = e => e.target.checked ? this.checkedItems = this.setCheckedItemsArray() : this.checkedItems = [];
 
   // add or remove record from checkedItems array //
   setCheckedItem = e => { 
@@ -50,12 +66,14 @@ export class AlsFormListComponent implements OnInit {
     return false;
   };
 
-  // sets checked all items to all or none //
-  setCheckAllStatus = e => e.target.checked ? this.checkedItems = this.setCheckedItemsArray() : this.checkedItems = [];
-
   // filter function to assign ALL valid records to checkedItems array //
   setCheckedItemsArray = () => Object.assign([],this.formListData['formsList'].filter((r) => r.isValid ).map((e) => e.formName)); 
 
   // shows or hides error row //
   setExpandCollapse = (e:boolean) => { e['expand']=!e['expand']; return false };
+
+  // call data service and set formList checkbox so page can be refreshed //
+  setFormListOptionCheckbox(event) {
+    this.dataService.setFormListOptionCheckbox(event.target.name, event.target.checked)
+  }
 };
