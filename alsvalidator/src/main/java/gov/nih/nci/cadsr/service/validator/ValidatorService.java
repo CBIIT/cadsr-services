@@ -27,28 +27,28 @@ public class ValidatorService {
 	private static final String msg2 = "CDE has been retired";
 	private static final String msg3 = "Newer Versions exist";
 	private static final String msg4_1 = "caDSR Max Length too short. PVs MaxLength ";
-	private static final String msg4_2 = ", caDSR MaxLength ";		
+	private static final String msg4_2 = ", caDSR MaxLength ";
 	private static final String msg5 = "This CDE is not enumerated but question in input file has Coded Data (Permissible values)";
 	private static final String msg6 = "Question Text in input file does not match available CDE question text(s)";
 	private static final String msg7 = "Control Type from caDSR DB doesn't seem to be unknown";
 	private static final String msg8 = "Control Type nor present in the ALS input data";
 	private static final String msg9 = "Additional PVs in Valid Value list";
-	private static final String msg10 = "PVs not in caDSR DB";	
+	private static final String msg10 = "PVs not in caDSR DB";
 	private static final String msg11 = "Data  type from ALS input doesn't match with caDSR DB";
-	private static final String msg12 = "Unit of Measure from ALS input is not compatible with that of caDSR DB";	
+	private static final String msg12 = "Unit of Measure from ALS input is not compatible with that of caDSR DB";
 	private static String congStatus_errors = "ERRORS";
 	private static String congStatus_warn = "WARNINGS";
-	private static List<String> characterDataFormats = Arrays.asList("CHAR", "VARCHAR2", "CHARACTER", "ALPHANUMERIC", "java.lang.String", "java.lang.Character", 
-			"xsd:string");
-	private static List<String> numericDataFormats = Arrays.asList("NUMBER", "number", "numeric", "integer", "Integer", "java.lang.Integer", "xsd:integer");
+	private static List<String> characterDataFormats = Arrays.asList("CHAR", "VARCHAR2", "CHARACTER", "ALPHANUMERIC",
+			"java.lang.String", "java.lang.Character", "xsd:string");
+	private static List<String> numericDataFormats = Arrays.asList("NUMBER", "number", "numeric", "integer", "Integer",
+			"java.lang.Integer", "xsd:integer");
 	private static List<String> dateDataFormats = Arrays.asList("DATE", "xsd:date");
 	private static List<String> timeDataFormats = Arrays.asList("TIME", "xsd:time");
 	private static final String characters_string = "characters";
 	private static final String punct_pattern = "\\p{P}";
 	private static final String patternHolderChar = "d";
-	private static final String patternHolderNum = "9";	
+	private static final String patternHolderNum = "9";
 
-	
 	public static CCCQuestion validate(ALSField field, CCCQuestion question, CdeDetails cdeDetails) {
 		try {
 		if (cdeDetails.getDataElement()==null && cdeDetails.getValueDomain()==null) {			

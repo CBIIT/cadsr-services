@@ -8,19 +8,19 @@ import java.util.List;
 
 public class CCCForm {	
 
-String raveFormOId;
+String raveFormOid;
 String caDSRFormId;
 int countTotalQuestions;
 String version;
-//String fieldOrder;
+String congruencyStatus; // Congruent, Errors, Warnings
 
 List<CCCQuestion> questions = new ArrayList<CCCQuestion>();
 
-public String getRaveFormOId() {
-	return raveFormOId;
+public String getRaveFormOid() {
+	return raveFormOid;
 }
-public void setRaveFormOId(String raveFormOId) {
-	this.raveFormOId = raveFormOId;
+public void setRaveFormOId(String raveFormOid) {
+	this.raveFormOid = raveFormOid;
 }
 public String getCaDSRFormId() {
 	return caDSRFormId;
@@ -39,6 +39,12 @@ public String getVersion() {
 }
 public void setVersion(String version) {
 	this.version = version;
+}
+public String getCongruencyStatus() {
+	return congruencyStatus;
+}
+public void setCongruencyStatus(String congruencyStatus) {
+	this.congruencyStatus = congruencyStatus;
 }
 public List<CCCQuestion> getQuestions() {
 	return questions;
