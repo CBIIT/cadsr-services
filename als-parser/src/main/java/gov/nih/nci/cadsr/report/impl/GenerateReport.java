@@ -125,8 +125,11 @@ public class GenerateReport implements ReportOutput {
 						// TODO Call to the validation of the CDEDetails against the ALSField & Question objects  
 						//question = validate(alsField, question, cdeDetails); //[ValidatorService]
 						//}
-						if ((question.getMessage() == null || question.getMessage().equals(""))) { 
-							form.setCongruencyStatus(congStatus_congruent);
+						if (question.getQuestionCongruencyStatus()==null || question.getQuestionCongruencyStatus().equalsIgnoreCase("")) {
+							if (form.getCongruencyStatus()!=null && (!form.getCongruencyStatus().equals(congStatus_errors))) {
+								form.setCongruencyStatus(congStatus_congruent);
+							}
+							//questionsList.add(question);							
 						} else {
 									questionsList.add(question); 
 									if (form.getCongruencyStatus()!=null) {
