@@ -29,7 +29,13 @@ public class ValidatorService {
 	private static final String msg4_1 = "caDSR Max Length too short. PVs MaxLength ";
 	private static final String msg4_2 = ", caDSR MaxLength ";		
 	private static final String msg5 = "This CDE is not enumerated but question in input file has Coded Data (Permissible values)";
-	private static final String msg6 = "Question Text in input file does not match available CDE question text(s)";	
+	private static final String msg6 = "Question Text in input file does not match available CDE question text(s)";
+	private static final String msg7 = "Control Type from caDSR DB doesn't seem to be unknown";
+	private static final String msg8 = "Control Type nor present in the ALS input data";
+	private static final String msg9 = "Additional PVs in Valid Value list";
+	private static final String msg10 = "PVs not in caDSR DB";	
+	private static final String msg11 = "Data  type from ALS input doesn't match with caDSR DB";
+	private static final String msg12 = "Unit of Measure from ALS input is not compatible with that of caDSR DB";	
 	private static String congStatus_errors = "ERRORS";
 	private static String congStatus_warn = "WARNINGS";
 	private static List<String> characterDataFormats = Arrays.asList("CHAR", "VARCHAR2", "CHARACTER", "ALPHANUMERIC", "java.lang.String", "java.lang.Character", 
@@ -177,6 +183,7 @@ public class ValidatorService {
 	
 	protected static CCCQuestion setRaveControlTypeResult (String vdType, CCCQuestion question) {
 		// Comparing the RAVE control type and the caDSR VD data type for Control Type Checker Result
+			question.setCdeValueDomainType(vdType);		
 			if (question.getRaveControlType()!=null) {
 				if (question.getRaveControlType().equalsIgnoreCase("TEXT") && vdType.equalsIgnoreCase("N")) {
 					question.setControlTypeResult(matchString);
@@ -188,11 +195,12 @@ public class ValidatorService {
 					question.setControlTypeResult(matchString);
 				} else {
 					question.setControlTypeResult(errorString);
+					question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg7));
 					question.setQuestionCongruencyStatus(congStatus_errors);
-				}
-				question.setCdeValueDomainType(vdType);	
+				}	
 			} else {
 				question.setControlTypeResult(errorString);
+				question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg8));				
 				question.setQuestionCongruencyStatus(congStatus_errors);
 			}
 		return question;
@@ -207,6 +215,7 @@ public class ValidatorService {
 					question.setPvResult(matchString);
 				} else {
 					question.setPvResult(errorString);
+					question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg9));
 					question.setQuestionCongruencyStatus(congStatus_errors);
 				}
 			}
@@ -224,6 +233,7 @@ public class ValidatorService {
 					cdResult.add(matchString);
 				} else {
 					cdResult.add(errorString);
+					question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg10));
 					question.setQuestionCongruencyStatus(congStatus_errors);
 				}
 			}
@@ -237,6 +247,7 @@ public class ValidatorService {
 	protected static CCCQuestion checkDataTypeCheckerResult (CCCQuestion question, String raveDataFormat, String vdDataType) {
 		// Comparing RAVE Data format with caDSR Value Domain Datatype - Datatype Checker Result
 		Boolean result = false;
+		logger.debug("Field Data Format: "+raveDataFormat+" vdDataType: "+vdDataType);
 		if (raveDataFormat!=null) {
 			if (raveDataFormat.startsWith("$")) {
 				if (characterDataFormats.contains(vdDataType)) 
@@ -256,6 +267,7 @@ public class ValidatorService {
 			question.setDatatypeCheckerResult(matchString);
 		else {
 			question.setDatatypeCheckerResult(errorString);
+			question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg11));			
 			question.setQuestionCongruencyStatus(congStatus_errors);
 		}
 		return question;
@@ -269,6 +281,7 @@ public class ValidatorService {
 					question.setUomCheckerResult(matchString);
 				} else {
 					question.setUomCheckerResult(warningString);
+					question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg12));					
 					if (!question.getQuestionCongruencyStatus().equalsIgnoreCase(congStatus_errors))
 						question.setQuestionCongruencyStatus(congStatus_warn);
 					question.setCdeUOM(unitOfMeasure);

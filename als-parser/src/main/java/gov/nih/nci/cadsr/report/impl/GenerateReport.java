@@ -54,6 +54,7 @@ public class GenerateReport implements ReportOutput {
 		List<CCCQuestion> questionsList = new ArrayList<CCCQuestion>();
 		Map<String, ALSDataDictionaryEntry> ddeMap = alsData.getDataDictionaryEntries();
 		for (ALSField alsField : alsData.getFields()) {
+			Boolean cdeServiceCall = true;
 			if (selForms.contains(alsField.getFormOid())) {
 				if (formName.equals(""))
 					formName = alsField.getFormOid();
@@ -77,18 +78,17 @@ public class GenerateReport implements ReportOutput {
 					String draftFieldName = alsField.getDraftFieldName();
 					if (draftFieldName.indexOf("PID") > -1 && draftFieldName.indexOf("_V") > -1) {
 						String idVersion = draftFieldName.substring(draftFieldName.indexOf("PID"), draftFieldName.length());
-							idVersion = draftFieldName.substring(draftFieldName.indexOf("PID"), draftFieldName.length());
-							String id = idVersion.substring(3, idVersion.indexOf("_"));
-							String version = (idVersion.substring(idVersion.indexOf("_V") + 2, idVersion.length()));
-							id = id.trim();
-					        String[] versionTokens = version.split("\\_");
-					        version = versionTokens[0] + "." + versionTokens[1];
-							if (NumberUtils.isNumber(id) && NumberUtils.isNumber(version)) {
-						        question.setCdePublicId(id.trim());
-						        question.setCdeVersion(version);
-							} else {
-								logger.debug("CDE public ID and version should be numeric");
-							}
+						idVersion = draftFieldName.substring(draftFieldName.indexOf("PID"), draftFieldName.length());
+						String id = idVersion.substring(3, idVersion.indexOf("_"));
+						String version = (idVersion.substring(idVersion.indexOf("_V") + 2, idVersion.length()));
+						id = id.trim();
+				        String[] versionTokens = version.split("\\_");
+				        version = versionTokens[0] + "." + versionTokens[1];
+						if (!NumberUtils.isNumber(id) || !NumberUtils.isNumber(version))
+							cdeServiceCall = false;	
+
+				        question.setCdePublicId(id.trim());
+				        question.setCdeVersion(version);
 						question.setNciCategory("NRDS"); // "NRDS" "Mandatory Module: {CRF ID/V}", "Optional Module {CRF ID/V}", "Conditional Module: {CRF ID/V}"
 						question.setRaveFieldLabel(alsField.getPreText());
 						question.setCdePermitQuestionTextChoices(""); // From the caDSR DB - docText
@@ -114,17 +114,19 @@ public class GenerateReport implements ReportOutput {
 						question.setMessage(pickFieldErrors(alsField, alsData.getCccError().getAlsErrors()));
 						// TODO This should call the service [Should be HTTPResponse] - VS
 						CdeDetails cdeDetails = null;
-						//if (alsField.getFormOid().equalsIgnoreCase("ENROLLLMENT") || alsField.getFormOid().equalsIgnoreCase("HISTOLOGY_AND_DISEASE") || alsField.getFormOid().equalsIgnoreCase("ELIGIBILITY_CHECKLIST")) {
-						try {
-							cdeDetails = CdeService.retrieveDataElement(question.getCdePublicId(), question.getCdeVersion());
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+						if (cdeServiceCall) {
+							//if (alsField.getFormOid().equalsIgnoreCase("ENROLLMENT")) {// || alsField.getFormOid().equalsIgnoreCase("HISTOLOGY_AND_DISEASE") || alsField.getFormOid().equalsIgnoreCase("ELIGIBILITY_CHECKLIST")) {
+							try {
+								cdeDetails = CdeService.retrieveDataElement(question.getCdePublicId(), question.getCdeVersion());
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							
+							// TODO Call to the validation of the CDEDetails against the ALSField & Question objects  
+							//question = validate(alsField, question, cdeDetails); //[ValidatorService]
+							//}
 						}
-						
-						// TODO Call to the validation of the CDEDetails against the ALSField & Question objects  
-						//question = validate(alsField, question, cdeDetails); //[ValidatorService]
-						//}
 						if (question.getQuestionCongruencyStatus()==null || question.getQuestionCongruencyStatus().equalsIgnoreCase("")) {
 							if (form.getCongruencyStatus()!=null && (!form.getCongruencyStatus().equals(congStatus_errors))) {
 								form.setCongruencyStatus(congStatus_congruent);
