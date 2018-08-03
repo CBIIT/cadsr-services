@@ -215,6 +215,13 @@ public class GenerateReport implements ReportOutput {
 		return alsError;
 	}
 
+	
+	/**
+	 * @param ALSField
+	 * @param List<ALSError>
+	 * @return All error messages from parser validation returned as a single concatenated string
+	 * 
+	 */	
 	protected static String pickFieldErrors(ALSField field, List<ALSError> errors) {
 		String errorMsg = null;
 		List<ALSError> fieldErrors = new ArrayList<ALSError>();
@@ -227,13 +234,10 @@ public class GenerateReport implements ReportOutput {
 			}
 		}
 		for (ALSError alsError : fieldErrors) {
-			// if (alsError.getFieldOid()!=null &&
-			// field.getFieldOid().equalsIgnoreCase(alsError.getFieldOid())) {
 			if (errorMsg != null)
 				errorMsg = errorMsg + alsError.getErrorDesc();
 			else
 				errorMsg = alsError.getErrorDesc();
-			// }
 		}
 		return errorMsg;
 	}
