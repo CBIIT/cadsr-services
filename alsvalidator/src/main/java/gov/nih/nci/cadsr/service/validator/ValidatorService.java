@@ -75,6 +75,7 @@ public class ValidatorService {
 			int pvMaxLen = 0;
 			int vdMaxLen = 0;
 			StringBuffer allowableCdes = new StringBuffer();
+			StringBuffer allowableVmTextChoices = new StringBuffer();
 			
 			if (cdeDetails.getValueDomain()!=null) {
 				vdMaxLen = cdeDetails.getValueDomain().getValueDomainDetails().getMaximumLength();
@@ -85,17 +86,25 @@ public class ValidatorService {
 						allowableCdes.append("|"+pv.getValue());
 					else 
 						allowableCdes.append(pv.getValue());
+					if (allowableVmTextChoices.length() > 0)
+						allowableVmTextChoices.append("|"+pv.getShortMeaning());
+					else
+						allowableVmTextChoices.append(pv.getShortMeaning());
 					if (pv.getValue().length() > pvMaxLen)
 						pvMaxLen = pv.getValue().length();
 				}
 			}			
-			
-			// Checking for the presence of RAVE user data string in the PV Value meaning list - PV Checker result
-			question = setPvCheckerResult (pvVmList, question);			
-			
+
 			// Setting the Allowable CDEs
 			if (allowableCdes.length() > 0) 
-				question.setAllowableCdeValue(allowableCdes.toString());
+				question.setAllowableCdeValue(allowableCdes.toString());			
+			
+			// Checking for the presence of RAVE user data string in the PV Value meaning list - PV Checker result
+			question = setPvCheckerResult (pvVmList, question);
+			
+			// Setting the Allowable CDE  Value Meaning Text Choices if PV Checker Result is Error.
+			if (question.getPvResult()!=null && question.getPvResult().equalsIgnoreCase(errorString))
+				question.setAllowableCdeTextChoices(allowableVmTextChoices.toString());
 				
 			// Checking for the presence of RAVE Coded data in the PV values list - Coded Data Checker Result
 			question = setCodedDataCheckerResult(pvList, question);
