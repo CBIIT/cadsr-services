@@ -29,7 +29,7 @@ export class AlsFormListComponent implements OnInit {
    }
 
   ngOnInit() {
-
+    this.validItemsLength = this.checkedItems.length;
   }
 
   // get checkbox status of record //
@@ -56,7 +56,12 @@ export class AlsFormListComponent implements OnInit {
   getSortedData = () => this.formListData['formsList'].sort((a, b) => a.formName.toUpperCase()<b.formName.toUpperCase() ? -1 : 1);
 
   // sets checked all items to all or none //
-  setCheckAllStatus = e => e.target.checked ? this.checkedItems = this.setCheckedItemsArray() : this.checkedItems = [];
+  setCheckAllStatus = e => {
+    
+    e.target.checked ? this.checkedItems = this.setCheckedItemsArray() : this.checkedItems = [];
+    this.selectAllCheckbox = e.target.checked;
+  }
+
 
   // add or remove record from checkedItems array //
   setCheckedItem = e => { 
