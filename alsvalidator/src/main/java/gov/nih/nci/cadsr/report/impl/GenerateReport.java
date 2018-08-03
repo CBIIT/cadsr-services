@@ -131,10 +131,13 @@ public class GenerateReport implements ReportOutput {
 						question.setRaveUOM(raveUOM);
 						question.setRaveLength(alsField.getFixedUnit());
 						question.setRaveDisplayFormat(alsField.getDataFormat());
-						// question.setQuestionCongruencyStatus(congStatus_congruent);
-						question.setMessage(pickFieldErrors(alsField, alsData.getCccError().getAlsErrors()));
-						// TODO This should call the service [Should be
-						// HTTPResponse] - VS
+						question.setRaveFieldDataType(alsField.getDataFormat());
+						String parseValidationMessage = pickFieldErrors(alsField, alsData.getCccError().getAlsErrors());
+						if (parseValidationMessage!=null && !parseValidationMessage.equals("")) {
+							question.setMessage(parseValidationMessage);
+							question.setQuestionCongruencyStatus(congStatus_warn);
+						}
+						
 						CdeDetails cdeDetails = null;
 						logger.debug("cdeServiceCall: "+cdeServiceCall);
 						if (cdeServiceCall) {
@@ -162,7 +165,7 @@ public class GenerateReport implements ReportOutput {
 									&& (!form.getCongruencyStatus().equals(congStatus_errors))) {
 								form.setCongruencyStatus(congStatus_congruent);
 							}
-							questionsList.add(question);
+							//questionsList.add(question);
 						} else {
 							questionsList.add(question);
 							if (form.getCongruencyStatus() != null) {
