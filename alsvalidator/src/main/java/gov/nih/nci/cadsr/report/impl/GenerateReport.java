@@ -141,12 +141,13 @@ public class GenerateReport implements ReportOutput {
 						CdeDetails cdeDetails = null;
 						logger.debug("cdeServiceCall: "+cdeServiceCall);
 						if (cdeServiceCall) {
-							if (alsField.getFormOid().equalsIgnoreCase("ENROLLMENT")) {// ||
+							//if (alsField.getFormOid().equalsIgnoreCase("ENROLLMENT")) {
 																						// alsField.getFormOid().equalsIgnoreCase("HISTOLOGY_AND_DISEASE")
 																						// ||
 																						// alsField.getFormOid().equalsIgnoreCase("ELIGIBILITY_CHECKLIST"))
 																						// {
 								try {
+									// Service Call to retrieve CDEDetails
 									cdeDetails = CdeService.retrieveDataElement(question.getCdePublicId(),
 											question.getCdeVersion());
 								} catch (Exception e) {
@@ -157,7 +158,7 @@ public class GenerateReport implements ReportOutput {
 								// Service Call to validate the CDEDetails
 								// against the ALSField & Question objects
 								question = ValidatorService.validate(alsField, question, cdeDetails);
-							}
+							//}
 						}
 						if (question.getQuestionCongruencyStatus() == null
 								|| question.getQuestionCongruencyStatus().equalsIgnoreCase("")) {
