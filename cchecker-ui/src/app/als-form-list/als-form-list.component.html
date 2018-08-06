@@ -25,7 +25,7 @@
         </th>
     </tr>   
 
-    <ng-container *ngFor="let record of getSortedData(); let i = index">
+    <ng-container *ngFor="let record of formListData.formsList; let i = index">
         <!-- render this row always -->
         <tr [ngClass]="{'rowOdd':i%2==0,'rowEven':i%2==1}">
             <td class="checkbox">
@@ -76,6 +76,6 @@
     </div>
 
     <div>
-        <button [disabled]="!checkedItems.length" class="btn btn-primary">Check Form<span *ngIf="checkedItems.length>1">s</span></button>
+        <button [disabled]="!checkedItems.length" class="btn btn-primary" (click)="checkForms()">Check Form<span *ngIf="checkedItems.length>1">s</span></button>
     </div>
 </ng-container>

@@ -30,6 +30,7 @@ export class AlsFormListComponent implements OnInit {
 
   ngOnInit() {
     this.validItemsLength = this.checkedItems.length;
+    this.formListData['formsList'].sort((a, b) => a.formName.toUpperCase()<b.formName.toUpperCase() ? -1 : 1);    
   }
 
   // get checkbox status of record //
@@ -51,9 +52,6 @@ export class AlsFormListComponent implements OnInit {
 
   // get usable status message to display in table status column //
   getReadableErrorStatus = e => e ? 'Success':'Fail';
-
-  // sorts data alphabetically by form name //
-  getSortedData = () => this.formListData['formsList'].sort((a, b) => a.formName.toUpperCase()<b.formName.toUpperCase() ? -1 : 1);
 
   // sets checked all items to all or none //
   setCheckAllStatus = e => {
