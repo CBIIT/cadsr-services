@@ -89,36 +89,15 @@ public class GenerateReport implements ReportOutput {
 
 						question.setCdePublicId(id.trim());
 						question.setCdeVersion(version);
-						question.setNciCategory("NRDS"); // "NRDS" "Mandatory
-															// Module: {CRF
-															// ID/V}", "Optional
-															// Module {CRF
-															// ID/V}",
-															// "Conditional
-															// Module: {CRF
-															// ID/V}"
+						question.setNciCategory(
+								fetchCdeNciCategory(question.getCdePublicId(), question.getCdeVersion())); // from a static table of NCI standard CRFs
 						question.setRaveFieldLabel(alsField.getPreText());
-						question.setCdePermitQuestionTextChoices(""); // From
-																		// the
-																		// caDSR
-																		// DB -
-																		// docText
+						question.setCdePermitQuestionTextChoices(""); 
 						question.setRaveControlType(alsField.getControlType());
 
 						for (String key : ddeMap.keySet()) {
 							if (key.equals(alsField.getDataDictionaryName())) {
-								question.setRaveCodedData(ddeMap.get(key).getCodedData()); // Data
-																							// dictionary
-																							// name
-																							// and
-																							// its
-																							// corresponding
-																							// entries
-																							// -
-																							// All
-																							// the
-																							// Permissible
-																							// values
+								question.setRaveCodedData(ddeMap.get(key).getCodedData()); 
 								question.setRaveUserString(ddeMap.get(key).getUserDataString());
 							}
 						}
@@ -133,19 +112,19 @@ public class GenerateReport implements ReportOutput {
 						question.setRaveDisplayFormat(alsField.getDataFormat());
 						question.setRaveFieldDataType(alsField.getDataFormat());
 						String parseValidationMessage = pickFieldErrors(alsField, alsData.getCccError().getAlsErrors());
-						if (parseValidationMessage!=null && !parseValidationMessage.equals("")) {
+						if (parseValidationMessage != null && !parseValidationMessage.equals("")) {
 							question.setMessage(parseValidationMessage);
 							question.setQuestionCongruencyStatus(congStatus_warn);
 						}
-						
+
 						CdeDetails cdeDetails = null;
-						logger.debug("cdeServiceCall: "+cdeServiceCall);
+						logger.debug("cdeServiceCall: " + cdeServiceCall);
 						if (cdeServiceCall) {
 							//if (alsField.getFormOid().equalsIgnoreCase("ENROLLMENT")) {
-																						// alsField.getFormOid().equalsIgnoreCase("HISTOLOGY_AND_DISEASE")
-																						// ||
-																						// alsField.getFormOid().equalsIgnoreCase("ELIGIBILITY_CHECKLIST"))
-																						// {
+								// alsField.getFormOid().equalsIgnoreCase("HISTOLOGY_AND_DISEASE")
+								// ||
+								// alsField.getFormOid().equalsIgnoreCase("ELIGIBILITY_CHECKLIST"))
+								// {
 								try {
 									// Service Call to retrieve CDEDetails
 									cdeDetails = CdeService.retrieveDataElement(question.getCdePublicId(),
@@ -216,13 +195,13 @@ public class GenerateReport implements ReportOutput {
 		return alsError;
 	}
 
-	
 	/**
 	 * @param ALSField
 	 * @param List<ALSError>
-	 * @return All error messages from parser validation returned as a single concatenated string
+	 * @return All error messages from parser validation returned as a single
+	 *         concatenated string
 	 * 
-	 */	
+	 */
 	protected static String pickFieldErrors(ALSField field, List<ALSError> errors) {
 		String errorMsg = null;
 		List<ALSError> fieldErrors = new ArrayList<ALSError>();
@@ -241,6 +220,19 @@ public class GenerateReport implements ReportOutput {
 				errorMsg = alsError.getErrorDesc();
 		}
 		return errorMsg;
+	}
+
+	/**
+	 * @param String cdePublicId
+	 * @param String cdeVersion
+	 * @return NCI category for the given CDE
+	 * 
+	 */
+	protected static String fetchCdeNciCategory(String cdePublicId, String cdeVersion) {
+		String nciCategory = "";
+		// Service to fetch the CDE's NCI category
+		// nciCategory = [DBservice].retrieveNciCategory(String cdePublicId, String cdeVersion);
+		return nciCategory;
 	}
 
 }
