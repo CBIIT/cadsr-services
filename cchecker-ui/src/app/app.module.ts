@@ -9,6 +9,7 @@ import { AlsReportComponent } from './als-report/als-report.component';
 import { NavigationComponent } from './navigation/navigation.component';
 import { HttpClientModule } from '@angular/common/http';
 import { ProgressBarComponent } from './progress-bar/progress-bar.component';
+import { FormListsortPipe } from './form-listsort.pipe';
 
 const APP_ROUTES: Routes = [
   // Default empty path
@@ -24,7 +25,8 @@ const APP_ROUTES: Routes = [
     AlsUploadFormComponent,
     AlsReportComponent,
     NavigationComponent,
-    ProgressBarComponent
+    ProgressBarComponent,
+    FormListsortPipe
   ],
   imports: [
     BrowserModule,

@@ -4,12 +4,11 @@ import { RestService } from '../services/rest.service';
 import { HttpClient } from '@angular/common/http';
 import { DataService } from '../services/data.service';
 import { HttpEventType }  from '@angular/common/http';
-
 @Component({
   selector: 'app-als-form-list',
   templateUrl: './als-form-list.component.html',
-  styleUrls: ['./als-form-list.component.css']
-})
+  styleUrls: ['./als-form-list.component.css'],
+  })
 export class AlsFormListComponent implements OnInit {
   checkedItems:String[];  // list of checked names //
   checkStdCrfCde:Boolean; // form checkbox at bottom of page //
@@ -30,7 +29,6 @@ export class AlsFormListComponent implements OnInit {
 
   ngOnInit() {
     this.validItemsLength = this.checkedItems.length;
-    this.formListData['formsList'].sort((a, b) => a.formName.toUpperCase()<b.formName.toUpperCase() ? -1 : 1);    
   }
 
   // get checkbox status of record //

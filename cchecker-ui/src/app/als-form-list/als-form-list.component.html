@@ -25,7 +25,7 @@
         </th>
     </tr>   
 
-    <ng-container *ngFor="let record of formListData.formsList; let i = index">
+    <ng-container *ngFor="let record of formListData.formsList | formListsort:'formName'; let i = index">
         <!-- render this row always -->
         <tr [ngClass]="{'rowOdd':i%2==0,'rowEven':i%2==1}">
             <td class="checkbox">
