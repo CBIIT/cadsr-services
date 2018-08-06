@@ -14,6 +14,7 @@ import gov.nih.nci.cadsr.dao.model.PermissibleValuesModel;
 import gov.nih.nci.cadsr.data.ALSField;
 import gov.nih.nci.cadsr.data.CCCQuestion;
 import gov.nih.nci.cadsr.service.model.cdeData.CdeDetails;
+import gov.nih.nci.cadsr.service.model.cdeData.dataElement.OtherVersion;
 import gov.nih.nci.cadsr.service.model.cdeData.dataElement.ReferenceDocument;
 
 public class ValidatorService {
@@ -25,7 +26,7 @@ public class ValidatorService {
 	private static final String retiredString = "RETIRED";
 	private static final String msg1 = "CDE not in caDSR database";
 	private static final String msg2 = "CDE has been retired";
-	private static final String msg3 = "Newer Versions exist";
+	private static final String msg3 = "Newer version of CDE exists: ";
 	private static final String msg4_1 = "caDSR Max Length too short. PVs MaxLength ";
 	private static final String msg4_2 = ", caDSR MaxLength ";
 	private static final String msg5 = "This CDE is not enumerated but question in input file has Coded Data (Permissible values)";
@@ -147,11 +148,22 @@ public class ValidatorService {
 
 
 	protected static CCCQuestion checkCdeVersions(CdeDetails cdeDetails, CCCQuestion question) {
-		//Checking for different versions of CDEs			
-		if (cdeDetails.getDataElement()!=null && (cdeDetails.getDataElement().getDataElementDetails().getVersion() >  Float.valueOf(question.getCdeVersion()))) {
-			question.setMessage(assignQuestionErrorMessage(question.getMessage(),msg3));
-			if (question.getQuestionCongruencyStatus()==null)
-				question.setQuestionCongruencyStatus(congStatus_warn);
+		//Checking for different versions of CDEs
+		Boolean newerVersionExists = false;
+		Float latestVersion = null;
+		if (cdeDetails.getDataElement()!=null) {
+			for (OtherVersion otherVersion : cdeDetails.getDataElement().getOtherVersions()) {
+				if (otherVersion.getVersion() >  Float.valueOf(question.getCdeVersion())) {
+					newerVersionExists = true;
+					latestVersion = otherVersion.getVersion();
+				}					
+			}
+							
+			if (newerVersionExists) {
+				question.setMessage(assignQuestionErrorMessage(question.getMessage(),msg3+latestVersion));
+				if (question.getQuestionCongruencyStatus()==null)
+					question.setQuestionCongruencyStatus(congStatus_warn);
+			} 
 		}
 		return question;		
 	}
