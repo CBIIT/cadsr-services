@@ -17,6 +17,7 @@ import gov.nih.nci.cadsr.data.ALSField;
 import gov.nih.nci.cadsr.data.CCCForm;
 import gov.nih.nci.cadsr.data.CCCQuestion;
 import gov.nih.nci.cadsr.data.CCCReport;
+import gov.nih.nci.cadsr.data.CdeStdCrfData;
 import gov.nih.nci.cadsr.data.NrdsCde;
 import gov.nih.nci.cadsr.data.StandardCrfCde;
 import gov.nih.nci.cadsr.report.ReportOutput;
@@ -100,8 +101,8 @@ public class GenerateReport implements ReportOutput {
 						question.setCdePublicId(id.trim());
 						question.setCdeVersion(version);
 						// from a static table of NCI standard CRFs
-						question.setNciCategory(
-								fetchCdeNciCategory(question.getCdePublicId(), question.getCdeVersion()));
+						CdeStdCrfData cdeCrfData = fetchCdeStandardCrfData(question.getCdePublicId(), question.getCdeVersion());
+						question.setNciCategory(cdeCrfData.getNciCategory());
 						question.setRaveFieldLabel(alsField.getPreText());
 						question.setCdePermitQuestionTextChoices("");
 						question.setRaveControlType(alsField.getControlType());
@@ -150,12 +151,15 @@ public class GenerateReport implements ReportOutput {
 								question = ValidatorService.validate(alsField, question, cdeDetails);
 							}
 						}
-						if (question.getNciCategory().equalsIgnoreCase(nrds_cde))
+						if (question.getNciCategory().equalsIgnoreCase(nrds_cde)) {
 							nrdsCdeList.add(buildNrdsCde(question,
-									cdeDetails.getDataElement().getDataElementDetails().getLongName()));
-						else
-							standardCrfCdeList.add(buildCrfCde(question, templateName, crfIdVersion, category,
-									cdeDetails.getDataElement().getDataElementDetails().getLongName()));
+									cdeDetails.getDataElement().getDataElementDetails().getLongName())); 
+							}
+						else if (question.getNciCategory().equalsIgnoreCase(mandatory_crf) || question.getNciCategory().equalsIgnoreCase(optional_crf) 
+								|| question.getNciCategory().equalsIgnoreCase(conditional_crf)) {
+								standardCrfCdeList.add(buildCrfCde(question, cdeCrfData.getCrfName(), cdeCrfData.getCrfIdVersion(), cdeCrfData.getNciCategory(),
+									cdeDetails.getDataElement().getDataElementDetails().getLongName())); 
+							}
 						if (question.getQuestionCongruencyStatus() == null
 								|| question.getQuestionCongruencyStatus().equalsIgnoreCase("")) {
 							if (form.getCongruencyStatus() != null
@@ -237,15 +241,14 @@ public class GenerateReport implements ReportOutput {
 	/**
 	 * @param String cdePublicId
 	 * @param String cdeVersion
-	 * @return NCI category for the given CDE
+	 * @return CRF data for the given CDE
 	 * 
 	 */
-	protected static String fetchCdeNciCategory(String cdePublicId, String cdeVersion) {
-		String nciCategory = "";
-		// Service to fetch the CDE's NCI category
-		// nciCategory = [DBservice].retrieveNciCategory(String cdePublicId,
-		// String cdeVersion);
-		return nciCategory;
+	protected static CdeStdCrfData fetchCdeStandardCrfData(String cdePublicId, String cdeVersion) {
+		CdeStdCrfData cdeCrfData = new CdeStdCrfData();
+		// Service to fetch the CDE CRF data
+		// cdeCrfData = [DBservice].retrieveCdeCrfData(String cdePublicId, String cdeVersion);
+		return cdeCrfData;
 	}
 
 	/**
