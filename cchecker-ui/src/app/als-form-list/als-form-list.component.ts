@@ -24,30 +24,22 @@ export class AlsFormListComponent implements OnInit {
   };
 
   // gets checkd status of record //
-  getCheckedStatus(record) {
-     return this.dataService.getCheckedStatus(record);
-  };
+  getCheckedStatus = record => this.dataService.getCheckedStatus(record);
 
   // sets checked status of record
-  setCheckedItem = (record):void => {
-    this.dataService.setCheckedItem(record);
-  };
+  setCheckedItem = (record):void => this.dataService.setCheckedItem(record);
 
   // sets all or none for checked status of records //
-  setCheckAllStatus(event):void {
-    this.dataService.setCheckAllStatus(event.target.checked);
-  };
+  setCheckAllStatus = (event):void => this.dataService.setCheckAllStatus(event.target.checked);
 
   // set expand collapse property //
-  setExpandCollapse(record) {
+  setExpandCollapse = record => {
     this.dataService.setExpandCollapse(record);
     return false;
   };
   
   // sets checkUom, checkStdCrfCde and mustDisplayException checkboxes at bottom of page //
-  setFormListOptionCheckbox(event):void {
-    this.dataService.setFormListOptionCheckbox(event);
-  };
+  setFormListOptionCheckbox = (event):void => this.dataService.setFormListOptionCheckbox(event);
 
 
 };

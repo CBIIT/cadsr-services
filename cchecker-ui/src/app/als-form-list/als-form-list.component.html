@@ -5,7 +5,7 @@
 <div class="alert alert-danger" role="alert" *ngIf="!(formListData | async)?.formsList.length">
     Please upload a file with form data.
 </div>
-
+{{checkedItems | async | json}}
 <ng-container *ngIf="(formListData |  async)?.formsList.length">
     <p>Some description up here</p>
     <div>
