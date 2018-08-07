@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { RestService } from '../services/rest.service';
-import { DataService } from '../services/data.service';
-import { Observable } from '../../../node_modules/rxjs';
+import { FormListService } from '../services/formlist.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-als-form-list',
@@ -14,32 +14,32 @@ export class AlsFormListComponent implements OnInit {
   private checkedItems:Observable<String[]>;
   private validItemsLength:Number;
 
-  constructor(private dataService:DataService) {
+  constructor(private formListService:FormListService) {
   }
 
   ngOnInit() {
-    this.formListData = this.dataService.getFormListData(); // get form data as observable //
-    this.checkedItems = this.dataService.getCheckedItems(); // get checkd items as observable //
+    this.formListData = this.formListService.getFormListData(); // get form data as observable //
+    this.checkedItems = this.formListService.getCheckedItems(); // get checkd items as observable //
     this.validItemsLength = Object.assign([],this.formListData.source['value']['formsList'].filter((r) => r.isValid ).map((e) => e.formName)).length; // get valid item value //
   };
 
   // gets checkd status of record //
-  getCheckedStatus = record => this.dataService.getCheckedStatus(record);
+  getCheckedStatus = record => this.formListService.getCheckedStatus(record);
 
   // sets checked status of record
-  setCheckedItem = (record):void => this.dataService.setCheckedItem(record);
+  setCheckedItem = (record):void => this.formListService.setCheckedItem(record);
 
   // sets all or none for checked status of records //
-  setCheckAllStatus = (event):void => this.dataService.setCheckAllStatus(event.target.checked);
+  setCheckAllStatus = (event):void => this.formListService.setCheckAllStatus(event.target.checked);
 
   // set expand collapse property //
   setExpandCollapse = record => {
-    this.dataService.setExpandCollapse(record);
+    this.formListService.setExpandCollapse(record);
     return false;
   };
   
   // sets checkUom, checkStdCrfCde and mustDisplayException checkboxes at bottom of page //
-  setFormListOptionCheckbox = (event):void => this.dataService.setFormListOptionCheckbox(event);
+  setFormListOptionCheckbox = (event):void => this.formListService.setFormListOptionCheckbox(event);
 
 
 };

@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { HttpHeaders, HttpClient, HttpProgressEvent, HttpEvent, HttpEventType } from '@angular/common/http';
-import { DataService } from './data.service';
 import { Observable } from 'rxjs';
 
 @Injectable({

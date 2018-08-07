@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from '../../../node_modules/rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
-export class DataService {
+export class FormListService {
   private formListData = new BehaviorSubject<Object>({"formsList":[],"checkUom":null,"checkStdCrfCde":null,"mustDisplayException":null});
   private checkedItems = new BehaviorSubject<String[]>([]);
   private validItemsLength = new BehaviorSubject<Number>(0);

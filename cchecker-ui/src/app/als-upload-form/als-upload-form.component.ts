@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { RestService } from '../services/rest.service';
 import { HttpEventType }  from '@angular/common/http';
 import { EventHandlerVars } from '@angular/compiler/src/compiler_util/expression_converter';
-import { DataService } from '../services/data.service';
+import { FormListService } from '../services/formlist.service';
 
 @Component({
   selector: 'app-als-upload-form',
@@ -18,7 +18,7 @@ export class AlsUploadFormComponent implements OnInit {
   uploadProgress:Number;
   alsFile:File;
 
-  constructor(private router:Router, private restService:RestService, private dataService:DataService) { 
+  constructor(private router:Router, private restService:RestService, private formListService:FormListService) { 
     this.submitted = false;
     this.uploadProgress = 0;
     this.error=false;
@@ -52,7 +52,7 @@ export class AlsUploadFormComponent implements OnInit {
       e => {
 
         if (e.type === HttpEventType.Response) { 
-          this.dataService.setFormListData(e.body);
+          this.formListService.setFormListData(e.body);
         }
         else if (e.type === HttpEventType.UploadProgress) {
             this.uploadProgress = Math.round((e.loaded/e.total)*100)
