@@ -54,8 +54,9 @@ public class GenerateReport implements ReportOutput {
 					questionsList = new ArrayList<CCCQuestion>();
 				}
 				CCCQuestion question = new CCCQuestion();
-				question.setFieldOrder(alsField.getOrdinal()); 																																
+				question.setFieldOrder(alsField.getOrdinal());
 				String draftFieldName = alsField.getDraftFieldName();
+				if (draftFieldName == null) draftFieldName = "";
 				if (draftFieldName.indexOf("PID") > -1 && draftFieldName.indexOf("_V") > -1) {
 					String idVersion = draftFieldName.substring(draftFieldName.indexOf("PID"), draftFieldName.length());
 					try {
