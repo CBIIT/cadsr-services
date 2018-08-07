@@ -1,18 +1,20 @@
 <h2>
    ALS Form List
 </h2>
-<div class="alert alert-danger" role="alert" *ngIf="!formListData.formsList.length">
+
+<div class="alert alert-danger" role="alert" *ngIf="!(formListData | async)?.formsList.length">
     Please upload a file with form data.
 </div>
-<ng-container *ngIf="formListData.formsList.length">
+
+<ng-container *ngIf="(formListData |  async)?.formsList.length">
     <p>Some description up here</p>
     <div>
-        <button [disabled]="!checkedItems.length" class="btn btn-primary" (click)="checkForms()">Check Form<span *ngIf="checkedItems.length>1">s</span></button>
+        <button [disabled]="!checkedItems.length" class="btn btn-primary" (click)="checkForms()">Check Form<span *ngIf="(checkedItems | async)?.length>1">s</span></button>
     </div><br />
     <table cellspacing="0" cellpadding="0" margin="0"class="alsFormList">
     <tr>
         <th>
-            <input type="checkbox" name="selectAllforms" (change)="setCheckAllStatus($event)" [checked]="selectAllCheckbox">
+            <input type="checkbox" name="selectAllforms" (change)="setCheckAllStatus($event)" [checked]="(checkedItems | async)?.length==validItemsLength">
         </th>
         <th>
             Form Name
@@ -23,25 +25,27 @@
         <th class="status">
             Parsing Status
         </th>
-    </tr>   
-
-    <ng-container *ngFor="let record of formListData.formsList | formListsort:'formName'; let i = index">
+    </tr>  
+    <ng-container *ngFor="let record of (formListData | async)?.formsList | formListsort:'formName'; let i = index">
         <!-- render this row always -->
         <tr [ngClass]="{'rowOdd':i%2==0,'rowEven':i%2==1}">
-            <td class="checkbox">
+            <td class="checbox">
                 <input type="checkbox" *ngIf="record.isValid" (change)="setCheckedItem(record)" name="checkedItem" value="a" [checked]="getCheckedStatus(record)">
                 <span *ngIf="!record.isValid" class="fa fa-times-circle fa-lg"></span>
             </td>
             <td>
-                <a *ngIf="!record.isValid" href="#" (click)="setExpandCollapse(record)">
-                <span class="fa fa-lg formName" [ngClass]="{'fa-minus-square':record.expand,'fa-plus-square':!record.expand}"></span>
-                </a><span class="formName">{{record.formName}}</span>
+                <a *ngIf="!record.isValid" href="#"  (click)="setExpandCollapse(record)">
+                    <span class="fa fa-lg formName" [ngClass]="{'fa-minus-square':record.expand,'fa-plus-square':!record.expand}"></span>
+                </a>
+                <span class="formName">{{record.formName}}</span>
             </td>
-            <td class="questionCount">{{record.questionsCount}}</td>
-            <td class="status" [ngClass]="{'success':record.isValid,'fail':!record.isValid}">{{getReadableErrorStatus(record.isValid)}}</td>
+            <td class="questionCount">
+                {{record.questionsCount}}
+            </td>    
+            <td class="status" [ngClass]="{'success':record.isValid,'fail':!record.isValid}">{{record.isValid}}</td>       
         </tr>
         <!-- end render this row always -->
-        <!-- render and hide this row only if there is an error -->
+        <!-- render and hide this row only if there is an error -->        
         <tr *ngIf="record['expand']" [ngClass]="{'rowError':record.expand}">
         <td></td>
         <td colspan="3">
@@ -55,27 +59,28 @@
                 </ul>
             </div>
         </td>
-        </tr>
+        </tr>        
         <!-- end render and hide this row only if there is an error -->
     </ng-container>
-    </table><br />
+    </table>     
+<br />
 
     <div class="formCriteriaCheckboxes">
         <div>
-            <input type="checkbox" id="checkUom" name="checkUom" (change)="setFormListOptionCheckbox($event)" ([ngModel])="checkUom" [checked]="checkUom">
+            <input type="checkbox" id="checkUom" name="checkUom" (change)="setFormListOptionCheckbox($event)" ([ngModel])="checkUom" [checked]="(formListData | async)?.checkUom">
             <label for="checkUom">Check UOM</label>        
         </div>
         <div>
-            <input type="checkbox" id="checkStdCrfCde" name="checkStdCrfCde" (change)="setFormListOptionCheckbox($event)" ([ngModel])="checkStdCrfCde" [checked]="checkStdCrfCde">
+            <input type="checkbox" id="checkStdCrfCde" name="checkStdCrfCde" (change)="setFormListOptionCheckbox($event)" ([ngModel])="checkStdCrfCde" [checked]="(formListData | async)?.checkStdCrfCde">
             <label for="checkStdCrfCde">Check against CDEs in Standard CRF Modules</label>        
         </div>
         <div>
-            <input type="checkbox" id="mustDisplayException" name="mustDisplayException" (change)="setFormListOptionCheckbox($event)" ([ngModel])="mustDisplayException" [checked]="mustDisplayException">
+            <input type="checkbox" id="mustDisplayException" name="mustDisplayException" (change)="setFormListOptionCheckbox($event)" ([ngModel])="mustDisplayException" [checked]="(formListData | async)?.mustDisplayException">
             <label for="mustDisplayException">Display Exception Details</label>        
         </div>  
     </div>
 
     <div>
-        <button [disabled]="!checkedItems.length" class="btn btn-primary" (click)="checkForms()">Check Form<span *ngIf="checkedItems.length>1">s</span></button>
-    </div>
+        <button [disabled]="!checkedItems.length" class="btn btn-primary" (click)="checkForms()">Check Form<span *ngIf="(checkedItems | async)?.length>1">s</span></button>
+    </div>    
 </ng-container>
