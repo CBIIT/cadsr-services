@@ -59,8 +59,11 @@ export class AlsUploadFormComponent implements OnInit {
         };
       }, 
       error => { 
+        this.errorMessage = 'Cannot communicate with the server'
+
         this.error = true;
         this.uploadProgress = 0;
+        console.log(event.target)
         if (event.target['response']=='') {
           this.errorMessage = 'Cannot communicate with the server'
         }
