@@ -14,7 +14,7 @@ export class AlsFormListComponent implements OnInit {
   private checkedItems:Observable<String[]>;
   private validItemsLength:Number;
 
-  constructor(private formListService:FormListService) {
+  constructor(private formListService:FormListService, private restService:RestService) {
   }
 
   ngOnInit() {
@@ -22,6 +22,16 @@ export class AlsFormListComponent implements OnInit {
     this.checkedItems = this.formListService.getCheckedItems(); // get checkd items as observable //
     this.validItemsLength = Object.assign([],this.formListData.source['value']['formsList'].filter((r) => r.isValid ).map((e) => e.formName)).length; // get valid item value //
   };
+
+  // check forms (validate) and go to report page //
+  checkForms() {
+    let checkedItems:String[];
+    let formListData:Object;
+    this.checkedItems.subscribe(data=>checkedItems=data);
+    this.formListData.subscribe(data=>formListData=data);
+    this.restService.checkForms(checkedItems,formListData).subscribe(
+      data => console.log(data))
+  }
 
   // gets checkd status of record //
   getCheckedStatus = record => this.formListService.getCheckedStatus(record);

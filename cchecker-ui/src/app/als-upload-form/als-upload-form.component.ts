@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { RestService } from '../services/rest.service';
 import { HttpEventType }  from '@angular/common/http';
-import { EventHandlerVars } from '@angular/compiler/src/compiler_util/expression_converter';
 import { FormListService } from '../services/formlist.service';
 
 @Component({
@@ -50,8 +49,9 @@ export class AlsUploadFormComponent implements OnInit {
   uploadFile = () =>  {
     this.restService.uploadAlsFile(this.file).subscribe(
       e => {
-
-        if (e.type === HttpEventType.Response) { 
+        console.log(e)
+        if (e.type === HttpEventType.Response) {
+          console.log(e.body) 
           this.formListService.setFormListData(e.body);
         }
         else if (e.type === HttpEventType.UploadProgress) {
