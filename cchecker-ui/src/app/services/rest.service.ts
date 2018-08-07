@@ -25,6 +25,8 @@ export class RestService {
     const displayExceptions = formListData['mustDisplayException'] ? 'true':'false';
     return this.http.post('http://localhost:8080/gateway/checkservice',checkedItems,
     {
+      observe:"body",
+      reportProgress:true,
       withCredentials:true,
       params:new HttpParams().set('checkUom', checkUom).append('checkCRF',checkCRF).append('displayExceptions',displayExceptions)
     })

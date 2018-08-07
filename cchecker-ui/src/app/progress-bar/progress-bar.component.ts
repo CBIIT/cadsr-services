@@ -8,6 +8,7 @@ import { KeyRegistry } from '../../../node_modules/@angular/core/src/di/reflecti
 export class ProgressBarComponent implements OnInit {
   @Input() percentage:Number;
   @Input() statusMessage:String;
+  @Input() type:String;
 
   constructor()   {
   }

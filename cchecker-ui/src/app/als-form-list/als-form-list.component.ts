@@ -13,7 +13,7 @@ export class AlsFormListComponent implements OnInit {
   private formListData:Observable<Object>;
   private checkedItems:Observable<String[]>;
   private validItemsLength:Number;
-
+  private validating:Boolean;
   constructor(private formListService:FormListService, private restService:RestService) {
   }
 
@@ -21,16 +21,20 @@ export class AlsFormListComponent implements OnInit {
     this.formListData = this.formListService.getFormListData(); // get form data as observable //
     this.checkedItems = this.formListService.getCheckedItems(); // get checkd items as observable //
     this.validItemsLength = Object.assign([],this.formListData.source['value']['formsList'].filter((r) => r.isValid ).map((e) => e.formName)).length; // get valid item value //
+    this.validating = false;
   };
 
   // check forms (validate) and go to report page //
   checkForms() {
+    this.validating = true;
     let checkedItems:String[];
     let formListData:Object;
     this.checkedItems.subscribe(data=>checkedItems=data);
     this.formListData.subscribe(data=>formListData=data);
     this.restService.checkForms(checkedItems,formListData).subscribe(
-      data => console.log(data))
+      data => console.log(data),
+      error => console.log(error),
+      () => this.validating = false)
   }
 
   // gets checkd status of record //
