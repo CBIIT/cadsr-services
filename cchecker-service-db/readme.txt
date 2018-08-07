@@ -59,3 +59,7 @@ http://localhost:4803
 
 5. Retrieve ALSData
 curl -v http://localhost:4803/rest/retrievealsdata?_cchecker=0BCAEE78-9916-4ADA-B7CD-CE5854AFDD82
+
+5. Retrieve Category CDE List
+curl -v http://localhost:4803/rest/retrievecategorycde
+

@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.CCCReport;
+import gov.nih.nci.cadsr.data.CategoryCde;
 @Repository
 public class DataElementRepository {
 	private static final Logger logger = LoggerFactory.getLogger(DataElementRepository.class);
@@ -164,7 +165,15 @@ public class DataElementRepository {
 		}
 		return blobData;
 	}
-    
+	/**
+	 * 
+	 * @return List<CategoryCde>
+	 */
+	public List<CategoryCde> retrieveCdeModuleTypeList () {
+		List<CategoryCde> resultList;
+		resultList = getAll(retrieveCategoryCdeListQuery(), CategoryCde.class);
+		return resultList;
+	}
 
     protected <T> String retrieveAlsQuery() {
 		return "SELECT PARSER_BLOB from SBREXT.CC_PARSER_DATA WHERE CCHECKER_IDSEQ = ?";
@@ -175,7 +184,14 @@ public class DataElementRepository {
     protected String retrieveFullReportQuery(/*String idseq*/) {
 		return "SELECT PARSER_BLOB from SBREXT.CC_REPORT_FULL WHERE CCHECKER_IDSEQ = ?";
 	}
-
+    /**
+     * Retrieve CDE SQL with CRF category to populate CRF cache.
+     * 
+     * @return SQL string
+     */
+    protected String retrieveCategoryCdeListQuery() {
+		return "SELECT * from SBREXT.MDSR_STANDARD_CDE_TYPE";
+	}
     /**
      * Return java generated UUID to upper case.
      * We could use Oracle caDSR function 
