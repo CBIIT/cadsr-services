@@ -24,6 +24,15 @@
 	</properties>
 	<repositories>
 		<repository>
+			<id>central</id>
+			<name>Maven Repository Switchboard</name>
+			<layout>default</layout>
+			<url>http://repo1.maven.org/maven2</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
 			<id>ncimvn-repo</id>
 			<name>NCI Nexus Repository for Maven</name>
 			<url>https://ncimvn.nci.nih.gov/nexus/content/repositories/public/</url>
