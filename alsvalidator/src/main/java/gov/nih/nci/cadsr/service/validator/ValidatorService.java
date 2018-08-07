@@ -236,7 +236,8 @@ public class ValidatorService {
 					question.setPvResult(matchString);
 				} else {
 					question.setPvResult(errorString);
-					question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg9));
+					if (question.getMessage().indexOf(msg9) == -1)
+						question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg9));
 					question.setQuestionCongruencyStatus(congStatus_errors);
 				}
 			}
@@ -254,7 +255,8 @@ public class ValidatorService {
 					cdResult.add(matchString);
 				} else {
 					cdResult.add(errorString);
-					question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg10));
+					if (question.getMessage().indexOf(msg10) == -1)
+						question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg10));
 					question.setQuestionCongruencyStatus(congStatus_errors);
 				}
 			}

@@ -14,10 +14,11 @@ import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.ALSDataDictionaryEntry;
 import gov.nih.nci.cadsr.data.ALSError;
 import gov.nih.nci.cadsr.data.ALSField;
-import gov.nih.nci.cadsr.data.CCCError;
 import gov.nih.nci.cadsr.data.CCCForm;
 import gov.nih.nci.cadsr.data.CCCQuestion;
 import gov.nih.nci.cadsr.data.CCCReport;
+import gov.nih.nci.cadsr.data.NrdsCde;
+import gov.nih.nci.cadsr.data.StandardCrfCde;
 import gov.nih.nci.cadsr.report.ReportOutput;
 import gov.nih.nci.cadsr.service.CdeService;
 import gov.nih.nci.cadsr.service.model.cdeData.CdeDetails;
@@ -29,6 +30,10 @@ public class GenerateReport implements ReportOutput {
 	private static String congStatus_errors = "ERRORS";
 	private static String congStatus_warn = "WARNINGS";
 	private static String congStatus_congruent = "CONGRUENT";
+	private static String nrds_cde = "NRDS";
+	private static String mandatory_crf = "Mandatory";
+	private static String optional_crf = "Optional";
+	private static String conditional_crf = "Conditional";
 
 	/**
 	 * @param
@@ -51,6 +56,11 @@ public class GenerateReport implements ReportOutput {
 		int totalQuestCount = 0;
 
 		List<CCCQuestion> questionsList = new ArrayList<CCCQuestion>();
+		List<NrdsCde> nrdsCdeList = new ArrayList<NrdsCde>();
+		List<StandardCrfCde> standardCrfCdeList = new ArrayList<StandardCrfCde>();
+		String templateName = null;
+		String crfIdVersion = null;
+		String category = null;
 		Map<String, ALSDataDictionaryEntry> ddeMap = alsData.getDataDictionaryEntries();
 		for (ALSField alsField : alsData.getFields()) {
 			Boolean cdeServiceCall = true;
@@ -89,15 +99,16 @@ public class GenerateReport implements ReportOutput {
 
 						question.setCdePublicId(id.trim());
 						question.setCdeVersion(version);
+						// from a static table of NCI standard CRFs
 						question.setNciCategory(
-								fetchCdeNciCategory(question.getCdePublicId(), question.getCdeVersion())); // from a static table of NCI standard CRFs
+								fetchCdeNciCategory(question.getCdePublicId(), question.getCdeVersion()));
 						question.setRaveFieldLabel(alsField.getPreText());
-						question.setCdePermitQuestionTextChoices(""); 
+						question.setCdePermitQuestionTextChoices("");
 						question.setRaveControlType(alsField.getControlType());
 
 						for (String key : ddeMap.keySet()) {
 							if (key.equals(alsField.getDataDictionaryName())) {
-								question.setRaveCodedData(ddeMap.get(key).getCodedData()); 
+								question.setRaveCodedData(ddeMap.get(key).getCodedData());
 								question.setRaveUserString(ddeMap.get(key).getUserDataString());
 							}
 						}
@@ -120,7 +131,7 @@ public class GenerateReport implements ReportOutput {
 						CdeDetails cdeDetails = null;
 						logger.debug("cdeServiceCall: " + cdeServiceCall);
 						if (cdeServiceCall) {
-							//if (alsField.getFormOid().equalsIgnoreCase("ENROLLMENT")) {
+							if (alsField.getFormOid().equalsIgnoreCase("ENROLLMENT")) {
 								// alsField.getFormOid().equalsIgnoreCase("HISTOLOGY_AND_DISEASE")
 								// ||
 								// alsField.getFormOid().equalsIgnoreCase("ELIGIBILITY_CHECKLIST"))
@@ -137,15 +148,21 @@ public class GenerateReport implements ReportOutput {
 								// Service Call to validate the CDEDetails
 								// against the ALSField & Question objects
 								question = ValidatorService.validate(alsField, question, cdeDetails);
-							//}
+							}
 						}
+						if (question.getNciCategory().equalsIgnoreCase(nrds_cde))
+							nrdsCdeList.add(buildNrdsCde(question,
+									cdeDetails.getDataElement().getDataElementDetails().getLongName()));
+						else
+							standardCrfCdeList.add(buildCrfCde(question, templateName, crfIdVersion, category,
+									cdeDetails.getDataElement().getDataElementDetails().getLongName()));
 						if (question.getQuestionCongruencyStatus() == null
 								|| question.getQuestionCongruencyStatus().equalsIgnoreCase("")) {
 							if (form.getCongruencyStatus() != null
 									&& (!form.getCongruencyStatus().equals(congStatus_errors))) {
 								form.setCongruencyStatus(congStatus_congruent);
 							}
-							//questionsList.add(question);
+							// questionsList.add(question);
 						} else {
 							questionsList.add(question);
 							if (form.getCongruencyStatus() != null) {
@@ -183,11 +200,6 @@ public class GenerateReport implements ReportOutput {
 			formsList.add(form);
 		cccReport.setCccForms(formsList);
 		return cccReport;
-	}
-
-	private static CCCError getErrorObject() {
-		CCCError cccError = new CCCError();
-		return cccError;
 	}
 
 	protected ALSError getErrorInstance() {
@@ -231,8 +243,43 @@ public class GenerateReport implements ReportOutput {
 	protected static String fetchCdeNciCategory(String cdePublicId, String cdeVersion) {
 		String nciCategory = "";
 		// Service to fetch the CDE's NCI category
-		// nciCategory = [DBservice].retrieveNciCategory(String cdePublicId, String cdeVersion);
+		// nciCategory = [DBservice].retrieveNciCategory(String cdePublicId,
+		// String cdeVersion);
 		return nciCategory;
+	}
+
+	/**
+	 * @param CCCQuestion
+	 * @param NrdsCde
+	 * @return Return NrdsCde for a question
+	 * 
+	 */
+	protected static NrdsCde buildNrdsCde(CCCQuestion question, String cdeName) {
+		NrdsCde nrds = new NrdsCde();
+		nrds.setCdeIdVersion(question.getCdePublicId() + "v" + question.getCdeVersion());
+		nrds.setCdeName(cdeName);
+		nrds.setRaveFieldLabel(question.getRaveFieldLabel());
+		nrds.setRaveFieldOrder(Integer.parseInt(question.getFieldOrder()));
+		nrds.setResult(question.getQuestionCongruencyStatus());
+		nrds.setMessage(question.getMessage());
+		return nrds;
+	}
+
+	/**
+	 * @param CCCQuestion
+	 * @param NrdsCde
+	 * @return Return NrdsCde for a question
+	 * 
+	 */
+	protected static StandardCrfCde buildCrfCde(CCCQuestion question, String templateName, String crfIdVersion,
+			String category, String cdeName) {
+		StandardCrfCde stdCrdCde = new StandardCrfCde();
+		stdCrdCde.setCdeIdVersion(question.getCdePublicId() + "v" + question.getCdeVersion());
+		stdCrdCde.setCdeName(cdeName);
+		stdCrdCde.setIdVersion(crfIdVersion);
+		stdCrdCde.setTemplateName(templateName);
+		stdCrdCde.setStdTemplateType(category);
+		return stdCrdCde;
 	}
 
 }
