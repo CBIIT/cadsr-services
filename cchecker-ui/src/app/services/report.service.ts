@@ -5,7 +5,7 @@ import { BehaviorSubject } from '../../../node_modules/rxjs';
   providedIn: 'root'
 })
 export class ReportService {
-  private reportData = new BehaviorSubject<Object>({});
+  private reportData = new BehaviorSubject<Object>({'cccForms':[]});
   private loadedFromButton:Boolean;
 
   constructor() { }

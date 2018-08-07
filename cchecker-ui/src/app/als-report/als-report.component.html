@@ -2,4 +2,8 @@
     ALS Report
 </h2>
 
+<div class="alert alert-danger" role="alert" *ngIf="!(reportData | async)?.cccForms.length">
+    Please select forms and try again.
+</div>
+
 {{reportData | async | json}}
