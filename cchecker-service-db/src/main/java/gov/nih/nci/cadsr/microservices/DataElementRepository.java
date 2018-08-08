@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.CCCReport;
 import gov.nih.nci.cadsr.data.CategoryCde;
+import gov.nih.nci.cadsr.data.CategoryNrds;
 @Repository
 public class DataElementRepository {
 	private static final Logger logger = LoggerFactory.getLogger(DataElementRepository.class);
@@ -174,7 +175,15 @@ public class DataElementRepository {
 		resultList = getAll(retrieveCategoryCdeListQuery(), CategoryCde.class);
 		return resultList;
 	}
-
+	/**
+	 * 
+	 * @return List<CategoryNrds
+	 */
+	public List<CategoryNrds> retrieveNrdsCdeList () {
+		List<CategoryNrds> resultList;
+		resultList = getAll(retrieveCategoryCdeListQuery(), CategoryNrds.class);
+		return resultList;
+	}
     protected <T> String retrieveAlsQuery() {
 		return "SELECT PARSER_BLOB from SBREXT.CC_PARSER_DATA WHERE CCHECKER_IDSEQ = ?";
 	}
@@ -192,6 +201,12 @@ public class DataElementRepository {
     protected String retrieveCategoryCdeListQuery() {
 		return "SELECT * from SBREXT.MDSR_STANDARD_CDE_TYPE";
 	}
+    protected String retrieveNrdsCdeListQuery() {
+		return "SELECT CDE_ID,de.VERSION, de.LONG_NAME DE_NAME FROM sbr.data_elements de "
+			+ "inner join sbr.contexts cnt on "
+			+ "de.CONTE_IDSEQ = cnt.CONTE_IDSEQ and cnt.NAME = 'NRDS' and de.ASL_NAME = 'RELEASED';";
+	}
+
     /**
      * Return java generated UUID to upper case.
      * We could use Oracle caDSR function 

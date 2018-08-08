@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.CCCReport;
 import gov.nih.nci.cadsr.data.CategoryCde;
+import gov.nih.nci.cadsr.data.CategoryNrds;
 
 @RestController
 @EnableAutoConfiguration
@@ -93,6 +94,16 @@ public class CCheckerDbController {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.add("Content-Type", "application/json");
 		return new ResponseEntity<List<CategoryCde>>(categoryCdeList, httpHeaders, HttpStatus.OK);
+	}
+	
+	@GetMapping("/rest/retrievecategorynrds")
+	public ResponseEntity<List<CategoryNrds>> retrieveCategoryNrdsCdeList(HttpServletRequest request) {
+		logger.debug("retrieveCategoryCdeList called");
+
+		List<CategoryNrds> categoryCdeList = dataElemenRepository.retrieveNrdsCdeList();
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.add("Content-Type", "application/json");
+		return new ResponseEntity<List<CategoryNrds>>(categoryCdeList, httpHeaders, HttpStatus.OK);
 	}
 	
 	@GetMapping("/rest/retrievereporterror")
