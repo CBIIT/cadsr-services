@@ -4,6 +4,16 @@ docker-compose configuration for cchecker
 ## Requirements ##
 * Docker installed and running
 
+## NOTE ##
+1. If install fails to connect to the internet add a file daemon.json file in /etc/docker
+2. Add the following entry into the file 
+{
+    "dns": ["x.x.x.x", "x.x.x.x"] 
+}
+3. replace x.x.x.x with the two nih naneservers. can be found be running cat /etc/resolve.conf on your main computer.
+4. Save file
+5. restart docker - on ubuntu run service docker restart
+
 ## Installation ##
 1. git clone https://github.com/CBIIT/cadsr-services
 2. cd cadsr-services/docker
