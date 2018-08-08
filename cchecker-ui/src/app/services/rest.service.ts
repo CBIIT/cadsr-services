@@ -11,7 +11,7 @@ export class RestService {
 
   // upload file service //
   uploadAlsFile(file){
-    return this.http.post('http://localhost:8080/gateway/parseservice?owner=me2',file,
+    return this.http.post('http://127.0.0.1:8080/gateway/parseservice?owner=me2',file,
     {
       observe:"events",
       reportProgress:true,
@@ -23,7 +23,7 @@ export class RestService {
     const checkUom = formListData['checkUom'] ? 'true':'false';
     const checkCRF = formListData['checkStdCrfCde'] ? 'true':'false';
     const displayExceptions = formListData['mustDisplayException'] ? 'true':'false';
-    return this.http.post('http://localhost:8080/gateway/checkservice',checkedItems,
+    return this.http.post('http://127.0.0.1:8080/gateway/checkservice',checkedItems,
     {
       observe:"body",
       reportProgress:true,
