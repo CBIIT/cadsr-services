@@ -19,7 +19,7 @@ docker-compose configuration for cchecker
 2. cd cadsr-services/docker
 3. run startall
 4. give container a minute or two to completely start angular ui and apache
-5. visit http://localhost in a browser
+5. visit http://localhost:8081 in a browser
 
 ## To start docker container once installed ##
 * This only needs to be done if the container is already installed and has previously been stopped

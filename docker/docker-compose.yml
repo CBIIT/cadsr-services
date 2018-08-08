@@ -4,7 +4,7 @@ services:
     container_name: cchecker-ui
     build: ./cchecker-ui-docker
     ports:
-     - "80:80"
+     - "8081:80"
   server:
     container_name: cchecker-gateway
     build: ./cchecker-server-docker
