@@ -132,11 +132,6 @@ public class GenerateReport implements ReportOutput {
 						CdeDetails cdeDetails = null;
 						logger.debug("cdeServiceCall: " + cdeServiceCall);
 						if (cdeServiceCall) {
-							if (alsField.getFormOid().equalsIgnoreCase("ENROLLMENT")) {
-								// alsField.getFormOid().equalsIgnoreCase("HISTOLOGY_AND_DISEASE")
-								// ||
-								// alsField.getFormOid().equalsIgnoreCase("ELIGIBILITY_CHECKLIST"))
-								// {
 								try {
 									// Service Call to retrieve CDEDetails
 									cdeDetails = CdeService.retrieveDataElement(question.getCdePublicId(),
@@ -144,19 +139,22 @@ public class GenerateReport implements ReportOutput {
 								} catch (Exception e) {
 									// TODO Auto-generated catch block
 									e.printStackTrace();
+									//FIXME error handling
+									continue;
 								}
 
 								// Service Call to validate the CDEDetails
 								// against the ALSField & Question objects
 								question = ValidatorService.validate(alsField, question, cdeDetails);
-							}
+							
 						}
-						if (question.getNciCategory().equalsIgnoreCase(nrds_cde)) {
+						if (nrds_cde.equalsIgnoreCase(question.getNciCategory())) {
 							nrdsCdeList.add(buildNrdsCde(question,
 									cdeDetails.getDataElement().getDataElementDetails().getLongName())); 
 							}
-						else if (question.getNciCategory().equalsIgnoreCase(mandatory_crf) || question.getNciCategory().equalsIgnoreCase(optional_crf) 
-								|| question.getNciCategory().equalsIgnoreCase(conditional_crf)) {
+						else if ((mandatory_crf.equalsIgnoreCase(question.getNciCategory()))
+								|| (optional_crf.equalsIgnoreCase(question.getNciCategory()))
+								|| (conditional_crf.equalsIgnoreCase(question.getNciCategory()))) {
 								standardCrfCdeList.add(buildCrfCde(question, cdeCrfData.getCrfName(), cdeCrfData.getCrfIdVersion(), cdeCrfData.getNciCategory(),
 									cdeDetails.getDataElement().getDataElementDetails().getLongName())); 
 							}

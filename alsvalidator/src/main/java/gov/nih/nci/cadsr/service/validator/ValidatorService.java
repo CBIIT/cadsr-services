@@ -236,7 +236,7 @@ public class ValidatorService {
 					question.setPvResult(matchString);
 				} else {
 					question.setPvResult(errorString);
-					if (question.getMessage().indexOf(msg9) == -1)
+					if((question.getMessage() != null) && (question.getMessage().indexOf(msg9) == -1))
 						question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg9));
 					question.setQuestionCongruencyStatus(congStatus_errors);
 				}
