@@ -3,12 +3,19 @@
  */
 package gov.nih.nci.cadsr.report.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.log4j.Logger;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.ALSDataDictionaryEntry;
@@ -17,6 +24,8 @@ import gov.nih.nci.cadsr.data.ALSField;
 import gov.nih.nci.cadsr.data.CCCForm;
 import gov.nih.nci.cadsr.data.CCCQuestion;
 import gov.nih.nci.cadsr.data.CCCReport;
+import gov.nih.nci.cadsr.data.CategoryCde;
+import gov.nih.nci.cadsr.data.CategoryNrds;
 import gov.nih.nci.cadsr.data.CdeStdCrfData;
 import gov.nih.nci.cadsr.data.NrdsCde;
 import gov.nih.nci.cadsr.data.StandardCrfCde;
@@ -56,6 +65,8 @@ public class GenerateReport implements ReportOutput {
 		CCCForm form = new CCCForm();
 		String formName = "";
 		int totalQuestCount = 0;
+		List<CategoryCde> categoryCdeList = retrieveCdeCrfData();
+		List<CategoryNrds> categoryNrdsList = retrieveNrdsData();
 
 		List<CCCQuestion> questionsList = new ArrayList<CCCQuestion>();
 		List<NrdsCde> nrdsCdeList = new ArrayList<NrdsCde>();
@@ -102,8 +113,9 @@ public class GenerateReport implements ReportOutput {
 						question.setCdePublicId(id.trim());
 						question.setCdeVersion(version);
 						// from a static table of NCI standard CRFs
-						CdeStdCrfData cdeCrfData = fetchCdeStandardCrfData(question.getCdePublicId(), question.getCdeVersion());
-						question.setNciCategory(cdeCrfData.getNciCategory());
+						CdeStdCrfData cdeCrfData = fetchCdeStandardCrfData(question.getCdePublicId(), question.getCdeVersion(), categoryCdeList, categoryNrdsList);
+						if (cdeCrfData!=null)
+							question.setNciCategory(cdeCrfData.getNciCategory());
 						question.setRaveFieldLabel(alsField.getPreText());
 						question.setCdePermitQuestionTextChoices("");
 						question.setRaveControlType(alsField.getControlType());
@@ -149,6 +161,7 @@ public class GenerateReport implements ReportOutput {
 								question = ValidatorService.validate(alsField, question, cdeDetails);
 							
 						}
+						if (cdeCrfData!=null && cdeDetails!=null)  {
 						if (nrds_cde.equalsIgnoreCase(question.getNciCategory())) {
 							nrdsCdeList.add(buildNrdsCde(question,
 									cdeDetails.getDataElement().getDataElementDetails().getLongName())); 
@@ -159,6 +172,7 @@ public class GenerateReport implements ReportOutput {
 								standardCrfCdeList.add(buildCrfCde(question, cdeCrfData.getCrfName(), cdeCrfData.getCrfIdVersion(), cdeCrfData.getNciCategory(),
 									cdeDetails.getDataElement().getDataElementDetails().getLongName())); 
 							}
+						}
 						if (question.getQuestionCongruencyStatus() == null
 								|| question.getQuestionCongruencyStatus().equalsIgnoreCase("")) {
 							if (form.getCongruencyStatus() != null
@@ -202,6 +216,8 @@ public class GenerateReport implements ReportOutput {
 		if (!form.getQuestions().isEmpty())
 			formsList.add(form);
 		cccReport.setCccForms(formsList);
+		cccReport.setNrdsCdeList(nrdsCdeList);
+		cccReport.setStandardCrfCdeList(standardCrfCdeList);
 		return cccReport;
 	}
 
@@ -243,16 +259,38 @@ public class GenerateReport implements ReportOutput {
 	 * @return CRF data for the given CDE
 	 * 
 	 */
-	protected static CdeStdCrfData fetchCdeStandardCrfData(String cdePublicId, String cdeVersion) {
-		CdeStdCrfData cdeCrfData = new CdeStdCrfData();
-		// Service to fetch the CDE CRF data
-		// cdeCrfData = [DBservice].retrieveCdeCrfData(String cdePublicId, String cdeVersion);
+	protected static CdeStdCrfData fetchCdeStandardCrfData(String cdePublicId, String cdeVersion, List<CategoryCde> categoryCdeList, List<CategoryNrds> categoryNrdsList) {
+		CdeStdCrfData cdeCrfData = null;
+		if (NumberUtils.isNumber(cdePublicId) && NumberUtils.isNumber(cdeVersion)) {
+			for (CategoryCde cde : categoryCdeList) {
+				if (cde.getCdeId() == Float.valueOf(cdePublicId) && cde.getDeVersion() == Float.valueOf(cdeVersion)) {
+					cdeCrfData = new CdeStdCrfData();
+					cdeCrfData.setCdePublicId(cdePublicId);
+					cdeCrfData.setCdeVersion(cdeVersion);
+					cdeCrfData.setCrfIdVersion("9991000v1.0"); // Mock data
+					cdeCrfData.setCrfName("NCI standard template"); // Mock data
+					cdeCrfData.setNciCategory(cde.getModuleType());
+				}
+			}
+			if (cdeCrfData == null) {
+				for (CategoryNrds cde : categoryNrdsList) {
+					if (cde.getCdeId() == Float.valueOf(cdePublicId) && cde.getDeVersion() == Float.valueOf(cdeVersion)) {
+						cdeCrfData = new CdeStdCrfData();
+						cdeCrfData.setCdePublicId(cdePublicId);
+						cdeCrfData.setCdeVersion(cdeVersion);
+						cdeCrfData.setCrfIdVersion("5555000v1.0"); // Mock data
+						cdeCrfData.setCrfName("NCI standard template"); // Mock data
+						cdeCrfData.setNciCategory(nrds_cde);
+					}
+				}
+			}
+		}
 		return cdeCrfData;
 	}
 
 	/**
 	 * @param CCCQuestion
-	 * @param NrdsCde
+	 * @param string
 	 * @return Return NrdsCde for a question
 	 * 
 	 */
@@ -283,5 +321,54 @@ public class GenerateReport implements ReportOutput {
 		stdCrdCde.setStdTemplateType(category);
 		return stdCrdCde;
 	}
+	
+	
+	protected static List<CategoryCde> retrieveCdeCrfData () {
+		RestTemplate restTemplate = new RestTemplate();
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		InputStream input = classLoader.getResourceAsStream("boot.properties");
+		Properties properties = new Properties();
+		try {
+			properties.load(input);
+		} catch (IOException e) {
+			logger.error("failed to load boot properties" + e);
+		    /**
+		     * If properties not found throws runtime exception
+		     */
+			e.printStackTrace();
+			throw new RuntimeException (e);
+		}
+		ResponseEntity<List<CategoryCde>> categoryCdeResponse =
+		        restTemplate.exchange(properties.getProperty("RETRIEVE_STD_CDECRF_URL"),
+		                    HttpMethod.GET, null, new ParameterizedTypeReference<List<CategoryCde>>() {
+		            });
+		List<CategoryCde> categoryCdeList = categoryCdeResponse.getBody();		
+		return categoryCdeList;
+	}
+	
+	
+	protected static List<CategoryNrds> retrieveNrdsData () {
+		RestTemplate restTemplate = new RestTemplate();
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		InputStream input = classLoader.getResourceAsStream("boot.properties");
+		Properties properties = new Properties();
+		try {
+			properties.load(input);
+		} catch (IOException e) {
+			logger.error("failed to load boot properties" + e);
+		    /**
+		     * If properties not found throws runtime exception
+		     */
+			e.printStackTrace();
+			throw new RuntimeException (e);
+		}
+		ResponseEntity<List<CategoryNrds>> categoryNrdsResponse =
+		        restTemplate.exchange(properties.getProperty("RETRIEVE_NRDS_URL"),
+		                    HttpMethod.GET, null, new ParameterizedTypeReference<List<CategoryNrds>>() {
+		            });
+		List<CategoryNrds> categoryNrdsList = categoryNrdsResponse.getBody();		
+		return categoryNrdsList;
+	}	
+	
 
 }

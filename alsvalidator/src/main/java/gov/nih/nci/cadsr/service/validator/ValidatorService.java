@@ -255,7 +255,7 @@ public class ValidatorService {
 					cdResult.add(matchString);
 				} else {
 					cdResult.add(errorString);
-					if (question.getMessage().indexOf(msg10) == -1)
+					if ((question.getMessage()!=null) && (question.getMessage().indexOf(msg10) == -1))
 						question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg10));
 					question.setQuestionCongruencyStatus(congStatus_errors);
 				}
