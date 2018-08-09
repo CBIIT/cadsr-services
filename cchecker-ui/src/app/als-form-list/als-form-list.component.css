@@ -5,13 +5,16 @@ th {
     vertical-align:top;
     padding:5px 3px 5px 5px;
     color:#000;
-    border-bottom:1px solid #000;
+    border-bottom:1px solid #111111;
 }
 
 td {
     vertical-align:top;
     padding:5px 0px 5px 5px;
     border-bottom:1px solid #ddd;
+}
+tr:last-child td {
+    border-bottom:1px solid #111111;
 }
 
 
@@ -49,7 +52,7 @@ span.formName{
     text-align:center;
 }
 .rowOdd {
-    background-color:#eee;
+    background-color:#F9F9F9;
 }
 .rowEven {
     background-color:#fff;
