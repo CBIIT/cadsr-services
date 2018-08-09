@@ -5,5 +5,36 @@
 <div class="alert alert-danger" role="alert" *ngIf="!(reportData | async)?.cccForms.length">
     Please select forms and try again.
 </div>
+<!-- <div *ngFor="let form of (reportData | async)?.cccForms">
+    <div *ngIf="form.raveFormOid=='ENROLLMENT'">
+        {{form | json}}
+    </div>
+</div> -->
+<ng-container *ngIf="reportData | async as r">
+<table cellspacing="0" cellpadding="0" margin="0"class="alsFormList">
 
+<tr><td>CDE Congruency Checker Report for</td><td></tr>
+<tr><td>Rave Protocol name </td><td>{{r.raveProtocolName}}</tr>
+<tr><td>Rave Protocol number </td><td>{{r.raveProtocolNumber}}</tr>
+<tr><td>Date Validated </td><td>{{r.reportDate}}</tr>
+<tr><td># Forms in protocol </td><td>{{totalFormsCount}}</tr>
+<tr><td># Total Forms Congruent </td><td></tr>
+<tr><td># Total Questions Checked </td><td>{{r.countQuestionsChecked}}</tr>
+<tr><td># Total Questions with Warnings </td><td>{{r.countQuestionsWithWarnings}}</tr>
+<tr><td># Total Questions with Errors </td><td>{{r.countQuestionsWithErrors}}</tr>
+<tr><td># Total Questions without associated CDE </td><td>{{r.countQuestionsWithoutCde}}</tr>
+<tr><td># Required NRDS Questions missing  </td><td>{{r.countNrdsMissing}}</tr>
+<tr><td># Required NRDS Questions Congruent </td><td>{{r.countNrdsCongruent}}</tr>
+<tr><td># Required NRDS Questions With Warnings </td><td>{{r.countNrdsWithWarnings}}</tr>
+<tr><td># Required NRDS Questions With Errors </td><td>{{r.countNrdsWithErrors}}</tr>
+<tr><td># NCI Standard Template Mandatory Modules Questions not used in Protocol  </td><td></tr>
+<tr><td># NCI Standard Template Mandatory Modules Questions Congruent </td><td>{{r.countNciCongruent}}</tr>
+<tr><td># NCI Standard Template Mandatory Modules Questions With Errors </td><td>{{r.countQuestionsWithErrors}}</tr>
+<tr><td># NCI Standard Template Mandatory Modules Questions With Warnings </td><td>{{r.countQuestionsWithWarnings}}</tr>
+</table>
+</ng-container>
+
+
+<!-- <pre>
 {{reportData | async | json}}
+</pre> -->

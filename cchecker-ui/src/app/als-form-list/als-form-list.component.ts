@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RestService } from '../services/rest.service';
 import { FormListService } from '../services/formlist.service';
 import { Observable } from 'rxjs';
@@ -35,8 +35,8 @@ export class AlsFormListComponent implements OnInit {
     this.error = false;
     let checkedItems:String[];
     let formListData:Object;
-    this.checkedItems.subscribe(data=>checkedItems=data);
-    this.formListData.subscribe(data=>formListData=data);
+    this.checkedItems.subscribe(data=>checkedItems=data).unsubscribe();
+    this.formListData.subscribe(data=>formListData=data).unsubscribe();
     this.restService.checkForms(checkedItems,formListData).subscribe(
       data => this.reportService.setReportData(data),
       error => this.errorMessage = error,
@@ -64,5 +64,7 @@ export class AlsFormListComponent implements OnInit {
   // sets checkUom, checkStdCrfCde and mustDisplayException checkboxes at bottom of page //
   setFormListOptionCheckbox = (event):void => this.formListService.setFormListOptionCheckbox(event);
 
+  ngOnDestroy() {
 
+  }
 };
