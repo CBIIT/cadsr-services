@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,22 +17,27 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.springframework.web.client.RestTemplate;
 
 import gov.nih.nci.cadsr.data.ALSData;
-import gov.nih.nci.cadsr.data.ALSError;
 import gov.nih.nci.cadsr.data.CCCForm;
 import gov.nih.nci.cadsr.data.CCCQuestion;
 import gov.nih.nci.cadsr.data.CCCReport;
 import gov.nih.nci.cadsr.data.FormDisplay;
 import gov.nih.nci.cadsr.data.FormsUiData;
-import gov.nih.nci.cadsr.service.FormService;
+import gov.nih.nci.cadsr.data.ReportInputWrapper;
+import gov.nih.nci.cadsr.data.ValidateDataWrapper;
 import gov.nih.nci.cadsr.parser.Parser;
 import gov.nih.nci.cadsr.parser.impl.AlsParser;
 import gov.nih.nci.cadsr.report.impl.GenerateReport;
+import gov.nih.nci.cadsr.service.FormService;
 
 public class CongruencyCheckerReportInvoker {
 	
@@ -91,7 +97,13 @@ public class CongruencyCheckerReportInvoker {
 				logger.debug("Error description: "+alsError1.getErrorDesc()+" Severity: "+alsError1.getErrorSeverity());
 			}*/			
 			//logger.debug("Selected Forms list size: "+selForms.size());
-			cccReport  = generateReport.getFinalReportData(alsData, selForms, false, false, false);
+			ReportInputWrapper reportInput = new ReportInputWrapper();
+			reportInput.setAlsData(alsData);
+			reportInput.setSelForms(selForms);
+			reportInput.setCheckStdCrfCde(false);
+			reportInput.setCheckUom(false);
+			reportInput.setDisplayExceptionDetails(false);
+			cccReport  = buildErrorReportService(reportInput);
 			logger.debug("Report Error Forms list size: "+cccReport.getCccForms().size());
 			for (CCCForm form : cccReport.getCccForms()) {
 				//logger.debug("Form name: " + form.getRaveFormOid());
@@ -104,8 +116,8 @@ public class CongruencyCheckerReportInvoker {
 				}
 			}
 			writeExcel(OUTPUT_XLSX_FILE_PATH, cccReport);
-			//writeToJSON(cccReport);
-			//logger.debug("Output object forms count: " + cccReport.getCccForms().size());			
+			writeToJSON(cccReport);
+			logger.debug("Output object forms count: " + cccReport.getCccForms().size());			
 			} catch (IOException ioe) {
 				ioe.printStackTrace();			
 			} catch (InvalidFormatException ife) {
@@ -181,7 +193,7 @@ public class CongruencyCheckerReportInvoker {
 				"Rave Field Data Type", "Dataype Checker Result", "CDE Data Type", "Rave UOM", "UOM Checker Result", "CDE UOM",
 				"Rave Length", "Length Checker Result", "CDE Maximum Length", "Rave Display Format", "Format Checker Result",
 				"CDE Display Format" };
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 1; i++) {
 			XSSFSheet sheet2 = workbook.createSheet(forms.get(i).getRaveFormOid());
 			rowNum = 0;
 			row = sheet2.createRow(rowNum++);
@@ -201,6 +213,8 @@ public class CongruencyCheckerReportInvoker {
 			colNum = colNum+3;
 			newCell = row.createCell(3);
 			newCell.setCellValue(forms.get(i).getCountTotalQuestions());
+            CellStyle cellStyle = workbook.createCellStyle(); //Create new style
+            cellStyle.setWrapText(true);
 			for (int j = 0; j < forms.get(i).getQuestions().size(); j++) {
 				int colNum2 = formStartColumn;
 				CCCQuestion question = forms.get(i).getQuestions().get(j);
@@ -216,12 +230,15 @@ public class CongruencyCheckerReportInvoker {
 				newCell = row.createCell(colNum2++);
 				newCell.setCellValue(question.getQuestionCongruencyStatus());
 				newCell = row.createCell(colNum2++);
+				newCell.setCellStyle(cellStyle);
 				newCell.setCellValue(question.getMessage());
 				newCell = row.createCell(colNum2++);
 				newCell.setCellValue(question.getRaveFieldLabel());
 				newCell = row.createCell(colNum2++);
+				newCell.setCellStyle(cellStyle);				
 				newCell.setCellValue(question.getRaveFieldLabelResult());
 				newCell = row.createCell(colNum2++);
+				newCell.setCellStyle(cellStyle);				
 				newCell.setCellValue(question.getCdePermitQuestionTextChoices());
 				newCell = row.createCell(colNum2++);
 				newCell.setCellValue(question.getRaveControlType());				
@@ -231,15 +248,19 @@ public class CongruencyCheckerReportInvoker {
 				newCell.setCellValue(question.getCdeValueDomainType());
 				List<String> raveCodedData = question.getRaveCodedData();
 				List<String> raveUserString = question.getRaveUserString();
+				List<String> codedDataResult = question.getCodedDataResult();
 				Row rowBeforeCD = row;
 				for (int m = 0; m < raveCodedData.size(); m++)	{
 					int colNum3 = codedDataColStart;
 					newCell = row.createCell(colNum3++);
 					newCell.setCellValue(raveCodedData.get(m));					
 					newCell = row.createCell(colNum3++);
-					newCell.setCellValue("CHECK"); // TODO - needs to get actual values from caDSR DB validation result 
+					if (codedDataResult.isEmpty())
+						newCell.setCellValue("Cell empty");
+					else	
+						newCell.setCellValue(codedDataResult.get(m)); 
 					newCell = row.createCell(colNum3);
-					newCell.setCellValue(raveCodedData.get(m).replaceAll("-", ", ")); // substituting pv values from ALS for now TODO - needs to get actual values from caDSR db			
+					newCell.setCellValue(raveUserString.get(m)); // substituting pv values from ALS for now TODO - needs to get actual values from caDSR db			
 					if (m != raveCodedData.size()-1)
 						row = sheet2.createRow(rowNum++);
 				}
@@ -247,10 +268,12 @@ public class CongruencyCheckerReportInvoker {
 				row = rowBeforeCD;
 				int newColNum = allowableCdeValueCol;
 				newCell = row.createCell(newColNum++);
+				newCell.setCellStyle(cellStyle);				
 				newCell.setCellValue(question.getAllowableCdeValue());
 				newCell = row.createCell(newColNum++);
 				newCell.setCellValue(question.getPvResult());				
 				newCell = row.createCell(newColNum++);
+				newCell.setCellStyle(cellStyle);				
 				newCell.setCellValue(question.getAllowableCdeTextChoices());
 				newCell = row.createCell(newColNum++);
 				newCell.setCellValue(question.getRaveFieldDataType());				
@@ -267,7 +290,7 @@ public class CongruencyCheckerReportInvoker {
 				newCell = row.createCell(newColNum++);
 				newCell.setCellValue(question.getRaveLength());
 				newCell = row.createCell(newColNum++);
-				newCell.setCellValue(question.getLengthCheckerResult());				
+				newCell.setCellValue(question.getLengthCheckerResult());
 				newCell = row.createCell(newColNum++);
 				newCell.setCellValue(question.getCdeMaxLength());				
 				newCell = row.createCell(newColNum++);
@@ -283,6 +306,7 @@ public class CongruencyCheckerReportInvoker {
 
 		try {
 			FileOutputStream outputStream = new FileOutputStream(OUTPUT_XLSX_FILE_PATH);
+			autoSizeColumns(workbook);
 			workbook.write(outputStream);
 			workbook.close();
 		} catch (FileNotFoundException e) {
@@ -292,6 +316,23 @@ public class CongruencyCheckerReportInvoker {
 		}
 	}		
 	
+	public static void autoSizeColumns(Workbook workbook) {
+	    int numberOfSheets = workbook.getNumberOfSheets();
+	    for (int i = 0; i < numberOfSheets; i++) {
+	        Sheet sheet = workbook.getSheetAt(i);
+	        if (sheet.getPhysicalNumberOfRows() > 0) {
+	        	for (int j = sheet.getFirstRowNum()+3; j < sheet.getLastRowNum(); j++) {
+		            Row row = sheet.getRow(j);
+		            Iterator<Cell> cellIterator = row.cellIterator();
+		            while (cellIterator.hasNext()) {
+		                Cell cell = cellIterator.next();
+		                int columnIndex = cell.getColumnIndex();
+		                sheet.autoSizeColumn(columnIndex);
+		            }
+	            }
+	        }
+	    }
+	}	
 	
 	private static void writeToJSON (CCCReport cccReport) {
 		
@@ -305,4 +346,44 @@ public class CongruencyCheckerReportInvoker {
         }		
 		
 	}
+	
+	protected CCCQuestion validateService (ValidateDataWrapper validateWrapper) {
+		RestTemplate restTemplate = new RestTemplate();
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		InputStream input = classLoader.getResourceAsStream("config.properties");
+		Properties properties = new Properties();
+		try {
+			properties.load(input);
+		} catch (IOException e) {
+			logger.error("failed to load config properties" + e);
+		    /**
+		     * If properties not found throws runtime exception
+		     */
+			e.printStackTrace();
+			throw new RuntimeException (e);
+		}
+		logger.debug("Starting up Validator service..... ");
+		CCCQuestion question = restTemplate.postForObject(properties.getProperty("VALIDATOR_URL"), validateWrapper, CCCQuestion.class);
+		return question;
+	}		
+	
+	protected static CCCReport buildErrorReportService (ReportInputWrapper reportInput) {
+		RestTemplate restTemplate = new RestTemplate();
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		InputStream input = classLoader.getResourceAsStream("config.properties");
+		Properties properties = new Properties();
+		try {
+			properties.load(input);
+		} catch (IOException e) {
+			logger.error("failed to load config properties" + e);
+		    /**
+		     * If properties not found throws runtime exception
+		     */
+			e.printStackTrace();
+			throw new RuntimeException (e);
+		}
+		logger.debug("Starting up Build error report service..... ");
+		CCCReport errorReport = restTemplate.postForObject(properties.getProperty("BUILD_ERROR_REPORT_URL"), reportInput, CCCReport.class);
+		return errorReport;
+	}			
 }
