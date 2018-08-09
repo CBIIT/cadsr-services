@@ -22,6 +22,14 @@ mvn clean package
 java -jar target/cchecker-service-db-0.0.1-SNAPSHOT.jar &
 echo "done building cchecker-service-db" 
 
+# build and run the cchecker db service #
+echo "entering alsvalidator directory"
+cd ../alsvalidator
+echo "building alsvalidator"
+mvn clean package
+java -jar target/alsvalidator-0.0.1-SNAPSHOT.jar &
+echo "done building, alsvalidator service started" 
+
 # build and run the cchecker gateway #
 echo "entering cchecker-gateway directory"
 cd ../cchecker-gateway

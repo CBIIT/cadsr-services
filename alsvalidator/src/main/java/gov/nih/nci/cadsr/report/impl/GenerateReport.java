@@ -46,6 +46,7 @@ public class GenerateReport implements ReportOutput {
 			Boolean checkStdCrfCde, Boolean displayExceptionDetails) throws NullPointerException {
 		CCCReport cccReport = new CCCReport();
 		cccReport.setReportOwner(alsData.getReportOwner());
+		cccReport.setFileName(alsData.getFileName());
 		cccReport.setReportDate(alsData.getReportDate());
 		cccReport.setRaveProtocolName(alsData.getCrfDraft().getProjectName());
 		cccReport.setRaveProtocolNumber(alsData.getCrfDraft().getPrimaryFormOid());

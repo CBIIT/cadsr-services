@@ -37,6 +37,7 @@ import gov.nih.nci.cadsr.data.ALSError;
 import gov.nih.nci.cadsr.data.CCCError;
 import gov.nih.nci.cadsr.data.CCCReport;
 import gov.nih.nci.cadsr.data.FormsUiData;
+import gov.nih.nci.cadsr.data.ValidateParamWrapper;
 import gov.nih.nci.cadsr.report.CongruencyCheckerReportInvoker;
 import gov.nih.nci.cadsr.service.FormService;
 
@@ -49,6 +50,7 @@ public class GatewayBootController {
 	static String CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_ERROR;
 	static String CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL;
 	static String CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL;	
+	static String CCHECKER_VALIDATE_SERVICE_URL;
 	private static String URL_RETRIEVE_ALS_FORMAT;
 	private static String URL_RETRIEVE_REPORT_ERROR_FORMAT;
 	private static String URL_RETRIEVE_REPORT_FULL_FORMAT;
@@ -65,25 +67,6 @@ public class GatewayBootController {
 	}
 
 	private final static Logger logger = LoggerFactory.getLogger(GatewayBootController.class);
-
-	/**
-	 * 
-	 * @param request
-	 * @param response
-	 * @param filename
-	 * @return ALSData
-	 */
-	@CrossOrigin
-	@GetMapping("/parsefileservice")
-	@ResponseBody
-	public ALSData parseFileService(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam(name = "filepath", required = true) String filepath) {
-		ALSDataWrapper alsData;
-		Cookie cookie = generateCookie();
-		alsData = submitPostRequestParser(filepath);
-		response.addCookie(cookie);
-		return alsData.getAlsData();
-	}
 
 	protected Cookie generateCookie() {
 		Cookie cookie = new Cookie(sessionCookieName, generateIdseq());
@@ -181,6 +164,9 @@ public class GatewayBootController {
 		}
 		return data;
 	}
+	protected StringResponseWrapper submitPostRequestValidateForms(ALSData alsData, String idseq) {
+		return submitPostRequestCreateGeneric(alsData, idseq, CCHECKER_DB_SERVICE_URL_CREATE);
+	}
 	/**
 	 * 
 	 * @param alsData
@@ -206,7 +192,7 @@ public class GatewayBootController {
 	 * @param idseq
 	 * @return StringResponseWrapper
 	 */
-	protected StringResponseWrapper submitPostRequestSaveReportError(Object reportFullData, String idseq) {
+	protected StringResponseWrapper submitPostRequestSaveReportFull(Object reportFullData, String idseq) {
 		//FIXME use a real Report Full Class
 		return submitPostRequestCreateGeneric(reportFullData, idseq, CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL);
 	}
@@ -241,6 +227,35 @@ public class GatewayBootController {
 			logger.error(createRequestUrlStr + " sent an error: " + statusCode);
 		}
 		return wrapper;
+	}
+	
+	protected CCCReport sendPostRequestValidator(List<String> selForms, String idseq, boolean checkUom, boolean checkCrf, boolean displayExceptions) {
+		RestTemplate restTemplate = new RestTemplate();
+		ValidateParamWrapper wrapper = new ValidateParamWrapper();
+		wrapper.setSelForms(selForms);
+		wrapper.setCheckUom(checkUom);
+		wrapper.setCheckCrf(checkCrf);
+		wrapper.setDisplayExceptions(displayExceptions);
+		CCCReport cccReport = null;
+		
+		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(CCHECKER_VALIDATE_SERVICE_URL);
+		builder.queryParam(sessionCookieName, idseq);
+		
+		HttpEntity<ValidateParamWrapper> requestData = new HttpEntity<>(wrapper);
+		ResponseEntity<CCCReport> responseEntity = restTemplate.postForEntity(builder.build().encode().toUri(),
+				requestData, CCCReport.class);
+
+		HttpStatus statusCode = responseEntity.getStatusCode();
+
+		if (statusCode == HttpStatus.OK) {
+			logger.debug(CCHECKER_VALIDATE_SERVICE_URL + " OK result received on validate: " + idseq);
+			cccReport = (CCCReport) responseEntity.getBody();
+		} 
+		else {
+			logger.error("submitPostRequestValidator received an error on  an error: " + idseq + ", HTTP response code: " + statusCode);
+		}
+		
+		return cccReport;
 	}
 	
 	/**
@@ -349,42 +364,38 @@ public class GatewayBootController {
 		// check for session cookie
 		Cookie cookie = retrieveCookie(request);
 		if (cookie == null) {
+			//FIXME add cookie format checker
 			return buildErrorResponse("Session is not found", HttpStatus.BAD_REQUEST);
 		}
+		
 		String sessionCookieValue = cookie.getValue();
 		logger.debug("checkService session cookie: " + sessionCookieValue);
 		List<String> formNames = requestEntity.getBody();
 		logger.debug("Selected forms received: " + formNames);
-		ALSData alsData;
 
-		//this is test code only getting file data to generate an example report
-//		String filepath = buildFilePath(cookie.getValue());
-//		ALSDataWrapper alsDataWrapper = submitPostRequestParser(filepath);
-//		alsData = alsDataWrapper.getAlsData();
-		
-		//this calls DB service to retrieve saved ALS
-		alsData = retrieveAlsData(sessionCookieValue);//
 		HttpStatus errorCode =  HttpStatus.BAD_REQUEST;
-		if (alsData != null) {
-			response.addCookie(cookie);
-			// FIXME call Validator service instead of the example code below
-			CCCReport cccReport = CongruencyCheckerReportInvoker.builTestReport(alsData);
-			cccReport.setFileName(alsData.getFileName());
-			cccReport.setReportOwner(alsData.getReportOwner());
-			StringResponseWrapper saveResponse = submitPostRequestSaveReportError(cccReport, sessionCookieValue);
-			HttpStatus statusCode = saveResponse.getStatusCode();
-			if (HttpStatus.OK.equals(statusCode)) {
-				cccReport.setReportOwner(alsData.getReportOwner());
-				cccReport.setFileName(alsData.getFileName());
-				HttpHeaders httpHeaders = createHttpOkHeaders();
-				return new ResponseEntity<CCCReport>(cccReport, httpHeaders, HttpStatus.OK);
-			}
-			else {
-				logger.error("submitPostRequestSaveReportError received statusCode: " + statusCode);
-				errorCode = statusCode;//This can be user error or server error
-			}
+
+		response.addCookie(cookie);
+		//call Validator service
+		CCCReport cccReport = sendPostRequestValidator(formNames, sessionCookieValue, checkUOM, checkCRF, displayExceptions);
+		
+		if (cccReport == null) {
+			//We never expect validate request failure. It shall always send a report.
+			logger.error("sendPostRequestValidator error on " + sessionCookieValue);
+			return buildErrorResponse("Session data is not found based on: " + sessionCookieValue, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return buildErrorResponse("Session data is not found based on: " + sessionCookieValue, errorCode);
+		
+		StringResponseWrapper saveResponse = submitPostRequestSaveReportError(cccReport, sessionCookieValue);
+		HttpStatus statusCode = saveResponse.getStatusCode();
+		if (HttpStatus.OK.equals(statusCode)) {
+			HttpHeaders httpHeaders = createHttpOkHeaders();
+			return new ResponseEntity<CCCReport>(cccReport, httpHeaders, HttpStatus.OK);
+		}
+		else {
+			logger.error("submitPostRequestSaveReportError received statusCode: " + statusCode);
+			errorCode = statusCode;//This can be user error or server error
+			return buildErrorResponse("Session data is not found based on: " + sessionCookieValue, errorCode);
+		}
 	}
 	
 	@CrossOrigin
@@ -501,6 +512,7 @@ public class GatewayBootController {
 		CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_ERROR = GatewayBootWebApplication.CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_ERROR;
 		CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL = GatewayBootWebApplication.CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL;
 		CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL = GatewayBootWebApplication.CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL;
+		CCHECKER_VALIDATE_SERVICE_URL = GatewayBootWebApplication.CCHECKER_VALIDATE_SERVICE_URL;
 		ACCESS_CONTROL_ALLOW_ORIGIN = GatewayBootWebApplication.ACCESS_CONTROL_ALLOW_ORIGIN;
 		logger.debug("GatewayBootController CCHECKER_PARSER_URL: " + CCHECKER_PARSER_URL);
 		logger.debug("GatewayBootController UPLOADED_FOLDER: " + UPLOADED_FOLDER);
@@ -510,6 +522,7 @@ public class GatewayBootController {
 		logger.debug("GatewayBootController CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_ERROR: " + CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_ERROR);
 		logger.debug("GatewayBootController CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL: " + CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL);
 		logger.debug("GatewayBootController CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL: " + CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL);
+		logger.debug("GatewayBootController CCHECKER_VALIDATE_SERVICE_URL: " + CCHECKER_VALIDATE_SERVICE_URL);
 		logger.debug("GatewayBootController ACCESS_CONTROL_ALLOW_ORIGIN: " + ACCESS_CONTROL_ALLOW_ORIGIN);
 		URL_RETRIEVE_ALS_FORMAT = CCHECKER_DB_SERVICE_URL_RETRIEVE + "?" + sessionCookieName + "=%s";
 		URL_RETRIEVE_REPORT_ERROR_FORMAT = CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_ERROR + "?" + sessionCookieName + "=%s";
@@ -539,5 +552,24 @@ public class GatewayBootController {
 		CCCReport cccReport = CongruencyCheckerReportInvoker.builTestReport(alsDataWrapper.getAlsData());
 		cccReport.setReportOwner(reportOwner);
 		return cccReport;
+	}
+	//TODO Remove this test service
+	/**
+	 * 
+	 * @param request
+	 * @param response
+	 * @param filename
+	 * @return ALSData
+	 */
+	@CrossOrigin
+	@GetMapping("/parsefileservice")
+	@ResponseBody
+	public ALSData parseFileService(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam(name = "filepath", required = true) String filepath) {
+		ALSDataWrapper alsData;
+		Cookie cookie = generateCookie();
+		alsData = submitPostRequestParser(filepath);
+		response.addCookie(cookie);
+		return alsData.getAlsData();
 	}
 }

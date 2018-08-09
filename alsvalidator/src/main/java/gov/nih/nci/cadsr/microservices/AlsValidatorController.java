@@ -21,7 +21,10 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import gov.nih.nci.cadsr.data.ALSData;
+import gov.nih.nci.cadsr.data.ALSError;
+import gov.nih.nci.cadsr.data.CCCError;
 import gov.nih.nci.cadsr.data.CCCReport;
+import gov.nih.nci.cadsr.data.ValidateParamWrapper;
 import gov.nih.nci.cadsr.report.ReportOutput;
 import gov.nih.nci.cadsr.report.impl.GenerateReport;
 
@@ -30,37 +33,72 @@ import gov.nih.nci.cadsr.report.impl.GenerateReport;
 public class AlsValidatorController {
 	private final static Logger logger = LoggerFactory.getLogger(AlsValidatorController.class);
 	private static String CCHECKER_DB_SERVICE_URL_RETRIEVE = ALSValidatorService.CCHECKER_DB_SERVICE_URL_RETRIEVE;
-
+	/**
+	 * This service shall always return CCCReport Entity.
+	 * 
+	 * @param request
+	 * @param response
+	 * @param idseq
+	 * @param checkUOM
+	 * @param checkCRF
+	 * @param displayExceptions
+	 * @param requestEntity
+	 * @return ResponseEntity<CCCReport>
+	 */
 	@PostMapping("/rest/validateservice")
-	public ResponseEntity<?> validateService(HttpServletRequest request, HttpServletResponse response,
+	public ResponseEntity<CCCReport> validateService(HttpServletRequest request, HttpServletResponse response,
 		@RequestParam(name="_cchecker", required=true) String idseq, 
-		@RequestParam(name = "checkUOM", required = false, defaultValue = "false") boolean checkUOM,
-		@RequestParam(name = "checkCRF", required = false, defaultValue = "false") boolean checkCRF,
-		@RequestParam(name = "displayExceptions", required = false, defaultValue = "false") boolean displayExceptions,
-		RequestEntity<List<String>> requestEntity) {
-		String strMsg = "validateService received a request with an error";
+		RequestEntity<ValidateParamWrapper> requestEntity) {
+
+		ValidateParamWrapper validateParamEntity = requestEntity.getBody();
+		logger.debug("Call validateService: " + validateParamEntity);
+		
+		String strMsg;
+		boolean checkUOM = validateParamEntity.getCheckUom();
+		boolean checkCRF = validateParamEntity.getCheckCrf();
+		boolean displayExceptions = validateParamEntity.getDisplayExceptions();
+		
+		CCCReport errorsReport = new CCCReport();
 		try {
 			ALSData alsData = retrieveAlsData(idseq);
 			if (alsData != null) {
-				List<String> selForms = requestEntity.getBody();
+				List<String> selForms = validateParamEntity.getSelForms();
+				logger.debug(".....original file name: " + alsData.getFileName());
+				
 				if ((selForms != null) && (! selForms.isEmpty())) {
 					ReportOutput report = new GenerateReport();
-					CCCReport errorsReport = report.getFinalReportData(alsData, selForms, checkUOM, checkCRF, displayExceptions);
+					errorsReport = report.getFinalReportData(alsData, selForms, checkUOM, checkCRF, displayExceptions);
+				}
+				else {//source default data to add
 					errorsReport.setReportOwner(alsData.getReportOwner());
 					errorsReport.setFileName(alsData.getFileName());
-					HttpHeaders httpHeaders = createHttpOkHeaders();
-					return new ResponseEntity<CCCReport>(errorsReport, httpHeaders, HttpStatus.OK);
+					errorsReport.setRaveProtocolName(alsData.getCrfDraft().getProjectName());
+					errorsReport.setRaveProtocolNumber(alsData.getCrfDraft().getPrimaryFormOid());
+					errorsReport.setTotalFormsCount(alsData.getForms().size());
+					errorsReport.setCountQuestionsChecked(alsData.getFields().size());
 				}
 			}
 			else {
-				strMsg = "No data found in retrieving ALSData by ID: " + idseq;
+				strMsg = "FATAL error: no data found in retrieving ALSData by ID: " + idseq;
+				CCCError cccError = new CCCError();
+				ALSError alsError = new ALSError();
+				alsError.setErrorSeverity("FATAL");
+				alsError.setErrorDesc(strMsg);
+				errorsReport.setCccError(cccError);
+				logger.error(strMsg);
 			}
 		}
 		catch(RestClientException e) {
-			strMsg = "Error on retrieving ALSData by ID: " + idseq + e;
+			strMsg = "Error on retrieving ALSData by session ID: " + idseq + e;
+			CCCError cccError = new CCCError();
+			ALSError alsError = new ALSError();
+			alsError.setErrorSeverity("FATAL");
+			alsError.setErrorDesc(strMsg);
+			errorsReport.setCccError(cccError);
+			logger.error(strMsg);
 		}
-		logger.error(strMsg);
-		return buildErrorResponse(strMsg, HttpStatus.BAD_REQUEST);
+		HttpHeaders httpHeaders = createHttpOkHeaders();
+		return new ResponseEntity<CCCReport>(errorsReport, httpHeaders, HttpStatus.OK);
 	}	
 	/**
 	 * 
@@ -89,12 +127,13 @@ public class AlsValidatorController {
 		return data;
 	}
 	/**
+	 * This method is no used.
 	 * 
 	 * @param errorMessage
 	 * @param httpStatus
 	 * @return ResponseEntity
 	 */
-	private ResponseEntity<String> buildErrorResponse(String errorMessage, HttpStatus httpStatus) {
+	protected ResponseEntity<String> buildErrorResponse(String errorMessage, HttpStatus httpStatus) {
 		// TODO what context type shall be returned on an error - ? Now
 		// text/plain
 		HttpHeaders httpHeaders = new HttpHeaders();
@@ -102,6 +141,7 @@ public class AlsValidatorController {
 		logger.error(errorMessage);
 		return new ResponseEntity<String>(errorMessage, httpHeaders, HttpStatus.BAD_REQUEST);
 	}
+	
 	protected HttpHeaders createHttpOkHeaders() {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.add("Content-Type", "application/json");
