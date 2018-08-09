@@ -364,11 +364,14 @@ public class GatewayBootController {
 		// check for session cookie
 		Cookie cookie = retrieveCookie(request);
 		if (cookie == null) {
-			//FIXME add cookie format checker
 			return buildErrorResponse("Session is not found", HttpStatus.BAD_REQUEST);
 		}
 		
 		String sessionCookieValue = cookie.getValue();
+		if (! ParameterValidator.validateIdSeq(sessionCookieValue)) {
+			return buildErrorResponse("Session is not valid: " + sessionCookieValue, HttpStatus.BAD_REQUEST);
+		}
+		
 		logger.debug("checkService session cookie: " + sessionCookieValue);
 		List<String> formNames = requestEntity.getBody();
 		logger.debug("Selected forms received: " + formNames);
