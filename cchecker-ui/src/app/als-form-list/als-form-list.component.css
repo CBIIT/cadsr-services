@@ -3,31 +3,18 @@ table {
 }
 th {
     vertical-align:top;
-    padding:10px 0px 10px 15px;
-    color:#fff;
-    border-top:1px solid #ccc;
-    background-color:#282828;
-}
-th:first-child { 
-    border-left:1px solid #ccc;
-}
-th:last-child {
-    border-right:1px solid #ccc;
-
+    padding:5px 3px 5px 5px;
+    color:#000;
+    border-bottom:1px solid #000;
 }
 
 td {
     vertical-align:top;
-    padding:10px 0px 10px 15px;
-}
-td:first-child{
-    border-left:1px solid #ccc;
+    padding:5px 0px 5px 5px;
+    border-bottom:1px solid #ddd;
 }
 
-td:last-child {
-    border-right:1px solid #ccc;
- 
-}
+
 a:hover {
     text-decoration: none;
 }
@@ -42,18 +29,17 @@ span.formName{
 .status {
     text-align:center 
 }
-.success {
-    background-color:#015e12;
-    color:#fff;
-}
+
 .fail {
     background-color:#7f0a0a;
     color:#fff;
 }
 .rowError {
-    padding:10px 0px 10px 40px;
-    background-color:#aaa;
+    padding:5px 0px 5px 0px;
     color:#000;
+}
+.rowError .errorText {
+    padding-left:30px;
 }
 .questionCount {
     text-align:center 

@@ -1,15 +1,10 @@
 <h2>
     ALS Report
 </h2>
-
 <div class="alert alert-danger" role="alert" *ngIf="!(reportData | async)?.cccForms.length">
     Please select forms and try again.
 </div>
-<!-- <div *ngFor="let form of (reportData | async)?.cccForms">
-    <div *ngIf="form.raveFormOid=='ENROLLMENT'">
-        {{form | json}}
-    </div>
-</div> -->
+
 <ng-container *ngIf="reportData | async as r">
 <table cellspacing="0" cellpadding="0" margin="0"class="alsFormList">
 
@@ -34,7 +29,6 @@
 </table>
 </ng-container>
 
-
-<!-- <pre>
+ <pre>
 {{reportData | async | json}}
-</pre> -->
+</pre>

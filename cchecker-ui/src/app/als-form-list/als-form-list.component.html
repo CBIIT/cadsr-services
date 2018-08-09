@@ -41,7 +41,7 @@
         <tr [ngClass]="{'rowOdd':i%2==0,'rowEven':i%2==1}">
             <td class="checbox">
                 <input type="checkbox" *ngIf="record.isValid" (change)="setCheckedItem(record)" name="checkedItem" value="a" [checked]="getCheckedStatus(record)">
-                <span *ngIf="!record.isValid" class="fa fa-times-circle fa-lg"></span>
+                <span *ngIf="!record.isValid" class="fa fa-lg fa-exclamation-triangle"></span>
             </td>
             <td>
                 <a *ngIf="!record.isValid" href="#"  (click)="setExpandCollapse(record)">
@@ -52,13 +52,13 @@
             <td class="questionCount">
                 {{record.questionsCount}}
             </td>    
-            <td class="status" [ngClass]="{'success':record.isValid,'fail':!record.isValid}">{{record.isValid}}</td>       
+            <td class="status" [ngClass]="{'success':record.isValid,'fail':!record.isValid}"><B>{{getParsingStatus(record.isValid)}}</B></td>       
         </tr>
         <!-- end render this row always -->
         <!-- render and hide this row only if there is an error -->        
         <tr *ngIf="record['expand']" [ngClass]="{'rowError':record.expand}">
         <td></td>
-        <td colspan="3">
+        <td colspan="3" class="errorText">
             <div *ngFor="let error of record.errors">
                 {{error.errorDesc}}
                 <ul>

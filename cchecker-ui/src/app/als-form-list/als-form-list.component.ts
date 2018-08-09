@@ -49,6 +49,9 @@ export class AlsFormListComponent implements OnInit {
   // gets checkd status of record //
   getCheckedStatus = record => this.formListService.getCheckedStatus(record);
 
+  // gets checkd status of record //
+  getParsingStatus = validFlag => validFlag ? 'Pass':'Fail';
+
   // sets checked status of record
   setCheckedItem = (record):void => this.formListService.setCheckedItem(record);
 
