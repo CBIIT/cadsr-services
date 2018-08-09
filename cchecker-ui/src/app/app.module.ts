@@ -10,6 +10,7 @@ import { NavigationComponent } from './navigation/navigation.component';
 import { HttpClientModule } from '@angular/common/http';
 import { ProgressBarComponent } from './progress-bar/progress-bar.component';
 import { FormListsortPipe } from './form-listsort.pipe';
+import { DataTablesModule } from 'angular-datatables';
 
 const APP_ROUTES: Routes = [
   // Default empty path
@@ -32,7 +33,8 @@ const APP_ROUTES: Routes = [
     BrowserModule,
     HttpClientModule,
     FormsModule,
-    RouterModule.forRoot(APP_ROUTES)
+    RouterModule.forRoot(APP_ROUTES),
+    DataTablesModule
   ],
   providers: [],
   bootstrap: [AppComponent]
