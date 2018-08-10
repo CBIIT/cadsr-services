@@ -44,6 +44,8 @@ public class GenerateReport implements ReportOutput {
 	private static String mandatory_crf = "Mandatory";
 	private static String optional_crf = "Optional";
 	private static String conditional_crf = "Conditional";
+	private static String publicid_prefix = "PID";
+	private static String version_prefix = "_V";
 
 	/**
 	 * @param  alsData not null
@@ -101,12 +103,12 @@ public class GenerateReport implements ReportOutput {
 					totalQuestCount++;
 					question.setFieldOrder(alsField.getOrdinal());
 					String draftFieldName = alsField.getDraftFieldName();
-					if (draftFieldName.indexOf("PID") > -1 && draftFieldName.indexOf("_V") > -1) {
-						String idVersion = draftFieldName.substring(draftFieldName.indexOf("PID"),
+					if (draftFieldName.indexOf(publicid_prefix) > -1 && draftFieldName.indexOf(version_prefix) > -1) {
+						String idVersion = draftFieldName.substring(draftFieldName.indexOf(publicid_prefix),
 								draftFieldName.length());
-						idVersion = draftFieldName.substring(draftFieldName.indexOf("PID"), draftFieldName.length());
+						idVersion = draftFieldName.substring(draftFieldName.indexOf(publicid_prefix), draftFieldName.length());
 						String id = idVersion.substring(3, idVersion.indexOf("_"));
-						String version = (idVersion.substring(idVersion.indexOf("_V") + 2, idVersion.length()));
+						String version = (idVersion.substring(idVersion.indexOf(version_prefix) + 2, idVersion.length()));
 						id = id.trim();
 						String[] versionTokens = version.split("\\_");
 						version = versionTokens[0] + "." + versionTokens[1];
@@ -329,7 +331,11 @@ public class GenerateReport implements ReportOutput {
 		return stdCrdCde;
 	}
 	
-	
+		
+	/**
+	 * @return List of Standard CRF CDEs
+	 * 
+	 */	
 	protected static List<CategoryCde> retrieveCdeCrfData () {
 		RestTemplate restTemplate = new RestTemplate();
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -353,7 +359,10 @@ public class GenerateReport implements ReportOutput {
 		return categoryCdeList;
 	}
 	
-	
+	/**
+	 * @return List of NRDS CDEs
+	 * 
+	 */		
 	protected static List<CategoryNrds> retrieveNrdsData () {
 		RestTemplate restTemplate = new RestTemplate();
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();

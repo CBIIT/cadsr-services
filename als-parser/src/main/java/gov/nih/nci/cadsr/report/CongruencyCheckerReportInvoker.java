@@ -35,6 +35,7 @@ import gov.nih.nci.cadsr.data.FormsUiData;
 import gov.nih.nci.cadsr.data.NrdsCde;
 import gov.nih.nci.cadsr.data.ReportInputWrapper;
 import gov.nih.nci.cadsr.data.ValidateDataWrapper;
+import gov.nih.nci.cadsr.data.ValidateParamWrapper;
 import gov.nih.nci.cadsr.parser.Parser;
 import gov.nih.nci.cadsr.parser.impl.AlsParser;
 import gov.nih.nci.cadsr.report.impl.GenerateReport;
@@ -100,13 +101,24 @@ public class CongruencyCheckerReportInvoker {
 				logger.debug("Error description: "+alsError1.getErrorDesc()+" Severity: "+alsError1.getErrorSeverity());
 			}*/			
 			//logger.debug("Selected Forms list size: "+selForms.size());
+			selForms.clear();
+			selForms.add("ENROLLMENT");
+			selForms.add("HISTOLOGY_AND_DISEASE");			
+			/*ValidateParamWrapper validate = new ValidateParamWrapper();
+
+			validate.setSelForms(selForms);
+			validate.setCheckCrf(false);
+			validate.setCheckUom(false);
+			validate.setDisplayExceptions(false);
+			cccReport  = validateService(validate);*/
 			ReportInputWrapper reportInput = new ReportInputWrapper();
 			reportInput.setAlsData(alsData);
 			reportInput.setSelForms(selForms);
 			reportInput.setCheckStdCrfCde(false);
 			reportInput.setCheckUom(false);
 			reportInput.setDisplayExceptionDetails(false);
-			cccReport  = buildErrorReportService(reportInput);
+			cccReport  = buildErrorReportService(reportInput);			
+			
 			logger.debug("Report Error Forms list size: "+cccReport.getCccForms().size());
 			for (CCCForm form : cccReport.getCccForms()) {
 				//logger.debug("Form name: " + form.getRaveFormOid());
@@ -196,12 +208,12 @@ public class CongruencyCheckerReportInvoker {
 				"Rave Field Data Type", "Dataype Checker Result", "CDE Data Type", "Rave UOM", "UOM Checker Result", "CDE UOM",
 				"Rave Length", "Length Checker Result", "CDE Maximum Length", "Rave Display Format", "Format Checker Result",
 				"CDE Display Format" };
-		for (int i = 0; i < 1; i++) {
-			XSSFSheet sheet2 = workbook.createSheet(forms.get(i).getRaveFormOid());
+		for (CCCForm cccForm : forms) {
+			XSSFSheet sheet2 = workbook.createSheet(cccForm.getRaveFormOid());
 			rowNum = 0;
 			row = sheet2.createRow(rowNum++);
 			newCell = row.createCell(0);
-			newCell.setCellValue(formHeader_1 + forms.get(i).getRaveFormOid() + formHeader_2);
+			newCell.setCellValue(formHeader_1 + cccForm.getRaveFormOid() + formHeader_2);
 			row = sheet2.createRow(rowNum++);
 			int colNum = 0;
 			// Print row headers in the form sheet
@@ -212,15 +224,15 @@ public class CongruencyCheckerReportInvoker {
 			colNum = 0;
 			row = sheet2.createRow(rowNum++);
 			newCell = row.createCell(0);
-			newCell.setCellValue(forms.get(i).getRaveFormOid());
+			newCell.setCellValue(cccForm.getRaveFormOid());
 			colNum = colNum+3;
 			newCell = row.createCell(3);
-			newCell.setCellValue(forms.get(i).getCountTotalQuestions());
+			newCell.setCellValue(cccForm.getCountTotalQuestions());
             CellStyle cellStyle = workbook.createCellStyle(); //Create new style
             cellStyle.setWrapText(true);
-			for (int j = 0; j < forms.get(i).getQuestions().size(); j++) {
+			for (int j = 0; j < cccForm.getQuestions().size(); j++) {
 				int colNum2 = formStartColumn;
-				CCCQuestion question = forms.get(i).getQuestions().get(j);
+				CCCQuestion question = cccForm.getQuestions().get(j);
 				row = sheet2.createRow(rowNum++);
 				newCell = row.createCell(colNum2++);
 				newCell.setCellValue(question.getFieldOrder());
@@ -305,16 +317,32 @@ public class CongruencyCheckerReportInvoker {
 				if (rowNumAfterCD > rowNum)
 					rowNum = rowNumAfterCD;
 			}
-		}
+		}				
+		workbook = buildNrdsTab(workbook, cccReport.getNrdsCdeList());
 		
+		try {
+			FileOutputStream outputStream = new FileOutputStream(OUTPUT_XLSX_FILE_PATH);
+			autoSizeColumns(workbook);
+			workbook.write(outputStream);
+			workbook.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}	
+	
+	
+	public static XSSFWorkbook buildNrdsTab (XSSFWorkbook workbook, List<NrdsCde> nrdsCdeList) {
+		Row row;
 		String[] nrdSRowHeaders = { "Rave Form OID", "RAVE Field Order", "RAVE Field Label", "CDE ID Version", "CDE Name", "Result", "Message"};
-		XSSFSheet sheet3 = workbook.createSheet(nrds_missing_cde_tab_name);
-		rowNum = 0;
-		row = sheet3.createRow(rowNum++);
-		newCell = row.createCell(0);
+		XSSFSheet sheet = workbook.createSheet(nrds_missing_cde_tab_name);
+		int rowNum = 0;
+		row = sheet.createRow(rowNum++);
+		Cell newCell = row.createCell(0);
 		newCell.setCellValue(nrds_missing_cde_header);
-		row = sheet3.createRow(rowNum++);
-		row = sheet3.createRow(rowNum++);
+		row = sheet.createRow(rowNum++);
+		row = sheet.createRow(rowNum++);
 		int colNum = 0;
 		// Print row headers in the NRDS sheet
 		for (String rowHeader : nrdSRowHeaders) {
@@ -323,10 +351,11 @@ public class CongruencyCheckerReportInvoker {
 		}
 		CellStyle cellStyle = workbook.createCellStyle();
         cellStyle.setWrapText(true);
-		List<NrdsCde> nrdsCdeList = cccReport.getNrdsCdeList();
+        colNum = 0;
+        nrdsCdeList.add(buildNrdsTestObject());
 		// Print the NRDS CDEs 	
 		for (NrdsCde cde : nrdsCdeList) {
-			row = sheet3.createRow(rowNum++);
+			row = sheet.createRow(rowNum++);
 			newCell = row.createCell(colNum++);
 			newCell.setCellValue(cde.getRaveFormOid());
 			newCell = row.createCell(colNum++);
@@ -342,20 +371,26 @@ public class CongruencyCheckerReportInvoker {
 			newCell.setCellValue(cde.getResult());
 			newCell = row.createCell(colNum++);
 			newCell.setCellValue(cde.getMessage());			
-		}
-		try {
-			FileOutputStream outputStream = new FileOutputStream(OUTPUT_XLSX_FILE_PATH);
-			autoSizeColumns(workbook);
-			workbook.write(outputStream);
-			workbook.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}		
+		}		
+		
+		return workbook;
+	}
 	
-	public static void autoSizeColumns(Workbook workbook) {
+	private static NrdsCde buildNrdsTestObject () {
+		NrdsCde nrds = new NrdsCde();
+		nrds.setCdeIdVersion("33023034v1.0");
+		nrds.setRaveFormOid("ENROLLMENT");
+		nrds.setRaveFieldOrder(1);
+		nrds.setRaveFieldLabel("Weight Units");
+		nrds.setCdeName("Weight unit");
+		nrds.setResult("ERRORS");
+		nrds.setMessage("Question does not match with the ALS file");
+		return nrds;
+	}
+	
+	
+	
+	public static void autoSizeColumns(XSSFWorkbook workbook) {
 	    int numberOfSheets = workbook.getNumberOfSheets();
 	    for (int i = 0; i < numberOfSheets; i++) {
 	        Sheet sheet = workbook.getSheetAt(i);
@@ -386,7 +421,7 @@ public class CongruencyCheckerReportInvoker {
 		
 	}
 	
-	protected CCCQuestion validateService (ValidateDataWrapper validateWrapper) {
+	protected static CCCReport validateService (ValidateParamWrapper validateParamWrapper) {
 		RestTemplate restTemplate = new RestTemplate();
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		InputStream input = classLoader.getResourceAsStream("config.properties");
@@ -401,9 +436,9 @@ public class CongruencyCheckerReportInvoker {
 			e.printStackTrace();
 			throw new RuntimeException (e);
 		}
-		logger.debug("Starting up Validator service..... ");
-		CCCQuestion question = restTemplate.postForObject(properties.getProperty("VALIDATOR_URL"), validateWrapper, CCCQuestion.class);
-		return question;
+		logger.debug("Starting up Validator service..... "+ properties.getProperty("VALIDATOR_URL"));
+		CCCReport report = restTemplate.postForObject(properties.getProperty("VALIDATOR_URL"), validateParamWrapper, CCCReport.class);
+		return report;
 	}		
 	
 	protected static CCCReport buildErrorReportService (ReportInputWrapper reportInput) {
