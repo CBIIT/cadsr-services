@@ -4,6 +4,7 @@
 package gov.nih.nci.cadsr.cchecker;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,8 +15,10 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -35,6 +38,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.ALSError;
 import gov.nih.nci.cadsr.data.CCCError;
+import gov.nih.nci.cadsr.data.CCCForm;
 import gov.nih.nci.cadsr.data.CCCReport;
 import gov.nih.nci.cadsr.data.FormsUiData;
 import gov.nih.nci.cadsr.data.ValidateParamWrapper;
@@ -51,16 +55,20 @@ public class GatewayBootController {
 	static String CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL;
 	static String CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL;	
 	static String CCHECKER_VALIDATE_SERVICE_URL;
+	static String CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL;
+
 	private static String URL_RETRIEVE_ALS_FORMAT;
 	private static String URL_RETRIEVE_REPORT_ERROR_FORMAT;
 	private static String URL_RETRIEVE_REPORT_FULL_FORMAT;
-
+	private static String URL_GEN_EXCEL_REPORT_ERROR_FORMAT;
+	
 	static String UPLOADED_FOLDER;
 	static String ACCESS_CONTROL_ALLOW_ORIGIN;
 	static final String sessionCookieName = "_cchecker";
 	// FIXME shall be defined in ALSError
 	static final String FATAL_ERROR_STATUS = "FATAL";
 	static final String EXCEL_FILE_EXT = ".xlsx";
+	public static final String fileExcelReportPrefix = "Report-";
 
 	{
 		loadProperties();
@@ -145,6 +153,15 @@ public class GatewayBootController {
 	 */
 	protected Object retrieveReportFull(String idseq) {
 		return retrieveData(idseq, URL_RETRIEVE_REPORT_FULL_FORMAT, Object.class);
+	}
+	/**
+	 * 
+	 * @param idseq
+	 *            - saved previously in DB not null
+	 * @return ALSData
+	 */
+	protected InputStreamResource retrieveGenExcelReportError(String idseq) {
+		return retrieveData(idseq, URL_GEN_EXCEL_REPORT_ERROR_FORMAT, InputStreamResource.class);
 	}
 	/**
 	 * 
@@ -250,6 +267,15 @@ public class GatewayBootController {
 		if (statusCode == HttpStatus.OK) {
 			logger.debug(CCHECKER_VALIDATE_SERVICE_URL + " OK result received on validate: " + idseq);
 			cccReport = (CCCReport) responseEntity.getBody();
+			String fileNameOrg = cccReport.getFileName();
+			logger.debug("Original file name of report: " + fileNameOrg);
+			if (StringUtils.isBlank(fileNameOrg)) {
+				cccReport.setFileName("Unknown");
+			}
+			List<CCCForm> forms = cccReport.getCccForms();
+			if ((forms == null) || (forms.isEmpty())) {
+				logger.error("!!!Red flag!!! forms are empty for report: "+ idseq);
+			}
 		} 
 		else {
 			logger.error("submitPostRequestValidator received an error on  an error: " + idseq + ", HTTP response code: " + statusCode);
@@ -372,13 +398,16 @@ public class GatewayBootController {
 			return buildErrorResponse("Session is not valid: " + sessionCookieValue, HttpStatus.BAD_REQUEST);
 		}
 		
+		Cookie sessionCookie = new Cookie(sessionCookieName, sessionCookieValue);
+		response.addCookie(sessionCookie);
+		
 		logger.debug("checkService session cookie: " + sessionCookieValue);
+		
 		List<String> formNames = requestEntity.getBody();
 		logger.debug("Selected forms received: " + formNames);
 
 		HttpStatus errorCode =  HttpStatus.BAD_REQUEST;
 
-		response.addCookie(cookie);
 		//call Validator service
 		CCCReport cccReport = sendPostRequestValidator(formNames, sessionCookieValue, checkUOM, checkCRF, displayExceptions);
 		
@@ -426,7 +455,29 @@ public class GatewayBootController {
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
 		return new ResponseEntity<CCCReport>(data, httpHeaders, httpStatus);
-	}	
+	}
+	
+	@CrossOrigin
+	@GetMapping("/genexcelreporterror")
+	public ResponseEntity<?> genExcelReportError(HttpServletRequest request) throws IOException {
+		Cookie cookie = retrieveCookie(request);
+		if (cookie == null) {
+			return buildErrorResponse("Session is not found", HttpStatus.BAD_REQUEST);
+		}
+		
+		String sessionCookieValue = cookie.getValue();
+		//FIXME idseq format check! check session token
+		logger.debug("genExcelReportError session cookie: " + sessionCookieValue);
+		
+		InputStream reqInputStream = request.getInputStream();
+		InputStreamResource data = new InputStreamResource(reqInputStream);
+		HttpStatus httpStatus;
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.add("Content-Type", "application/vnd.ms-excel");
+		httpHeaders.add("Content-Disposition", "attachment; filename=" + fileExcelReportPrefix + sessionCookieValue + EXCEL_FILE_EXT);
+		httpStatus = HttpStatus.OK;
+		return new ResponseEntity<InputStreamResource>(data, httpHeaders, httpStatus);
+	}
 	
 	private Cookie retrieveCookie(HttpServletRequest request) {
 		Cookie[] cookieArr = request.getCookies();
@@ -516,6 +567,7 @@ public class GatewayBootController {
 		CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL = GatewayBootWebApplication.CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL;
 		CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL = GatewayBootWebApplication.CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL;
 		CCHECKER_VALIDATE_SERVICE_URL = GatewayBootWebApplication.CCHECKER_VALIDATE_SERVICE_URL;
+		CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL = GatewayBootWebApplication.CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL;
 		ACCESS_CONTROL_ALLOW_ORIGIN = GatewayBootWebApplication.ACCESS_CONTROL_ALLOW_ORIGIN;
 		logger.debug("GatewayBootController CCHECKER_PARSER_URL: " + CCHECKER_PARSER_URL);
 		logger.debug("GatewayBootController UPLOADED_FOLDER: " + UPLOADED_FOLDER);
@@ -528,11 +580,14 @@ public class GatewayBootController {
 		logger.debug("GatewayBootController CCHECKER_VALIDATE_SERVICE_URL: " + CCHECKER_VALIDATE_SERVICE_URL);
 		logger.debug("GatewayBootController ACCESS_CONTROL_ALLOW_ORIGIN: " + ACCESS_CONTROL_ALLOW_ORIGIN);
 		URL_RETRIEVE_ALS_FORMAT = CCHECKER_DB_SERVICE_URL_RETRIEVE + "?" + sessionCookieName + "=%s";
+		URL_GEN_EXCEL_REPORT_ERROR_FORMAT = CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL + "?" + sessionCookieName + "=%s";
 		URL_RETRIEVE_REPORT_ERROR_FORMAT = CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_ERROR + "?" + sessionCookieName + "=%s";
 		URL_RETRIEVE_REPORT_FULL_FORMAT = CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL + "?" + sessionCookieName + "=%s";
 		logger.debug("GatewayBootController URL_RETRIEVE_ALS_FORMAT: " + URL_RETRIEVE_ALS_FORMAT);
 		logger.debug("GatewayBootController URL_RETRIEVE_REPORT_ERROR_FORMAT: " + URL_RETRIEVE_REPORT_ERROR_FORMAT);
 		logger.debug("GatewayBootController URL_RETRIEVE_REPORT_FULL_FORMAT: " + URL_RETRIEVE_REPORT_FULL_FORMAT);
+		logger.debug("GatewayBootController CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL: " + CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL);
+		logger.debug("GatewayBootController URL_GEN_EXCEL_REPORT_ERROR: " + URL_GEN_EXCEL_REPORT_ERROR_FORMAT);
 	}
 
 	// TODO remove testReportService service

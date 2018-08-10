@@ -33,18 +33,22 @@ Service "/gateway/checkservice" is a sample implementation as of now.
 For a manual test take a look into your directory /local/contents/cchecker.
 Find any file created by parseservice with UID-like name on /local/content/cchecker.
 The file is retrieved from DB storage table. 
-This is one example we have in DEV DB: 855B4B76-A462-4B73-8727-3194517C6DE3.
+This is one example we have in DEV DB: 0BCAEE78-9916-4ADA-B7CD-CE5854AFDD82.
  
 use an existed UID as a cookie for testing this service. ALS parser data with this ID shall be save in DB before this call.
-curl -v --cookie "_cchecker=855B4B76-A462-4B73-8727-3194517C6DE3" -X POST \
+curl -v --cookie "_cchecker=0BCAEE78-9916-4ADA-B7CD-CE5854AFDD82" -X POST \
 -H "Content-Type: application/json" --data "@/local/content/cchecker/formnamelist.json" http://localhost:8080/gateway/checkservice
 "formnamelist.json" file contains a json array of string. Each String is a form name.
-Example: ["Enrollment","Other Form 1"]
+Examples: 
+["Enrollment"]
+["HISTOLOGY_AND_DISEASE","PATIENT_ELIGIBILITY"]
 Other request parameters which are all "false" by default:
 checkUOM=true/false
 checkCRF=true/false
 displayExceptions=true/false
 ********
+The next call shall open Save as dialog for a report previously generated:
+curl -v --cookie "_cchecker=0BCAEE78-9916-4ADA-B7CD-CE5854AFDD82" http://localhost:8080/gateway/genexcelreporterror
 ********
 Test services
 ********
