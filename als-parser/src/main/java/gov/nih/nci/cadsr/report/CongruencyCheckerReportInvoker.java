@@ -101,23 +101,13 @@ public class CongruencyCheckerReportInvoker {
 				logger.debug("Error description: "+alsError1.getErrorDesc()+" Severity: "+alsError1.getErrorSeverity());
 			}*/			
 			//logger.debug("Selected Forms list size: "+selForms.size());
-			selForms.clear();
-			selForms.add("ENROLLMENT");
-			selForms.add("HISTOLOGY_AND_DISEASE");			
-			/*ValidateParamWrapper validate = new ValidateParamWrapper();
+			ValidateParamWrapper validate = new ValidateParamWrapper();
 
 			validate.setSelForms(selForms);
 			validate.setCheckCrf(false);
 			validate.setCheckUom(false);
 			validate.setDisplayExceptions(false);
-			cccReport  = validateService(validate);*/
-			ReportInputWrapper reportInput = new ReportInputWrapper();
-			reportInput.setAlsData(alsData);
-			reportInput.setSelForms(selForms);
-			reportInput.setCheckStdCrfCde(false);
-			reportInput.setCheckUom(false);
-			reportInput.setDisplayExceptionDetails(false);
-			cccReport  = buildErrorReportService(reportInput);			
+			cccReport  = validateService(validate);
 			
 			logger.debug("Report Error Forms list size: "+cccReport.getCccForms().size());
 			for (CCCForm form : cccReport.getCccForms()) {
