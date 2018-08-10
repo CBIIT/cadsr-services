@@ -203,7 +203,7 @@ public class DataElementRepository {
 		return "SELECT * from SBREXT.MDSR_STANDARD_CDE_TYPE";
 	}
     protected String retrieveNrdsCdeListQuery() {
-		return "SELECT CDE_ID,de.VERSION, de.LONG_NAME DE_NAME FROM sbr.data_elements de "
+		return "SELECT CDE_ID, de.VERSION DE_VERSION, de.LONG_NAME DE_NAME FROM sbr.data_elements de "
 			+ "inner join sbr.contexts cnt on "
 			+ "de.CONTE_IDSEQ = cnt.CONTE_IDSEQ and cnt.NAME = 'NRDS' and de.ASL_NAME = 'RELEASED'";
 	}
