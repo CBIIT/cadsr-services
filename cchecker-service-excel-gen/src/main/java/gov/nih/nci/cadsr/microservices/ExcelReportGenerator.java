@@ -232,15 +232,18 @@ public class ExcelReportGenerator {
 			}
 			try {
 				FileOutputStream outputStream = new FileOutputStream(OUTPUT_XLSX_FILE_PATH);
+				logger.debug("outputStream created for " + OUTPUT_XLSX_FILE_PATH);
 				autoSizeColumns(workbook);
 				workbook.write(outputStream);
 				workbook.close();
 			} catch (FileNotFoundException e) {
+				logger.debug("outputStream FileNotFoundException " + OUTPUT_XLSX_FILE_PATH);
 				e.printStackTrace();
-			} catch (IOException e) {
+			} catch (Exception e) {
+				logger.debug("outputStream Exception " + OUTPUT_XLSX_FILE_PATH);
 				e.printStackTrace();
 			}
-		}		
+		}
 		
 		public static void autoSizeColumns(Workbook workbook) {
 		    int numberOfSheets = workbook.getNumberOfSheets();
