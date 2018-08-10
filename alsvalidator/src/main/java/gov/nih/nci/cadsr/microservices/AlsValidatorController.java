@@ -51,7 +51,7 @@ public class AlsValidatorController {
 		RequestEntity<ValidateParamWrapper> requestEntity) {
 
 		ValidateParamWrapper validateParamEntity = requestEntity.getBody();
-		logger.debug("Call validateService: " + validateParamEntity);
+		logger.info("Call validateService: " + validateParamEntity);
 		
 		String strMsg;
 		boolean checkUOM = validateParamEntity.getCheckUom();
@@ -62,14 +62,16 @@ public class AlsValidatorController {
 		try {
 			ALSData alsData = retrieveAlsData(idseq);
 			if (alsData != null) {
+				logger.debug("Retrieved parsed file for validation, with name: " + alsData.getFileName());
 				List<String> selForms = validateParamEntity.getSelForms();
-				logger.debug(".....original file name: " + alsData.getFileName());
 				
 				if ((selForms != null) && (! selForms.isEmpty())) {
 					ReportOutput report = new GenerateReport();
 					errorsReport = report.getFinalReportData(alsData, selForms, checkUOM, checkCRF, displayExceptions);
+					logger.info("Created CCCReport with amount of forms: " + errorsReport.getCccForms().size());
 				}
 				else {//source default data to add
+					logger.info("No selected forms, sending CCCReport with no forms");
 					errorsReport.setReportOwner(alsData.getReportOwner());
 					errorsReport.setFileName(alsData.getFileName());
 					errorsReport.setRaveProtocolName(alsData.getCrfDraft().getProjectName());
@@ -79,7 +81,7 @@ public class AlsValidatorController {
 				}
 			}
 			else {
-				strMsg = "FATAL error: no data found in retrieving ALSData by ID: " + idseq;
+				strMsg = "FATAL error: no data found in retrieving ALSData parser data by ID: " + idseq;
 				CCCError cccError = new CCCError();
 				ALSError alsError = new ALSError();
 				alsError.setErrorSeverity("FATAL");

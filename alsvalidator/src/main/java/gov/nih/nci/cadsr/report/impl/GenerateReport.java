@@ -46,13 +46,16 @@ public class GenerateReport implements ReportOutput {
 	private static String conditional_crf = "Conditional";
 
 	/**
-	 * @param
+	 * @param  alsData not null
+	 * @param  selForms not null
 	 * @return Populates the output object for the report after initial
 	 *         validation and parsing of data
-	 * 
 	 */
 	public CCCReport getFinalReportData(ALSData alsData, List<String> selForms, Boolean checkUom,
 			Boolean checkStdCrfCde, Boolean displayExceptionDetails) throws NullPointerException {
+		logger.info("getFinalReportData selected forms: " + selForms);
+		logger.info("getFinalReportData selected alsData: " + alsData.getFileName());
+		
 		CCCReport cccReport = new CCCReport();
 		cccReport.setReportOwner(alsData.getReportOwner());
 		cccReport.setFileName(alsData.getFileName());
@@ -216,11 +219,15 @@ public class GenerateReport implements ReportOutput {
 		if (!form.getQuestions().isEmpty())
 			formsList.add(form);
 		cccReport.setCccForms(formsList);
+		logger.info("getFinalReportData created formsList size: " + formsList.size());
+		if (formsList.size() == 0) {
+			throw new RuntimeException("!!!!!!!!! GenerateReport.getFinalReportData created report with no FORMS!!!");
+		}
 		cccReport.setNrdsCdeList(nrdsCdeList);
 		cccReport.setStandardCrfCdeList(standardCrfCdeList);
 		return cccReport;
 	}
-
+	
 	protected ALSError getErrorInstance() {
 		ALSError alsError = new ALSError();
 		return alsError;
