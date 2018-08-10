@@ -161,7 +161,7 @@ public class GenerateReport implements ReportOutput {
 								question = ValidatorService.validate(alsField, question, cdeDetails);
 							
 						}
-						if (cdeCrfData!=null && cdeDetails!=null)  {
+						if (cdeCrfData!=null && cdeDetails.getDataElement()!=null)  {
 						if (nrds_cde.equalsIgnoreCase(question.getNciCategory())) {
 							nrdsCdeList.add(buildNrdsCde(question,
 									cdeDetails.getDataElement().getDataElementDetails().getLongName())); 
@@ -366,7 +366,7 @@ public class GenerateReport implements ReportOutput {
 		        restTemplate.exchange(properties.getProperty("RETRIEVE_NRDS_URL"),
 		                    HttpMethod.GET, null, new ParameterizedTypeReference<List<CategoryNrds>>() {
 		            });
-		List<CategoryNrds> categoryNrdsList = categoryNrdsResponse.getBody();		
+		List<CategoryNrds> categoryNrdsList = categoryNrdsResponse.getBody();
 		return categoryNrdsList;
 	}	
 	

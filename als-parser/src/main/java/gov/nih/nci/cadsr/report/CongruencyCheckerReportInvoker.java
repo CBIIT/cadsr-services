@@ -32,6 +32,7 @@ import gov.nih.nci.cadsr.data.CCCQuestion;
 import gov.nih.nci.cadsr.data.CCCReport;
 import gov.nih.nci.cadsr.data.FormDisplay;
 import gov.nih.nci.cadsr.data.FormsUiData;
+import gov.nih.nci.cadsr.data.NrdsCde;
 import gov.nih.nci.cadsr.data.ReportInputWrapper;
 import gov.nih.nci.cadsr.data.ValidateDataWrapper;
 import gov.nih.nci.cadsr.parser.Parser;
@@ -71,6 +72,8 @@ public class CongruencyCheckerReportInvoker {
 	private static int formStartColumn = 4;	
 	private static int allowableCdeValueCol = 19;
 	private static int codedDataColStart = 16;
+	private static String nrds_missing_cde_tab_name = "NRDS CDEs missing";
+	private static String nrds_missing_cde_header = "NRDS CDEs included in Protocol Forms with Warnings or Errors";
 	
 	
 	
@@ -303,7 +306,43 @@ public class CongruencyCheckerReportInvoker {
 					rowNum = rowNumAfterCD;
 			}
 		}
-
+		
+		String[] nrdSRowHeaders = { "Rave Form OID", "RAVE Field Order", "RAVE Field Label", "CDE ID Version", "CDE Name", "Result", "Message"};
+		XSSFSheet sheet3 = workbook.createSheet(nrds_missing_cde_tab_name);
+		rowNum = 0;
+		row = sheet3.createRow(rowNum++);
+		newCell = row.createCell(0);
+		newCell.setCellValue(nrds_missing_cde_header);
+		row = sheet3.createRow(rowNum++);
+		row = sheet3.createRow(rowNum++);
+		int colNum = 0;
+		// Print row headers in the NRDS sheet
+		for (String rowHeader : nrdSRowHeaders) {
+			newCell = row.createCell(colNum++);
+			newCell.setCellValue(rowHeader);
+		}
+		CellStyle cellStyle = workbook.createCellStyle();
+        cellStyle.setWrapText(true);
+		List<NrdsCde> nrdsCdeList = cccReport.getNrdsCdeList();
+		// Print the NRDS CDEs 	
+		for (NrdsCde cde : nrdsCdeList) {
+			row = sheet3.createRow(rowNum++);
+			newCell = row.createCell(colNum++);
+			newCell.setCellValue(cde.getRaveFormOid());
+			newCell = row.createCell(colNum++);
+			newCell.setCellValue(cde.getRaveFieldOrder());
+			newCell = row.createCell(colNum++);
+			newCell.setCellStyle(cellStyle);			
+			newCell.setCellValue(cde.getRaveFieldLabel());			
+			newCell = row.createCell(colNum++);
+			newCell.setCellValue(cde.getCdeIdVersion());			
+			newCell = row.createCell(colNum++);
+			newCell.setCellValue(cde.getCdeName());						
+			newCell = row.createCell(colNum++);
+			newCell.setCellValue(cde.getResult());
+			newCell = row.createCell(colNum++);
+			newCell.setCellValue(cde.getMessage());			
+		}
 		try {
 			FileOutputStream outputStream = new FileOutputStream(OUTPUT_XLSX_FILE_PATH);
 			autoSizeColumns(workbook);
