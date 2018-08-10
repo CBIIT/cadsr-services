@@ -181,7 +181,7 @@ public class DataElementRepository {
 	 */
 	public List<CategoryNrds> retrieveNrdsCdeList () {
 		List<CategoryNrds> resultList;
-		resultList = getAll(retrieveCategoryCdeListQuery(), CategoryNrds.class);
+		resultList = getAll(retrieveNrdsCdeListQuery(), CategoryNrds.class);
 		return resultList;
 	}
     protected <T> String retrieveAlsQuery() {
@@ -204,7 +204,7 @@ public class DataElementRepository {
     protected String retrieveNrdsCdeListQuery() {
 		return "SELECT CDE_ID,de.VERSION, de.LONG_NAME DE_NAME FROM sbr.data_elements de "
 			+ "inner join sbr.contexts cnt on "
-			+ "de.CONTE_IDSEQ = cnt.CONTE_IDSEQ and cnt.NAME = 'NRDS' and de.ASL_NAME = 'RELEASED';";
+			+ "de.CONTE_IDSEQ = cnt.CONTE_IDSEQ and cnt.NAME = 'NRDS' and de.ASL_NAME = 'RELEASED'";
 	}
 
     /**
