@@ -117,7 +117,7 @@ public class DataElementRepository {
 	 * @throws DataAccessException
 	 */
 	public ALSData retrieveAlsData(String idseq) {
-		return retrieveBlobData(idseq, ALSData.class, retrieveAlsQuery());
+		return retrieveBlobData(idseq, ALSData.class, retrieveAlsQuery(), "PARSER_BLOB");
 	}
 	/**
 	 * 
@@ -126,7 +126,7 @@ public class DataElementRepository {
 	 * @throws DataAccessException
 	 */
 	public CCCReport retrieveReportError(String idseq) {
-		return retrieveBlobData(idseq, CCCReport.class, retrieveErrorReportQuery());
+		return retrieveBlobData(idseq, CCCReport.class, retrieveErrorReportQuery(), "ERROR_REPORT_BLOB");
 	}
 	//FIXME Do we have a data class for Full report?
 	/**
@@ -136,7 +136,7 @@ public class DataElementRepository {
 	 * @throws DataAccessException
 	 */
 	public CCCReport retrieveFullReport(String idseq) {
-		return retrieveBlobData(idseq, CCCReport.class, retrieveFullReportQuery());
+		return retrieveBlobData(idseq, CCCReport.class, retrieveFullReportQuery(), "FULL_REPORT_BLOB");
 	}
 	/**
 	 * 
@@ -144,24 +144,25 @@ public class DataElementRepository {
 	 * @return ALSData or null
 	 * @throws DataAccessException
 	 */
-	public <T> T retrieveBlobData(String idseq, Class<T> clazz, String retrieveQueryStr) {
+	public <T> T retrieveBlobData(String idseq, Class<T> clazz, String retrieveQueryStr, String columnName) {
 		T blobData = null;
 		try {
 			byte[] alsDataByteArr = null;
 			LobHandler lobHandler = new DefaultLobHandler();
+			logger.debug("retrieveBlobData for ID: " + idseq + ", retrieveQueryStr: " + retrieveQueryStr);
 			alsDataByteArr = (byte[]) jdbcTemplate.queryForObject(retrieveQueryStr, new Object[] { idseq },
 				new RowMapper<Object>() {
 						// queryForObject expects that at least one object is found, otherwise: DataAccessException
 						@Override
 						public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
-							byte[] requestData = lobHandler.getBlobAsBytes(rs, "PARSER_BLOB");
+							byte[] requestData = lobHandler.getBlobAsBytes(rs, columnName);
 							return requestData;
 						}
 					});
 			blobData = readFromJSON(alsDataByteArr, clazz);
 		} 
 		catch (Exception e) {
-			logger.error("retrieveAlsData error on idseq: " + idseq, e);
+			logger.error("retrieveBlobData error on idseq: " + idseq, e);
 			e.printStackTrace();
 		}
 		return blobData;
@@ -188,10 +189,10 @@ public class DataElementRepository {
 		return "SELECT PARSER_BLOB from SBREXT.CC_PARSER_DATA WHERE CCHECKER_IDSEQ = ?";
 	}
     protected String retrieveErrorReportQuery(/*String idseq*/) {
-		return "SELECT PARSER_BLOB from SBREXT.CC_REPORT_ERROR WHERE CCHECKER_IDSEQ = ?";
+		return "SELECT ERROR_REPORT_BLOB from SBREXT.CC_REPORT_ERROR WHERE CCHECKER_IDSEQ = ?";
 	}
     protected String retrieveFullReportQuery(/*String idseq*/) {
-		return "SELECT PARSER_BLOB from SBREXT.CC_REPORT_FULL WHERE CCHECKER_IDSEQ = ?";
+		return "SELECT FULL_REPORT_BLOB from SBREXT.CC_REPORT_FULL WHERE CCHECKER_IDSEQ = ?";
 	}
     /**
      * Retrieve CDE SQL with CRF category to populate CRF cache.
