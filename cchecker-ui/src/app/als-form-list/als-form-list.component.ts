@@ -37,10 +37,9 @@ export class AlsFormListComponent implements OnInit {
     let formListData:Object;
     this.checkedItems.subscribe(data=>checkedItems=data).unsubscribe();
     this.formListData.subscribe(data=>formListData=data).unsubscribe();
-    this.restService.checkForms(checkedItems.map(val => val.toUpperCase().replace(' ','_')),formListData).subscribe(
+    this.restService.checkForms(checkedItems,formListData).subscribe(
       data => this.reportService.setReportData(data),
       error => {
-        console.log(error)
         this.error = true;
         this.validating = false;
         this.errorMessage = error;
