@@ -26,6 +26,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -461,24 +462,31 @@ public class GatewayBootController {
 	@GetMapping("/genexcelreporterror")
 	public void genExcelReportError(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		Cookie cookie = retrieveCookie(request);
-		if (cookie == null) {
+		if ((cookie == null) || (StringUtils.isBlank(cookie.getValue())) || (!ParameterValidator.validateIdSeq(cookie.getValue()))) {
 			response.setHeader("Content-Type", "text/plain");
-			response.setStatus(response.SC_BAD_REQUEST);
-			IOUtils.copy(new ByteArrayInputStream("Session Cookie is not found".getBytes()), response.getOutputStream());
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			IOUtils.copy(new ByteArrayInputStream("Session Cookie is not found or not valid".getBytes()),
+				response.getOutputStream());
+		} 
+		else {
+			String sessionCookieValue = cookie.getValue();
+
+			RestTemplate restTemplate = new RestTemplate();
+			String urlStr = String.format(URL_GEN_EXCEL_REPORT_ERROR_FORMAT, sessionCookieValue);
+			logger.debug("...retrieveData: " + urlStr);
+			response.setHeader("Content-Type", "application/vnd.ms-excel");
+			response.setHeader("Content-Disposition", "attachment; filename=" + fileExcelReportPrefix + sessionCookieValue + EXCEL_FILE_EXT);
+			response.setStatus(HttpServletResponse.SC_OK);
+
+			restTemplate.execute(urlStr, HttpMethod.GET, (ClientHttpRequest requestCallback) -> {
+			}, responseExtractor -> {
+				IOUtils.copy(responseExtractor.getBody(), response.getOutputStream());
+				return null;
+			});
 		}
-		else{
-		String sessionCookieValue = cookie.getValue();
-		//FIXME idseq format check! check session token
-		logger.debug("genExcelReportError session cookie: " + sessionCookieValue);
-		response.setHeader("Content-Type", "application/vnd.ms-excel");
-		response.setHeader("Content-Disposition", "attachment; filename=" + fileExcelReportPrefix + sessionCookieValue + EXCEL_FILE_EXT);
-		response.setStatus(response.SC_OK);
-		  // Copy the stream to the response's output stream.
-	    IOUtils.copy(request.getInputStream(), response.getOutputStream());
-		}
-	    response.flushBuffer();
+		response.flushBuffer();
 	}
-	
+		
 	private Cookie retrieveCookie(HttpServletRequest request) {
 		Cookie[] cookieArr = request.getCookies();
 		Cookie sessionCookie = null;

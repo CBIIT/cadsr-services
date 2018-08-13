@@ -39,9 +39,9 @@ use an existed UID as a cookie for testing this service. ALS parser data with th
 curl -v --cookie "_cchecker=0BCAEE78-9916-4ADA-B7CD-CE5854AFDD82" -X POST \
 -H "Content-Type: application/json" --data "@/local/content/cchecker/formnamelist.json" http://localhost:8080/gateway/checkservice
 "formnamelist.json" file contains a json array of string. Each String is a form name.
-Examples: 
+Examples of Form names lists: 
 ["Enrollment"]
-["HISTOLOGY_AND_DISEASE","PATIENT_ELIGIBILITY"]
+["HISTOLOGY AND DISEASE","PATIENT ELIGIBILITY"]
 Other request parameters which are all "false" by default:
 checkUOM=true/false
 checkCRF=true/false
@@ -50,20 +50,11 @@ displayExceptions=true/false
 The next call shall open Save as dialog for a report previously generated:
 curl -v --cookie "_cchecker=0BCAEE78-9916-4ADA-B7CD-CE5854AFDD82" http://localhost:8080/gateway/genexcelreporterror
 ********
+********
 Test services
 ********
 If cchecker-service-parser microservice is running we can call a test service parsefileservice:
 http://localhost:8080/gateway/parsefileservice?filepath=/local/content/cchecker/RAVE-ALS-10057-VS.xlsx
 To call parser using curl and using prepared ALS file:
 curl http://localhost:8080/gateway/parsefileservice?filepath=/local/content/cchecker/RAVE-ALS-10057-VS.xlsx
-********
-To upload a file to the server, select an existed file as /local/content/source/data.txt, and run "curl" command.
-Go to a different terminal, and run:
-curl -F file=@"/local/content/source/data.txt" http://localhost:8080/uploadfileservice
-
-
-********
-We added "testreportservice" for testing Congruence Checker Report representation. It sends generated test data based on input file.
-The supporting class is "CCCReport".
-curl http://localhost:8080/gateway/testreportservice?owner=owner1&filepath=/local/content/cchecker/RAVE-ALS-10057-VS.xlsx
 ********
