@@ -59,7 +59,7 @@ Report-0BCAEE78-9916-4ADA-B7CD-CE5854AFDD82.xlsx
 6. To generate an Excel file using a RESTful service find an IDSEQ of an existed Report Error created by 
 ALSValidatorService, and run "curl" command GET request with _cchecker QUERY PARAMETER (IDSEQ value).
 
-curl -v http://localhost:4807/rest/generatereporterror?_cchecker=0BCAEE78-9916-4ADA-B7CD-CE5854AFDD82
+curl -v http://localhost:4807/rest/generatereporterror?_cchecker=C2892C39-8593-40B7-AACF-95F254123F84
 
 
 7.The response is a stream of Excel file. The response sends the headers:
