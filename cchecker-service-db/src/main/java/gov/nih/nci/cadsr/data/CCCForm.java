@@ -9,7 +9,7 @@ import java.util.List;
 public class CCCForm {	
 
 String raveFormOid;
-String caDSRFormId;
+String formName;
 int countTotalQuestions;
 String version;
 String congruencyStatus; // Congruent, Errors, Warnings
@@ -19,14 +19,14 @@ List<CCCQuestion> questions = new ArrayList<CCCQuestion>();
 public String getRaveFormOid() {
 	return raveFormOid;
 }
-public void setRaveFormOId(String raveFormOid) {
+public String getFormName() {
+	return formName;
+}
+public void setFormName(String formName) {
+	this.formName = formName;
+}
+public void setRaveFormOid(String raveFormOid) {
 	this.raveFormOid = raveFormOid;
-}
-public String getCaDSRFormId() {
-	return caDSRFormId;
-}
-public void setCaDSRFormId(String caDSRFormId) {
-	this.caDSRFormId = caDSRFormId;
 }
 public int getCountTotalQuestions() {
 	return countTotalQuestions;

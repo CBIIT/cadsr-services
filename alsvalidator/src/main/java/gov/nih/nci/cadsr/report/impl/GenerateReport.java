@@ -91,7 +91,7 @@ public class GenerateReport implements ReportOutput {
 							form.setQuestions(questionsList);
 						else
 							form.setCongruencyStatus(congStatus_congruent);
-						form.setRaveFormOId(formName);
+						form.setRaveFormOid(formName);
 						form.setCountTotalQuestions(totalQuestCount);
 						formsList.add(form);
 						totalQuestCount = 0;
@@ -217,7 +217,7 @@ public class GenerateReport implements ReportOutput {
 			form.setCongruencyStatus(congStatus_congruent);
 		else
 			form.setQuestions(questionsList);
-		form.setRaveFormOId(formName);
+		form.setRaveFormOid(formName);
 		if (!form.getQuestions().isEmpty())
 			formsList.add(form);
 		cccReport.setCccForms(formsList);

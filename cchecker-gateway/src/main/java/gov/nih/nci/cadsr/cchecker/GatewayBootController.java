@@ -3,8 +3,8 @@
  */
 package gov.nih.nci.cadsr.cchecker;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
@@ -42,7 +43,6 @@ import gov.nih.nci.cadsr.data.CCCForm;
 import gov.nih.nci.cadsr.data.CCCReport;
 import gov.nih.nci.cadsr.data.FormsUiData;
 import gov.nih.nci.cadsr.data.ValidateParamWrapper;
-import gov.nih.nci.cadsr.report.CongruencyCheckerReportInvoker;
 import gov.nih.nci.cadsr.service.FormService;
 
 @Controller
@@ -459,24 +459,24 @@ public class GatewayBootController {
 	
 	@CrossOrigin
 	@GetMapping("/genexcelreporterror")
-	public ResponseEntity<?> genExcelReportError(HttpServletRequest request) throws IOException {
+	public void genExcelReportError(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		Cookie cookie = retrieveCookie(request);
 		if (cookie == null) {
-			return buildErrorResponse("Session is not found", HttpStatus.BAD_REQUEST);
+			response.setHeader("Content-Type", "text/plain");
+			response.setStatus(response.SC_BAD_REQUEST);
+			IOUtils.copy(new ByteArrayInputStream("Session Cookie is not found".getBytes()), response.getOutputStream());
 		}
-		
+		else{
 		String sessionCookieValue = cookie.getValue();
 		//FIXME idseq format check! check session token
 		logger.debug("genExcelReportError session cookie: " + sessionCookieValue);
-		
-		InputStream reqInputStream = request.getInputStream();
-		InputStreamResource data = new InputStreamResource(reqInputStream);
-		HttpStatus httpStatus;
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.add("Content-Type", "application/vnd.ms-excel");
-		httpHeaders.add("Content-Disposition", "attachment; filename=" + fileExcelReportPrefix + sessionCookieValue + EXCEL_FILE_EXT);
-		httpStatus = HttpStatus.OK;
-		return new ResponseEntity<InputStreamResource>(data, httpHeaders, httpStatus);
+		response.setHeader("Content-Type", "application/vnd.ms-excel");
+		response.setHeader("Content-Disposition", "attachment; filename=" + fileExcelReportPrefix + sessionCookieValue + EXCEL_FILE_EXT);
+		response.setStatus(response.SC_OK);
+		  // Copy the stream to the response's output stream.
+	    IOUtils.copy(request.getInputStream(), response.getOutputStream());
+		}
+	    response.flushBuffer();
 	}
 	
 	private Cookie retrieveCookie(HttpServletRequest request) {
@@ -590,27 +590,6 @@ public class GatewayBootController {
 		logger.debug("GatewayBootController URL_GEN_EXCEL_REPORT_ERROR: " + URL_GEN_EXCEL_REPORT_ERROR_FORMAT);
 	}
 
-	// TODO remove testReportService service
-	/**
-	 * 
-	 * @param request
-	 * @param response
-	 * @param filename
-	 * @return ALSData
-	 */
-	@GetMapping("/testreportservice")
-	@ResponseBody
-	public CCCReport testReportService(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam(name = "filepath", required = true) String filepath,
-			@RequestParam(name = "owner", defaultValue = "guest") String reportOwner) {
-		ALSDataWrapper alsDataWrapper;
-		Cookie cookie = generateCookie();
-		alsDataWrapper = submitPostRequestParser(filepath);
-		response.addCookie(cookie);
-		CCCReport cccReport = CongruencyCheckerReportInvoker.builTestReport(alsDataWrapper.getAlsData());
-		cccReport.setReportOwner(reportOwner);
-		return cccReport;
-	}
 	//TODO Remove this test service
 	/**
 	 * 
