@@ -11,28 +11,15 @@ import { RouterLinkWithHref } from '../../../node_modules/@angular/router';
 export class AlsReportComponent implements OnInit {
   reportData:Object;
   dtOptions:Object;
-  
+  congruentFormTotal:String;
+
   constructor(private reportService:ReportService) { }
 
-  // set raveFormOid for selection //
-  // setRaveFormOid = (e):void => {
-  //   console.log(e)
-  //       this.raveFormOid = e.target.value;
-  // }
+  changeForm = form => console.log("A");
 
-  getCongruentFormTotal = forms => {
-    // const f = forms.filter(v => v.congruencyStatus=='WARNINGS')
-    console.log('a')
-    return 'asdsa';
-  }
-
-  test(a) {
-    console.log("A")
-    return 'a'
-  }
   ngOnInit() {
-    // this.raveFormOid = 'PATIENT_ELIGIBILITY'
-    this.reportService.getReportData().subscribe(data=> {console.log(data);return this.reportData = data}).unsubscribe();
+    this.reportService.getReportData().subscribe(data=> this.reportData = data).unsubscribe();
+    this.congruentFormTotal = this.reportData['cccForms'].filter(v => v.congruencyStatus=='CONGRUENT').length;
     this.dtOptions={
       columns: [
         {

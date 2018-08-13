@@ -1,10 +1,10 @@
 <h2>
     ALS Report
 </h2>
-<div class="alert alert-danger" role="alert" *ngIf="!reportData.cccForms.length">
+<div class="alert alert-danger" role="alert" *ngIf="!reportData['cccForms'].length">
     Please select forms and try again.
 </div>
-<ng-container *ngIf="reportData.cccForms.length">
+<ng-container *ngIf="reportData['cccForms'].length">
 <div>
     <form #f="ngForm">
         <span class="reportHeader">
@@ -34,7 +34,7 @@
             <tr><td>Rave Protocol number </td><td>{{r.raveProtocolNumber}}</td></tr>
             <tr><td>Date Validated </td><td>{{r.reportDate}}</td></tr>
             <tr><td># Forms in protocol </td><td>{{r.totalFormsCount}}</td></tr>
-            <tr><td># Total Forms Congruent </td><td>{{getCongruentFormTotal(r.cccForms)}}</td></tr>
+            <tr><td># Total Forms Congruent </td><td>{{congruentFormTotal}}</td></tr>
             <tr><td># Total Questions Checked </td><td>{{r.countQuestionsChecked}}</td></tr>
             <tr><td># Total Questions with Warnings </td><td>{{r.countQuestionsWithWarnings}}</td></tr>
             <tr><td># Total Questions with Errors </td><td>{{r.countQuestionsWithErrors}}</td></tr>
