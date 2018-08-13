@@ -16,6 +16,7 @@ export class AlsUploadFormComponent implements OnInit {
   submitted:boolean;
   uploadProgress:Number;
   alsFile:File;
+  name:String;
 
   constructor(private router:Router, private restService:RestService, private formListService:FormListService) { 
     this.submitted = false;

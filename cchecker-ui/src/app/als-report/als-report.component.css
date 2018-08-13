@@ -1,7 +1,22 @@
+form {
+    width:100%;
+}
 .odd {
     background-color:#EEEEEE;
 }
 
 .even {
     background-color:#fff;
+}
+
+.reportHeader{
+    display:inline;
+}
+.reportHeader:last-child {
+    float:right;
+}
+
+.reportHeader label {
+    font-weight:bold;
+    padding-right:10px;
 }

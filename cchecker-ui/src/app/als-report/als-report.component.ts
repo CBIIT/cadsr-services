@@ -9,12 +9,30 @@ import { RouterLinkWithHref } from '../../../node_modules/@angular/router';
   styleUrls: ['./als-report.component.css']
 })
 export class AlsReportComponent implements OnInit {
-  private reportData:Observable<Object>;
-  private dtOptions:Object;
+  reportData:Object;
+  dtOptions:Object;
+  
   constructor(private reportService:ReportService) { }
 
+  // set raveFormOid for selection //
+  // setRaveFormOid = (e):void => {
+  //   console.log(e)
+  //       this.raveFormOid = e.target.value;
+  // }
+
+  getCongruentFormTotal = forms => {
+    // const f = forms.filter(v => v.congruencyStatus=='WARNINGS')
+    console.log('a')
+    return 'asdsa';
+  }
+
+  test(a) {
+    console.log("A")
+    return 'a'
+  }
   ngOnInit() {
-    this.reportData = this.reportService.getReportData();
+    // this.raveFormOid = 'PATIENT_ELIGIBILITY'
+    this.reportService.getReportData().subscribe(data=> {console.log(data);return this.reportData = data}).unsubscribe();
     this.dtOptions={
       columns: [
         {
@@ -39,6 +57,9 @@ export class AlsReportComponent implements OnInit {
       searching:false,
       info:false
     };
-  }
+
+  };
 
 }
+
+

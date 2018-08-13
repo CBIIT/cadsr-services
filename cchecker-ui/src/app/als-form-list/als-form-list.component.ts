@@ -12,12 +12,12 @@ import { Router } from '../../../node_modules/@angular/router';
   })
 export class AlsFormListComponent implements OnInit {
 
-  private formListData:Observable<Object>;
-  private checkedItems:Observable<String[]>;
-  private validItemsLength:Number;
-  private validating:Boolean;
-  private error:boolean;
-  private errorMessage:String;  
+  formListData:Observable<Object>;
+  checkedItems:Observable<String[]>;
+  validItemsLength:Number;
+  validating:Boolean;
+  error:boolean;
+  errorMessage:String;  
   constructor(private formListService:FormListService, private restService:RestService, private reportService:ReportService, private router:Router) {
   }
 
