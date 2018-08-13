@@ -31,7 +31,7 @@ public class ValidatorService {
 	private static final String msg4_2 = ", caDSR MaxLength ";
 	private static final String msg5 = "This CDE is not enumerated but question in input file has Coded Data (Permissible values)";
 	private static final String msg6 = "Question Text in input file does not match available CDE question text(s)";
-	private static final String msg7 = "Control Type from caDSR DB doesn't seem to be unknown";
+	private static final String msg7 = "Unknown Control Type from caDSR DB";
 	private static final String msg8 = "Control Type nor present in the ALS input data";
 	private static final String msg9 = "Additional PVs in Valid Value list";
 	private static final String msg10 = "PVs not in caDSR DB";

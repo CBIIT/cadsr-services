@@ -21,6 +21,7 @@ import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.ALSDataDictionaryEntry;
 import gov.nih.nci.cadsr.data.ALSError;
 import gov.nih.nci.cadsr.data.ALSField;
+import gov.nih.nci.cadsr.data.ALSForm;
 import gov.nih.nci.cadsr.data.CCCForm;
 import gov.nih.nci.cadsr.data.CCCQuestion;
 import gov.nih.nci.cadsr.data.CCCReport;
@@ -76,9 +77,6 @@ public class GenerateReport implements ReportOutput {
 		List<CCCQuestion> questionsList = new ArrayList<CCCQuestion>();
 		List<NrdsCde> nrdsCdeList = new ArrayList<NrdsCde>();
 		List<StandardCrfCde> standardCrfCdeList = new ArrayList<StandardCrfCde>();
-		String templateName = null;
-		String crfIdVersion = null;
-		String category = null;
 		Map<String, ALSDataDictionaryEntry> ddeMap = alsData.getDataDictionaryEntries();
 		for (ALSField alsField : alsData.getFields()) {
 			Boolean cdeServiceCall = true;
@@ -102,6 +100,7 @@ public class GenerateReport implements ReportOutput {
 					CCCQuestion question = new CCCQuestion();
 					totalQuestCount++;
 					question.setFieldOrder(alsField.getOrdinal());
+					question.setRaveFormOId(alsField.getFormOid());
 					String draftFieldName = alsField.getDraftFieldName();
 					if (draftFieldName.indexOf(publicid_prefix) > -1 && draftFieldName.indexOf(version_prefix) > -1) {
 						String idVersion = draftFieldName.substring(draftFieldName.indexOf(publicid_prefix),
@@ -227,6 +226,7 @@ public class GenerateReport implements ReportOutput {
 		}
 		cccReport.setNrdsCdeList(nrdsCdeList);
 		cccReport.setStandardCrfCdeList(standardCrfCdeList);
+		cccReport = addFormNamestoForms(cccReport, alsData.getForms());		
 		return cccReport;
 	}
 	
@@ -305,6 +305,7 @@ public class GenerateReport implements ReportOutput {
 	 */
 	protected static NrdsCde buildNrdsCde(CCCQuestion question, String cdeName) {
 		NrdsCde nrds = new NrdsCde();
+		nrds.setRaveFormOid(question.getRaveFormOId());
 		nrds.setCdeIdVersion(question.getCdePublicId() + "v" + question.getCdeVersion());
 		nrds.setCdeName(cdeName);
 		nrds.setRaveFieldLabel(question.getRaveFieldLabel());
@@ -384,6 +385,24 @@ public class GenerateReport implements ReportOutput {
 		            });
 		List<CategoryNrds> categoryNrdsList = categoryNrdsResponse.getBody();
 		return categoryNrdsList;
+	}	
+	
+	/**
+	 * Finds the form names by Form OID & adds them, for the forms in the report 
+	 * @param cccReport
+	 * @param alsForms
+	 * @return CCCReport
+	 * 
+	 */	
+	protected static CCCReport addFormNamestoForms (CCCReport cccReport, List<ALSForm> alsForms) {
+		for (CCCForm completedForm : cccReport.getCccForms()) {
+			for (ALSForm alsForm: alsForms) {
+				if (completedForm.getRaveFormOid().equalsIgnoreCase(alsForm.getFormOid())) {
+					completedForm.setFormName(alsForm.getDraftFormName());
+				}
+			}
+		}		
+		return cccReport;
 	}	
 	
 
