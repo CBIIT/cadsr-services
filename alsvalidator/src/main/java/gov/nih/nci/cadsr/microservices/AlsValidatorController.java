@@ -1,4 +1,5 @@
 package gov.nih.nci.cadsr.microservices;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,6 +23,7 @@ import org.springframework.web.client.RestTemplate;
 
 import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.ALSError;
+import gov.nih.nci.cadsr.data.ALSForm;
 import gov.nih.nci.cadsr.data.CCCError;
 import gov.nih.nci.cadsr.data.CCCReport;
 import gov.nih.nci.cadsr.data.ValidateParamWrapper;
@@ -67,7 +69,7 @@ public class AlsValidatorController {
 				
 				if ((selForms != null) && (! selForms.isEmpty())) {
 					ReportOutput report = new GenerateReport();
-					errorsReport = report.getFinalReportData(alsData, selForms, checkUOM, checkCRF, displayExceptions);
+					errorsReport = report.getFinalReportData(alsData, getFormIdList(selForms, alsData.getForms()), checkUOM, checkCRF, displayExceptions);
 					logger.info("Created CCCReport with amount of forms: " + errorsReport.getCccForms().size());
 				}
 				else {//source default data to add
@@ -149,4 +151,24 @@ public class AlsValidatorController {
 		httpHeaders.add("Content-Type", "application/json");
 		return httpHeaders;
 	}
+	
+	/**
+	 * Returns a list of Form OIDs for the respective Form Names list 
+	 * 
+	 * @param selForms
+	 * @param formsList
+	 * @return List<String>
+	 */		
+	protected static List<String> getFormIdList(List<String> selForms, List<ALSForm> formsList) {
+		List<String> formIdsList = new ArrayList<String>();
+		for (String selectedFormName : selForms) {			
+			for (ALSForm alsForm : formsList) {
+				if (alsForm.getDraftFormName().equalsIgnoreCase(selectedFormName)) {
+						formIdsList.add(alsForm.getFormOid());
+					}
+				}
+		}
+		return formIdsList;
+	}	
+	
 }

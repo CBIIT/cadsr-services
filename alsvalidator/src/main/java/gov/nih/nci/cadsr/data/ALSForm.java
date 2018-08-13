@@ -8,18 +8,18 @@ import java.util.List;
 
 public class ALSForm {
 	
-String formOId;
+String formOid;
 int ordinal;
 String draftFormName;
 
 
 List<ALSField> fields = new ArrayList<ALSField>();
 
-public String getFormOId() {
-	return formOId;
+public String getFormOid() {
+	return formOid;
 }
-public void setFormOId(String formOId) {
-	this.formOId = formOId;
+public void setFormOId(String formOid) {
+	this.formOid = formOid;
 }
 public int getOrdinal() {
 	return ordinal;
