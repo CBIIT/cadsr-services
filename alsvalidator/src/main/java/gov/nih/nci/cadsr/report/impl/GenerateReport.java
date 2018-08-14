@@ -86,7 +86,6 @@ public class GenerateReport implements ReportOutput {
 			if (selForms.contains(alsField.getFormOid())) {
 				if (formName.equals(""))
 					formName = alsField.getFormOid();
-				if (!formName.equals("OID")) {
 					if (!formName.equals(alsField.getFormOid())) {
 						if (!questionsList.isEmpty())
 							form.setQuestions(questionsList);
@@ -106,19 +105,10 @@ public class GenerateReport implements ReportOutput {
 					question.setRaveFormOId(alsField.getFormOid());
 					String draftFieldName = alsField.getDraftFieldName();
 					if (draftFieldName.indexOf(publicid_prefix) > -1 && draftFieldName.indexOf(version_prefix) > -1) {
-						String idVersion = draftFieldName.substring(draftFieldName.indexOf(publicid_prefix),
-								draftFieldName.length());
-						idVersion = draftFieldName.substring(draftFieldName.indexOf(publicid_prefix), draftFieldName.length());
-						String id = idVersion.substring(3, idVersion.indexOf("_"));
-						String version = (idVersion.substring(idVersion.indexOf(version_prefix) + 2, idVersion.length()));
-						id = id.trim();
-						String[] versionTokens = version.split("\\_");
-						version = versionTokens[0] + "." + versionTokens[1];
-						if (!NumberUtils.isNumber(id) || !NumberUtils.isNumber(version))
+						question = assignCdeIdVersionToQuestion (question, draftFieldName);
+						if (!NumberUtils.isNumber(question.getCdePublicId()) || !NumberUtils.isNumber(question.getCdeVersion()))
 							cdeServiceCall = false;
 
-						question.setCdePublicId(id.trim());
-						question.setCdeVersion(version);
 						// from a static table of NCI standard CRFs
 						CdeStdCrfData cdeCrfData = fetchCdeStandardCrfData(question.getCdePublicId(), question.getCdeVersion(), categoryCdeList, categoryNrdsList);
 						if (cdeCrfData!=null)
@@ -208,7 +198,6 @@ public class GenerateReport implements ReportOutput {
 						question = setParseErrorToQuestion (question, parseValidationError);
 						questionsList.add(question);
 					}
-				}
 			}
 		}
 
@@ -256,7 +245,6 @@ public class GenerateReport implements ReportOutput {
 			}
 		}
 		for (ALSError alsError : fieldErrors) {
-			System.out.println("Parsing error msg: "+alsError.getErrorDesc()+" :: Severity: "+alsError.getErrorSeverity());
 			if (errorMsg != null)
 				errorMsg = errorMsg + alsError.getErrorDesc();
 			else
@@ -289,6 +277,24 @@ public class GenerateReport implements ReportOutput {
 	}
 	
 
+	
+	
+	protected static CCCQuestion assignCdeIdVersionToQuestion (CCCQuestion question, String draftFieldName) {
+		String idVersion = draftFieldName.substring(draftFieldName.indexOf(publicid_prefix),
+				draftFieldName.length());
+		idVersion = draftFieldName.substring(draftFieldName.indexOf(publicid_prefix), draftFieldName.length());
+		String id = idVersion.substring(3, idVersion.indexOf("_"));
+		String version = (idVersion.substring(idVersion.indexOf(version_prefix) + 2, idVersion.length()));
+		id = id.trim();
+		String[] versionTokens = version.split("\\_");
+		version = versionTokens[0] + "." + versionTokens[1];
+		question.setCdePublicId(id.trim());
+		question.setCdeVersion(version);		
+		return question;
+	}
+	
+	
+	
 	/**
 	 * @param String cdePublicId
 	 * @param String cdeVersion
