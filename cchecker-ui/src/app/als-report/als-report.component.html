@@ -1,25 +1,26 @@
 <h2>
-    ALS Report
+   ALS Report
 </h2>
 <div class="alert alert-danger" role="alert" *ngIf="!reportData['cccForms'].length">
-    Please select forms and try again.
+   Please select forms and try again.
 </div>
 <form #f="ngForm">
-    <div>
-    <span class="reportHeader">
-    <button class="btn btn-primary">Generate excel. Call 4807 url</button>
-    </span>
-    <span class="reportHeader">
-        <label for="raveFormOid">Rave Form Oid</label>
-        <select name="raveForm" id="raveFormOid" ngModel (change)="changeForm(f.value.raveForm)"  #localRaveOid>
-        <option value="" disabled>Select a form</option>
-        <option *ngFor="let form of reportData.cccForms | formListsort:'raveFormOid'" [ngValue]="form">
-        {{form.raveFormOid}}
-        </option>
-        </select>
-    </span>
-    </div><br />
-<ngb-tabset type="pills" ([ngModel])="tabs" #tabs *ngIf="reportData['cccForms'].length">dsads
+   <div>
+      <span class="reportHeader">
+      <button class="btn btn-primary">Generate Excel</button>
+      </span>
+      <span class="reportHeader">
+         <label for="raveFormOid">Rave Form Oid</label>
+         <select name="raveForm" id="raveFormOid" ngModel (change)="changeForm(f.value.raveForm)"  #localRaveOid>
+         <option value="" disabled>Select a form</option>
+         <option *ngFor="let form of reportData.cccForms | formListsort:'raveFormOid'" [ngValue]="form">
+         {{form.raveFormOid}}
+         </option>
+         </select>
+      </span>
+   </div>
+   <br />
+   <ngb-tabset type="pills" ([ngModel])="tabs" #tabs *ngIf="reportData['cccForms'].length">dsads
    <ngb-tab title="Summary">
       <ng-template ngbTabContent>
          <table datatable [dtOptions]="dtSummaryOptions" class="display compact" *ngIf="reportData as r">
@@ -30,23 +31,74 @@
             </tr>
          </thead>
          <tbody>
-            <tr><td>Rave Protocol name </td><td>{{r.raveProtocolName}}</td></tr>
-            <tr><td>Rave Protocol number </td><td>{{r.raveProtocolNumber}}</td></tr>
-            <tr><td>Date Validated </td><td>{{r.reportDate}}</td></tr>
-            <tr><td># Forms in protocol </td><td>{{r.totalFormsCount}}</td></tr>
-            <tr><td># Total Forms Congruent </td><td>{{congruentFormTotal}}</td></tr>
-            <tr><td># Total Questions Checked </td><td>{{r.countQuestionsChecked}}</td></tr>
-            <tr><td># Total Questions with Warnings </td><td>{{r.countQuestionsWithWarnings}}</td></tr>
-            <tr><td># Total Questions with Errors </td><td>{{r.countQuestionsWithErrors}}</td></tr>
-            <tr><td># Total Questions without associated CDE </td><td>{{r.countQuestionsWithoutCde}}</td></tr>
-            <tr><td># Required NRDS Questions missing  </td><td>{{r.countNrdsMissing}}</td></tr>
-            <tr><td># Required NRDS Questions Congruent </td><td>{{r.countNrdsCongruent}}</td></tr>
-            <tr><td># Required NRDS Questions With Warnings </td><td>{{r.countNrdsWithWarnings}}</td></tr>
-            <tr><td># Required NRDS Questions With Errors </td><td>{{r.countNrdsWithErrors}}</td></tr>
-            <tr><td># NCI Standard Template Mandatory Modules Questions not used in Protocol  </td><td></td></tr>
-            <tr><td># NCI Standard Template Mandatory Modules Questions Congruent </td><td>{{r.countNciCongruent}}</td></tr>
-            <tr><td># NCI Standard Template Mandatory Modules Questions With Errors </td><td>{{r.countQuestionsWithErrors}}</td></tr>
-            <tr><td># NCI Standard Template Mandatory Modules Questions With Warnings </td><td>{{r.countQuestionsWithWarnings}}</td></tr>
+            <tr>
+               <td>Rave Protocol name </td>
+               <td>{{r.raveProtocolName}}</td>
+            </tr>
+            <tr>
+               <td>Rave Protocol number </td>
+               <td>{{r.raveProtocolNumber}}</td>
+            </tr>
+            <tr>
+               <td>Date Validated </td>
+               <td>{{r.reportDate}}</td>
+            </tr>
+            <tr>
+               <td># Forms in protocol </td>
+               <td>{{r.totalFormsCount}}</td>
+            </tr>
+            <tr>
+               <td># Total Forms Congruent </td>
+               <td>{{congruentFormTotal}}</td>
+            </tr>
+            <tr>
+               <td># Total Questions Checked </td>
+               <td>{{r.countQuestionsChecked}}</td>
+            </tr>
+            <tr>
+               <td># Total Questions with Warnings </td>
+               <td>{{r.countQuestionsWithWarnings}}</td>
+            </tr>
+            <tr>
+               <td># Total Questions with Errors </td>
+               <td>{{r.countQuestionsWithErrors}}</td>
+            </tr>
+            <tr>
+               <td># Total Questions without associated CDE </td>
+               <td>{{r.countQuestionsWithoutCde}}</td>
+            </tr>
+            <tr>
+               <td># Required NRDS Questions missing  </td>
+               <td>{{r.countNrdsMissing}}</td>
+            </tr>
+            <tr>
+               <td># Required NRDS Questions Congruent </td>
+               <td>{{r.countNrdsCongruent}}</td>
+            </tr>
+            <tr>
+               <td># Required NRDS Questions With Warnings </td>
+               <td>{{r.countNrdsWithWarnings}}</td>
+            </tr>
+            <tr>
+               <td># Required NRDS Questions With Errors </td>
+               <td>{{r.countNrdsWithErrors}}</td>
+            </tr>
+            <tr>
+               <td># NCI Standard Template Mandatory Modules Questions not used in Protocol  </td>
+               <td></td>
+            </tr>
+            <tr>
+               <td># NCI Standard Template Mandatory Modules Questions Congruent </td>
+               <td>{{r.countNciCongruent}}</td>
+            </tr>
+            <tr>
+               <td># NCI Standard Template Mandatory Modules Questions With Errors </td>
+               <td>{{r.countQuestionsWithErrors}}</td>
+            </tr>
+            <tr>
+               <td># NCI Standard Template Mandatory Modules Questions With Warnings </td>
+               <td>{{r.countQuestionsWithWarnings}}</td>
+            </tr>
          </tbody>
          </table>
       </ng-template>
@@ -54,103 +106,99 @@
    <ngb-tab id="raveForm">
       <ng-template ngbTabTitle>{{tabName}}</ng-template>
       <ng-template ngbTabContent>
-        <div style="padding-left:4px;padding-top:5px;margin-bottom:-5px"><B>VIEW OF EXPANDED RESULTS {{raveForm.raveFormOid}}</B></div>
-        <table datatable [dtOptions]="dtFormSummaryOptions" class="display compact">
+         <div style="padding-left:4px;padding-top:5px;margin-bottom:-5px"><B>VIEW OF EXPANDED RESULTS {{raveForm.raveFormOid}}</B></div>
+         <table datatable [dtOptions]="dtFormSummaryOptions" class="display compact">
             <tbody>
-                <tr><th>Rave Form OID</th><td>{{raveForm.countTotalQuestions}}</td></tr>
-                <tr><th>caDSR Form ID</th><td>{{raveForm.raveFormOid}}</td></tr>
-                <tr><th>Version</th><td>{{raveForm.version}}</td></tr>
-                <tr><th>Total Number Of Questions Checked</th><td>{{raveForm.countTotalQuestions}}</td></tr>
+               <tr>
+                  <th>Rave Form OID</th>
+                  <td>{{raveForm.countTotalQuestions}}</td>
+               </tr>
+               <tr>
+                  <th>caDSR Form ID</th>
+                  <td>{{raveForm.raveFormOid}}</td>
+               </tr>
+               <tr>
+                  <th>Version</th>
+                  <td>{{raveForm.version}}</td>
+               </tr>
+               <tr>
+                  <th>Total Number Of Questions Checked</th>
+                  <td>{{raveForm.countTotalQuestions}}</td>
+               </tr>
             </tbody>
-        </table><br />
- 
-
-<table datatable [dtOptions]="dtFormOptions" class="display compact">
-  <thead>
-    <tr>
-        <th>Field Order</th>
-        <th>CDE Public ID</th>
-        <th>CDE Version</th>
-        <th>NCI Category</th>
-        <th>Question Congruency Status</th>
-        <th>Message</th>   
-        <th>Rave Field Label</th>   
-        <th>Rave Field Label Result</th>
-        <th>Field Order</th>
-        <th>CDE Public ID</th>
-        <th>CDE Version</th>
-        <th>NCI Category</th>
-        <th>Question Congruency Status</th>
-        <th>Message</th>   
-        <th>Rave Field Label</th>   
-        <th>Rave Field Label Result</th>    
-        <th>Field Order</th>
-        <th>CDE Public ID</th>
-        <th>CDE Version</th>
-        <th>NCI Category</th>
-        <th>Question Congruency Status</th>
-        <th>Message</th>   
-        <th>Rave Field Label</th>   
-        <th>Rave Field Label Result</th>    
-        <th>Field Order</th>
-        <th>CDE Public ID</th>
-        <th>CDE Version</th>
-        <th>NCI Category</th>
-        <th>Question Congruency Status</th>
-        <th>Message</th>   
-        <th>Rave Field Label</th>   
-        <th>Rave Field Label Result</th>   
-        <th>Rave Field Label</th>   
-        <th>Rave Field Label Result</th>                                
-
-
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let question of raveForm.questions">
-        <td>{{question.fieldOrder}}</td>
-        <td>{{question.cdePublicId}}</td>
-        <td>{{question.cdeVersion}}</td>
-        <td>{{question.nciCategory}}</td>
-        <td>{{question.questionCongruencyStatus}}</td>
-        <td>{{question.message}}</td>      
-        <td>{{question.raveFieldLabel}}</td>
-        <td>{{question.raveFieldLabelResult}}</td>
-        <td>{{question.fieldOrder}}</td>
-        <td>{{question.cdePublicId}}</td>
-        <td>{{question.cdeVersion}}</td>
-        <td>{{question.nciCategory}}</td>
-        <td>{{question.questionCongruencyStatus}}</td>
-        <td>{{question.message}}</td>      
-        <td>{{question.raveFieldLabel}}</td>
-        <td>{{question.raveFieldLabelResult}}</td>   
-        <td>{{question.fieldOrder}}</td>
-        <td>{{question.cdePublicId}}</td>
-        <td>{{question.cdeVersion}}</td>
-        <td>{{question.nciCategory}}</td>
-        <td>{{question.questionCongruencyStatus}}</td>
-        <td>{{question.message}}</td>      
-        <td>{{question.raveFieldLabel}}</td>
-        <td>{{question.raveFieldLabelResult}}</td>
-        <td>{{question.fieldOrder}}</td>
-        <td>{{question.cdePublicId}}</td>
-        <td>{{question.cdeVersion}}</td>
-        <td>{{question.nciCategory}}</td>
-        <td>{{question.questionCongruencyStatus}}</td>
-        <td>{{question.message}}</td>      
-        <td>{{question.raveFieldLabel}}</td>
-        <td>{{question.raveFieldLabelResult}}</td>                
-        <td>{{question.raveFieldLabelResult}}</td>                
-        <td>{{question.raveFieldLabelResult}}</td>                
-
-
-        
-    </tr>
-    </tbody>
-</table>
+         </table>
+         <br />
+         <table datatable [dtOptions]="dtFormOptions" class="display compact">
+            <thead>
+               <tr>
+                  <th>Field Order</th>
+                  <th>CDE Public ID</th>
+                  <th>CDE Version</th>
+                  <th>NCI Category</th>
+                  <th>Question Congruency Status</th>
+                  <th>Message</th>
+                  <th>Rave Field Label</th>
+                  <th>Rave Field Label Result</th>
+                  <th>CDE Permitted Question Text Choices</th>
+                  <th>Rave Control Type</th>
+                  <th>Control Type Checker Result</th>
+                  <th>CDE Value Domain Type</th>
+                  <th>Rave Coded Data</th>
+                  <th>Coded Data Result</th>
+                  <th>Allowable CDE Value</th>
+                  <th>Rave User String</th>
+                  <th>PV  Result</th>
+                  <th>Allowable CDE  Value Meaning Text Choices</th>
+                  <th>Rave Field Data Type</th>
+                  <th>Dataype Checker Result</th>
+                  <th>CDE Data Type</th>
+                  <th>Rave UOM</th>
+                  <th>UOM Checker Result</th>
+                  <th>CDE UOM</th>
+                  <th>Rave Length</th>
+                  <th>Length Checker Result</th>
+                  <th>CDE Maximum Length</th>
+                  <th>Rave Display Format</th>
+                  <th>Format Checker Result</th>
+                  <th>CDE Display Format</th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr *ngFor="let question of raveForm.questions">
+                  <td>{{question.fieldOrder}}</td>
+                  <td>{{question.cdePublicId}}</td>
+                  <td>{{question.cdeVersion}}</td>
+                  <td>{{question.nciCategory}}</td>
+                  <td>{{question.questionCongruencyStatus}}</td>
+                  <td>{{question.message}}</td>
+                  <td>{{question.raveFieldLabel}}</td>
+                  <td>{{question.raveFieldLabelResult}}</td>
+                  <td>{{question.cdePermitQuestionTextChoices}}</td>
+                  <td>{{question.raveControlType}}</td>
+                  <td>{{question.controlTypeResult}}</td>
+                  <td>{{question.cdeValueDomainType}}</td>
+                  <td>{{question.raveCodedData}}</td>
+                  <td>{{question.codedDataResult}}</td>
+                  <td>{{question.allowableCdeValue}}</td>
+                  <td>{{question.raveUserString}}</td>
+                  <td>{{question.pvResult}}</td>
+                  <td>{{question.allowableCdeValue}}</td>
+                  <td>{{question.raveFieldDataType}}</td>
+                  <td>{{question.datatypeCheckerResult}}</td>
+                  <td>{{question.cdeDataType}}</td>
+                  <td>{{question.raveUOM}}</td>
+                  <td>{{question.uomCheckerResult}}</td>
+                  <td>{{question.cdeUOM}}</td>
+                  <td>{{question.raveLength}}</td>
+                  <td>{{question.lengthCheckerResult}}</td>
+                  <td>{{question.cdeMaxLength}}</td>
+                  <td>{{question.raveDisplayFormat}}</td>
+                  <td>{{question.formatCheckerResult}}</td>
+                  <td>{{question.cdeDisplayFormat}}</td>
+               </tr>
+            </tbody>
+         </table>
       </ng-template>
    </ngb-tab>
-</ngb-tabset>
-
+   </ngb-tabset>
 </form>
-<pre>{{raveForm | json}}</pre>
