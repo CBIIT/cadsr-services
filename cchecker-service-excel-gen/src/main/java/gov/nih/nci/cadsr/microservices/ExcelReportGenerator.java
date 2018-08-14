@@ -230,11 +230,13 @@ public class ExcelReportGenerator {
 						rowNum = rowNumAfterCD;
 				}
 			}
+			FileOutputStream outputStream = null;
 			try {
-				FileOutputStream outputStream = new FileOutputStream(OUTPUT_XLSX_FILE_PATH);
+				outputStream = new FileOutputStream(OUTPUT_XLSX_FILE_PATH);
 				logger.debug("outputStream created for " + OUTPUT_XLSX_FILE_PATH);
 				autoSizeColumns(workbook);
 				workbook.write(outputStream);
+				workbook.close();
 				workbook.close();
 			} catch (FileNotFoundException e) {
 				logger.debug("outputStream FileNotFoundException " + OUTPUT_XLSX_FILE_PATH);
@@ -242,6 +244,12 @@ public class ExcelReportGenerator {
 			} catch (Exception e) {
 				logger.debug("outputStream Exception " + OUTPUT_XLSX_FILE_PATH);
 				e.printStackTrace();
+			}
+			finally {
+				if (outputStream != null) {
+					outputStream.flush();
+					outputStream.close();
+				}
 			}
 		}
 		
