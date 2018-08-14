@@ -242,10 +242,10 @@ public class ExcelReportGenerator {
 				logger.debug("...workbook.close done");
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
-				logger.debug("outputStream FileNotFoundException " + OUTPUT_XLSX_FILE_PATH + ", FileNotFoundException: "+ e);
+				logger.error("outputStream FileNotFoundException " + OUTPUT_XLSX_FILE_PATH + ", FileNotFoundException: "+ e);
 			} catch (Exception e) {
 				e.printStackTrace();
-				logger.debug("outputStream Exception " + OUTPUT_XLSX_FILE_PATH + ", getMessage: " + e.getMessage() + e);
+				logger.error("Exception in Excel generation on file " + OUTPUT_XLSX_FILE_PATH + ", getMessage: " + e.getMessage() + e);
 			}
 			finally {
 				if (outputStream != null) {
@@ -258,20 +258,32 @@ public class ExcelReportGenerator {
 		
 		public static void autoSizeColumns(Workbook workbook) {
 		    int numberOfSheets = workbook.getNumberOfSheets();
+		    logger.debug("autoSizeColumns NumberOfSheets: " + numberOfSheets);
 		    for (int i = 0; i < numberOfSheets; i++) {
-		        Sheet sheet = workbook.getSheetAt(i);
-		        if (sheet.getPhysicalNumberOfRows() > 0) {
-		        	for (int j = sheet.getFirstRowNum()+3; j < sheet.getLastRowNum(); j++) {
-			            Row row = sheet.getRow(j);
-			            Iterator<Cell> cellIterator = row.cellIterator();
-			            while (cellIterator.hasNext()) {
-			                Cell cell = cellIterator.next();
-			                int columnIndex = cell.getColumnIndex();
-			                sheet.autoSizeColumn(columnIndex);
-			            }
-		            }
-		        }
-		    }
+		    	try {
+			        Sheet sheet = workbook.getSheetAt(i);
+			        if (sheet != null) {
+				        if (sheet.getPhysicalNumberOfRows() > 0) {
+				        	for (int j = sheet.getFirstRowNum()+3; j < sheet.getLastRowNum(); j++) {
+					            Row row = sheet.getRow(j); 
+					            if (row != null) {
+						            Iterator<Cell> cellIterator = row.cellIterator();
+						            while (cellIterator.hasNext()) {
+						                Cell cell = cellIterator.next();
+						                if (cell != null) {
+							                int columnIndex = cell.getColumnIndex();
+							                sheet.autoSizeColumn(columnIndex);
+						                }
+						            }
+					            }
+				            }
+				        }
+			        }
+		    	}
+		    	catch (Exception e) {
+		    		logger.error("autoSizeColumns Exception on i=: " + i + ", " + e);
+		    	}
+		    }//for
 		}	
 		
 }
