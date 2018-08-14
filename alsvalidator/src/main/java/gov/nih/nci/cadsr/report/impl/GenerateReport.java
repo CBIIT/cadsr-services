@@ -6,6 +6,7 @@ package gov.nih.nci.cadsr.report.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -40,6 +41,8 @@ public class GenerateReport implements ReportOutput {
 	private static final Logger logger = Logger.getLogger(GenerateReport.class);
 	private static String congStatus_errors = "ERRORS";
 	private static String congStatus_warn = "WARNINGS";
+	private static String parse_errors_error = "ERROR";
+	private static String parse_errors_warn = "WARNING";	
 	private static String congStatus_congruent = "CONGRUENT";
 	private static String nrds_cde = "NRDS";
 	private static String mandatory_crf = "Mandatory";
@@ -140,12 +143,8 @@ public class GenerateReport implements ReportOutput {
 						question.setRaveLength(alsField.getFixedUnit());
 						question.setRaveDisplayFormat(alsField.getDataFormat());
 						question.setRaveFieldDataType(alsField.getDataFormat());
-						String parseValidationMessage = pickFieldErrors(alsField, alsData.getCccError().getAlsErrors());
-						if (parseValidationMessage != null && !parseValidationMessage.equals("")) {
-							question.setMessage(parseValidationMessage);
-							question.setQuestionCongruencyStatus(congStatus_warn);
-						}
-
+						Map<String, String> parseValidationError = pickFieldErrors(alsField, alsData.getCccError().getAlsErrors());
+						question = setParseErrorToQuestion (question, parseValidationError);						
 						CdeDetails cdeDetails = null;
 						logger.debug("cdeServiceCall: " + cdeServiceCall);
 						if (cdeServiceCall) {
@@ -205,7 +204,8 @@ public class GenerateReport implements ReportOutput {
 						// (!question.getQuestionCongruencyStatus().equalsIgnoreCase(congStatus_errors))
 						question.setQuestionCongruencyStatus(congStatus_warn);
 						// question.setMessage(msg_6);
-						question.setMessage(pickFieldErrors(alsField, alsData.getCccError().getAlsErrors()));
+						Map<String, String> parseValidationError = pickFieldErrors(alsField, alsData.getCccError().getAlsErrors());
+						question = setParseErrorToQuestion (question, parseValidationError);
 						questionsList.add(question);
 					}
 				}
@@ -242,8 +242,10 @@ public class GenerateReport implements ReportOutput {
 	 *         concatenated string
 	 * 
 	 */
-	protected static String pickFieldErrors(ALSField field, List<ALSError> errors) {
+	protected static Map<String, String> pickFieldErrors(ALSField field, List<ALSError> errors) {
 		String errorMsg = null;
+		String severity = null;
+		Map<String, String> parseErrorMap = new HashMap<String, String>(); 
 		List<ALSError> fieldErrors = new ArrayList<ALSError>();
 		for (ALSError alsError : errors) {
 			if (alsError.getFieldOid() != null) {
@@ -254,13 +256,38 @@ public class GenerateReport implements ReportOutput {
 			}
 		}
 		for (ALSError alsError : fieldErrors) {
+			System.out.println("Parsing error msg: "+alsError.getErrorDesc()+" :: Severity: "+alsError.getErrorSeverity());
 			if (errorMsg != null)
 				errorMsg = errorMsg + alsError.getErrorDesc();
 			else
 				errorMsg = alsError.getErrorDesc();
+			if (severity!=null) {
+				if (parse_errors_warn.equals(severity) && parse_errors_error.equals(alsError.getErrorSeverity())) { 
+					severity = congStatus_errors; 
+				} 
+			} else {
+				if (parse_errors_warn.equals(alsError.getErrorSeverity()))
+						severity = congStatus_warn;
+			}
+				
 		}
-		return errorMsg;
+		if (errorMsg!=null && severity!=null)
+			parseErrorMap.put(severity, errorMsg);
+		return parseErrorMap;
 	}
+	
+	
+	protected static CCCQuestion setParseErrorToQuestion (CCCQuestion question, Map<String, String> parseValidationError) {
+		if (parseValidationError.get(parse_errors_error) != null) {
+			question.setMessage(parseValidationError.get(parse_errors_error));
+			question.setQuestionCongruencyStatus(congStatus_errors);
+		} else if (parseValidationError.get(parse_errors_warn) != null) {
+			question.setMessage(parseValidationError.get(parse_errors_warn));
+			question.setQuestionCongruencyStatus(congStatus_warn);							
+		}		
+		return question;
+	}
+	
 
 	/**
 	 * @param String cdePublicId
