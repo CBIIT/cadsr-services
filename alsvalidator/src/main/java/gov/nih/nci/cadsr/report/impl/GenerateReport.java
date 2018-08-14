@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -50,6 +51,8 @@ public class GenerateReport implements ReportOutput {
 	private static String conditional_crf = "Conditional";
 	private static String publicid_prefix = "PID";
 	private static String version_prefix = "_V";
+	private static List<CategoryCde> categoryCdeList;
+	private static List<CategoryNrds> categoryNrdsList;	
 
 	/**
 	 * @param  alsData not null
@@ -74,12 +77,13 @@ public class GenerateReport implements ReportOutput {
 		CCCForm form = new CCCForm();
 		String formName = "";
 		int totalQuestCount = 0;
-		List<CategoryCde> categoryCdeList = retrieveCdeCrfData();
-		List<CategoryNrds> categoryNrdsList = retrieveNrdsData();
+		categoryCdeList = retrieveCdeCrfData();
+		categoryNrdsList = retrieveNrdsData();
 
 		List<CCCQuestion> questionsList = new ArrayList<CCCQuestion>();
 		List<NrdsCde> nrdsCdeList = new ArrayList<NrdsCde>();
 		List<StandardCrfCde> standardCrfCdeList = new ArrayList<StandardCrfCde>();
+		List<StandardCrfCde> missingStdCrfCdeList = new ArrayList<StandardCrfCde>();
 		Map<String, ALSDataDictionaryEntry> ddeMap = alsData.getDataDictionaryEntries();
 		for (ALSField alsField : alsData.getFields()) {
 			Boolean cdeServiceCall = true;
@@ -109,10 +113,6 @@ public class GenerateReport implements ReportOutput {
 						if (!NumberUtils.isNumber(question.getCdePublicId()) || !NumberUtils.isNumber(question.getCdeVersion()))
 							cdeServiceCall = false;
 
-						// from a static table of NCI standard CRFs
-						CdeStdCrfData cdeCrfData = fetchCdeStandardCrfData(question.getCdePublicId(), question.getCdeVersion(), categoryCdeList, categoryNrdsList);
-						if (cdeCrfData!=null)
-							question.setNciCategory(cdeCrfData.getNciCategory());
 						question.setRaveFieldLabel(alsField.getPreText());
 						question.setCdePermitQuestionTextChoices("");
 						question.setRaveControlType(alsField.getControlType());
@@ -148,22 +148,23 @@ public class GenerateReport implements ReportOutput {
 									//FIXME error handling
 									continue;
 								}
-
 								// Service Call to validate the CDEDetails
 								// against the ALSField & Question objects
-								question = ValidatorService.validate(alsField, question, cdeDetails);
-							
+								question = ValidatorService.validate(alsField, question, cdeDetails);							
 						}
+						// from a static table of NCI standard CRFs
+						CdeStdCrfData cdeCrfData = fetchCdeStandardCrfData(question.getCdePublicId(), question.getCdeVersion());
+						if (cdeCrfData!=null)
+							question.setNciCategory(cdeCrfData.getNciCategory());						
 						if (cdeCrfData!=null && cdeDetails.getDataElement()!=null)  {
 						if (nrds_cde.equalsIgnoreCase(question.getNciCategory())) {
 							nrdsCdeList.add(buildNrdsCde(question,
-									cdeDetails.getDataElement().getDataElementDetails().getLongName())); 
+									cdeDetails.getDataElement().getDataElementDetails().getLongName()));
 							}
 						else if ((mandatory_crf.equalsIgnoreCase(question.getNciCategory()))
 								|| (optional_crf.equalsIgnoreCase(question.getNciCategory()))
 								|| (conditional_crf.equalsIgnoreCase(question.getNciCategory()))) {
-								standardCrfCdeList.add(buildCrfCde(question, cdeCrfData.getCrfName(), cdeCrfData.getCrfIdVersion(), cdeCrfData.getNciCategory(),
-									cdeDetails.getDataElement().getDataElementDetails().getLongName())); 
+								standardCrfCdeList.add(buildCrfCde(cdeCrfData, cdeDetails.getDataElement().getDataElementDetails().getLongName())); 
 							}
 						}
 						if (question.getQuestionCongruencyStatus() == null
@@ -190,10 +191,7 @@ public class GenerateReport implements ReportOutput {
 						}
 					} else {
 						question.setRaveFieldLabel(alsField.getPreText());
-						// if
-						// (!question.getQuestionCongruencyStatus().equalsIgnoreCase(congStatus_errors))
 						question.setQuestionCongruencyStatus(congStatus_warn);
-						// question.setMessage(msg_6);
 						Map<String, String> parseValidationError = pickFieldErrors(alsField, alsData.getCccError().getAlsErrors());
 						question = setParseErrorToQuestion (question, parseValidationError);
 						questionsList.add(question);
@@ -213,6 +211,8 @@ public class GenerateReport implements ReportOutput {
 		if (formsList.size() == 0) {
 			throw new RuntimeException("!!!!!!!!! GenerateReport.getFinalReportData created report with no FORMS!!!");
 		}
+		cleanupMissingCdesList(nrdsCdeList, standardCrfCdeList);
+		
 		cccReport.setNrdsCdeList(nrdsCdeList);
 		cccReport.setStandardCrfCdeList(standardCrfCdeList);
 		cccReport = addFormNamestoForms(cccReport, alsData.getForms());		
@@ -301,7 +301,7 @@ public class GenerateReport implements ReportOutput {
 	 * @return CRF data for the given CDE
 	 * 
 	 */
-	protected static CdeStdCrfData fetchCdeStandardCrfData(String cdePublicId, String cdeVersion, List<CategoryCde> categoryCdeList, List<CategoryNrds> categoryNrdsList) {
+	protected static CdeStdCrfData fetchCdeStandardCrfData(String cdePublicId, String cdeVersion) {
 		CdeStdCrfData cdeCrfData = null;
 		if (NumberUtils.isNumber(cdePublicId) && NumberUtils.isNumber(cdeVersion)) {
 			for (CategoryCde cde : categoryCdeList) {
@@ -354,16 +354,40 @@ public class GenerateReport implements ReportOutput {
 	 * @return Return NrdsCde for a question
 	 * 
 	 */
-	protected static StandardCrfCde buildCrfCde(CCCQuestion question, String templateName, String crfIdVersion,
-			String category, String cdeName) {
+	protected static StandardCrfCde buildCrfCde(CdeStdCrfData cdeCrfData, String cdeName) {
 		StandardCrfCde stdCrdCde = new StandardCrfCde();
-		stdCrdCde.setCdeIdVersion(question.getCdePublicId() + "v" + question.getCdeVersion());
+		stdCrdCde.setCdeIdVersion(cdeCrfData.getCdePublicId() + "v" + cdeCrfData.getCdeVersion());
 		stdCrdCde.setCdeName(cdeName);
-		stdCrdCde.setIdVersion(crfIdVersion);
-		stdCrdCde.setTemplateName(templateName);
-		stdCrdCde.setStdTemplateType(category);
+		stdCrdCde.setIdVersion(cdeCrfData.getCrfIdVersion());
+		stdCrdCde.setTemplateName(cdeCrfData.getCrfName());
+		stdCrdCde.setStdTemplateType(cdeCrfData.getNciCategory());
 		return stdCrdCde;
 	}
+	
+	
+	protected static void cleanupMissingCdesList (List<NrdsCde> nrdsCdeList, List<StandardCrfCde> standardCrfCdeList) {
+		for (Iterator<CategoryNrds> iterator = categoryNrdsList.iterator(); iterator.hasNext();) {
+			CategoryNrds nrds = iterator.next();
+			for (NrdsCde nrdsCdeStatic : nrdsCdeList) {
+			    if (nrdsCdeStatic.getCdeIdVersion().equals(nrds.getCdeId()+"v"+nrds.getDeVersion())) {
+			        // Remove the current element from the iterator and the list.
+			        iterator.remove();
+			    }
+		    }
+		}
+		for (Iterator<CategoryCde> iterator = categoryCdeList.iterator(); iterator.hasNext();) {
+			CategoryCde cde = iterator.next();
+			for (StandardCrfCde stdCrfCdeStatic : standardCrfCdeList) {
+				if (stdCrfCdeStatic.getCdeIdVersion().equals(cde.getCdeId()+"v"+cde.getDeVersion())) {
+			        // Remove the current element from the iterator and the list.
+			    	iterator.remove();
+				}
+			}
+		}
+	}
+	
+	
+	
 	
 		
 	/**
