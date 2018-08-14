@@ -27,6 +27,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.web.client.RestTemplate;
 
 import gov.nih.nci.cadsr.data.ALSData;
+import gov.nih.nci.cadsr.data.ALSForm;
 import gov.nih.nci.cadsr.data.CCCForm;
 import gov.nih.nci.cadsr.data.CCCQuestion;
 import gov.nih.nci.cadsr.data.CCCReport;
@@ -34,6 +35,7 @@ import gov.nih.nci.cadsr.data.FormDisplay;
 import gov.nih.nci.cadsr.data.FormsUiData;
 import gov.nih.nci.cadsr.data.NrdsCde;
 import gov.nih.nci.cadsr.data.ReportInputWrapper;
+import gov.nih.nci.cadsr.data.StandardCrfCde;
 import gov.nih.nci.cadsr.data.ValidateDataWrapper;
 import gov.nih.nci.cadsr.data.ValidateParamWrapper;
 import gov.nih.nci.cadsr.parser.Parser;
@@ -101,25 +103,32 @@ public class CongruencyCheckerReportInvoker {
 				logger.debug("Error description: "+alsError1.getErrorDesc()+" Severity: "+alsError1.getErrorSeverity());
 			}*/			
 			//logger.debug("Selected Forms list size: "+selForms.size());
-			ValidateParamWrapper validate = new ValidateParamWrapper();
+			/*ValidateParamWrapper validate = new ValidateParamWrapper();
 
 			validate.setSelForms(selForms);
 			validate.setCheckCrf(false);
 			validate.setCheckUom(false);
 			validate.setDisplayExceptions(false);
-			cccReport  = validateService(validate);
+			cccReport  = validateService(validate);*/
+			ReportInputWrapper reportInput = new ReportInputWrapper();
+			reportInput.setAlsData(alsData);
+			reportInput.setSelForms(selForms);
+			reportInput.setCheckStdCrfCde(false);
+			reportInput.setCheckUom(false);
+			reportInput.setDisplayExceptionDetails(false);
+			cccReport  = buildErrorReportService(reportInput);			
 			
 			logger.debug("Report Error Forms list size: "+cccReport.getCccForms().size());
-			for (CCCForm form : cccReport.getCccForms()) {
-				//logger.debug("Form name: " + form.getRaveFormOid());
-				//logger.debug("Questions list: " + form.getQuestions().size());
+			/*for (CCCForm form : cccReport.getCccForms()) {
+				logger.debug("Form name: " + form.getRaveFormOid());
+				logger.debug("Questions list: " + form.getQuestions().size());
 				for (CCCQuestion question : form.getQuestions()) {
 					/*if (question.getRaveCodedData() != null && question.getRaveCodedData().size() != 0)
 						logger.debug("Question coded data list: " + question.getRaveCodedData().size());
 					if (question.getRaveUserString() != null && question.getRaveUserString().size() != 0)
-						logger.debug("Questions user string data list: " + question.getRaveUserString().size());*/
+						logger.debug("Questions user string data list: " + question.getRaveUserString().size());
 				}
-			}
+			}*/
 			writeExcel(OUTPUT_XLSX_FILE_PATH, cccReport);
 			writeToJSON(cccReport);
 			logger.debug("Output object forms count: " + cccReport.getCccForms().size());			
@@ -308,7 +317,8 @@ public class CongruencyCheckerReportInvoker {
 					rowNum = rowNumAfterCD;
 			}
 		}				
-		workbook = buildNrdsTab(workbook, cccReport.getNrdsCdeList());
+		buildNrdsTab(workbook, cccReport.getNrdsCdeList());
+		buildStdCrfMissingTabs(workbook, cccReport.getStandardCrfCdeList());
 		
 		try {
 			FileOutputStream outputStream = new FileOutputStream(OUTPUT_XLSX_FILE_PATH);
@@ -325,7 +335,7 @@ public class CongruencyCheckerReportInvoker {
 	
 	public static XSSFWorkbook buildNrdsTab (XSSFWorkbook workbook, List<NrdsCde> nrdsCdeList) {
 		Row row;
-		String[] nrdSRowHeaders = { "Rave Form OID", "RAVE Field Order", "RAVE Field Label", "CDE ID Version", "CDE Name", "Result", "Message"};
+		String[] nrdsRowHeaders = { "Rave Form OID", "RAVE Field Order", "RAVE Field Label", "CDE ID Version", "CDE Name", "Result", "Message"};
 		XSSFSheet sheet = workbook.createSheet(nrds_missing_cde_tab_name);
 		int rowNum = 0;
 		row = sheet.createRow(rowNum++);
@@ -335,16 +345,17 @@ public class CongruencyCheckerReportInvoker {
 		row = sheet.createRow(rowNum++);
 		int colNum = 0;
 		// Print row headers in the NRDS sheet
-		for (String rowHeader : nrdSRowHeaders) {
+		for (String rowHeader : nrdsRowHeaders) {
 			newCell = row.createCell(colNum++);
 			newCell.setCellValue(rowHeader);
 		}
 		CellStyle cellStyle = workbook.createCellStyle();
         cellStyle.setWrapText(true);
         colNum = 0;
-        nrdsCdeList.add(buildNrdsTestObject());
+        //nrdsCdeList.add(buildNrdsTestObject());
 		// Print the NRDS CDEs 	
 		for (NrdsCde cde : nrdsCdeList) {
+			colNum = 0;			
 			row = sheet.createRow(rowNum++);
 			newCell = row.createCell(colNum++);
 			newCell.setCellValue(cde.getRaveFormOid());
@@ -366,6 +377,53 @@ public class CongruencyCheckerReportInvoker {
 		return workbook;
 	}
 	
+	
+	public static XSSFWorkbook buildStdCrfMissingTabs (XSSFWorkbook workbook, List<StandardCrfCde> stdCrfCdeList) {
+		String[] templateTypes = {"Mandatory", "Optional", "Conditional"};
+		String[] tabNames = {"Standard CRF Mandatory Missing", "Standard CRF Optional Missing", "Standard CRF Conditional Missing"};
+		int crfTabsCount = 3;
+        //stdCrfCdeList.add(buildCrfTestObject());		
+		for (int i = 0; i < crfTabsCount; i++ )
+			buildCrfTab(workbook.createSheet(tabNames[i]), stdCrfCdeList, templateTypes[i]);	
+ 		return workbook;		
+	}	
+	
+	
+	private static XSSFSheet buildCrfTab (XSSFSheet sheet, List<StandardCrfCde> stdCrfCdeList, String category) {
+		Row row;
+		String[] crfRowHeaders = { "CDE IDVersion", "CDE Name", "Template Name", "CRF ID Version"};
+		int colNum = 0;
+		int rowNum = 0;
+		row = sheet.createRow(rowNum++);
+		Cell newCell = row.createCell(0);
+		newCell.setCellValue("CDEs in Standard Template \""+category+"\" Modules Not Used");
+		row = sheet.createRow(rowNum++);
+		row = sheet.createRow(rowNum++);
+		// Print row headers in the CRF sheets
+		for (String rowHeader : crfRowHeaders) {
+			newCell = row.createCell(colNum++);
+			newCell.setCellValue(rowHeader);
+		}
+		
+		colNum = 0;
+		for (StandardCrfCde cde : stdCrfCdeList) {
+			if (cde.getStdTemplateType().equalsIgnoreCase(category)) {
+				colNum = 0;
+				row = sheet.createRow(rowNum++);
+				newCell = row.createCell(colNum++);
+				newCell.setCellValue(cde.getCdeIdVersion());			
+				newCell = row.createCell(colNum++);
+				newCell.setCellValue(cde.getCdeName());
+				newCell = row.createCell(colNum++);			
+				newCell.setCellValue(cde.getTemplateName());			
+				newCell = row.createCell(colNum++);
+				newCell.setCellValue(cde.getIdVersion()); 
+			}
+		}		
+		return sheet;
+	} 
+	
+	
 	private static NrdsCde buildNrdsTestObject () {
 		NrdsCde nrds = new NrdsCde();
 		nrds.setCdeIdVersion("33023034v1.0");
@@ -377,6 +435,16 @@ public class CongruencyCheckerReportInvoker {
 		nrds.setMessage("Question does not match with the ALS file");
 		return nrds;
 	}
+	
+	private static StandardCrfCde buildCrfTestObject () {
+		StandardCrfCde crfCde = new StandardCrfCde();
+		crfCde.setCdeIdVersion("324v5.0");
+		crfCde.setCdeName("Patient Age Value");
+		crfCde.setTemplateName("NCI Standard Demography Template");
+		crfCde.setIdVersion("2674812v1.0");
+		crfCde.setStdTemplateType("Mandatory");
+		return crfCde;
+	}	
 	
 	
 	
