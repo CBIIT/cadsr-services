@@ -4,32 +4,32 @@
 <div class="alert alert-danger" role="alert" *ngIf="!reportData['cccForms'].length">
     Please select forms and try again.
 </div>
-<ng-container *ngIf="reportData['cccForms'].length">
-<div>
-    <form #f="ngForm">
-        <span class="reportHeader">
-            <button class="btn btn-primary">Generate excel. Call 4807 url</button>
-        </span>
-        <span class="reportHeader">
-            <label for="raveFormOid">Rave Form Oid</label>
-            <select name="raveForm" id="raveFormOid" ngModel (change)="changeForm(f.value.raveForm)">
-                <option value="" disabled>Select a form</option>
-                <option *ngFor="let form of reportData.cccForms | formListsort:'raveFormOid'" [ngValue]="form">
-                    {{form.raveFormOid}}
-                </option>
-            </select>
-        </span>
-    </form>                
-</div>
-
-    <table datatable [dtOptions]="dtOptions" class="display compact" *ngIf="reportData as r">
-        <thead>
+<form #f="ngForm">
+    <div>
+    <span class="reportHeader">
+    <button class="btn btn-primary">Generate excel. Call 4807 url</button>
+    </span>
+    <span class="reportHeader">
+        <label for="raveFormOid">Rave Form Oid</label>
+        <select name="raveForm" id="raveFormOid" ngModel (change)="changeForm(f.value.raveForm)"  #localRaveOid>
+        <option value="" disabled>Select a form</option>
+        <option *ngFor="let form of reportData.cccForms | formListsort:'raveFormOid'" [ngValue]="form">
+        {{form.raveFormOid}}
+        </option>
+        </select>
+    </span>
+    </div><br />
+<ngb-tabset type="pills" ([ngModel])="tabs" #tabs *ngIf="reportData['cccForms'].length">dsads
+   <ngb-tab title="Summary">
+      <ng-template ngbTabContent>
+         <table datatable [dtOptions]="dtSummaryOptions" class="display compact" *ngIf="reportData as r">
+         <thead>
             <tr>
-                <th>CDE Congruency Checker Report for</th>
-                <th></th>
+               <th>CDE Congruency Checker Report for</th>
+               <th></th>
             </tr>
-        </thead>
-        <tbody>
+         </thead>
+         <tbody>
             <tr><td>Rave Protocol name </td><td>{{r.raveProtocolName}}</td></tr>
             <tr><td>Rave Protocol number </td><td>{{r.raveProtocolNumber}}</td></tr>
             <tr><td>Date Validated </td><td>{{r.reportDate}}</td></tr>
@@ -47,7 +47,110 @@
             <tr><td># NCI Standard Template Mandatory Modules Questions Congruent </td><td>{{r.countNciCongruent}}</td></tr>
             <tr><td># NCI Standard Template Mandatory Modules Questions With Errors </td><td>{{r.countQuestionsWithErrors}}</td></tr>
             <tr><td># NCI Standard Template Mandatory Modules Questions With Warnings </td><td>{{r.countQuestionsWithWarnings}}</td></tr>
-        </tbody>
-    </table>
+         </tbody>
+         </table>
+      </ng-template>
+   </ngb-tab>
+   <ngb-tab id="raveForm">
+      <ng-template ngbTabTitle>{{tabName}}</ng-template>
+      <ng-template ngbTabContent>
+        <div style="padding-left:4px;padding-top:5px;margin-bottom:-5px"><B>VIEW OF EXPANDED RESULTS {{raveForm.raveFormOid}}</B></div>
+        <table datatable [dtOptions]="dtFormSummaryOptions" class="display compact">
+            <tbody>
+                <tr><th>Rave Form OID</th><td>{{raveForm.countTotalQuestions}}</td></tr>
+                <tr><th>caDSR Form ID</th><td>{{raveForm.raveFormOid}}</td></tr>
+                <tr><th>Version</th><td>{{raveForm.version}}</td></tr>
+                <tr><th>Total Number Of Questions Checked</th><td>{{raveForm.countTotalQuestions}}</td></tr>
+            </tbody>
+        </table><br />
+ 
 
-</ng-container>
+<table datatable [dtOptions]="dtFormOptions" class="display compact">
+  <thead>
+    <tr>
+        <th>Field Order</th>
+        <th>CDE Public ID</th>
+        <th>CDE Version</th>
+        <th>NCI Category</th>
+        <th>Question Congruency Status</th>
+        <th>Message</th>   
+        <th>Rave Field Label</th>   
+        <th>Rave Field Label Result</th>
+        <th>Field Order</th>
+        <th>CDE Public ID</th>
+        <th>CDE Version</th>
+        <th>NCI Category</th>
+        <th>Question Congruency Status</th>
+        <th>Message</th>   
+        <th>Rave Field Label</th>   
+        <th>Rave Field Label Result</th>    
+        <th>Field Order</th>
+        <th>CDE Public ID</th>
+        <th>CDE Version</th>
+        <th>NCI Category</th>
+        <th>Question Congruency Status</th>
+        <th>Message</th>   
+        <th>Rave Field Label</th>   
+        <th>Rave Field Label Result</th>    
+        <th>Field Order</th>
+        <th>CDE Public ID</th>
+        <th>CDE Version</th>
+        <th>NCI Category</th>
+        <th>Question Congruency Status</th>
+        <th>Message</th>   
+        <th>Rave Field Label</th>   
+        <th>Rave Field Label Result</th>   
+        <th>Rave Field Label</th>   
+        <th>Rave Field Label Result</th>                                
+
+
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let question of raveForm.questions">
+        <td>{{question.fieldOrder}}</td>
+        <td>{{question.cdePublicId}}</td>
+        <td>{{question.cdeVersion}}</td>
+        <td>{{question.nciCategory}}</td>
+        <td>{{question.questionCongruencyStatus}}</td>
+        <td>{{question.message}}</td>      
+        <td>{{question.raveFieldLabel}}</td>
+        <td>{{question.raveFieldLabelResult}}</td>
+        <td>{{question.fieldOrder}}</td>
+        <td>{{question.cdePublicId}}</td>
+        <td>{{question.cdeVersion}}</td>
+        <td>{{question.nciCategory}}</td>
+        <td>{{question.questionCongruencyStatus}}</td>
+        <td>{{question.message}}</td>      
+        <td>{{question.raveFieldLabel}}</td>
+        <td>{{question.raveFieldLabelResult}}</td>   
+        <td>{{question.fieldOrder}}</td>
+        <td>{{question.cdePublicId}}</td>
+        <td>{{question.cdeVersion}}</td>
+        <td>{{question.nciCategory}}</td>
+        <td>{{question.questionCongruencyStatus}}</td>
+        <td>{{question.message}}</td>      
+        <td>{{question.raveFieldLabel}}</td>
+        <td>{{question.raveFieldLabelResult}}</td>
+        <td>{{question.fieldOrder}}</td>
+        <td>{{question.cdePublicId}}</td>
+        <td>{{question.cdeVersion}}</td>
+        <td>{{question.nciCategory}}</td>
+        <td>{{question.questionCongruencyStatus}}</td>
+        <td>{{question.message}}</td>      
+        <td>{{question.raveFieldLabel}}</td>
+        <td>{{question.raveFieldLabelResult}}</td>                
+        <td>{{question.raveFieldLabelResult}}</td>                
+        <td>{{question.raveFieldLabelResult}}</td>                
+
+
+        
+    </tr>
+    </tbody>
+</table>
+      </ng-template>
+   </ngb-tab>
+</ngb-tabset>
+
+</form>
+<pre>{{raveForm | json}}</pre>

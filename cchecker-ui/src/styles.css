@@ -106,3 +106,22 @@ form input {
 
 
 /* navigation css for header and left nav in navigation.css file under assets/styles directory */
+.nav-item:first-child {
+	padding-right:10px;
+}
+
+.nav-item:first-child a {
+    border:1px solid #007bff !important;
+}
+
+ .tab-pane {
+ 	padding-top:10px;
+ }
+
+table.dataTable thead th, table.dataTable thead td {
+  vertical-align: top !important;
+}
+
+table.dataTable tbody td {
+  vertical-align: top !important;
+}
