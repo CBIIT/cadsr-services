@@ -79,7 +79,6 @@ public class CongruencyCheckerReportInvoker {
 	private static String nrds_missing_cde_header = "NRDS CDEs included in Protocol Forms with Warnings or Errors";
 	
 	
-	
 	public static void main(String[] args) {
 			CCCReport cccReport = new CCCReport();
 			alsParser = new AlsParser();
@@ -103,20 +102,20 @@ public class CongruencyCheckerReportInvoker {
 				logger.debug("Error description: "+alsError1.getErrorDesc()+" Severity: "+alsError1.getErrorSeverity());
 			}*/			
 			//logger.debug("Selected Forms list size: "+selForms.size());
-			/*ValidateParamWrapper validate = new ValidateParamWrapper();
+			ValidateParamWrapper validate = new ValidateParamWrapper();
 
 			validate.setSelForms(selForms);
 			validate.setCheckCrf(false);
 			validate.setCheckUom(false);
 			validate.setDisplayExceptions(false);
-			cccReport  = validateService(validate);*/
-			ReportInputWrapper reportInput = new ReportInputWrapper();
+			cccReport  = validateService(validate);
+			/*ReportInputWrapper reportInput = new ReportInputWrapper();
 			reportInput.setAlsData(alsData);
 			reportInput.setSelForms(selForms);
 			reportInput.setCheckStdCrfCde(false);
 			reportInput.setCheckUom(false);
 			reportInput.setDisplayExceptionDetails(false);
-			cccReport  = buildErrorReportService(reportInput);			
+			cccReport  = buildErrorReportService(reportInput);*/			
 			
 			logger.debug("Report Error Forms list size: "+cccReport.getCccForms().size());
 			/*for (CCCForm form : cccReport.getCccForms()) {
@@ -352,7 +351,6 @@ public class CongruencyCheckerReportInvoker {
 		CellStyle cellStyle = workbook.createCellStyle();
         cellStyle.setWrapText(true);
         colNum = 0;
-        //nrdsCdeList.add(buildNrdsTestObject());
 		// Print the NRDS CDEs 	
 		for (NrdsCde cde : nrdsCdeList) {
 			colNum = 0;			
@@ -381,8 +379,7 @@ public class CongruencyCheckerReportInvoker {
 	public static XSSFWorkbook buildStdCrfMissingTabs (XSSFWorkbook workbook, List<StandardCrfCde> stdCrfCdeList) {
 		String[] templateTypes = {"Mandatory", "Optional", "Conditional"};
 		String[] tabNames = {"Standard CRF Mandatory Missing", "Standard CRF Optional Missing", "Standard CRF Conditional Missing"};
-		int crfTabsCount = 3;
-        //stdCrfCdeList.add(buildCrfTestObject());		
+		int crfTabsCount = 3; // 3 categories of standard CRF CDEs		
 		for (int i = 0; i < crfTabsCount; i++ )
 			buildCrfTab(workbook.createSheet(tabNames[i]), stdCrfCdeList, templateTypes[i]);	
  		return workbook;		
@@ -406,6 +403,7 @@ public class CongruencyCheckerReportInvoker {
 		}
 		
 		colNum = 0;
+		// Print the Standard CRF CDEs
 		for (StandardCrfCde cde : stdCrfCdeList) {
 			if (cde.getStdTemplateType().equalsIgnoreCase(category)) {
 				colNum = 0;
@@ -414,38 +412,14 @@ public class CongruencyCheckerReportInvoker {
 				newCell.setCellValue(cde.getCdeIdVersion());			
 				newCell = row.createCell(colNum++);
 				newCell.setCellValue(cde.getCdeName());
-				newCell = row.createCell(colNum++);			
-				newCell.setCellValue(cde.getTemplateName());			
+				newCell = row.createCell(colNum++);
+				newCell.setCellValue(cde.getTemplateName());
 				newCell = row.createCell(colNum++);
 				newCell.setCellValue(cde.getIdVersion()); 
 			}
 		}		
 		return sheet;
 	} 
-	
-	
-	private static NrdsCde buildNrdsTestObject () {
-		NrdsCde nrds = new NrdsCde();
-		nrds.setCdeIdVersion("33023034v1.0");
-		nrds.setRaveFormOid("ENROLLMENT");
-		nrds.setRaveFieldOrder(1);
-		nrds.setRaveFieldLabel("Weight Units");
-		nrds.setCdeName("Weight unit");
-		nrds.setResult("ERRORS");
-		nrds.setMessage("Question does not match with the ALS file");
-		return nrds;
-	}
-	
-	private static StandardCrfCde buildCrfTestObject () {
-		StandardCrfCde crfCde = new StandardCrfCde();
-		crfCde.setCdeIdVersion("324v5.0");
-		crfCde.setCdeName("Patient Age Value");
-		crfCde.setTemplateName("NCI Standard Demography Template");
-		crfCde.setIdVersion("2674812v1.0");
-		crfCde.setStdTemplateType("Mandatory");
-		return crfCde;
-	}	
-	
 	
 	
 	public static void autoSizeColumns(XSSFWorkbook workbook) {
