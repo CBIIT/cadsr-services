@@ -1,8 +1,9 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { Observable } from '../../../node_modules/rxjs';
 import { ReportService } from '../services/report.service';
-import { RouterLinkWithHref } from '../../../node_modules/@angular/router';
 import { NgbTabset } from '../../../node_modules/@ng-bootstrap/ng-bootstrap';
+import { RestService } from '../services/rest.service';
+import { HttpClient } from '../../../node_modules/@angular/common/http';
+import { saveAs }  from 'file-saver'
 
 @Component({
   selector: 'app-als-report',
@@ -10,28 +11,50 @@ import { NgbTabset } from '../../../node_modules/@ng-bootstrap/ng-bootstrap';
   styleUrls: ['./als-report.component.css']
 })
 export class AlsReportComponent implements OnInit {
-  reportData:Object;
-  dtSummaryOptions:Object;
+  congruentFormTotal:String;
   dtFormOptions:Object;
   dtFormSummaryOptions:Object;
-  congruentFormTotal:String;
+  dtSummaryOptions:Object;
+  error:boolean;
+  errorMessage:String;  
+  raveForm:Object;
+  reportData:Object;
   showFormTab:Boolean=false;
   tabName:String;
-  raveForm:Object;
   @ViewChild(NgbTabset)
     tabs: NgbTabset;
-  constructor(private reportService:ReportService) { }
 
+  constructor(private reportService:ReportService, private restService:RestService,private http:HttpClient) { }
 
+  // switch tab when selecting form from dropdown //
   changeForm = (form) => {
     this.tabName = form.raveFormOid;
     this.showFormTab = true;
     this.raveForm = form;
     this.tabs.select('raveForm');
-
   }
 
+  generateExcel = () => {
+    this.error = false;
+    this.restService.generateExcel().subscribe(
+      data => {
+        console.log(data)
+        const filename = data.headers.get('Content-Disposition').replace('attachment; filename=','')
+        var blob = new Blob([data.body], {type: "application/vnd.ms-excel"});
+        saveAs(blob, filename);
+      }, 
+      error => {
+        const reader = new FileReader();
+        reader.readAsText(error.error);
+        console.log(reader.result.toString())
+        this.errorMessage = reader.result.toString();
+        this.error = true;
+      },
+      () => console.log("FINISHED"))
+  };
+  
   ngOnInit() {
+    // this.restService.getUrl().subscribe(data=>console.log(data))
     this.reportService.getReportData().subscribe(data=> this.reportData = data).unsubscribe();
     this.congruentFormTotal = this.reportData['cccForms'].filter(v => v.congruencyStatus=='CONGRUENT').length;
     this.dtSummaryOptions={
@@ -67,47 +90,13 @@ export class AlsReportComponent implements OnInit {
       info:false
     };
     this.dtFormOptions={
-      columns: [
-        {width:"70px"},
-        {width:"80px"},
-        {width:"80px"},
-        {width:"80px"},
-        {width:"150px"},
-        {width:"300px"},
-        {width:"300px"},
-        {width:"200px"},
-        {width:"700px"},
-
-
-        {width:"120px"},
-        {width:"120px"},
-        {width:"120px"},
-        {width:"400px"},
-        {width:"700px"},
-        {width:"400px"},
-        {width:"700px"},
-        {width:"120px"},
-        {width:"500px"},
-        {width:"120px"},
-        {width:"120px"},
-        {width:"120px"},
-        {width:"120px"},
-        {width:"120px"},
-        {width:"120px"},
-        {width:"120px"},
-        {width:"120px"},
-        {width:"120px"},
-        {width:"120px"},
-        {width:"120px"},
-        {width:"120px"},
-                  
-     
-      ],
+      columns: [{width:"70px"},{width:"80px"},{width:"80px"},{width:"80px"},{width:"150px"},{width:"300px"},{width:"300px"},{width:"200px"},{width:"700px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"400px"},{width:"700px"},{width:"400px"},{width:"700px"},{width:"120px"},{width:"500px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"}],
       ordering:false,
       paging:false,
       searching:false,
       info:false,
       scrollX:true,
+      scrollY:300,
       scroller:true
     };
   };

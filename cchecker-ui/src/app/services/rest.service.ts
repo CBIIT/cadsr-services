@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -8,6 +8,26 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 export class RestService {
   constructor(private http:HttpClient) {
   }
+
+  // generate excel report //
+  generateExcel = () => this.http.get('http://localhost:8080/gateway/genexcelreporterror',
+  {
+    observe:'response',
+    responseType: "blob",
+    withCredentials:true
+  }
+  );
+
+  // validation service //
+  checkForms(checkedItems,formListData){
+    const checkUom = formListData['checkUom'] ? 'true':'false';
+    const checkCRF = formListData['checkStdCrfCde'] ? 'true':'false';
+    const displayExceptions = formListData['mustDisplayException'] ? 'true':'false';
+    return this.http.post('http://localhost:8080/gateway/checkservice',checkedItems,
+    {
+      withCredentials:true
+    })
+  } ; 
 
   // upload file service //
   uploadAlsFile(file){
@@ -18,15 +38,8 @@ export class RestService {
       withCredentials:true,
     })} ;
 
-  // upload file service //
-  checkForms(checkedItems,formListData){
-    const checkUom = formListData['checkUom'] ? 'true':'false';
-    const checkCRF = formListData['checkStdCrfCde'] ? 'true':'false';
-    const displayExceptions = formListData['mustDisplayException'] ? 'true':'false';
-    return this.http.post('http://localhost:8080/gateway/checkservice',checkedItems,
-    {
 
-      withCredentials:true
-    })
-  } ;    
+
+
+
 }
