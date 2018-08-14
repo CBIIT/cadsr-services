@@ -233,22 +233,25 @@ public class ExcelReportGenerator {
 			FileOutputStream outputStream = null;
 			try {
 				outputStream = new FileOutputStream(OUTPUT_XLSX_FILE_PATH);
-				logger.debug("outputStream created for " + OUTPUT_XLSX_FILE_PATH);
+				logger.debug("..outputStream created for " + OUTPUT_XLSX_FILE_PATH);
 				autoSizeColumns(workbook);
+				logger.debug("...autoSizeColumns done");
 				workbook.write(outputStream);
+				logger.debug("...workbook.write done");
 				workbook.close();
-				workbook.close();
+				logger.debug("...workbook.close done");
 			} catch (FileNotFoundException e) {
-				logger.debug("outputStream FileNotFoundException " + OUTPUT_XLSX_FILE_PATH);
 				e.printStackTrace();
+				logger.debug("outputStream FileNotFoundException " + OUTPUT_XLSX_FILE_PATH + ", FileNotFoundException: "+ e);
 			} catch (Exception e) {
-				logger.debug("outputStream Exception " + OUTPUT_XLSX_FILE_PATH);
 				e.printStackTrace();
+				logger.debug("outputStream Exception " + OUTPUT_XLSX_FILE_PATH + ", getMessage: " + e.getMessage() + e);
 			}
 			finally {
 				if (outputStream != null) {
 					outputStream.flush();
 					outputStream.close();
+					logger.debug("File is closed: " + OUTPUT_XLSX_FILE_PATH);
 				}
 			}
 		}
