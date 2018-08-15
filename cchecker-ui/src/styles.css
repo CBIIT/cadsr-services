@@ -110,7 +110,7 @@ form input {
 	padding-right:10px;
 }
 
-.nav-item:first-child a {
+.nav-item a {
     border:1px solid #007bff !important;
 }
 

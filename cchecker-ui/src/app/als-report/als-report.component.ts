@@ -1,16 +1,17 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy  } from '@angular/core';
 import { ReportService } from '../services/report.service';
 import { NgbTabset } from '../../../node_modules/@ng-bootstrap/ng-bootstrap';
 import { RestService } from '../services/rest.service';
 import { HttpClient } from '../../../node_modules/@angular/common/http';
 import { saveAs }  from 'file-saver'
+import { Observable, Subscription } from '../../../node_modules/rxjs';
 
 @Component({
   selector: 'app-als-report',
   templateUrl: './als-report.component.html',
   styleUrls: ['./als-report.component.css']
 })
-export class AlsReportComponent implements OnInit {
+export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
   congruentFormTotal:String;
   dtFormOptions:Object;
   dtFormSummaryOptions:Object;
@@ -22,17 +23,24 @@ export class AlsReportComponent implements OnInit {
   showFormTab:Boolean=false;
   statusMessage:String;
   tabName:String;
+  tabChanges:Subscription;
+
   @ViewChild(NgbTabset)
     tabs: NgbTabset;
 
   constructor(private reportService:ReportService, private restService:RestService,private http:HttpClient) { }
 
   // switch tab when selecting form from dropdown //
+
   changeForm = (form) => {
-    this.tabName = form.raveFormOid;
-    this.showFormTab = true;
+    this.tabName = form.formName;
+    if (this.showFormTab) {
+      this.tabs.select("raveForm")
+    }
+    else {
+      this.showFormTab = true;
+    }
     this.raveForm = form;
-    this.tabs.select('raveForm');
   }
 
   generateExcel = () => {
@@ -53,9 +61,8 @@ export class AlsReportComponent implements OnInit {
       },
       () => console.log("FINISHED"))
   };
-  
-  ngOnInit() {
-    // this.restService.getUrl().subscribe(data=>console.log(data))
+
+  ngOnInit() { 
     this.reportService.getReportData().subscribe(data=> this.reportData = data).unsubscribe();
     this.congruentFormTotal = this.reportData['cccForms'].filter(v => v.congruencyStatus=='CONGRUENT').length;
     this.dtSummaryOptions={
@@ -102,6 +109,16 @@ export class AlsReportComponent implements OnInit {
     };
   };
 
+  ngAfterViewInit() {
+    // after view is created subscribe to tab changes. Only done for css to create border on non active tab since ngb tabsets do not support classes //
+    this.tabChanges = this.tabs.tabs.changes.subscribe(data=>{
+      this.tabs.select("raveForm")
+    })
+  }
+
+  ngOnDestroy() {
+   this.tabChanges.unsubscribe();
+  }
 }
 
 

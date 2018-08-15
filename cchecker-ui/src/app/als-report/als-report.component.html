@@ -23,7 +23,7 @@
          <select name="raveForm" id="raveFormOid" ngModel (change)="changeForm(f.value.raveForm)"  #localRaveOid>
          <option value="" disabled>Select a form</option>
          <option *ngFor="let form of reportData.cccForms | formListsort:'raveFormOid'" [ngValue]="form">
-         {{form.raveFormOid}}
+         {{form.formName}}
          </option>
          </select>
       </span>
@@ -112,10 +112,10 @@
          </table>
       </ng-template>
    </ngb-tab>
-   <ngb-tab id="raveForm">
+   <ngb-tab id="raveForm" *ngIf="showFormTab">
       <ng-template ngbTabTitle>{{tabName}}</ng-template>
       <ng-template ngbTabContent>
-         <div style="padding-left:4px;padding-top:5px;margin-bottom:-5px"><B>VIEW OF EXPANDED RESULTS {{raveForm.raveFormOid}}</B></div>
+         <div style="padding-left:4px;padding-top:5px;margin-bottom:-5px"><B>VIEW OF EXPANDED RESULTS {{raveForm.formName}}</B></div>
          <table datatable [dtOptions]="dtFormSummaryOptions" class="display compact">
             <tbody>
                <tr>
@@ -211,3 +211,4 @@
    </ngb-tab>
    </ngb-tabset>
 </form>
+{{tabChanages | json}}
