@@ -50,9 +50,7 @@ export class AlsUploadFormComponent implements OnInit {
   uploadFile = () =>  {
     this.restService.uploadAlsFile(this.file).subscribe(
       e => {
-        console.log(e)
         if (e.type === HttpEventType.Response) {
-          console.log(e.body) 
           this.formListService.setFormListData(e.body);
         }
         else if (e.type === HttpEventType.UploadProgress) {
@@ -64,7 +62,6 @@ export class AlsUploadFormComponent implements OnInit {
 
         this.error = true;
         this.uploadProgress = 0;
-        console.log(event.target)
         if (event.target['response']=='') {
           this.errorMessage = 'Cannot communicate with the server'
         }
