@@ -83,6 +83,7 @@ public class GenerateReport implements ReportOutput {
 		List<CCCQuestion> questionsList = new ArrayList<CCCQuestion>();
 		List<NrdsCde> nrdsCdeList = new ArrayList<NrdsCde>();
 		List<StandardCrfCde> standardCrfCdeList = new ArrayList<StandardCrfCde>();
+		List<NrdsCde> missingNrdsCdesList = new ArrayList<NrdsCde>();
 		List<StandardCrfCde> missingStdCrfCdeList = new ArrayList<StandardCrfCde>();
 		Map<String, ALSDataDictionaryEntry> ddeMap = alsData.getDataDictionaryEntries();
 		for (ALSField alsField : alsData.getFields()) {
@@ -134,7 +135,7 @@ public class GenerateReport implements ReportOutput {
 						question.setRaveDisplayFormat(alsField.getDataFormat());
 						question.setRaveFieldDataType(alsField.getDataFormat());
 						Map<String, String> parseValidationError = pickFieldErrors(alsField, alsData.getCccError().getAlsErrors());
-						question = setParseErrorToQuestion (question, parseValidationError);						
+						question = setParseErrorToQuestion (question, parseValidationError);
 						CdeDetails cdeDetails = null;
 						logger.debug("cdeServiceCall: " + cdeServiceCall);
 						if (cdeServiceCall) {
@@ -211,10 +212,18 @@ public class GenerateReport implements ReportOutput {
 		if (formsList.size() == 0) {
 			throw new RuntimeException("!!!!!!!!! GenerateReport.getFinalReportData created report with no FORMS!!!");
 		}
-		cleanupMissingCdesList(nrdsCdeList, standardCrfCdeList);
+		// categoryNrdsList and categoryCdeList will be reduced to those CDEs that are missing
+		refineMissingCdesList(nrdsCdeList, standardCrfCdeList);
+		for (CategoryNrds cde : categoryNrdsList) {
+			missingNrdsCdesList.add(buildMissingNrdsCde(cde));
+		}
+		for (CategoryCde cde : categoryCdeList) {
+			missingStdCrfCdeList.add(buildMissingStdCrfCde(cde));
+		}		
 		
+		cccReport.setMissingNrdsCdeList(missingNrdsCdesList);
 		cccReport.setNrdsCdeList(nrdsCdeList);
-		cccReport.setStandardCrfCdeList(standardCrfCdeList);
+		cccReport.setMissingStandardCrfCdeList(missingStdCrfCdeList);
 		cccReport = addFormNamestoForms(cccReport, alsData.getForms());		
 		return cccReport;
 	}
@@ -347,10 +356,23 @@ public class GenerateReport implements ReportOutput {
 		nrds.setMessage(question.getMessage());
 		return nrds;
 	}
+	
+	
+	/**
+	 * @param nrdsDb
+	 * @return Return NrdsCde for a CDE returned from the static list of NRDS CDEs
+	 * 
+	 */
+	protected static NrdsCde buildMissingNrdsCde(CategoryNrds nrdsDb) {
+		NrdsCde nrds = new NrdsCde();
+		nrds.setCdeIdVersion(nrdsDb.getCdeId()+"v"+nrdsDb.getDeVersion());
+		nrds.setCdeName(nrdsDb.getDeName());
+		return nrds;
+	}	
 
 	/**
-	 * @param CCCQuestion
-	 * @param NrdsCde
+	 * @param cdeCrfData
+	 * @param cdeName
 	 * @return Return NrdsCde for a question
 	 * 
 	 */
@@ -365,13 +387,36 @@ public class GenerateReport implements ReportOutput {
 	}
 	
 	
-	protected static void cleanupMissingCdesList (List<NrdsCde> nrdsCdeList, List<StandardCrfCde> standardCrfCdeList) {
+	/**
+	 * @param stdCrfCdeDb
+	 * @return Return StandardCrfCde for a CDE returned from the static list of Standard CRF CDEs
+	 * 
+	 */
+	protected static StandardCrfCde buildMissingStdCrfCde(CategoryCde stdCrfCdeDb) {
+		StandardCrfCde stdCrdCde = new StandardCrfCde();
+		stdCrdCde.setCdeIdVersion(stdCrfCdeDb.getCdeId()+"v"+stdCrfCdeDb.getDeVersion());
+		stdCrdCde.setCdeName(stdCrfCdeDb.getDeName());
+		stdCrdCde.setIdVersion("1234567v1.0"); // Mock data
+		stdCrdCde.setTemplateName("NCI Standard Template"); // Mock data
+		stdCrdCde.setStdTemplateType(stdCrfCdeDb.getModuleType());
+		return stdCrdCde;
+	}	
+	
+
+	/**
+	 * @param nrdsCdeList
+	 * @param standardCrfCdeList
+	 * @return Reduces the NRDS and Standard CRF CDE lists to the CDEs that are missing in the RAVE ALS input file
+	 * 
+	 */	
+	protected static void refineMissingCdesList (List<NrdsCde> nrdsCdeList, List<StandardCrfCde> standardCrfCdeList) {
 		for (Iterator<CategoryNrds> iterator = categoryNrdsList.iterator(); iterator.hasNext();) {
 			CategoryNrds nrds = iterator.next();
 			for (NrdsCde nrdsCdeStatic : nrdsCdeList) {
 			    if (nrdsCdeStatic.getCdeIdVersion().equals(nrds.getCdeId()+"v"+nrds.getDeVersion())) {
 			        // Remove the current element from the iterator and the list.
-			        iterator.remove();
+			    	if (iterator!=null)
+			    		iterator.remove();
 			    }
 		    }
 		}
@@ -380,7 +425,8 @@ public class GenerateReport implements ReportOutput {
 			for (StandardCrfCde stdCrfCdeStatic : standardCrfCdeList) {
 				if (stdCrfCdeStatic.getCdeIdVersion().equals(cde.getCdeId()+"v"+cde.getDeVersion())) {
 			        // Remove the current element from the iterator and the list.
-			    	iterator.remove();
+					if (iterator!=null)					
+						iterator.remove();
 				}
 			}
 		}
