@@ -76,7 +76,7 @@ export class FormListService {
 
   // sets form list data. called from upload form //
   setFormListData = (data):void => { 
-    const ci = Object.assign([],data['formsList'].filter((r) => r.isValid ).map((e) => e.formName));
+    const ci = [];
     this.loadedFromFile = true;
     this.formListData.next(data);
     this.checkedItems.next(ci);
