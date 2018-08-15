@@ -300,7 +300,7 @@ public class ExcelReportGenerator {
 		
 		public static XSSFWorkbook buildNrdsTab (XSSFWorkbook workbook, List<NrdsCde> nrdsCdeList) {
 			Row row;
-			String[] nrdsRowHeaders = { "Rave Form OID", "RAVE Field Order", "RAVE Field Label", "CDE ID Version", "CDE Name", "Result", "Message"};
+			final String[] nrdsRowHeaders = { "Rave Form OID", "RAVE Field Order", "RAVE Field Label", "CDE ID Version", "CDE Name", "Result", "Message"};
 			XSSFSheet sheet = workbook.createSheet(matching_nrds_cdes_tab_name);
 			int rowNum = 0;
 			row = sheet.createRow(rowNum++);
@@ -343,8 +343,14 @@ public class ExcelReportGenerator {
 		
 		public static XSSFWorkbook buildMissingNrdsCdesTab (XSSFWorkbook workbook, List<NrdsCde> missingNrdsCdeList) {
 			Row row;
-			String[] nrdsRowHeaders = { "CDE ID Version", "CDE Name"};
+			final int idxOfCdeId = 0;//0-based
+			final int widthOfCdeId = 8*256;//in characters
+			final int idxOfCdeName = 1;
+			final int widthOfCdeName = 100*256;
+			final String[] nrdsRowHeaders = { "CDE ID Version", "CDE Name"};
 			XSSFSheet sheet = workbook.createSheet(nrds_missing_cde_tab_name);
+			sheet.setColumnWidth(idxOfCdeId, widthOfCdeId);
+			sheet.setColumnWidth(idxOfCdeName, widthOfCdeName);
 			int rowNum = 0;
 			row = sheet.createRow(rowNum++);
 			Cell newCell = row.createCell(0);
@@ -375,8 +381,8 @@ public class ExcelReportGenerator {
 		
 		
 		public static XSSFWorkbook buildStdCrfMissingTabs (XSSFWorkbook workbook, List<StandardCrfCde> stdCrfCdeList) {
-			String[] templateTypes = {"Mandatory", "Optional", "Conditional"};
-			String[] tabNames = {"Standard CRF Mandatory Missing", "Standard CRF Optional Missing", "Standard CRF Conditional Missing"};
+			final String[] templateTypes = {"Mandatory", "Optional", "Conditional"};
+			final String[] tabNames = {"Standard CRF Mandatory Missing", "Standard CRF Optional Missing", "Standard CRF Conditional Missing"};
 			int crfTabsCount = 3; // 3 categories of standard CRF CDEs		
 			for (int i = 0; i < crfTabsCount; i++ )
 				buildCrfTab(workbook.createSheet(tabNames[i]), stdCrfCdeList, templateTypes[i]);	
@@ -386,7 +392,19 @@ public class ExcelReportGenerator {
 		
 		private static XSSFSheet buildCrfTab (XSSFSheet sheet, List<StandardCrfCde> stdCrfCdeList, String category) {
 			Row row;
-			String[] crfRowHeaders = { "CDE IDVersion", "CDE Name", "Template Name", "CRF ID Version"};
+			final String[] crfRowHeaders = { "CDE IDVersion", "CDE Name", "Template Name", "CRF ID Version"};
+			final int idxOfCdeId = 0;//0-based
+			final int widthOfCdeId = 12*256;//in characters
+			final int idxOfCdeName = 1;//0-based
+			final int widthOfCdeName = 48*256;
+			final int idxOfFormName = 2;
+			final int widthOfFormName = 100*256;
+			final int idxOfFormId = 3;
+			final int widthOfFormId = 20*256;//in characters
+			sheet.setColumnWidth(idxOfCdeId, widthOfCdeId);
+			sheet.setColumnWidth(idxOfCdeName, widthOfCdeName);
+			sheet.setColumnWidth(idxOfFormName, widthOfFormName);
+			sheet.setColumnWidth(idxOfFormId, widthOfFormId);
 			int colNum = 0;
 			int rowNum = 0;
 			row = sheet.createRow(rowNum++);
