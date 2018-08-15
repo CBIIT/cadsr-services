@@ -6,7 +6,11 @@
 </div>
 
 <div class="alert alert-danger" role="alert" *ngIf="error">
-   {{errorMessage | json}}
+   {{errorMessage}}
+</div>
+
+<div class="alert alert-success" role="alert" *ngIf="statusMessage">
+   {{statusMessage}}
 </div>
 
 <form #f="ngForm">

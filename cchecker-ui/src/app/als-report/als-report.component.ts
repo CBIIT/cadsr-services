@@ -20,6 +20,7 @@ export class AlsReportComponent implements OnInit {
   raveForm:Object;
   reportData:Object;
   showFormTab:Boolean=false;
+  statusMessage:String;
   tabName:String;
   @ViewChild(NgbTabset)
     tabs: NgbTabset;
@@ -35,20 +36,20 @@ export class AlsReportComponent implements OnInit {
   }
 
   generateExcel = () => {
+    this.statusMessage = null;
     this.error = false;
     this.restService.generateExcel().subscribe(
       data => {
-        console.log(data)
         const filename = data.headers.get('Content-Disposition').replace('attachment; filename=','')
         var blob = new Blob([data.body], {type: "application/vnd.ms-excel"});
         saveAs(blob, filename);
+        this.statusMessage = `${filename} downloaded succesfully.`
       }, 
       error => {
-        const reader = new FileReader();
-        reader.readAsText(error.error);
-        console.log(reader.result.toString())
-        this.errorMessage = reader.result.toString();
         this.error = true;
+        const reader: FileReader = new FileReader();  
+        reader.readAsText(error.error)
+        reader.onloadend = (error):void => this.errorMessage = reader.result;
       },
       () => console.log("FINISHED"))
   };
