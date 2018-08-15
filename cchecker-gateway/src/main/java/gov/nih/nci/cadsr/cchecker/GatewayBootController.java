@@ -476,6 +476,7 @@ public class GatewayBootController {
 			logger.debug("...retrieveData: " + urlStr);
 			response.setHeader("Content-Type", "application/vnd.ms-excel");
 			response.setHeader("Content-Disposition", "attachment; filename=" + fileExcelReportPrefix + sessionCookieValue + EXCEL_FILE_EXT);
+			response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
 			response.setStatus(HttpServletResponse.SC_OK);
 
 			restTemplate.execute(urlStr, HttpMethod.GET, (ClientHttpRequest requestCallback) -> {
