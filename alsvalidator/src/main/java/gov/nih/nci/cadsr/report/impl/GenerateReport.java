@@ -204,6 +204,7 @@ public class GenerateReport implements ReportOutput {
 			form.setCongruencyStatus(congStatus_congruent);
 		else
 			form.setQuestions(questionsList);
+		form.setCountTotalQuestions(totalQuestCount);		
 		form.setRaveFormOid(formName);
 		if (!form.getQuestions().isEmpty())
 			formsList.add(form);
@@ -318,8 +319,8 @@ public class GenerateReport implements ReportOutput {
 					cdeCrfData = new CdeStdCrfData();
 					cdeCrfData.setCdePublicId(cdePublicId);
 					cdeCrfData.setCdeVersion(cdeVersion);
-					cdeCrfData.setCrfIdVersion("9991000v1.0"); // Mock data
-					cdeCrfData.setCrfName("NCI standard template"); // Mock data
+					cdeCrfData.setCrfIdVersion(cde.getFormId()); // Mock data
+					cdeCrfData.setCrfName(cde.getFormName()); // Mock data
 					cdeCrfData.setNciCategory(cde.getModuleType());
 				}
 			}
@@ -329,8 +330,6 @@ public class GenerateReport implements ReportOutput {
 						cdeCrfData = new CdeStdCrfData();
 						cdeCrfData.setCdePublicId(cdePublicId);
 						cdeCrfData.setCdeVersion(cdeVersion);
-						cdeCrfData.setCrfIdVersion("5555000v1.0"); // Mock data
-						cdeCrfData.setCrfName("NCI standard template"); // Mock data
 						cdeCrfData.setNciCategory(nrds_cde);
 					}
 				}
@@ -396,8 +395,8 @@ public class GenerateReport implements ReportOutput {
 		StandardCrfCde stdCrdCde = new StandardCrfCde();
 		stdCrdCde.setCdeIdVersion(stdCrfCdeDb.getCdeId()+"v"+stdCrfCdeDb.getDeVersion());
 		stdCrdCde.setCdeName(stdCrfCdeDb.getDeName());
-		stdCrdCde.setIdVersion("1234567v1.0"); // Mock data
-		stdCrdCde.setTemplateName("NCI Standard Template"); // Mock data
+		stdCrdCde.setIdVersion(stdCrfCdeDb.getFormId());
+		stdCrdCde.setTemplateName(stdCrfCdeDb.getFormName());
 		stdCrdCde.setStdTemplateType(stdCrfCdeDb.getModuleType());
 		return stdCrdCde;
 	}	
