@@ -23,12 +23,14 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import gov.nih.nci.cadsr.data.CCCForm;
 import gov.nih.nci.cadsr.data.CCCQuestion;
 import gov.nih.nci.cadsr.data.CCCReport;
+import gov.nih.nci.cadsr.data.NrdsCde;
+import gov.nih.nci.cadsr.data.StandardCrfCde;
 
 public class ExcelReportGenerator {
 
 		private static final Logger logger = Logger.getLogger(ExcelReportGenerator.class);
-		private static String formHeader_1 = "VIEW OF EXPANDED RESULTS FOR ";
-		private static String formHeader_2 = " FORM";	
+		private static String formHeader_1 = "View of Expanded Results for ";
+		private static String formHeader_2 = " form";	
 		private static String summaryFormsHeader = "Report Summary - Click on Form Name to expand results";
 		private static String summaryFormsValidResult = "Validation Result";
 		private static int summaryFormsValidResultColNum = 11;
@@ -53,6 +55,10 @@ public class ExcelReportGenerator {
 		private static int formStartColumn = 4;	
 		private static int allowableCdeValueCol = 19;
 		private static int codedDataColStart = 16;
+		private static String matching_nrds_cdes_tab_name = "NRDS CDEs in ALS";
+		private static String nrds_missing_cde_tab_name = "NRDS CDEs missing";
+		private static String nrds_missing_cde_header = "NRDS CDEs missing from the ALS file";
+		private static String matching_nrds_cdes_header = "NRDS CDEs included in Protocol Forms with Warnings or Errors";		
 
 		/**
 		 * @param
@@ -230,6 +236,9 @@ public class ExcelReportGenerator {
 						rowNum = rowNumAfterCD;
 				}
 			}
+			buildNrdsTab(workbook, cccReport.getNrdsCdeList());
+			buildMissingNrdsCdesTab(workbook, cccReport.getMissingNrdsCdeList());
+			buildStdCrfMissingTabs(workbook, cccReport.getMissingStandardCrfCdeList());			
 			FileOutputStream outputStream = null;
 			try {
 				outputStream = new FileOutputStream(OUTPUT_XLSX_FILE_PATH);
@@ -257,33 +266,156 @@ public class ExcelReportGenerator {
 		}
 		
 		public static void autoSizeColumns(Workbook workbook) {
-		    int numberOfSheets = workbook.getNumberOfSheets();
-		    logger.debug("autoSizeColumns NumberOfSheets: " + numberOfSheets);
-		    for (int i = 0; i < numberOfSheets; i++) {
-		    	try {
-			        Sheet sheet = workbook.getSheetAt(i);
-			        if (sheet != null) {
-				        if (sheet.getPhysicalNumberOfRows() > 0) {
-				        	for (int j = sheet.getFirstRowNum()+3; j < sheet.getLastRowNum(); j++) {
-					            Row row = sheet.getRow(j); 
-					            if (row != null) {
-						            Iterator<Cell> cellIterator = row.cellIterator();
-						            while (cellIterator.hasNext()) {
-						                Cell cell = cellIterator.next();
-						                if (cell != null) {
-							                int columnIndex = cell.getColumnIndex();
-							                sheet.autoSizeColumn(columnIndex);
-						                }
+			if (workbook!=null) {
+			    int numberOfSheets = workbook.getNumberOfSheets();
+			    logger.debug("autoSizeColumns NumberOfSheets: " + numberOfSheets);
+			    for (int i = 0; i < numberOfSheets; i++) {
+			    	try {
+				        Sheet sheet = workbook.getSheetAt(i);
+				        if (sheet != null) {
+					        if (sheet.getPhysicalNumberOfRows() > 0) {
+					        	for (int j = sheet.getFirstRowNum()+3; j < sheet.getLastRowNum(); j++) {
+						            Row row = sheet.getRow(j); 
+						            if (row != null) {
+							            Iterator<Cell> cellIterator = row.cellIterator();
+							            while (cellIterator.hasNext()) {
+							                Cell cell = cellIterator.next();
+							                if (cell != null) {
+								                int columnIndex = cell.getColumnIndex();
+								                sheet.autoSizeColumn(columnIndex);
+							                }
+							            }
 						            }
 					            }
-				            }
+					        }
 				        }
-			        }
-		    	}
-		    	catch (Exception e) {
-		    		logger.error("autoSizeColumns Exception on i=: " + i + ", " + e);
-		    	}
-		    }//for
+			    	}
+			    	catch (Exception e) {
+			    		logger.error("autoSizeColumns Exception on i=: " + i + ", " + e);
+			    	}
+			    }
+			}
+		}
+		
+		public static XSSFWorkbook buildNrdsTab (XSSFWorkbook workbook, List<NrdsCde> nrdsCdeList) {
+			Row row;
+			String[] nrdsRowHeaders = { "Rave Form OID", "RAVE Field Order", "RAVE Field Label", "CDE ID Version", "CDE Name", "Result", "Message"};
+			XSSFSheet sheet = workbook.createSheet(matching_nrds_cdes_tab_name);
+			int rowNum = 0;
+			row = sheet.createRow(rowNum++);
+			Cell newCell = row.createCell(0);
+			newCell.setCellValue(matching_nrds_cdes_header);
+			row = sheet.createRow(rowNum++);
+			row = sheet.createRow(rowNum++);
+			int colNum = 0;
+			// Print row headers in the NRDS sheet
+			for (String rowHeader : nrdsRowHeaders) {
+				newCell = row.createCell(colNum++);
+				newCell.setCellValue(rowHeader);
+			}
+			CellStyle cellStyle = workbook.createCellStyle();
+	        cellStyle.setWrapText(true);
+	        colNum = 0;
+			// Print the ALS CDEs matching with the NRDS CDEs 	
+			for (NrdsCde cde : nrdsCdeList) {
+				colNum = 0;			
+				row = sheet.createRow(rowNum++);
+				newCell = row.createCell(colNum++);
+				newCell.setCellValue(cde.getRaveFormOid());
+				newCell = row.createCell(colNum++);
+				newCell.setCellValue(cde.getRaveFieldOrder());
+				newCell = row.createCell(colNum++);
+				newCell.setCellStyle(cellStyle);			
+				newCell.setCellValue(cde.getRaveFieldLabel());			
+				newCell = row.createCell(colNum++);
+				newCell.setCellValue(cde.getCdeIdVersion());			
+				newCell = row.createCell(colNum++);
+				newCell.setCellValue(cde.getCdeName());						
+				newCell = row.createCell(colNum++);
+				newCell.setCellValue(cde.getResult());
+				newCell = row.createCell(colNum++);
+				newCell.setCellValue(cde.getMessage());			
+			}		
+			
+			return workbook;
+		}
+		
+		public static XSSFWorkbook buildMissingNrdsCdesTab (XSSFWorkbook workbook, List<NrdsCde> missingNrdsCdeList) {
+			Row row;
+			String[] nrdsRowHeaders = { "CDE ID Version", "CDE Name"};
+			XSSFSheet sheet = workbook.createSheet(nrds_missing_cde_tab_name);
+			int rowNum = 0;
+			row = sheet.createRow(rowNum++);
+			Cell newCell = row.createCell(0);
+			newCell.setCellValue(nrds_missing_cde_header);
+			row = sheet.createRow(rowNum++);
+			row = sheet.createRow(rowNum++);
+			int colNum = 0;
+			// Print row headers in the NRDS sheet
+			for (String rowHeader : nrdsRowHeaders) {
+				newCell = row.createCell(colNum++);
+				newCell.setCellValue(rowHeader);
+			}
+			CellStyle cellStyle = workbook.createCellStyle();
+	        cellStyle.setWrapText(true);
+	        colNum = 0;
+			// Print the missing NRDS CDEs 	
+			for (NrdsCde cde : missingNrdsCdeList) {
+				colNum = 0;			
+				row = sheet.createRow(rowNum++);
+				newCell = row.createCell(colNum++);
+				newCell.setCellValue(cde.getCdeIdVersion());			
+				newCell = row.createCell(colNum++);
+				newCell.setCellValue(cde.getCdeName());						
+			}		
+			
+			return workbook;
 		}	
+		
+		
+		public static XSSFWorkbook buildStdCrfMissingTabs (XSSFWorkbook workbook, List<StandardCrfCde> stdCrfCdeList) {
+			String[] templateTypes = {"Mandatory", "Optional", "Conditional"};
+			String[] tabNames = {"Standard CRF Mandatory Missing", "Standard CRF Optional Missing", "Standard CRF Conditional Missing"};
+			int crfTabsCount = 3; // 3 categories of standard CRF CDEs		
+			for (int i = 0; i < crfTabsCount; i++ )
+				buildCrfTab(workbook.createSheet(tabNames[i]), stdCrfCdeList, templateTypes[i]);	
+	 		return workbook;		
+		}	
+		
+		
+		private static XSSFSheet buildCrfTab (XSSFSheet sheet, List<StandardCrfCde> stdCrfCdeList, String category) {
+			Row row;
+			String[] crfRowHeaders = { "CDE IDVersion", "CDE Name", "Template Name", "CRF ID Version"};
+			int colNum = 0;
+			int rowNum = 0;
+			row = sheet.createRow(rowNum++);
+			Cell newCell = row.createCell(0);
+			newCell.setCellValue("CDEs in Standard Template \""+category+"\" Modules Not Used");
+			row = sheet.createRow(rowNum++);
+			row = sheet.createRow(rowNum++);
+			// Print row headers in the CRF sheets
+			for (String rowHeader : crfRowHeaders) {
+				newCell = row.createCell(colNum++);
+				newCell.setCellValue(rowHeader);
+			}
+			
+			colNum = 0;
+			// Print the Standard CRF CDEs
+			for (StandardCrfCde cde : stdCrfCdeList) {
+				if (cde.getStdTemplateType().equalsIgnoreCase(category)) {
+					colNum = 0;
+					row = sheet.createRow(rowNum++);
+					newCell = row.createCell(colNum++);
+					newCell.setCellValue(cde.getCdeIdVersion());			
+					newCell = row.createCell(colNum++);
+					newCell.setCellValue(cde.getCdeName());
+					newCell = row.createCell(colNum++);
+					newCell.setCellValue(cde.getTemplateName());
+					newCell = row.createCell(colNum++);
+					newCell.setCellValue(cde.getIdVersion()); 
+				}
+			}		
+			return sheet;
+		} 		
 		
 }
