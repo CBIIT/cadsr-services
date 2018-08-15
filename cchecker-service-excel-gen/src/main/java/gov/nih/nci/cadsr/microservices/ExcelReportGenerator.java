@@ -269,7 +269,8 @@ public class ExcelReportGenerator {
 			if (workbook!=null) {
 			    int numberOfSheets = workbook.getNumberOfSheets();
 			    logger.debug("autoSizeColumns NumberOfSheets: " + numberOfSheets);
-			    for (int i = 0; i < numberOfSheets; i++) {
+			    //FIXME this is slow; consider re-sizing Form sheets only
+			    for (int i = 0; (i < numberOfSheets) && (i < 2); i++) {
 			    	try {
 				        Sheet sheet = workbook.getSheetAt(i);
 				        if (sheet != null) {
