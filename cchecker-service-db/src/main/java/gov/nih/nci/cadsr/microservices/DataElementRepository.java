@@ -9,6 +9,9 @@ import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -174,6 +177,12 @@ public class DataElementRepository {
 	public List<CategoryCde> retrieveCdeModuleTypeList () {
 		List<CategoryCde> resultList;
 		resultList = getAll(retrieveCategoryCdeListQuery(), CategoryCde.class);
+		if ((resultList != null) && (! resultList.isEmpty())) {
+			CategoryCde[] arr = new CategoryCde[resultList.size()];
+			arr = resultList.toArray(arr);
+			Arrays.sort(arr, new SortCdes());
+			resultList = Arrays.asList(arr);
+		}
 		return resultList;
 	}
 	/**
@@ -200,7 +209,7 @@ public class DataElementRepository {
      * @return SQL string
      */
     protected String retrieveCategoryCdeListQuery() {
-		return "SELECT * from SBREXT.MDSR_STANDARD_CDE_TYPE";
+		return "SELECT * from SBREXT.MDSR_STANDARD_FORM_CDE_AGR";
 	}
     protected String retrieveNrdsCdeListQuery() {
 		return "SELECT CDE_ID, de.VERSION DE_VERSION, de.LONG_NAME DE_NAME FROM sbr.data_elements de "
@@ -310,6 +319,14 @@ public class DataElementRepository {
 		logger.debug("retrieveCdeType result: " + simpleJdbcCallResult.toString());
     	return simpleJdbcCallResult;
     }
-    
+    class SortCdes implements Comparator<CategoryCde>
+    {
+        public int compare(CategoryCde a, CategoryCde b)
+        {
+            	if (a == null) return -1;
+            else 
+            	return a.compareTo(b);
+        }
+    }    
     
 }
