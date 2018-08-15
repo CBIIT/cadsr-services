@@ -45,7 +45,9 @@ int countNrdsWithErrors;
 
 List<CCCForm> cccForms = new ArrayList<CCCForm>();
 List<NrdsCde> nrdsCdeList = new ArrayList<NrdsCde>();
-List<StandardCrfCde> standardCrfCdeList = new ArrayList<StandardCrfCde>();
+List<NrdsCde> missingNrdsCdeList = new ArrayList<NrdsCde>();
+List<StandardCrfCde> missingStandardCrfCdeList = new ArrayList<StandardCrfCde>();
+
 
 CCCError cccError = new CCCError();
 
@@ -216,12 +218,20 @@ public void setNrdsCdeList(List<NrdsCde> nrdsCdeList) {
 	this.nrdsCdeList = nrdsCdeList;
 }
 
-public List<StandardCrfCde> getStandardCrfCdeList() {
-	return standardCrfCdeList;
+public List<NrdsCde> getMissingNrdsCdeList() {
+	return missingNrdsCdeList;
 }
 
-public void setStandardCrfCdeList(List<StandardCrfCde> standardCrfCdeList) {
-	this.standardCrfCdeList = standardCrfCdeList;
+public void setMissingNrdsCdeList(List<NrdsCde> missingNrdsCdeList) {
+	this.missingNrdsCdeList = missingNrdsCdeList;
+}
+
+public List<StandardCrfCde> getMissingStandardCrfCdeList() {
+	return missingStandardCrfCdeList;
+}
+
+public void setMissingStandardCrfCdeList(List<StandardCrfCde> missingStandardCrfCdeList) {
+	this.missingStandardCrfCdeList = missingStandardCrfCdeList;
 }
 
 public CCCError getCccError() {

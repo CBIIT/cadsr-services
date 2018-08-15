@@ -49,8 +49,8 @@ public class CongruencyCheckerReportInvoker {
 	private static final Logger logger = Logger.getLogger(CongruencyCheckerReportInvoker.class);
 	private static Parser alsParser = null;
 	private static ReportOutput generateReport = null;
-	private static String formHeader_1 = "VIEW OF EXPANDED RESULTS FOR ";
-	private static String formHeader_2 = " FORM";	
+	private static String formHeader_1 = "View of Expanded Results for ";
+	private static String formHeader_2 = " form";	
 	private static String summaryFormsHeader = "Report Summary - Click on Form Name to expand results";
 	private static String summaryFormsValidResult = "Validation Result";
 	private static int summaryFormsValidResultColNum = 11;
@@ -75,8 +75,10 @@ public class CongruencyCheckerReportInvoker {
 	private static int formStartColumn = 4;	
 	private static int allowableCdeValueCol = 19;
 	private static int codedDataColStart = 16;
+	private static String matching_nrds_cdes_tab_name = "NRDS CDEs in ALS";
 	private static String nrds_missing_cde_tab_name = "NRDS CDEs missing";
-	private static String nrds_missing_cde_header = "NRDS CDEs included in Protocol Forms with Warnings or Errors";
+	private static String nrds_missing_cde_header = "NRDS CDEs missing from the ALS file";
+	private static String matching_nrds_cdes_header = "NRDS CDEs included in Protocol Forms with Warnings or Errors";
 	
 	
 	public static void main(String[] args) {
@@ -102,8 +104,8 @@ public class CongruencyCheckerReportInvoker {
 				logger.debug("Error description: "+alsError1.getErrorDesc()+" Severity: "+alsError1.getErrorSeverity());
 			}*/			
 			//logger.debug("Selected Forms list size: "+selForms.size());
+			
 			ValidateParamWrapper validate = new ValidateParamWrapper();
-
 			validate.setSelForms(selForms);
 			validate.setCheckCrf(false);
 			validate.setCheckUom(false);
@@ -129,7 +131,7 @@ public class CongruencyCheckerReportInvoker {
 				}
 			}*/
 			writeExcel(OUTPUT_XLSX_FILE_PATH, cccReport);
-			writeToJSON(cccReport);
+			//writeToJSON(cccReport);
 			logger.debug("Output object forms count: " + cccReport.getCccForms().size());			
 			} catch (IOException ioe) {
 				ioe.printStackTrace();			
@@ -317,7 +319,8 @@ public class CongruencyCheckerReportInvoker {
 			}
 		}				
 		buildNrdsTab(workbook, cccReport.getNrdsCdeList());
-		buildStdCrfMissingTabs(workbook, cccReport.getStandardCrfCdeList());
+		buildMissingNrdsCdesTab(workbook, cccReport.getMissingNrdsCdeList());
+		buildStdCrfMissingTabs(workbook, cccReport.getMissingStandardCrfCdeList());
 		
 		try {
 			FileOutputStream outputStream = new FileOutputStream(OUTPUT_XLSX_FILE_PATH);
@@ -335,11 +338,11 @@ public class CongruencyCheckerReportInvoker {
 	public static XSSFWorkbook buildNrdsTab (XSSFWorkbook workbook, List<NrdsCde> nrdsCdeList) {
 		Row row;
 		String[] nrdsRowHeaders = { "Rave Form OID", "RAVE Field Order", "RAVE Field Label", "CDE ID Version", "CDE Name", "Result", "Message"};
-		XSSFSheet sheet = workbook.createSheet(nrds_missing_cde_tab_name);
+		XSSFSheet sheet = workbook.createSheet(matching_nrds_cdes_tab_name);
 		int rowNum = 0;
 		row = sheet.createRow(rowNum++);
 		Cell newCell = row.createCell(0);
-		newCell.setCellValue(nrds_missing_cde_header);
+		newCell.setCellValue(matching_nrds_cdes_header);
 		row = sheet.createRow(rowNum++);
 		row = sheet.createRow(rowNum++);
 		int colNum = 0;
@@ -351,7 +354,7 @@ public class CongruencyCheckerReportInvoker {
 		CellStyle cellStyle = workbook.createCellStyle();
         cellStyle.setWrapText(true);
         colNum = 0;
-		// Print the NRDS CDEs 	
+		// Print the ALS CDEs matching with the NRDS CDEs 	
 		for (NrdsCde cde : nrdsCdeList) {
 			colNum = 0;			
 			row = sheet.createRow(rowNum++);
@@ -374,6 +377,38 @@ public class CongruencyCheckerReportInvoker {
 		
 		return workbook;
 	}
+	
+	public static XSSFWorkbook buildMissingNrdsCdesTab (XSSFWorkbook workbook, List<NrdsCde> missingNrdsCdeList) {
+		Row row;
+		String[] nrdsRowHeaders = { "CDE ID Version", "CDE Name"};
+		XSSFSheet sheet = workbook.createSheet(nrds_missing_cde_tab_name);
+		int rowNum = 0;
+		row = sheet.createRow(rowNum++);
+		Cell newCell = row.createCell(0);
+		newCell.setCellValue(nrds_missing_cde_header);
+		row = sheet.createRow(rowNum++);
+		row = sheet.createRow(rowNum++);
+		int colNum = 0;
+		// Print row headers in the NRDS sheet
+		for (String rowHeader : nrdsRowHeaders) {
+			newCell = row.createCell(colNum++);
+			newCell.setCellValue(rowHeader);
+		}
+		CellStyle cellStyle = workbook.createCellStyle();
+        cellStyle.setWrapText(true);
+        colNum = 0;
+		// Print the missing NRDS CDEs 	
+		for (NrdsCde cde : missingNrdsCdeList) {
+			colNum = 0;			
+			row = sheet.createRow(rowNum++);
+			newCell = row.createCell(colNum++);
+			newCell.setCellValue(cde.getCdeIdVersion());			
+			newCell = row.createCell(colNum++);
+			newCell.setCellValue(cde.getCdeName());						
+		}		
+		
+		return workbook;
+	}	
 	
 	
 	public static XSSFWorkbook buildStdCrfMissingTabs (XSSFWorkbook workbook, List<StandardCrfCde> stdCrfCdeList) {
@@ -423,21 +458,31 @@ public class CongruencyCheckerReportInvoker {
 	
 	
 	public static void autoSizeColumns(XSSFWorkbook workbook) {
+		if (workbook!=null) {
 	    int numberOfSheets = workbook.getNumberOfSheets();
 	    for (int i = 0; i < numberOfSheets; i++) {
 	        Sheet sheet = workbook.getSheetAt(i);
-	        if (sheet.getPhysicalNumberOfRows() > 0) {
-	        	for (int j = sheet.getFirstRowNum()+3; j < sheet.getLastRowNum(); j++) {
-		            Row row = sheet.getRow(j);
-		            Iterator<Cell> cellIterator = row.cellIterator();
-		            while (cellIterator.hasNext()) {
-		                Cell cell = cellIterator.next();
-		                int columnIndex = cell.getColumnIndex();
-		                sheet.autoSizeColumn(columnIndex);
+	        if (sheet!=null) {
+		        if (sheet.getPhysicalNumberOfRows() > 0) {
+		        	for (int j = sheet.getFirstRowNum()+3; j < sheet.getLastRowNum(); j++) {
+			            Row row = sheet.getRow(j);
+			            if (row!=null) {
+				            Iterator<Cell> cellIterator = row.cellIterator();
+				            if (cellIterator!=null) {
+					            while (cellIterator.hasNext()) {
+					                Cell cell = cellIterator.next();
+					                if (cell!=null) {
+						                int columnIndex = cell.getColumnIndex();
+						                sheet.autoSizeColumn(columnIndex); 
+					                }
+					            }
+				            }
+			            }
 		            }
-	            }
+		        }
 	        }
-	    }
+	      }
+	   }
 	}	
 	
 	private static void writeToJSON (CCCReport cccReport) {
