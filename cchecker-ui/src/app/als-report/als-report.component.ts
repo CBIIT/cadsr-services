@@ -5,7 +5,6 @@ import { RestService } from '../services/rest.service';
 import { HttpClient } from '../../../node_modules/@angular/common/http';
 import { saveAs }  from 'file-saver'
 import { Observable, Subscription } from '../../../node_modules/rxjs';
-import {D} from 'angular-datatables';
 @Component({
   selector: 'app-als-report',
   templateUrl: './als-report.component.html',
