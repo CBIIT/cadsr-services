@@ -101,13 +101,17 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     // after view is created subscribe to tab changes. Only done for css to create border on non active tab since ngb tabsets do not support classes //
-    this.tabChanges = this.tabs.tabs.changes.subscribe(data=>{
-      this.tabs.select("raveForm")
-    })
+    if (this.tabs) {
+      this.tabChanges = this.tabs.tabs.changes.subscribe(data=>{
+        this.tabs.select("raveForm")
+      });
+    };
   }
 
   ngOnDestroy() {
-   this.tabChanges.unsubscribe();
+    if (this.tabs) {
+      this.tabChanges.unsubscribe();
+    }
   }
 }
 
