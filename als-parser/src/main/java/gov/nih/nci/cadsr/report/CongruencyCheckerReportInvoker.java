@@ -68,10 +68,18 @@ public class CongruencyCheckerReportInvoker {
 	private static String reqNrdsQuestCongLbl = "# Required NRDS Questions Congruent ";
 	private static String reqNrdsQuestWarnLbl = "# Required NRDS Questions With Warnings ";
 	private static String reqNrdsQuestErrorLbl = "# Required NRDS Questions With Errors ";
-	private static String nciStdTempQuestLbl = "# NCI Standard Template Mandatory Modules Questions not used in Protocol ";
-	private static String nciStdTempCongLbl = "# NCI Standard Template Mandatory Modules Questions Congruent ";
-	private static String nciStdTempErrorLbl = "# NCI Standard Template Mandatory Modules Questions With Errors ";
-	private static String nciStdTempWarnLbl = "# NCI Standard Template Mandatory Modules Questions With Warnings ";	
+	private static String nciStdManQuestLbl = "# NCI Standard Template Mandatory Modules Questions missing from Protocol ";
+	private static String nciStdManCongLbl = "# NCI Standard Template Mandatory Modules Questions Congruent ";
+	private static String nciStdManErrorLbl = "# NCI Standard Template Mandatory Modules Questions With Errors ";
+	private static String nciStdManWarnLbl = "# NCI Standard Template Mandatory Modules Questions With Warnings ";	
+	private static String nciStdCondQuestLbl = "# NCI Standard Template Conditional Modules Questions missing from Protocol ";
+	private static String nciStdCondCongLbl = "# NCI Standard Template Conditional Modules Questions Congruent ";
+	private static String nciStdCondErrorLbl = "# NCI Standard Template Conditional Modules Questions With Errors ";
+	private static String nciStdCondWarnLbl = "# NCI Standard Template Conditional Modules Questions With Warnings ";	
+	private static String nciStdOptQuestLbl = "# NCI Standard Template Optional Modules Questions missing from Protocol ";
+	private static String nciStdOptCongLbl = "# NCI Standard Template Optional Modules Questions Congruent ";
+	private static String nciStdOptErrorLbl = "# NCI Standard Template Optional Modules Questions With Errors ";
+	private static String nciStdOptWarnLbl = "# NCI Standard Template Optional Modules Questions With Warnings ";		
 	private static int formStartColumn = 4;	
 	private static int allowableCdeValueCol = 19;
 	private static int codedDataColStart = 16;
@@ -117,7 +125,7 @@ public class CongruencyCheckerReportInvoker {
 			reportInput.setCheckStdCrfCde(false);
 			reportInput.setCheckUom(false);
 			reportInput.setDisplayExceptionDetails(false);
-			cccReport  = buildErrorReportService(reportInput);*/			
+			cccReport  = buildErrorReportService(reportInput);	*/
 			
 			logger.debug("Report Error Forms list size: "+cccReport.getCccForms().size());
 			/*for (CCCForm form : cccReport.getCccForms()) {
@@ -131,7 +139,7 @@ public class CongruencyCheckerReportInvoker {
 				}
 			}*/
 			writeExcel(OUTPUT_XLSX_FILE_PATH, cccReport);
-			//writeToJSON(cccReport);
+			writeToJSON(cccReport);
 			logger.debug("Output object forms count: " + cccReport.getCccForms().size());			
 			} catch (IOException ioe) {
 				ioe.printStackTrace();			
@@ -158,19 +166,27 @@ public class CongruencyCheckerReportInvoker {
 		summaryLabels.put(raveProtocolNumLbl, cccReport.getRaveProtocolNumber());
 		summaryLabels.put(reportDateLbl, cccReport.getReportDate());
 		summaryLabels.put(formCountLbl, String.valueOf(cccReport.getTotalFormsCount()));
-		summaryLabels.put(totalCountFormLbl, String.valueOf(cccReport.getTotalFormsCount()));
+		summaryLabels.put(totalCountFormLbl, String.valueOf(cccReport.getTotalFormsCong()));
 		summaryLabels.put(totalQuestCheckLbl, String.valueOf(cccReport.getCountQuestionsChecked()));
-		summaryLabels.put(totalQuestWarnLbl, "");
-		summaryLabels.put(totalQuestErrorLbl, "");
+		summaryLabels.put(totalQuestWarnLbl, String.valueOf(cccReport.getCountQuestionsWithWarnings()));
+		summaryLabels.put(totalQuestErrorLbl, String.valueOf(cccReport.getCountQuestionsWithErrors()));
 		summaryLabels.put(totalunassociatedQuestLbl, "");
-		summaryLabels.put(reqQuestMissLbl, "");
-		summaryLabels.put(reqNrdsQuestCongLbl, "");
-		summaryLabels.put(reqNrdsQuestWarnLbl, "");
-		summaryLabels.put(reqNrdsQuestErrorLbl, "");
-		summaryLabels.put(nciStdTempQuestLbl, "");
-		summaryLabels.put(nciStdTempCongLbl, "");
-		summaryLabels.put(nciStdTempErrorLbl, "");
-		summaryLabels.put(nciStdTempWarnLbl, "");
+		summaryLabels.put(reqQuestMissLbl, String.valueOf(cccReport.getCountNrdsMissing()));
+		summaryLabels.put(reqNrdsQuestCongLbl, String.valueOf(cccReport.getCountNrdsCongruent()));
+		summaryLabels.put(reqNrdsQuestWarnLbl, String.valueOf(cccReport.getCountNrdsWithWarnings()));
+		summaryLabels.put(reqNrdsQuestErrorLbl, String.valueOf(cccReport.getCountNrdsWithErrors()));
+		summaryLabels.put(nciStdManQuestLbl, String.valueOf(cccReport.getCountManCrfMissing()));
+		summaryLabels.put(nciStdManCongLbl, String.valueOf(cccReport.getCountManCrfCongruent()));
+		summaryLabels.put(nciStdManErrorLbl, String.valueOf(cccReport.getCountManCrfWithErrors()));
+		summaryLabels.put(nciStdManWarnLbl, String.valueOf(cccReport.getCountManCrfwWithWarnings()));
+		summaryLabels.put(nciStdCondQuestLbl, String.valueOf(cccReport.getCountCondCrfMissing()));
+		summaryLabels.put(nciStdCondCongLbl, String.valueOf(cccReport.getCountCondCrfCongruent()));
+		summaryLabels.put(nciStdCondErrorLbl, String.valueOf(cccReport.getCountCondCrfWithErrors()));
+		summaryLabels.put(nciStdCondWarnLbl, String.valueOf(cccReport.getCountCondCrfwWithWarnings()));
+		summaryLabels.put(nciStdOptQuestLbl, String.valueOf(cccReport.getCountOptCrfMissing()));
+		summaryLabels.put(nciStdOptCongLbl, String.valueOf(cccReport.getCountOptCrfCongruent()));
+		summaryLabels.put(nciStdOptErrorLbl, String.valueOf(cccReport.getCountOptCrfWithErrors()));
+		summaryLabels.put(nciStdOptWarnLbl, String.valueOf(cccReport.getCountOptCrfwWithWarnings()));		
 		
 		int rowNum = 0;
 		logger.debug("Creating excel");
@@ -380,8 +396,14 @@ public class CongruencyCheckerReportInvoker {
 	
 	public static XSSFWorkbook buildMissingNrdsCdesTab (XSSFWorkbook workbook, List<NrdsCde> missingNrdsCdeList) {
 		Row row;
-		String[] nrdsRowHeaders = { "CDE ID Version", "CDE Name"};
+		final int idxOfCdeId = 0;//0-based
+		final int widthOfCdeId = 8*256;//in characters
+		final int idxOfCdeName = 1;
+		final int widthOfCdeName = 100*256;
+		final String[] nrdsRowHeaders = { "CDE ID Version", "CDE Name"};
 		XSSFSheet sheet = workbook.createSheet(nrds_missing_cde_tab_name);
+		sheet.setColumnWidth(idxOfCdeId, widthOfCdeId);
+		sheet.setColumnWidth(idxOfCdeName, widthOfCdeName);
 		int rowNum = 0;
 		row = sheet.createRow(rowNum++);
 		Cell newCell = row.createCell(0);
@@ -424,6 +446,18 @@ public class CongruencyCheckerReportInvoker {
 	private static XSSFSheet buildCrfTab (XSSFSheet sheet, List<StandardCrfCde> stdCrfCdeList, String category) {
 		Row row;
 		String[] crfRowHeaders = { "CDE IDVersion", "CDE Name", "Template Name", "CRF ID Version"};
+		final int idxOfCdeId = 0;//0-based
+		final int widthOfCdeId = 12*256;//in characters
+		final int idxOfCdeName = 1;//0-based
+		final int widthOfCdeName = 48*256;
+		final int idxOfFormName = 2;
+		final int widthOfFormName = 100*256;
+		final int idxOfFormId = 3;
+		final int widthOfFormId = 20*256;//in characters
+		sheet.setColumnWidth(idxOfCdeId, widthOfCdeId);
+		sheet.setColumnWidth(idxOfCdeName, widthOfCdeName);
+		sheet.setColumnWidth(idxOfFormName, widthOfFormName);
+		sheet.setColumnWidth(idxOfFormId, widthOfFormId);		
 		int colNum = 0;
 		int rowNum = 0;
 		row = sheet.createRow(rowNum++);
@@ -460,7 +494,7 @@ public class CongruencyCheckerReportInvoker {
 	public static void autoSizeColumns(XSSFWorkbook workbook) {
 		if (workbook!=null) {
 	    int numberOfSheets = workbook.getNumberOfSheets();
-	    for (int i = 0; i < numberOfSheets; i++) {
+	    for (int i = 0; (i < numberOfSheets) && (i < 2); i++) {
 	        Sheet sheet = workbook.getSheetAt(i);
 	        if (sheet!=null) {
 		        if (sheet.getPhysicalNumberOfRows() > 0) {

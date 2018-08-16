@@ -17,6 +17,7 @@ String raveProtocolName;
 String raveProtocolNumber;
 
 int totalFormsCount;
+int totalFormsCong;
 int countQuestionsChecked;
 int countCongruentQuestions;
 int countQuestionsWithWarnings;
@@ -31,11 +32,23 @@ int countQuestionsWithoutCde;
  *  because while it is mostly stable, it can change over time.
  */
 
-// NCI standard questions requirement
-int countNciCongruent;
-int countNciMissing;
-int countNciwWithWarnings;
-int countNciWithErrors;
+// NCI standard Mandatory questions requirement
+int countManCrfCongruent;
+int countManCrfMissing;
+int countManCrfwWithWarnings;
+int countManCrfWithErrors;
+
+//NCI standard Optional questions requirement
+int countOptCrfCongruent;
+int countOptCrfMissing;
+int countOptCrfwWithWarnings;
+int countOptCrfWithErrors;
+
+//NCI standard Conditional questions requirement
+int countCondCrfCongruent;
+int countCondCrfMissing;
+int countCondCrfwWithWarnings;
+int countCondCrfWithErrors;
 
 // NRDS mandatory questions requirement
 int countNrdsCongruent;
@@ -47,7 +60,6 @@ List<CCCForm> cccForms = new ArrayList<CCCForm>();
 List<NrdsCde> nrdsCdeList = new ArrayList<NrdsCde>();
 List<NrdsCde> missingNrdsCdeList = new ArrayList<NrdsCde>();
 List<StandardCrfCde> missingStandardCrfCdeList = new ArrayList<StandardCrfCde>();
-
 
 CCCError cccError = new CCCError();
 
@@ -98,6 +110,14 @@ public void setTotalFormsCount(int totalFormsCount) {
 	this.totalFormsCount = totalFormsCount;
 }
 
+public int getTotalFormsCong() {
+	return totalFormsCong;
+}
+
+public void setTotalFormsCong(int totalFormsCong) {
+	this.totalFormsCong = totalFormsCong;
+}
+
 public int getCountQuestionsChecked() {
 	return countQuestionsChecked;
 }
@@ -138,36 +158,100 @@ public void setCountQuestionsWithoutCde(int countQuestionsWithoutCde) {
 	this.countQuestionsWithoutCde = countQuestionsWithoutCde;
 }
 
-public int getCountNciMissing() {
-	return countNciMissing;
+public int getCountManCrfCongruent() {
+	return countManCrfCongruent;
 }
 
-public void setCountNciMissing(int countNciMissing) {
-	this.countNciMissing = countNciMissing;
+public void setCountManCrfCongruent(int countManCrfCongruent) {
+	this.countManCrfCongruent = countManCrfCongruent;
 }
 
-public int getCountNciCongruent() {
-	return countNciCongruent;
+public int getCountManCrfMissing() {
+	return countManCrfMissing;
 }
 
-public void setCountNciCongruent(int countNciCongruent) {
-	this.countNciCongruent = countNciCongruent;
+public void setCountManCrfMissing(int countManCrfMissing) {
+	this.countManCrfMissing = countManCrfMissing;
 }
 
-public int getCountNciwWithWarnings() {
-	return countNciwWithWarnings;
+public int getCountManCrfwWithWarnings() {
+	return countManCrfwWithWarnings;
 }
 
-public void setCountNciwWithWarnings(int countNciwWithWarnings) {
-	this.countNciwWithWarnings = countNciwWithWarnings;
+public void setCountManCrfwWithWarnings(int countManCrfwWithWarnings) {
+	this.countManCrfwWithWarnings = countManCrfwWithWarnings;
 }
 
-public int getCountNciWithErrors() {
-	return countNciWithErrors;
+public int getCountManCrfWithErrors() {
+	return countManCrfWithErrors;
 }
 
-public void setCountNciWithErrors(int countNciWithErrors) {
-	this.countNciWithErrors = countNciWithErrors;
+public void setCountManCrfWithErrors(int countManCrfWithErrors) {
+	this.countManCrfWithErrors = countManCrfWithErrors;
+}
+
+public int getCountOptCrfCongruent() {
+	return countOptCrfCongruent;
+}
+
+public void setCountOptCrfCongruent(int countOptCrfCongruent) {
+	this.countOptCrfCongruent = countOptCrfCongruent;
+}
+
+public int getCountOptCrfMissing() {
+	return countOptCrfMissing;
+}
+
+public void setCountOptCrfMissing(int countOptCrfMissing) {
+	this.countOptCrfMissing = countOptCrfMissing;
+}
+
+public int getCountOptCrfwWithWarnings() {
+	return countOptCrfwWithWarnings;
+}
+
+public void setCountOptCrfwWithWarnings(int countoptCrfwWithWarnings) {
+	this.countOptCrfwWithWarnings = countoptCrfwWithWarnings;
+}
+
+public int getCountOptCrfWithErrors() {
+	return countOptCrfWithErrors;
+}
+
+public void setCountOptCrfWithErrors(int countOptCrfWithErrors) {
+	this.countOptCrfWithErrors = countOptCrfWithErrors;
+}
+
+public int getCountCondCrfCongruent() {
+	return countCondCrfCongruent;
+}
+
+public void setCountCondCrfCongruent(int countCondCrfCongruent) {
+	this.countCondCrfCongruent = countCondCrfCongruent;
+}
+
+public int getCountCondCrfMissing() {
+	return countCondCrfMissing;
+}
+
+public void setCountCondCrfMissing(int countCondCrfMissing) {
+	this.countCondCrfMissing = countCondCrfMissing;
+}
+
+public int getCountCondCrfwWithWarnings() {
+	return countCondCrfwWithWarnings;
+}
+
+public void setCountCondCrfwWithWarnings(int countCondCrfwWithWarnings) {
+	this.countCondCrfwWithWarnings = countCondCrfwWithWarnings;
+}
+
+public int getCountCondCrfWithErrors() {
+	return countCondCrfWithErrors;
+}
+
+public void setCountCondCrfWithErrors(int countCondCrfWithErrors) {
+	this.countCondCrfWithErrors = countCondCrfWithErrors;
 }
 
 public int getCountNrdsCongruent() {

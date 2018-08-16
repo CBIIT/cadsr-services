@@ -76,11 +76,11 @@ public class GenerateReport implements ReportOutput {
 		cccReport.setRaveProtocolName(alsData.getCrfDraft().getProjectName());
 		cccReport.setRaveProtocolNumber(alsData.getCrfDraft().getPrimaryFormOid());
 		cccReport.setTotalFormsCount(alsData.getForms().size());
-		cccReport.setCountQuestionsChecked(alsData.getFields().size());
 		List<CCCForm> formsList = new ArrayList<CCCForm>();
 		CCCForm form = new CCCForm();
 		String formName = "";
 		int totalQuestCount = 0;
+		int totalFormsCongruent = 0;
 
 
 		List<CCCQuestion> questionsList = new ArrayList<CCCQuestion>();
@@ -225,11 +225,22 @@ public class GenerateReport implements ReportOutput {
 		}
 		for (CategoryCde cde : missingCdeStd) {
 			missingStdCrfCdeList.add(buildMissingStdCrfCde(cde));
-		}		
+		}
 		
+		for (CCCForm tempForm : formsList) {
+			if (tempForm.getCongruencyStatus()!=null) {
+				if (congStatus_congruent.equals(tempForm.getCongruencyStatus())) {
+					totalFormsCongruent++;
+				}
+			}
+		}
+		
+		cccReport.setTotalFormsCong(totalFormsCongruent);
 		cccReport.setMissingNrdsCdeList(missingNrdsCdesList);
+		cccReport.setCountNrdsMissing(missingNrdsCdesList.size());
 		cccReport.setNrdsCdeList(nrdsCdeList);
-		cccReport.setMissingStandardCrfCdeList(missingStdCrfCdeList);
+		cccReport.setMissingStandardCrfCdeList(missingStdCrfCdeList);		
+		cccReport = computeFormsAndQuestionsCount(cccReport);		
 		cccReport = addFormNamestoForms(cccReport, alsData.getForms());		
 		return cccReport;
 	}
@@ -469,6 +480,92 @@ public class GenerateReport implements ReportOutput {
 		}		
 		return missing;
 	}	
+	
+	protected static CCCReport computeFormsAndQuestionsCount (CCCReport report) {
+		int stdManMissingCount = 0;
+		int stdOptMissingCount = 0;
+		int stdCondMissingCount = 0;
+		int countQuestChecked = 0;
+		int countQuestCongruent = 0;
+		int countQuestWarn = 0;
+		int countQuestError = 0;
+		int manCrfCong = 0;
+		int manCrfWarn = 0;
+		int manCrfErr = 0;
+		int optCrfCong = 0;
+		int optCrfWarn = 0;
+		int optCrfErr = 0;
+		int condCrfCong = 0;
+		int condCrfWarn = 0;
+		int condCrfErr = 0;
+		
+		for (StandardCrfCde cde : report.getMissingStandardCrfCdeList()) {
+			if (mandatory_crf.equals(cde.getStdTemplateType())) 
+				stdManMissingCount++;
+			else if (conditional_crf.equals(cde.getStdTemplateType()))
+				stdCondMissingCount++;
+			else if (optional_crf.equals(cde.getStdTemplateType()))
+				stdOptMissingCount++;
+		}
+		for (CCCForm tempForm : report.getCccForms()) {
+			countQuestChecked = countQuestChecked + tempForm.getQuestions().size();
+			for (CCCQuestion tempQuestion : tempForm.getQuestions()) {
+				if (tempQuestion.getQuestionCongruencyStatus()!=null) {
+					if (congStatus_congruent.equals(tempQuestion.getQuestionCongruencyStatus())) {
+						countQuestCongruent++;
+						if (tempQuestion.getNciCategory()!=null) {
+							if (mandatory_crf.equals(tempQuestion.getNciCategory())) {
+								manCrfCong++;	
+							} else if (conditional_crf.equals(tempQuestion.getNciCategory())) {
+								condCrfCong++;
+							} else if (optional_crf.equals(tempQuestion.getNciCategory())) {
+								optCrfCong++;
+							}
+						}
+					} else if (congStatus_warn.equals(tempQuestion.getQuestionCongruencyStatus())) {
+						countQuestWarn++;
+						if (tempQuestion.getNciCategory()!=null) {
+							if (mandatory_crf.equals(tempQuestion.getNciCategory())) {
+								manCrfWarn++;	
+							} else if (conditional_crf.equals(tempQuestion.getNciCategory())) {
+								condCrfWarn++;
+							} else if (optional_crf.equals(tempQuestion.getNciCategory())) {
+								optCrfWarn++;
+							}
+						}						
+					} else if (congStatus_errors.equals(tempQuestion.getQuestionCongruencyStatus())) {
+						countQuestError++;
+						if (tempQuestion.getNciCategory()!=null) {
+							if (mandatory_crf.equals(tempQuestion.getNciCategory())) {
+								manCrfErr++;	
+							} else if (conditional_crf.equals(tempQuestion.getNciCategory())) {
+								condCrfErr++;
+							} else if (optional_crf.equals(tempQuestion.getNciCategory())) {
+								optCrfErr++;
+							}
+						}						
+					}					
+				}
+			}
+		}
+		report.setCountQuestionsChecked(countQuestChecked);
+		report.setCountCongruentQuestions(countQuestCongruent);
+		report.setCountQuestionsWithWarnings(countQuestWarn);
+		report.setCountQuestionsWithErrors(countQuestError);
+		report.setCountManCrfMissing(stdManMissingCount);
+		report.setCountOptCrfMissing(stdOptMissingCount);
+		report.setCountCondCrfMissing(stdCondMissingCount);
+		report.setCountManCrfCongruent(manCrfCong);
+		report.setCountManCrfwWithWarnings(manCrfWarn);
+		report.setCountManCrfWithErrors(manCrfErr);
+		report.setCountCondCrfCongruent(condCrfCong);
+		report.setCountCondCrfwWithWarnings(condCrfWarn);
+		report.setCountCondCrfWithErrors(condCrfErr);
+		report.setCountOptCrfCongruent(optCrfCong);
+		report.setCountOptCrfwWithWarnings(optCrfWarn);
+		report.setCountOptCrfWithErrors(optCrfErr);
+		return report;
+	}
 		
 	/**
 	 * @return List of Standard CRF CDEs
