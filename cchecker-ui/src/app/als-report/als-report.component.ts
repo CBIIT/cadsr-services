@@ -65,38 +65,10 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit() { 
     this.reportService.getReportData().subscribe(data=> this.reportData = data).unsubscribe();
     this.congruentFormTotal = this.reportData['cccForms'].filter(v => v.congruencyStatus=='CONGRUENT').length;
-    this.dtSummaryOptions={
-      columns: [
-        {
-          width:"50%",
-          cellType:"th"
-        },
-        {
-          width:"50%",
-          cellType:"th"
-        },
-      ],
-      ordering:false,
-      paging:false,
-      searching:false,
-      info:false
-    };
-    this.dtFormSummaryOptions={
-      columns: [
-        {
-          width:"25%",
-          cellType:"th"
-        },
-        {
-          width:"75%",
-          cellType:"th"
-        },
-      ],
-      ordering:false,
-      paging:false,
-      searching:false,
-      info:false
-    };
+    const baseDtOptions = { ordering:false, paging:false, sarching:false, info:false }
+    this.dtSummaryOptions= Object.assign({columns:[{width:"50%",cellType:"th"},{width:"50%",cellType:"th"}] },baseDtOptions) //
+    this.dtFormSummaryOptions = Object.assign({columns:[{width:"25%",cellType:"th"},{width:"75%",cellType:"th"}]},baseDtOptions)
+
     this.dtFormOptions={
       columns: [{width:"70px"},{width:"80px"},{width:"80px"},{width:"80px"},{width:"150px"},{width:"300px"},{width:"300px"},{width:"200px"},{width:"700px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"400px"},{width:"700px"},{width:"400px"},{width:"700px"},{width:"120px"},{width:"500px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"}],
       ordering:false,

@@ -19,7 +19,7 @@
       <button class="btn btn-primary" (click)="generateExcel()" *ngIf="reportData['cccForms'].length">Generate Excel</button>
       </span>
       <span class="reportHeader">
-         <label for="raveFormOid">Rave Form Oid</label>
+         <label for="raveFormOid">Rave Form</label>
          <select name="raveForm" id="raveFormOid" ngModel (change)="changeForm(f.value.raveForm)"  #localRaveOid>
          <option value="" disabled>Select a form</option>
          <option *ngFor="let form of reportData.cccForms | formListsort:'raveFormOid'" [ngValue]="form">
@@ -112,6 +112,27 @@
          </table>
       </ng-template>
    </ngb-tab>
+   <ngb-tab>
+       <ng-template ngbTabTitle>NRDS CDEs in ALS</ng-template>
+       <ng-template ngbTabContent></ng-template>
+   </ngb-tab>
+   <ngb-tab>
+       <ng-template ngbTabTitle>NRDS CDEs Missing</ng-template>
+       <ng-template ngbTabContent></ng-template>
+   </ngb-tab>
+   <ngb-tab>
+       <ng-template ngbTabTitle>Standard CRF Mandatory Missing</ng-template>
+       <ng-template ngbTabContent></ng-template>
+   </ngb-tab>
+   <ngb-tab>
+       <ng-template ngbTabTitle>Standard CRF Optional Missing</ng-template>
+       <ng-template ngbTabContent></ng-template>
+   </ngb-tab>   
+   <ngb-tab>
+       <ng-template ngbTabTitle>Standard CRF Conditional Missing</ng-template>
+       <ng-template ngbTabContent></ng-template>
+   </ngb-tab>      
+
    <ngb-tab id="raveForm" *ngIf="showFormTab">
       <ng-template ngbTabTitle>{{tabName}}</ng-template>
       <ng-template ngbTabContent>
