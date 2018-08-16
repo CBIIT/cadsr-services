@@ -79,20 +79,27 @@ public class ValidatorService {
 			StringBuffer allowableVmTextChoices = new StringBuffer();
 			
 			if (cdeDetails.getValueDomain()!=null) {
-				vdMaxLen = cdeDetails.getValueDomain().getValueDomainDetails().getMaximumLength();
-				for (PermissibleValuesModel pv : cdeDetails.getValueDomain().getPermissibleValues()) {
-					pvList.add(pv.getValue());
-					pvVmList.add(pv.getShortMeaning());
-					if (allowableCdes.length() > 0)
-						allowableCdes.append("|"+pv.getValue());
-					else 
-						allowableCdes.append(pv.getValue());
-					if (allowableVmTextChoices.length() > 0)
-						allowableVmTextChoices.append("|"+pv.getShortMeaning());
-					else
-						allowableVmTextChoices.append(pv.getShortMeaning());
-					if (pv.getValue().length() > pvMaxLen)
-						pvMaxLen = pv.getValue().length();
+				if (cdeDetails.getValueDomain().getValueDomainDetails()!=null) {
+					if (cdeDetails.getValueDomain().getValueDomainDetails().getMaximumLength()!=null) {
+						vdMaxLen = cdeDetails.getValueDomain().getValueDomainDetails().getMaximumLength();
+					}
+				}
+
+				if (cdeDetails.getValueDomain().getPermissibleValues()!=null) {
+					for (PermissibleValuesModel pv : cdeDetails.getValueDomain().getPermissibleValues()) {
+						pvList.add(pv.getValue());
+						pvVmList.add(pv.getShortMeaning());
+						if (allowableCdes.length() > 0)
+							allowableCdes.append("|"+pv.getValue());
+						else 
+							allowableCdes.append(pv.getValue());
+						if (allowableVmTextChoices.length() > 0)
+							allowableVmTextChoices.append("|"+pv.getShortMeaning());
+						else
+							allowableVmTextChoices.append(pv.getShortMeaning());
+						if (pv.getValue().length() > pvMaxLen)
+							pvMaxLen = pv.getValue().length();
+					}
 				}
 			}			
 
@@ -120,7 +127,8 @@ public class ValidatorService {
 			question = setLengthCheckerResult (question, cdeDetails.getValueDomain().getValueDomainDetails().getMaximumLength());
 			
 			// Comparing RAVE Length (FixedUnit) with the caDSR PVs Max length
-			question = checkCdeMaxLength (question, pvMaxLen, vdMaxLen, computeRaveLength(question.getRaveLength()));			
+			if (vdMaxLen != 0)
+				question = checkCdeMaxLength (question, pvMaxLen, vdMaxLen, computeRaveLength(question.getRaveLength()));
 			
 			//Comparing the ALS RAVE Data Format with caDSR Value Domain Display Format
 			question = checkFormatCheckerResult (question, field.getDataFormat(), cdeDetails.getValueDomain().getValueDomainDetails().getDisplayFormat());
