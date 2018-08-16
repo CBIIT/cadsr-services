@@ -2,7 +2,7 @@ package gov.nih.nci.cadsr.data;
 /*
  * Copyright 2018 Leidos Biomedical Research, Inc.
  */
-public class CategoryCde implements Comparable {
+public class CategoryCde implements Comparable<Object> {
     private int cdeId;
     private float deVersion;
     private String deName;
@@ -53,6 +53,29 @@ public class CategoryCde implements Comparable {
 				+ moduleType + ", formId=" + formId + ", formName=" + formName + "]";
 	}
 	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + cdeId;
+		result = prime * result + Float.floatToIntBits(deVersion);
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		CategoryCde other = (CategoryCde) obj;
+		if (cdeId != other.cdeId)
+			return false;
+		if (Float.floatToIntBits(deVersion) != Float.floatToIntBits(other.deVersion))
+			return false;
+		return true;
+	}
 	@Override
 	public int compareTo(Object o) {
 		int res = 0;

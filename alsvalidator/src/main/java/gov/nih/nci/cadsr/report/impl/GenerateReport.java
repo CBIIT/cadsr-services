@@ -53,6 +53,10 @@ public class GenerateReport implements ReportOutput {
 	private static String version_prefix = "_V";
 	private static List<CategoryCde> categoryCdeList;
 	private static List<CategoryNrds> categoryNrdsList;	
+	static{
+		categoryCdeList = retrieveCdeCrfData();
+		categoryNrdsList = retrieveNrdsData();
+	}
 
 	/**
 	 * @param  alsData not null
@@ -77,8 +81,7 @@ public class GenerateReport implements ReportOutput {
 		CCCForm form = new CCCForm();
 		String formName = "";
 		int totalQuestCount = 0;
-		categoryCdeList = retrieveCdeCrfData();
-		categoryNrdsList = retrieveNrdsData();
+
 
 		List<CCCQuestion> questionsList = new ArrayList<CCCQuestion>();
 		List<NrdsCde> nrdsCdeList = new ArrayList<NrdsCde>();
@@ -214,11 +217,13 @@ public class GenerateReport implements ReportOutput {
 			throw new RuntimeException("!!!!!!!!! GenerateReport.getFinalReportData created report with no FORMS!!!");
 		}
 		// categoryNrdsList and categoryCdeList will be reduced to those CDEs that are missing
-		refineMissingCdesList(nrdsCdeList, standardCrfCdeList);
-		for (CategoryNrds cde : categoryNrdsList) {
+		List<CategoryCde> missingCdeStd = createMissingCategoryCdeList(standardCrfCdeList);
+		List<CategoryNrds> missingCategoryNrdsList = createMissingNrdsCategoryNrdsList(nrdsCdeList);
+		
+		for (CategoryNrds cde : missingCategoryNrdsList) {
 			missingNrdsCdesList.add(buildMissingNrdsCde(cde));
 		}
-		for (CategoryCde cde : categoryCdeList) {
+		for (CategoryCde cde : missingCdeStd) {
 			missingStdCrfCdeList.add(buildMissingStdCrfCde(cde));
 		}		
 		
@@ -403,6 +408,10 @@ public class GenerateReport implements ReportOutput {
 	
 
 	/**
+	 * FIXME remove refineMissingCdesList method.
+	 * It creates IllegalStateException because of changing an iterator which is in use.
+	 * It is not removed for educational purposes.
+	 * 
 	 * @param nrdsCdeList
 	 * @param standardCrfCdeList
 	 * @return Reduces the NRDS and Standard CRF CDE lists to the CDEs that are missing in the RAVE ALS input file
@@ -431,9 +440,35 @@ public class GenerateReport implements ReportOutput {
 		}
 	}
 	
+	protected static List<CategoryNrds> createMissingNrdsCategoryNrdsList(List<NrdsCde> nrdsCdeList) {
+		List<CategoryNrds> missing = new ArrayList<>();
+		for (CategoryNrds nrds : categoryNrdsList ) {
+			missing.add(nrds);
+			for (NrdsCde nrdsCdeStatic : nrdsCdeList) {
+			    if (nrdsCdeStatic.getCdeIdVersion().equals(nrds.getCdeId()+"v"+nrds.getDeVersion())) {
+			        // Remove the current element from the list.
+			    	missing.remove(nrds);
+			    	break;
+			    }
+		    }
+		}		
+		return missing;
+	}
 	
-	
-	
+	protected static List<CategoryCde> createMissingCategoryCdeList(List<StandardCrfCde> standardCrfCdeList) {
+		List<CategoryCde> missing = new ArrayList<>();
+		for (CategoryCde categoryCde : categoryCdeList ) {
+			missing.add(categoryCde);
+			for (StandardCrfCde curr : standardCrfCdeList) {
+			    if (curr.getCdeIdVersion().equals(categoryCde.getCdeId()+"v"+categoryCde.getDeVersion())) {
+			        // Remove the current element from the list.
+			    	missing.remove(categoryCde);
+			    	break;
+			    }
+		    }
+		}		
+		return missing;
+	}	
 		
 	/**
 	 * @return List of Standard CRF CDEs

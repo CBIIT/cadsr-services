@@ -98,7 +98,7 @@ public class CCheckerDbController {
 	
 	@GetMapping("/rest/retrievecategorynrds")
 	public ResponseEntity<List<CategoryNrds>> retrieveCategoryNrdsCdeList(HttpServletRequest request) {
-		logger.debug("retrieveCategoryCdeList called");
+		logger.debug("retrieveCategoryNrdsCdeList called");
 
 		List<CategoryNrds> categoryCdeList = dataElemenRepository.retrieveNrdsCdeList();
 		HttpHeaders httpHeaders = new HttpHeaders();

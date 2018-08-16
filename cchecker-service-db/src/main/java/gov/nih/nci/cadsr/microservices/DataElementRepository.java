@@ -192,6 +192,12 @@ public class DataElementRepository {
 	public List<CategoryNrds> retrieveNrdsCdeList () {
 		List<CategoryNrds> resultList;
 		resultList = getAll(retrieveNrdsCdeListQuery(), CategoryNrds.class);
+		if ((resultList != null) && (! resultList.isEmpty())) {
+			CategoryNrds[] arr = new CategoryNrds[resultList.size()];
+			arr = resultList.toArray(arr);
+			Arrays.sort(arr, new SortNrds());
+			resultList = Arrays.asList(arr);
+		}
 		return resultList;
 	}
     protected <T> String retrieveAlsQuery() {
@@ -328,5 +334,13 @@ public class DataElementRepository {
             	return a.compareTo(b);
         }
     }    
-    
+    class SortNrds implements Comparator<CategoryNrds>
+    {
+        public int compare(CategoryNrds a, CategoryNrds b)
+        {
+            	if (a == null) return -1;
+            else 
+            	return a.compareTo(b);
+        }
+    } 
 }
