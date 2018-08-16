@@ -22,7 +22,7 @@
          <label for="raveFormOid">Rave Form</label>
          <select name="raveForm" id="raveFormOid" ngModel (change)="changeForm(f.value.raveForm)"  #localRaveOid>
          <option value="" disabled>Select a form</option>
-         <option *ngFor="let form of reportData.cccForms | formListsort:'raveFormOid'" [ngValue]="form">
+         <option *ngFor="let form of reportData['cccForms'] | formListsort:'raveFormOid'" [ngValue]="form">
          {{form.formName}}
          </option>
          </select>
