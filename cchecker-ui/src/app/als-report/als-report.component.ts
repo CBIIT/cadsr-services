@@ -5,7 +5,7 @@ import { RestService } from '../services/rest.service';
 import { HttpClient } from '../../../node_modules/@angular/common/http';
 import { saveAs }  from 'file-saver'
 import { Observable, Subscription } from '../../../node_modules/rxjs';
-
+import {D} from 'angular-datatables';
 @Component({
   selector: 'app-als-report',
   templateUrl: './als-report.component.html',
@@ -16,6 +16,8 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
   dtFormOptions:Object;
   dtFormSummaryOptions:Object;
   dtSummaryOptions:Object;
+  dtNrdsOptions:Object;
+  dtCrfOptions:Object;
   error:boolean;
   errorMessage:String;  
   raveForm:Object;
@@ -24,7 +26,7 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
   statusMessage:String;
   tabName:String;
   tabChanges:Subscription;
-
+  
   @ViewChild(NgbTabset)
     tabs: NgbTabset;
 
@@ -41,6 +43,7 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
       this.showFormTab = true;
     }
     this.raveForm = form;
+    return false;
   }
 
   generateExcel = () => {
@@ -65,10 +68,26 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit() { 
     this.reportService.getReportData().subscribe(data=> this.reportData = data).unsubscribe();
     this.congruentFormTotal = this.reportData['cccForms'].filter(v => v.congruencyStatus=='CONGRUENT').length;
-    const baseDtOptions = { ordering:false, paging:false, sarching:false, info:false }
+    const baseDtOptions = { ordering:false, paging:false, searching:false, info:false }
     this.dtSummaryOptions= Object.assign({columns:[{width:"50%",cellType:"th"},{width:"50%",cellType:"th"}] },baseDtOptions) //
     this.dtFormSummaryOptions = Object.assign({columns:[{width:"25%",cellType:"th"},{width:"75%",cellType:"th"}]},baseDtOptions)
-
+    this.dtNrdsOptions = Object.assign({columns:[
+      {width:"15%",cellType:"th", title:"Rave Form OID"},
+      {width:"15%",cellType:"th", title:"RAVE Field Order"},
+      {width:"15%",cellType:"th", title:"RAVE Field Label"},
+      {width:"15%",cellType:"th", title:"CDE ID Version"},
+      {width:"15%",cellType:"th", title:"CDE Name"},
+      {width:"15%",cellType:"th", title:"Result"},
+      {width:"10%",cellType:"th", title:"Message"}
+    ]},baseDtOptions)
+    this.dtCrfOptions = Object.assign({
+      columns:[
+        {width:"125px", cellType:"th", title:"CDE IDVersion"},
+        {width:"225px", cellType:"th", title:"CDE Name"},
+        {width:"225px", cellType:"th",title:"Template Name"},
+        {width:"225px", cellType:"th", title:"CRF ID Version"}
+      ],scrollY:400, scroller:true, scrollX:true
+    }, baseDtOptions)
     this.dtFormOptions={
       columns: [{width:"70px"},{width:"80px"},{width:"80px"},{width:"80px"},{width:"150px"},{width:"300px"},{width:"300px"},{width:"200px"},{width:"700px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"400px"},{width:"700px"},{width:"400px"},{width:"700px"},{width:"120px"},{width:"500px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"}],
       ordering:false,
@@ -76,7 +95,7 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
       searching:false,
       info:false,
       scrollX:true,
-      scrollY:300,
+      scrollY:400,
       scroller:true
     };
   };

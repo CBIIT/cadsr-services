@@ -12,6 +12,7 @@ import { ProgressBarComponent } from './progress-bar/progress-bar.component';
 import { FormListsortPipe } from './form-listsort.pipe';
 import { DataTablesModule } from 'angular-datatables';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
+import { ReportFilterPipe } from './report-filter.pipe';
 
 const APP_ROUTES: Routes = [
   // Default empty path
@@ -28,7 +29,8 @@ const APP_ROUTES: Routes = [
     AlsReportComponent,
     NavigationComponent,
     ProgressBarComponent,
-    FormListsortPipe
+    FormListsortPipe,
+    ReportFilterPipe
   ],
   imports: [
     BrowserModule,

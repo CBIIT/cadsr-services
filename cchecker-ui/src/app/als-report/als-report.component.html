@@ -29,7 +29,7 @@
       </span>
    </div>
    <br />
-   <ngb-tabset type="pills" ([ngModel])="tabs" #tabs *ngIf="reportData['cccForms'].length">dsads
+   <ngb-tabset type="pills" ([ngModel])="tabs" #tabs *ngIf="reportData['cccForms'].length">
    <ngb-tab title="Summary">
       <ng-template ngbTabContent>
          <table datatable [dtOptions]="dtSummaryOptions" class="display compact" *ngIf="reportData as r">
@@ -110,27 +110,112 @@
             </tr>
          </tbody>
          </table>
+         <br />
+        <table datatable [dtOptions]="dtSummaryOptions" class="display compact" *ngIf="reportData as r">
+            <thead>
+                <tr>
+                    <th>Report Summary - Click on Form Name to expand results</th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <th>Form</th>
+                    <th>Validation Result</th>
+                </tr>
+            </thead>      
+            <tbody>
+                <tr *ngFor="let form of r.cccForms">
+                    <td><a href="#" name="form" (click)="changeForm(form)">{{form.formName}}</a></td>
+                    <td>{{form.congruencyStatus}}</td>
+                </tr>
+            </tbody>                
+        </table>  
       </ng-template>
    </ngb-tab>
    <ngb-tab>
        <ng-template ngbTabTitle>NRDS CDEs in ALS</ng-template>
-       <ng-template ngbTabContent></ng-template>
+       <ng-template ngbTabContent>
+         <div style="padding-left:4px;padding-bottom:3px;padding-top:5px;margin-bottom:0px;border-bottom:1px solid #000;"><B>NRDS CDEs included in Protocol Forms with Warnings or Errors
+</B></div>
+
+        <table datatable [dtOptions]="dtNrdsOptions" class="display compact">
+            <tbody>
+                <tr *ngFor="let missingNrds of reportData.nrdsCdeList">
+                    <td>{{missingNrds.raveFormOid}}</td>
+                    <td>{{missingNrds.raveFieldOrder}}</td>
+                    <td>{{missingNrds.raveFieldLabel}}</td>
+                    <td>{{missingNrds.cdeIdVersion}}</td>
+                    <td>{{missingNrds.cdeName}}</td>
+                    <td>{{missingNrds.result}}</td>
+                    <td>{{missingNrds.message}}</td>
+                </tr>
+            </tbody>            
+        </table>        
+       </ng-template>
    </ngb-tab>
    <ngb-tab>
        <ng-template ngbTabTitle>NRDS CDEs Missing</ng-template>
-       <ng-template ngbTabContent></ng-template>
+       <ng-template ngbTabContent>
+         <div style="padding-left:4px;padding-bottom:3px;padding-top:5px;margin-bottom:0px;border-bottom:1px solid #000;"><B>NRDS CDEs missing from the ALS file</B></div>
+
+        <table datatable [dtOptions]="dtNrdsOptions" class="display compact">
+            <tbody>
+                <tr *ngFor="let missingNrds of reportData.missingNrdsCdeList">
+                    <td>{{missingNrds.raveFormOid}}</td>
+                    <td>{{missingNrds.raveFieldOrder}}</td>
+                    <td>{{missingNrds.raveFieldLabel}}</td>
+                    <td>{{missingNrds.cdeIdVersion}}</td>
+                    <td>{{missingNrds.cdeName}}</td>
+                    <td>{{missingNrds.result}}</td>
+                    <td>{{missingNrds.message}}</td>
+                </tr>
+            </tbody>            
+        </table>
+       </ng-template>
    </ngb-tab>
    <ngb-tab>
        <ng-template ngbTabTitle>Standard CRF Mandatory Missing</ng-template>
-       <ng-template ngbTabContent></ng-template>
+       <ng-template ngbTabContent>
+            <table datatable [dtOptions]="dtCrfOptions" class="display compact">
+                <tbody>
+                    <tr *ngFor="let missing of reportData.missingStandardCrfCdeList | reportFilter: 'stdTemplateType':'Mandatory'">
+                        <td>{{missing.cdeIdVersion}}</td>
+                        <td>{{missing.cdeName}}</td>
+                        <td>{{missing.templateName}}</td>
+                        <td>{{missing.idVersion}}</td>
+                    </tr>
+                </tbody>
+            </table>           
+       </ng-template>
    </ngb-tab>
    <ngb-tab>
        <ng-template ngbTabTitle>Standard CRF Optional Missing</ng-template>
-       <ng-template ngbTabContent></ng-template>
+       <ng-template ngbTabContent>
+            <table datatable [dtOptions]="dtCrfOptions" class="display compact">
+                <tbody>
+                    <tr *ngFor="let missing of reportData.missingStandardCrfCdeList | reportFilter: 'stdTemplateType':'Optional'">
+                        <td>{{missing.cdeIdVersion}}</td>
+                        <td>{{missing.cdeName}}</td>
+                        <td>{{missing.templateName}}</td>
+                        <td>{{missing.idVersion}}</td>
+                    </tr>
+                </tbody>
+            </table>              
+       </ng-template>
    </ngb-tab>   
    <ngb-tab>
        <ng-template ngbTabTitle>Standard CRF Conditional Missing</ng-template>
-       <ng-template ngbTabContent></ng-template>
+       <ng-template ngbTabContent>
+            <table datatable [dtOptions]="dtCrfOptions" class="display compact">
+                <tbody>
+                    <tr *ngFor="let missing of reportData.missingStandardCrfCdeList | reportFilter: 'stdTemplateType':'Conditional'">
+                        <td>{{missing.cdeIdVersion}}</td>
+                        <td>{{missing.cdeName}}</td>
+                        <td>{{missing.templateName}}</td>
+                        <td>{{missing.idVersion}}</td>
+                    </tr>
+                </tbody>
+            </table>            
+       </ng-template>
    </ngb-tab>      
 
    <ngb-tab id="raveForm" *ngIf="showFormTab">
@@ -232,4 +317,3 @@
    </ngb-tab>
    </ngb-tabset>
 </form>
-{{tabChanages | json}}
