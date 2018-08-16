@@ -62,6 +62,8 @@ public class GatewayBootController {
 	private static String URL_RETRIEVE_REPORT_ERROR_FORMAT;
 	private static String URL_RETRIEVE_REPORT_FULL_FORMAT;
 	private static String URL_GEN_EXCEL_REPORT_ERROR_FORMAT;
+	public final String MS_EXCEL_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
 	
 	static String UPLOADED_FOLDER;
 	static String ACCESS_CONTROL_ALLOW_ORIGIN;
@@ -474,7 +476,7 @@ public class GatewayBootController {
 			RestTemplate restTemplate = new RestTemplate();
 			String urlStr = String.format(URL_GEN_EXCEL_REPORT_ERROR_FORMAT, sessionCookieValue);
 			logger.debug("...retrieveData: " + urlStr);
-			response.setHeader("Content-Type", "application/vnd.ms-excel");
+			response.setHeader("Content-Type", MS_EXCEL_MIME_TYPE);
 			response.setHeader("Content-Disposition", "attachment; filename=" + fileExcelReportPrefix + sessionCookieValue + EXCEL_FILE_EXT);
 			response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
 			response.setStatus(HttpServletResponse.SC_OK);
