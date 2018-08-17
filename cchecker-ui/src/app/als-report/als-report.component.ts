@@ -51,7 +51,7 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
     this.restService.generateExcel().subscribe(
       data => {
         const filename = data.headers.get('Content-Disposition').replace('attachment; filename=','')
-        var blob = new Blob([data.body], {type: "application/vnd.ms-excel"});
+        var blob = new Blob([data.body], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
         saveAs(blob, filename);
         this.statusMessage = `${filename} downloaded succesfully.`
       }, 
