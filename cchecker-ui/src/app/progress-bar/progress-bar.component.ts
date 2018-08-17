@@ -1,5 +1,4 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { KeyRegistry } from '../../../node_modules/@angular/core/src/di/reflective_key';
 @Component({
   selector: 'app-progress-bar',
   templateUrl: './progress-bar.component.html',

@@ -1,17 +1,16 @@
-import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy  } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy,ElementRef  } from '@angular/core';
 import { ReportService } from '../services/report.service';
 import { NgbTabset } from '../../../node_modules/@ng-bootstrap/ng-bootstrap';
 import { RestService } from '../services/rest.service';
 import { HttpClient } from '../../../node_modules/@angular/common/http';
 import { saveAs }  from 'file-saver'
-import { Observable, Subscription } from '../../../node_modules/rxjs';
+import { Subscription } from '../../../node_modules/rxjs';
 @Component({
   selector: 'app-als-report',
   templateUrl: './als-report.component.html',
   styleUrls: ['./als-report.component.css']
 })
 export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
-  congruentFormTotal:String;
   dtFormOptions:Object;
   dtFormSummaryOptions:Object;
   dtSummaryOptions:Object;
@@ -25,26 +24,29 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
   statusMessage:String;
   tabName:String;
   tabChanges:Subscription;
-  
+
   @ViewChild(NgbTabset)
     tabs: NgbTabset;
 
   constructor(private reportService:ReportService, private restService:RestService,private http:HttpClient) { }
 
   // switch tab when selecting form from dropdown //
-
-  changeForm = (form) => {
-    this.tabName = form.formName;
+  changeForm = (raveForm, form) => {
+    this.tabName = raveForm.formName;
+    if (form) { // used to select dropdown via link //
+      form.controls['raveForm'].setValue(raveForm)
+    }
     if (this.showFormTab) {
       this.tabs.select("raveForm")
     }
     else {
       this.showFormTab = true;
     }
-    this.raveForm = form;
+    this.raveForm = raveForm;
     return false;
-  }
+  };
 
+  // generates excel file after button is clicked //
   generateExcel = () => {
     this.statusMessage = null;
     this.error = false;
@@ -65,11 +67,35 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
   };
 
   ngOnInit() { 
+    // get reportData //
     this.reportService.getReportData().subscribe(data=> this.reportData = data).unsubscribe();
-    this.congruentFormTotal = this.reportData['cccForms'].filter(v => v.congruencyStatus=='CONGRUENT').length;
-    const baseDtOptions = { ordering:false, paging:false, searching:false, info:false }
-    this.dtSummaryOptions= Object.assign({columns:[{width:"50%",cellType:"th"},{width:"50%",cellType:"th"}] },baseDtOptions) //
-    this.dtFormSummaryOptions = Object.assign({columns:[{width:"25%",cellType:"th"},{width:"75%",cellType:"th"}]},baseDtOptions)
+
+    // all options for data tables //
+    const baseDtOptions = { ordering:false, paging:false, searching:false, info:false } // base datatable options //
+
+    // options for standard crf module tables //
+    this.dtCrfOptions = Object.assign({
+      columns:[
+        {width:"125px", cellType:"th", title:"CDE IDVersion"},
+        {width:"225px", cellType:"th", title:"CDE Name"},
+        {width:"225px", cellType:"th",title:"Template Name"},
+        {width:"225px", cellType:"th", title:"CRF ID Version"}
+      ],scrollY:400, scroller:true, scrollX:true
+    }, baseDtOptions);
+
+    // options for rave form page //
+    this.dtFormOptions={
+      columns: [{width:"70px"},{width:"80px"},{width:"80px"},{width:"80px"},{width:"170px"},{width:"300px"},{width:"200px"},{width:"200px"},{width:"250px"},{width:"120px"},{width:"170px"},{width:"150px"},{width:"150px"},{width:"150px"},{width:"150px"},{width:"150px"},{width:"120px"},{width:"260px"},{width:"120px"},{width:"160px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"150px"},{width:"150px"},{width:"120px"},{width:"150px"},{width:"120px"}],
+      ordering:false,
+      paging:false,
+      searching:false,
+      info:false,
+      scrollX:true,
+      scrollY:400,
+      scroller:true
+    };    
+
+    // options for NRDS tables //
     this.dtNrdsOptions = Object.assign({columns:[
       {width:"15%",cellType:"th", title:"Rave Form OID"},
       {width:"15%",cellType:"th", title:"RAVE Field Order"},
@@ -78,25 +104,20 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
       {width:"15%",cellType:"th", title:"CDE Name"},
       {width:"15%",cellType:"th", title:"Result"},
       {width:"10%",cellType:"th", title:"Message"}
-    ]},baseDtOptions)
-    this.dtCrfOptions = Object.assign({
-      columns:[
-        {width:"125px", cellType:"th", title:"CDE IDVersion"},
-        {width:"225px", cellType:"th", title:"CDE Name"},
-        {width:"225px", cellType:"th",title:"Template Name"},
-        {width:"225px", cellType:"th", title:"CRF ID Version"}
-      ],scrollY:400, scroller:true, scrollX:true
-    }, baseDtOptions)
-    this.dtFormOptions={
-      columns: [{width:"70px"},{width:"80px"},{width:"80px"},{width:"80px"},{width:"150px"},{width:"300px"},{width:"300px"},{width:"200px"},{width:"700px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"400px"},{width:"700px"},{width:"400px"},{width:"700px"},{width:"120px"},{width:"500px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"}],
-      ordering:false,
-      paging:false,
-      searching:false,
-      info:false,
-      scrollX:true,
-      scrollY:400,
-      scroller:true
-    };
+    ]},baseDtOptions);
+        
+    // options for summary bottom table //        
+    this.dtFormSummaryOptions = Object.assign({columns:[{width:"25%",cellType:"th"},{width:"75%",cellType:"th"}]},baseDtOptions)
+  
+    // options for summary top table //
+    this.dtSummaryOptions= Object.assign({columns:[{width:"50%",cellType:"th"},{width:"50%",cellType:"th"}] },baseDtOptions) //
+
+ 
+
+
+
+
+
   };
 
   ngAfterViewInit() {

@@ -13,6 +13,7 @@
    {{statusMessage}}
 </div>
 
+
 <form #f="ngForm">
    <div>
       <span class="reportHeader">
@@ -58,7 +59,7 @@
             </tr>
             <tr>
                <td># Total Forms Congruent </td>
-               <td>{{congruentFormTotal}}</td>
+               <td>{{r.totalFormsCong}}</td>
             </tr>
             <tr>
                <td># Total Questions Checked </td>
@@ -145,12 +146,11 @@
          </tbody>
          </table>
          <br />
+        <div class="tableHeader">
+            Report Summary - Click on Form Name to expand results
+        </div>
         <table datatable [dtOptions]="dtSummaryOptions" class="display compact" *ngIf="reportData as r">
             <thead>
-                <tr>
-                    <th>Report Summary - Click on Form Name to expand results</th>
-                    <th></th>
-                </tr>
                 <tr>
                     <th>Form</th>
                     <th>Validation Result</th>
@@ -158,7 +158,7 @@
             </thead>      
             <tbody>
                 <tr *ngFor="let form of r.cccForms">
-                    <td><a href="#" name="form" (click)="changeForm(form)">{{form.formName}}</a></td>
+                    <td><a href="#" name="form" (click)="changeForm(form,f)">{{form.formName}}</a></td>
                     <td>{{form.congruencyStatus}}</td>
                 </tr>
             </tbody>                
@@ -168,8 +168,7 @@
    <ngb-tab>
        <ng-template ngbTabTitle>NRDS CDEs in ALS</ng-template>
        <ng-template ngbTabContent>
-         <div style="padding-left:4px;padding-bottom:3px;padding-top:5px;margin-bottom:0px;border-bottom:1px solid #000;"><B>NRDS CDEs included in Protocol Forms with Warnings or Errors
-</B></div>
+         <div class="tableHeader">NRDS CDEs included in Protocol Forms with Warnings or Errors</div>
 
         <table datatable [dtOptions]="dtNrdsOptions" class="display compact">
             <tbody>
@@ -189,7 +188,7 @@
    <ngb-tab>
        <ng-template ngbTabTitle>NRDS CDEs Missing</ng-template>
        <ng-template ngbTabContent>
-         <div style="padding-left:4px;padding-bottom:3px;padding-top:5px;margin-bottom:0px;border-bottom:1px solid #000;"><B>NRDS CDEs missing from the ALS file</B></div>
+         <div class="tableHeader">NRDS CDEs missing from the ALS file</div>
 
         <table datatable [dtOptions]="dtNrdsOptions" class="display compact">
             <tbody>
@@ -209,6 +208,7 @@
    <ngb-tab>
        <ng-template ngbTabTitle>Standard CRF Mandatory Missing</ng-template>
        <ng-template ngbTabContent>
+           <div class="tableHeader">CDEs in Standard Template "Mandatory" Modules Not Used</div>
             <table datatable [dtOptions]="dtCrfOptions" class="display compact">
                 <tbody>
                     <tr *ngFor="let missing of reportData.missingStandardCrfCdeList | reportFilter: 'stdTemplateType':'Mandatory'">
@@ -224,6 +224,7 @@
    <ngb-tab>
        <ng-template ngbTabTitle>Standard CRF Optional Missing</ng-template>
        <ng-template ngbTabContent>
+           <div class="tableHeader">CDEs in Standard Template "Optional" Modules Not Used</div>
             <table datatable [dtOptions]="dtCrfOptions" class="display compact">
                 <tbody>
                     <tr *ngFor="let missing of reportData.missingStandardCrfCdeList | reportFilter: 'stdTemplateType':'Optional'">
@@ -239,6 +240,7 @@
    <ngb-tab>
        <ng-template ngbTabTitle>Standard CRF Conditional Missing</ng-template>
        <ng-template ngbTabContent>
+           <div class="tableHeader">CDEs in Standard Template "Conditional" Modules Not Used</div>
             <table datatable [dtOptions]="dtCrfOptions" class="display compact">
                 <tbody>
                     <tr *ngFor="let missing of reportData.missingStandardCrfCdeList | reportFilter: 'stdTemplateType':'Conditional'">
@@ -255,7 +257,7 @@
    <ngb-tab id="raveForm" *ngIf="showFormTab">
       <ng-template ngbTabTitle>{{tabName}}</ng-template>
       <ng-template ngbTabContent>
-         <div style="padding-left:4px;padding-top:5px;margin-bottom:-5px"><B>VIEW OF EXPANDED RESULTS {{raveForm.formName}}</B></div>
+         <div><B>VIEW OF EXPANDED RESULTS {{raveForm.formName}}</B></div>
          <table datatable [dtOptions]="dtFormSummaryOptions" class="display compact">
             <tbody>
                <tr>
