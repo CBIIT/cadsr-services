@@ -80,7 +80,7 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
         {width:"225px", cellType:"th", title:"CDE Name"},
         {width:"225px", cellType:"th",title:"Template Name"},
         {width:"225px", cellType:"th", title:"CRF ID Version"}
-      ],scrollY:400, scroller:true, scrollX:true
+      ],scrollY:350, scroller:true, scrollX:true
     }, baseDtOptions);
 
     // options for rave form page //
@@ -91,7 +91,7 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
       searching:false,
       info:false,
       scrollX:true,
-      scrollY:400,
+      scrollY:300,
       scroller:true
     };    
 
@@ -105,7 +105,7 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
       {width:"15%",cellType:"th", title:"Result"},
       {width:"10%",cellType:"th", title:"Message"}
     ],
-      scrollY:400,
+      scrollY:350,
       scroller:true
     },baseDtOptions);
         
