@@ -104,20 +104,16 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
       {width:"15%",cellType:"th", title:"CDE Name"},
       {width:"15%",cellType:"th", title:"Result"},
       {width:"10%",cellType:"th", title:"Message"}
-    ]},baseDtOptions);
+    ],
+      scrollY:400,
+      scroller:true
+    },baseDtOptions);
         
     // options for summary bottom table //        
     this.dtFormSummaryOptions = Object.assign({columns:[{width:"25%",cellType:"th"},{width:"75%",cellType:"th"}]},baseDtOptions)
   
     // options for summary top table //
     this.dtSummaryOptions= Object.assign({columns:[{width:"50%",cellType:"th"},{width:"50%",cellType:"th"}] },baseDtOptions) //
-
- 
-
-
-
-
-
   };
 
   ngAfterViewInit() {
