@@ -8,6 +8,8 @@ services:
   server:
     container_name: cchecker-gateway
     build: ./cchecker-server-docker
+    volumes:
+      - "/tmp/logs/:/usr/local/apache-tomcat/log"
     ports:
      - "8080:8080"
     environment:
