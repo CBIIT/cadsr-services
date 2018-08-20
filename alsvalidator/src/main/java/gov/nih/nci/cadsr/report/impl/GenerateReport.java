@@ -98,10 +98,10 @@ public class GenerateReport implements ReportOutput {
 								form.setCongruencyStatus(congStatus_congruent); 
 							} else {
 								form.setQuestions(questionsList); 
+								form = setFormCongruencyStatus(form);
 							}
 							form.setRaveFormOid(formOid);
 							form.setCountTotalQuestions(totalQuestCount);
-							form = setFormCongruencyStatus(form);							
 							formsList.add(form);
 							totalQuestCount = 0;
 							formOid = alsField.getFormOid();
@@ -192,7 +192,7 @@ public class GenerateReport implements ReportOutput {
 		form.setRaveFormOid(formOid);
 		if (!questionsList.isEmpty()) {
 			form.setQuestions(questionsList);
-			form = setFormCongruencyStatus(form);			
+			form = setFormCongruencyStatus(form);
 			formsList.add(form);
 		} else {
 			form.setCongruencyStatus(congStatus_congruent);
