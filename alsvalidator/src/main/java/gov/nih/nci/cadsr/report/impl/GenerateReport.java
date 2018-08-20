@@ -101,6 +101,7 @@ public class GenerateReport implements ReportOutput {
 							}
 							form.setRaveFormOid(formOid);
 							form.setCountTotalQuestions(totalQuestCount);
+							form = setFormCongruencyStatus(form);							
 							formsList.add(form);
 							totalQuestCount = 0;
 							formOid = alsField.getFormOid();
@@ -173,23 +174,9 @@ public class GenerateReport implements ReportOutput {
 									standardCrfCdeList.add(buildCrfCde(cdeCrfData, cdeDetails.getDataElement().getDataElementDetails().getLongName())); 
 								}
 							}
-							if (question.getQuestionCongruencyStatus() == null) {
-								if (form.getCongruencyStatus() != null
-										&& (!form.getCongruencyStatus().equals(congStatus_errors))) {
-									form.setCongruencyStatus(congStatus_congruent);
-								}
-								// Adding the below line will create a Full report - All questions irrespective of errors/not
-								// questionsList.add(question);
-							} else {
+
+							if (question.getQuestionCongruencyStatus() != null) {
 								questionsList.add(question);
-								if (question.getQuestionCongruencyStatus()!=null) {
-									if (congStatus_warn.equals(question.getQuestionCongruencyStatus())) {
-										if (form.getCongruencyStatus() == null)
-											form.setCongruencyStatus(congStatus_warn);
-									} else if (congStatus_errors.equals(question.getQuestionCongruencyStatus())) {
-										form.setCongruencyStatus(congStatus_errors);
-									}
-								}
 							}
 						} else {
 							question.setRaveFieldLabel(alsField.getPreText());
@@ -203,11 +190,12 @@ public class GenerateReport implements ReportOutput {
 		}
 		form.setCountTotalQuestions(totalQuestCount);
 		form.setRaveFormOid(formOid);
-		if (questionsList.isEmpty()) {
-			form.setCongruencyStatus(congStatus_congruent); 
-		} else {
-			form.setQuestions(questionsList); 
+		if (!questionsList.isEmpty()) {
+			form.setQuestions(questionsList);
+			form = setFormCongruencyStatus(form);			
 			formsList.add(form);
+		} else {
+			form.setCongruencyStatus(congStatus_congruent);
 		}
 		cccReport.setCccForms(formsList);
 		logger.info("getFinalReportData created formsList size: " + formsList.size());
@@ -635,7 +623,33 @@ public class GenerateReport implements ReportOutput {
 			}
 		}		
 		return cccReport;
-	}	
+	}
+
+	
+	protected static CCCForm setFormCongruencyStatus (CCCForm form) {
+		/*
+		 *  Iterate through the Questions in the form to check for their Congruency statuses.
+		 *  The form takes the highest status occurring in any of the questions in this order
+		 *  Congruent being the lowest, Errors being the highest and
+		 *   Warnings if only warnings are present.
+		 */		
+		for (CCCQuestion question : form.getQuestions()) {
+			if (question.getQuestionCongruencyStatus()!=null) {
+				if (congStatus_warn.equals(question.getQuestionCongruencyStatus())) {
+					if (form.getCongruencyStatus() == null) {
+							form.setCongruencyStatus(congStatus_warn);
+						}
+				} else if (congStatus_errors.equals(question.getQuestionCongruencyStatus())) {
+					form.setCongruencyStatus(congStatus_errors);
+					break;
+				}
+			}
+		}
+		// If none of the questions have errors/warnings, set to 'Congruent'
+		if (form.getCongruencyStatus() == null)
+			form.setCongruencyStatus(congStatus_congruent);
+		return form;		
+	}
 	
 
 }

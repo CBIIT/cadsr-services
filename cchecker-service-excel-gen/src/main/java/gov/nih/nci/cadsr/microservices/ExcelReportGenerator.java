@@ -33,7 +33,7 @@ public class ExcelReportGenerator {
 		private static String formHeader_2 = " form";	
 		private static String summaryFormsHeader = "Report Summary - Click on Form Name to expand results";
 		private static String summaryFormsValidResult = "Validation Result";
-		private static int summaryFormsValidResultColNum = 11;
+		private static int summaryFormsValidResultColNum = 1;
 		private static String checkerReportOwnerLbl = "CDE Congruency Checker Report for ";
 		private static String raveProtocolNameLbl = "Rave Protocol name ";
 		private static String raveProtocolNumLbl = "Rave Protocol number ";
@@ -111,11 +111,11 @@ public class ExcelReportGenerator {
 			for (Map.Entry<String, String> label : summaryLabels.entrySet()) {
 				row = sheet.createRow(rowNum++);
 				int colNum = 0;
-				if ((label.getKey().equals("# Forms in protocol ")))
+				if ((formCountLbl.equals(label.getKey())))
 					row = sheet.createRow(rowNum++);
 				Cell cell = row.createCell(colNum++);
 				cell.setCellValue((String) label.getKey());
-				cell = row.createCell(colNum + 10);
+				cell = row.createCell(colNum++);
 				cell.setCellValue((String) label.getValue());
 			}
 			row = sheet.createRow(rowNum++);
