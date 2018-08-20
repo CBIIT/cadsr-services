@@ -78,7 +78,7 @@ public class GenerateReport implements ReportOutput {
 		cccReport.setTotalFormsCount(alsData.getForms().size());
 		List<CCCForm> formsList = new ArrayList<CCCForm>();
 		CCCForm form = new CCCForm();
-		String formName = "";
+		String formOid = null;
 		int totalQuestCount = 0;
 		int totalFormsCongruent = 0;
 
@@ -92,125 +92,123 @@ public class GenerateReport implements ReportOutput {
 		for (ALSField alsField : alsData.getFields()) {
 			Boolean cdeServiceCall = true;
 			if (selForms.contains(alsField.getFormOid())) {
-				if (formName.equals(""))
-					formName = alsField.getFormOid();
-					if (!formName.equals(alsField.getFormOid())) {
-						if (!questionsList.isEmpty())
-							form.setQuestions(questionsList);
-						else
-							form.setCongruencyStatus(congStatus_congruent);
-						form.setRaveFormOid(formName);
-						form.setCountTotalQuestions(totalQuestCount);
-						formsList.add(form);
-						totalQuestCount = 0;
-						formName = alsField.getFormOid();
-						form = new CCCForm();
-						questionsList = new ArrayList<CCCQuestion>();
-					}
+				if (formOid != null) {
+					if (!formOid.equals(alsField.getFormOid())) {
+							if (questionsList.isEmpty()) {
+								form.setCongruencyStatus(congStatus_congruent); 
+							} else {
+								form.setQuestions(questionsList); 
+							}
+							form.setRaveFormOid(formOid);
+							form.setCountTotalQuestions(totalQuestCount);
+							formsList.add(form);
+							totalQuestCount = 0;
+							formOid = alsField.getFormOid();
+							form = new CCCForm();
+							questionsList = new ArrayList<CCCQuestion>();
+					} 
+				} else {
+					formOid = alsField.getFormOid();
+				}
 					CCCQuestion question = new CCCQuestion();
 					totalQuestCount++;
 					question.setFieldOrder(alsField.getOrdinal());
 					question.setRaveFormOId(alsField.getFormOid());
 					String draftFieldName = alsField.getDraftFieldName();
-					if (draftFieldName.indexOf(publicid_prefix) > -1 && draftFieldName.indexOf(version_prefix) > -1) {
-						question = assignCdeIdVersionToQuestion (question, draftFieldName);
-						if (!NumberUtils.isNumber(question.getCdePublicId()) || !NumberUtils.isNumber(question.getCdeVersion()))
-							cdeServiceCall = false;
-
-						question.setRaveFieldLabel(alsField.getPreText());
-						question.setCdePermitQuestionTextChoices("");
-						question.setRaveControlType(alsField.getControlType());
-
-						for (String key : ddeMap.keySet()) {
-							if (key.equals(alsField.getDataDictionaryName())) {
-								question.setRaveCodedData(ddeMap.get(key).getCodedData());
-								question.setRaveUserString(ddeMap.get(key).getUserDataString());
-							}
-						}
-
-						String raveUOM = null;
-						if (alsField.getFixedUnit() != null)
-							raveUOM = alsField.getFixedUnit();
-						else if (alsField.getUnitDictionaryName() != null)
-							raveUOM = alsField.getUnitDictionaryName();
-						question.setRaveUOM(raveUOM);
-						question.setRaveLength(alsField.getFixedUnit());
-						question.setRaveDisplayFormat(alsField.getDataFormat());
-						question.setRaveFieldDataType(alsField.getDataFormat());
-						Map<String, String> parseValidationError = pickFieldErrors(alsField, alsData.getCccError().getAlsErrors());
-						question = setParseErrorToQuestion (question, parseValidationError);
-						CdeDetails cdeDetails = null;
-						logger.debug("cdeServiceCall: " + cdeServiceCall);
-						if (cdeServiceCall) {
-								try {
-									// Service Call to retrieve CDEDetails
-									cdeDetails = CdeService.retrieveDataElement(question.getCdePublicId(),
-											question.getCdeVersion());
-								} catch (Exception e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-									//FIXME error handling
-									continue;
+					if (draftFieldName!=null) {
+						if (draftFieldName.indexOf(publicid_prefix) > -1 && draftFieldName.indexOf(version_prefix) > -1) {
+							question = assignCdeIdVersionToQuestion (question, draftFieldName);
+							if (!NumberUtils.isNumber(question.getCdePublicId()) || !NumberUtils.isNumber(question.getCdeVersion()))
+								cdeServiceCall = false;
+	
+							question.setRaveFieldLabel(alsField.getPreText());
+							question.setCdePermitQuestionTextChoices("");
+							question.setRaveControlType(alsField.getControlType());
+	
+							for (String key : ddeMap.keySet()) {
+								if (key.equals(alsField.getDataDictionaryName())) {
+									question.setRaveCodedData(ddeMap.get(key).getCodedData());
+									question.setRaveUserString(ddeMap.get(key).getUserDataString());
 								}
-								// Service Call to validate the CDEDetails
-								// against the ALSField & Question objects
+							}
+	
+							String raveUOM = null;
+							if (alsField.getFixedUnit() != null)
+								raveUOM = alsField.getFixedUnit();
+							else if (alsField.getUnitDictionaryName() != null)
+								raveUOM = alsField.getUnitDictionaryName();
+							question.setRaveUOM(raveUOM);
+							question.setRaveLength(alsField.getFixedUnit());
+							question.setRaveDisplayFormat(alsField.getDataFormat());
+							question.setRaveFieldDataType(alsField.getDataFormat());
+							Map<String, String> parseValidationError = pickFieldErrors(alsField, alsData.getCccError().getAlsErrors());
+							question = setParseErrorToQuestion (question, parseValidationError);
+							CdeDetails cdeDetails = null;
+							logger.debug("cdeServiceCall: " + cdeServiceCall);
+							if (cdeServiceCall) {
+								try {
+								// Service Call to retrieve CDEDetails
+								cdeDetails = CdeService.retrieveDataElement(question.getCdePublicId(), question.getCdeVersion());
+								} catch (Exception e) {
+									//FIXME error handling
+									e.printStackTrace();
+									continue;
+									
+								}
+								// Service Call to validate the CDEDetails against the ALSField & Question objects
 								question = ValidatorService.validate(alsField, question, cdeDetails);							
-						}
-						// from a static table of NCI standard CRFs
-						CdeStdCrfData cdeCrfData = fetchCdeStandardCrfData(question.getCdePublicId(), question.getCdeVersion());
-						if (cdeCrfData!=null)
-							question.setNciCategory(cdeCrfData.getNciCategory());						
-						if (cdeCrfData!=null && cdeDetails.getDataElement()!=null)  {
-						if (nrds_cde.equalsIgnoreCase(question.getNciCategory())) {
-							nrdsCdeList.add(buildNrdsCde(question,
-									cdeDetails.getDataElement().getDataElementDetails().getLongName()));
 							}
-						else if ((mandatory_crf.equalsIgnoreCase(question.getNciCategory()))
-								|| (optional_crf.equalsIgnoreCase(question.getNciCategory()))
-								|| (conditional_crf.equalsIgnoreCase(question.getNciCategory()))) {
-								standardCrfCdeList.add(buildCrfCde(cdeCrfData, cdeDetails.getDataElement().getDataElementDetails().getLongName())); 
+							// from a static table of NCI standard CRFs
+							CdeStdCrfData cdeCrfData = fetchCdeStandardCrfData(question.getCdePublicId(), question.getCdeVersion());
+							if (cdeCrfData!=null)
+								question.setNciCategory(cdeCrfData.getNciCategory());						
+							if (cdeCrfData!=null && cdeDetails.getDataElement()!=null)  {
+							if (nrds_cde.equalsIgnoreCase(question.getNciCategory())) {
+								nrdsCdeList.add(buildNrdsCde(question,
+										cdeDetails.getDataElement().getDataElementDetails().getLongName()));
+								}
+							else if ((mandatory_crf.equalsIgnoreCase(question.getNciCategory()))
+									|| (optional_crf.equalsIgnoreCase(question.getNciCategory()))
+									|| (conditional_crf.equalsIgnoreCase(question.getNciCategory()))) {
+									standardCrfCdeList.add(buildCrfCde(cdeCrfData, cdeDetails.getDataElement().getDataElementDetails().getLongName())); 
+								}
 							}
-						}
-						if (question.getQuestionCongruencyStatus() == null
-								|| question.getQuestionCongruencyStatus().equalsIgnoreCase("")) {
-							if (form.getCongruencyStatus() != null
-									&& (!form.getCongruencyStatus().equals(congStatus_errors))) {
-								form.setCongruencyStatus(congStatus_congruent);
-							}
-							// questionsList.add(question);
-						} else {
-							questionsList.add(question);
-							if (form.getCongruencyStatus() != null) {
-								if (!form.getCongruencyStatus().equals(congStatus_errors)) {
-									if (question.getQuestionCongruencyStatus() != null && question
-											.getQuestionCongruencyStatus().equalsIgnoreCase(congStatus_errors))
+							if (question.getQuestionCongruencyStatus() == null) {
+								if (form.getCongruencyStatus() != null
+										&& (!form.getCongruencyStatus().equals(congStatus_errors))) {
+									form.setCongruencyStatus(congStatus_congruent);
+								}
+								// Adding the below line will create a Full report - All questions irrespective of errors/not
+								// questionsList.add(question);
+							} else {
+								questionsList.add(question);
+								if (question.getQuestionCongruencyStatus()!=null) {
+									if (congStatus_warn.equals(question.getQuestionCongruencyStatus())) {
+										if (form.getCongruencyStatus() == null)
+											form.setCongruencyStatus(congStatus_warn);
+									} else if (congStatus_errors.equals(question.getQuestionCongruencyStatus())) {
 										form.setCongruencyStatus(congStatus_errors);
-									else if (question.getQuestionCongruencyStatus() != null
-											&& question.getQuestionCongruencyStatus().equals(congStatus_warn))
-										form.setCongruencyStatus(congStatus_warn);
-								} else
-									form.setCongruencyStatus(question.getQuestionCongruencyStatus());
-							} else
-								form.setCongruencyStatus(question.getQuestionCongruencyStatus());
+									}
+								}
+							}
+						} else {
+							question.setRaveFieldLabel(alsField.getPreText());
+							question.setQuestionCongruencyStatus(congStatus_warn);
+							Map<String, String> parseValidationError = pickFieldErrors(alsField, alsData.getCccError().getAlsErrors());
+							question = setParseErrorToQuestion (question, parseValidationError);
+							questionsList.add(question);
 						}
-					} else {
-						question.setRaveFieldLabel(alsField.getPreText());
-						question.setQuestionCongruencyStatus(congStatus_warn);
-						Map<String, String> parseValidationError = pickFieldErrors(alsField, alsData.getCccError().getAlsErrors());
-						question = setParseErrorToQuestion (question, parseValidationError);
-						questionsList.add(question);
-					}
+				}
 			}
 		}
-
-		if (questionsList.isEmpty())
-			form.setCongruencyStatus(congStatus_congruent);
-		else
-			form.setQuestions(questionsList);
-		form.setCountTotalQuestions(totalQuestCount);		
-		form.setRaveFormOid(formName);
-		if (!form.getQuestions().isEmpty())
+		form.setCountTotalQuestions(totalQuestCount);
+		form.setRaveFormOid(formOid);
+		if (questionsList.isEmpty()) {
+			form.setCongruencyStatus(congStatus_congruent); 
+		} else {
+			form.setQuestions(questionsList); 
 			formsList.add(form);
+		}
 		cccReport.setCccForms(formsList);
 		logger.info("getFinalReportData created formsList size: " + formsList.size());
 		if (formsList.size() == 0) {
