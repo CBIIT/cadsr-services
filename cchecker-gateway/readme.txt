@@ -50,6 +50,10 @@ displayExceptions=true/false
 The next call shall open Save as dialog for a report previously generated:
 curl -v --cookie "_cchecker=0BCAEE78-9916-4ADA-B7CD-CE5854AFDD82" http://localhost:8080/gateway/genexcelreporterror
 ********
+Swagger 2 - Documentation
+Swagger and Swagger-UI are added.
+To try services by Swagger UI you have to have your browser cookie "_cchecker". The cookie is created by calling RESTful service "/parseservice".
+http://localhost:8080/gateway/swagger-ui.html
 ********
 Test services
 ********
