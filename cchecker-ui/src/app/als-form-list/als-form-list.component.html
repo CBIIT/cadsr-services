@@ -6,7 +6,7 @@
     Please upload a file with form data.
 </div>
 
-<div class="alert alert-danger" role="alert" *ngIf="error">
+<div class="alert alert-danger" role="alert" *ngIf="errorMessage">
   {{errorMessage.message}}
 </div>
 
@@ -111,3 +111,4 @@
 <div *ngIf="validating"><br />
     <app-progress-bar [statusMessage]="'Validating'" [type]="'busy'" [percentage]="100"></app-progress-bar><br />
 </div>
+

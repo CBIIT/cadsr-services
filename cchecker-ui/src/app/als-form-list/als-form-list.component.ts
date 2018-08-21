@@ -11,44 +11,42 @@ import { Router } from '../../../node_modules/@angular/router';
   styleUrls: ['./als-form-list.component.css'],
   })
 export class AlsFormListComponent implements OnInit {
-
-  formListData:Observable<Object>;
   checkedItems:Observable<String[]>;
-  validItemsLength:Number;
-  validating:Boolean;
-  error:boolean;
   errorMessage:String;  
+  formListData:Observable<Object>;
+  validating:Boolean;
+  validItemsLength:Observable<Object>;
+  
   constructor(private formListService:FormListService, private restService:RestService, private reportService:ReportService, private router:Router) {
   }
 
   ngOnInit() {
+    this.checkedItems = this.formListService.getCheckedItems(); // get checked items as observable //
     this.formListData = this.formListService.getFormListData(); // get form data as observable //
-    this.checkedItems = this.formListService.getCheckedItems(); // get checkd items as observable //
-    this.validItemsLength = Object.assign([],this.formListData.source['value']['formsList'].filter((r) => r.isValid ).map((e) => e.formName)).length; // get valid item value //
     this.validating = false;
-
+    this.validItemsLength = Object.assign([],this.formListData.source['value']['formsList'].filter((r) => r.isValid ).map((e) => e.formName)).length; // get valid item value //
   };
 
   // check forms (validate) and go to report page //
   checkForms() {
-    this.validating = true;
-    this.error = false;
     let checkedItems:String[];
+    this.errorMessage = null;
     let formListData:Object;
     this.checkedItems.subscribe(data=>checkedItems=data).unsubscribe();
     this.formListData.subscribe(data=>formListData=data).unsubscribe();
+    this.validating = true;
+
     this.restService.checkForms(checkedItems,formListData).subscribe(
       data => this.reportService.setReportData(data),
       error => {
-        this.error = true;
-        this.validating = false;
         this.errorMessage = error;
+        this.validating = false;
       },
       () => {
         this.validating = false;
         this.router.navigateByUrl('/report')
       })
-  }
+  };
 
   // gets checkd status of record //
   getCheckedStatus = record => this.formListService.getCheckedStatus(record);
@@ -56,11 +54,11 @@ export class AlsFormListComponent implements OnInit {
   // gets checkd status of record //
   getParsingStatus = validFlag => validFlag ? 'Pass':'Fail';
 
-  // sets checked status of record
-  setCheckedItem = (record):void => this.formListService.setCheckedItem(record);
-
   // sets all or none for checked status of records //
   setCheckAllStatus = (event):void => this.formListService.setCheckAllStatus(event.target.checked);
+
+  // sets checked status of record
+  setCheckedItem = (record):void => this.formListService.setCheckedItem(record);
 
   // set expand collapse property //
   setExpandCollapse = record => {
@@ -72,6 +70,5 @@ export class AlsFormListComponent implements OnInit {
   setFormListOptionCheckbox = (event):void => this.formListService.setFormListOptionCheckbox(event);
 
   ngOnDestroy() {
-
   }
 };
