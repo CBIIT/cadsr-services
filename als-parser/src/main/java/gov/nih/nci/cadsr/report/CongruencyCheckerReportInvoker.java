@@ -85,6 +85,7 @@ public class CongruencyCheckerReportInvoker {
 	private static String nrds_missing_cde_tab_name = "NRDS CDEs missing";
 	private static String nrds_missing_cde_header = "NRDS CDEs missing from the ALS file";
 	private static String matching_nrds_cdes_header = "NRDS CDEs included in Protocol Forms with Warnings or Errors";
+	private static String congStatus_Congruent = "CONGRUENT";
 	
 	
 	public static void main(String[] args) {
@@ -122,7 +123,7 @@ public class CongruencyCheckerReportInvoker {
 			reportInput.setCheckStdCrfCde(false);
 			reportInput.setCheckUom(false);
 			reportInput.setDisplayExceptionDetails(false);
-			cccReport  = buildErrorReportService(reportInput);	*/
+			cccReport  = buildErrorReportService(reportInput);*/
 			
 			logger.debug("Report Error Forms list size: "+cccReport.getCccForms().size());
 			/*for (CCCForm form : cccReport.getCccForms()) {
@@ -222,6 +223,10 @@ public class CongruencyCheckerReportInvoker {
 				"Rave Length", "Length Checker Result", "CDE Maximum Length", "Rave Display Format", "Format Checker Result",
 				"CDE Display Format" };
 		for (CCCForm cccForm : forms) {
+			if (cccForm.getCongruencyStatus()!=null) {
+				if (congStatus_Congruent.equalsIgnoreCase(cccForm.getCongruencyStatus())) {
+					continue;
+				} else {
 			XSSFSheet sheet2 = workbook.createSheet(cccForm.getRaveFormOid());
 			rowNum = 0;
 			row = sheet2.createRow(rowNum++);
@@ -329,7 +334,9 @@ public class CongruencyCheckerReportInvoker {
 				newCell.setCellValue(question.getCdeDisplayFormat());
 				if (rowNumAfterCD > rowNum)
 					rowNum = rowNumAfterCD;
-			}
+				}
+			  }
+		   }
 		}				
 		buildNrdsTab(workbook, cccReport.getNrdsCdeList());
 		buildMissingNrdsCdesTab(workbook, cccReport.getMissingNrdsCdeList());

@@ -193,10 +193,10 @@ public class GenerateReport implements ReportOutput {
 		if (!questionsList.isEmpty()) {
 			form.setQuestions(questionsList);
 			form = setFormCongruencyStatus(form);
-			formsList.add(form);
 		} else {
 			form.setCongruencyStatus(congStatus_congruent);
 		}
+		formsList.add(form);		
 		cccReport.setCccForms(formsList);
 		logger.info("getFinalReportData created formsList size: " + formsList.size());
 		if (formsList.size() == 0) {
