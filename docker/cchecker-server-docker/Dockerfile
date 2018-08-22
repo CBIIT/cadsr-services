@@ -4,9 +4,9 @@ RUN apk update \
     util-linux
 
 WORKDIR /tmp
-RUN wget http://apache.mirrors.tds.net/tomcat/tomcat-9/v9.0.10/bin/apache-tomcat-9.0.10.tar.gz \
-    && tar xvfz apache-tomcat-9.0.10.tar.gz \
-    && mv apache-tomcat-9.0.10 /usr/local/apache-tomcat
+RUN wget http://www.gtlib.gatech.edu/pub/apache/tomcat/tomcat-9/v9.0.11/bin/apache-tomcat-9.0.11.tar.gz \
+    && tar xvfz apache-tomcat-9.0.11.tar.gz \
+    && mv apache-tomcat-9.0.11 /usr/local/apache-tomcat
 
 WORKDIR /var/local
 RUN git clone https://github.com/CBIIT/cadsr-services \
