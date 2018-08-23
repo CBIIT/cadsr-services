@@ -17,6 +17,10 @@ import gov.nih.nci.cadsr.service.model.cdeData.CdeDetails;
 import gov.nih.nci.cadsr.service.model.cdeData.dataElement.OtherVersion;
 import gov.nih.nci.cadsr.service.model.cdeData.dataElement.ReferenceDocument;
 
+/**
+ * Service with methods checking the congruency of the ALS input with CDE from caDSR
+ *
+ */
 public class ValidatorService {
 
 	private static final Logger logger = Logger.getLogger(ValidatorService.class);
@@ -50,6 +54,14 @@ public class ValidatorService {
 	private static final String patternHolderChar = "d";
 	private static final String patternHolderNum = "9";
 
+	
+	/**
+	 * Calls the methods to perform congruency checks against caDSR DB 
+	 * @param field
+	 * @param question
+	 * @param cdeDetails
+	 * @return CCCQuestion
+	 */
 	public static CCCQuestion validate(ALSField field, CCCQuestion question, CdeDetails cdeDetails) {
 		try {
 		if (cdeDetails.getDataElement()==null && cdeDetails.getValueDomain()==null) {			
@@ -144,10 +156,16 @@ public class ValidatorService {
 	}
 	
 	
+	/**
+	 * Check if the CDE is retired [Workflow status - RETIRED]
+	 * @param cdeDetails
+	 * @param question
+	 * @return CCCQuestion
+	 */
 	protected static CCCQuestion checkCdeRetired(CdeDetails cdeDetails, CCCQuestion question) {
 		//Checking for retired CDEs 
 		if (cdeDetails.getDataElement()!=null && cdeDetails.getDataElement().getDataElementDetails().getWorkflowStatus().equalsIgnoreCase(retiredString)) {	
-			question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg6));
+			question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg2));
 			if (question.getQuestionCongruencyStatus()==null)
 				question.setQuestionCongruencyStatus(congStatus_warn);
 		}		
@@ -155,6 +173,12 @@ public class ValidatorService {
 	}
 
 
+	/**
+	 * Retrieve & check for newer versions of the CDE
+	 * @param cdeDetails
+	 * @param question
+	 * @return CCCQuestion
+	 */
 	protected static CCCQuestion checkCdeVersions(CdeDetails cdeDetails, CCCQuestion question) {
 		//Checking for different versions of CDEs
 		Boolean newerVersionExists = false;
@@ -177,6 +201,12 @@ public class ValidatorService {
 	}
 	
 	
+	/**
+	 * Check & Set the congruency check result for RAVE Field Label
+	 * @param cdeDetails
+	 * @param question
+	 * @return CCCQuestion
+	 */
 	protected static CCCQuestion setRaveFieldLabelResult (CdeDetails cdeDetails, CCCQuestion question) {
 		List<String> rdDocTextList = new ArrayList<String>();
 		StringBuffer rdDocs = new StringBuffer();
@@ -210,8 +240,13 @@ public class ValidatorService {
 	}
 
 	
+	/**
+	 * Comparing the RAVE control type and the caDSR VD data type for Control Type Checker Result
+	 * @param vdType
+	 * @param question
+	 * @return CCCQuestion
+	 */
 	protected static CCCQuestion setRaveControlTypeResult (String vdType, CCCQuestion question) {
-		// Comparing the RAVE control type and the caDSR VD data type for Control Type Checker Result
 			question.setCdeValueDomainType(vdType);		
 			if (question.getRaveControlType()!=null) {
 				if (question.getRaveControlType().equalsIgnoreCase("TEXT") && vdType.equalsIgnoreCase("N")) {
@@ -236,6 +271,12 @@ public class ValidatorService {
 	}
 	
 	
+	/**
+	 * Check the PV VMs against the User Data String in the ALS input file
+	 * @param pvVmList
+	 * @param question
+	 * @return CCCQuestion
+	 */
 	protected static CCCQuestion setPvCheckerResult (List<String> pvVmList, CCCQuestion question) {
 		// Checking for the presence of RAVE user data string in the PV Value meaning list - PV Checker result
 		if (!pvVmList.isEmpty()) {
@@ -254,8 +295,13 @@ public class ValidatorService {
 	}
 	
 	
+	/**
+	 * Checking for the presence of RAVE Coded data in the PV values list - Coded Data Checker Result
+	 * @param pvList
+	 * @param question
+	 * @return CCCQuestion
+	 */
 	protected static CCCQuestion setCodedDataCheckerResult (List<String> pvList, CCCQuestion question) {
-		// Checking for the presence of RAVE Coded data in the PV values list - Coded Data Checker Result
 		List<String> cdResult = new ArrayList<String>();
 		if (!pvList.isEmpty()) {
 			for (String codedData : question.getRaveCodedData()) {
@@ -275,8 +321,14 @@ public class ValidatorService {
 	}
 	
 
+	/**
+	 * Comparing RAVE Data format with caDSR Value Domain Datatype - Datatype Checker Result
+	 * @param question
+	 * @param raveDataFormat
+	 * @param vdDataType
+	 * @return CCCQuestion
+	 */
 	protected static CCCQuestion checkDataTypeCheckerResult (CCCQuestion question, String raveDataFormat, String vdDataType) {
-		// Comparing RAVE Data format with caDSR Value Domain Datatype - Datatype Checker Result
 		Boolean result = false;
 		logger.debug("Field Data Format: "+raveDataFormat+" vdDataType: "+vdDataType);
 		question.setCdeDataType(vdDataType);
@@ -306,8 +358,13 @@ public class ValidatorService {
 	}
 	
 	
+	/**
+	 * Comparing RAVE UOM (FixedUnit) with the caDSR Value Domain Unit of Measure - UOM Checker Result
+	 * @param question
+	 * @param unitOfMeasure
+	 * @return CCCQuestion
+	 */
 	protected static CCCQuestion setUomCheckerResult (CCCQuestion question, String unitOfMeasure) {
-		// Comparing RAVE UOM (FixedUnit) with the caDSR Value Domain Unit of Measure - UOM Checker Result
 		question.setCdeUOM(unitOfMeasure);
 		if (question.getRaveUOM()!=null) {
 				if (question.getRaveUOM().equals(unitOfMeasure)) {
@@ -323,8 +380,13 @@ public class ValidatorService {
 	}
 	
 	
+	/**
+	 * Comparing RAVE Length (FixedUnit) with the caDSR Value Domain Max length - RAVE Length Checker result
+	 * @param question
+	 * @param vdMaxLength
+	 * @return CCCQuestion
+	 */
 	protected static CCCQuestion setLengthCheckerResult (CCCQuestion question, Integer vdMaxLength) {
-		// Comparing RAVE Length (FixedUnit) with the caDSR Value Domain Max length - RAVE Length Checker result
 		String raveLength = question.getRaveLength();
 		if (raveLength!=null) {
 			if (Float.valueOf(computeRaveLength(raveLength)) < Float.valueOf(vdMaxLength)) {
@@ -339,8 +401,14 @@ public class ValidatorService {
 	}
 	
 	
+	/**
+	 * Comparing the ALS RAVE Data Format with caDSR Value Domain Display Format
+	 * @param question
+	 * @param raveDataFormat
+	 * @param vdDisplayFormat
+	 * @return CCCQuestion
+	 */
 	protected static CCCQuestion checkFormatCheckerResult (CCCQuestion question, String raveDataFormat, String vdDisplayFormat) {
-		//Comparing the ALS RAVE Data Format with caDSR Value Domain Display Format
 		question.setCdeDisplayFormat(vdDisplayFormat);
 		if (raveDataFormat!=null) {
 				if (raveDataFormat.equals(vdDisplayFormat)) {
@@ -355,6 +423,14 @@ public class ValidatorService {
 	}
 	
 
+	/**
+	 * Checking for the max length of CDEs against the max length of the Value Domain
+	 * @param question
+	 * @param pvMaxLen
+	 * @param vdMaxLen
+	 * @param cdeMaxLen
+	 * @return CCCQuestion
+	 */
 	protected static CCCQuestion checkCdeMaxLength (CCCQuestion question, int pvMaxLen, int vdMaxLen, int cdeMaxLen) {
 		question.setCdeMaxLength(vdMaxLen);
 		if (pvMaxLen > vdMaxLen)
@@ -362,6 +438,12 @@ public class ValidatorService {
 		return question;
 	}
 	
+	
+	/**
+	 * Compute the Rave length
+	 * @param raveLength
+	 * @return int
+	 */
 	protected static int computeRaveLength (String raveLength) {
 		if (raveLength!=null && !raveLength.equals("%")) {
 			if (raveLength.indexOf(characters_string)>-1) {
@@ -384,6 +466,13 @@ public class ValidatorService {
 		return Integer.parseInt(raveLength.trim());
 	}
 	
+	
+	/**
+	 * Assing a question message to a question
+	 * @param questionMessage
+	 * @param newMessage
+	 * @return String
+	 */
 	protected static String assignQuestionErrorMessage (String questionMessage, String newMessage) {
 		String errorMessage = null;
 		if (questionMessage!=null) 
