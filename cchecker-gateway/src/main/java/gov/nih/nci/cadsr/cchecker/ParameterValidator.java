@@ -34,7 +34,7 @@ public class ParameterValidator {
 			return m.matches();
 		}
 		else {
-			logger.debug("Wrong length");
+			logger.error("validateIdSeq: wrong length or blank: " + idSeq);
 			return false;
 		}
 	}

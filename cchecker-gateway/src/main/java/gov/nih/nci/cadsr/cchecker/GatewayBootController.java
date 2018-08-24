@@ -30,6 +30,7 @@ import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -179,7 +180,7 @@ public class GatewayBootController {
 			RestTemplate restTemplate = new RestTemplate();
 
 			String urlStr = String.format(retrieveUrlStr, idseq);
-			logger.debug("...retrieveData" + urlStr);
+			logger.debug("...retrieveData from URL: " + urlStr);
 
 			data = restTemplate.getForObject(urlStr, clazz);
 		}
@@ -435,9 +436,9 @@ public class GatewayBootController {
 	}
 	
 	@CrossOrigin
-	@GetMapping("/retrievereporterror")
+	@GetMapping("/retrievereporterror/{idseq}")
 	public ResponseEntity<?> retrieveErrorReport(HttpServletRequest request,
-			@RequestParam(name="_cchecker", required=true) String idseq) {
+			@PathVariable("idseq") String idseq) {
 		logger.debug("retrieveErrorReport called: " + idseq);
 
 		if (!ParameterValidator.validateIdSeq(idseq)) {
