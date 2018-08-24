@@ -27,7 +27,9 @@ public class ValidatorService {
 	private static final String errorString = "ERROR";
 	private static final String matchString = "MATCH";
 	private static final String warningString = "WARNING";
-	private static final String retiredString = "RETIRED";
+	private static final String retiredArchivedStatus = "RETIRED ARCHIVED";
+	private static final String retiredPhasedOutStatus = "RETIRED PHASED OUT";
+	private static final String retiredWithdrawnStatus = "RETIRED WITHDRAWN";
 	private static final String msg1 = "CDE not in caDSR database";
 	private static final String msg2 = "CDE has been retired";
 	private static final String msg3 = "Newer version of CDE exists: ";
@@ -157,14 +159,16 @@ public class ValidatorService {
 	
 	
 	/**
-	 * Check if the CDE is retired [Workflow status - RETIRED]
+	 * Check if the CDE is retired [Workflow status - RETIRED ARCHIVED, RETIRED PHASED OUT or RETIRED WITHDRAWN]
 	 * @param cdeDetails
 	 * @param question
 	 * @return CCCQuestion
 	 */
 	protected static CCCQuestion checkCdeRetired(CdeDetails cdeDetails, CCCQuestion question) {
 		//Checking for retired CDEs 
-		if (cdeDetails.getDataElement()!=null && cdeDetails.getDataElement().getDataElementDetails().getWorkflowStatus().equalsIgnoreCase(retiredString)) {	
+		if (cdeDetails.getDataElement()!=null && (cdeDetails.getDataElement().getDataElementDetails().getWorkflowStatus().equalsIgnoreCase(retiredArchivedStatus)
+				|| cdeDetails.getDataElement().getDataElementDetails().getWorkflowStatus().equalsIgnoreCase(retiredPhasedOutStatus)
+				|| cdeDetails.getDataElement().getDataElementDetails().getWorkflowStatus().equalsIgnoreCase(retiredWithdrawnStatus))) {	
 			question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg2));
 			if (question.getQuestionCongruencyStatus()==null)
 				question.setQuestionCongruencyStatus(congStatus_warn);

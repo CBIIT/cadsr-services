@@ -276,7 +276,13 @@ public class GenerateReport implements ReportOutput {
 		return parseErrorMap;
 	}
 	
-	
+
+	/**
+	 * Transfer the parser errors to the question for the report
+	 * @param question
+	 * @param parseValidationError
+	 * @return CCCQuestion
+	 */
 	protected static CCCQuestion setParseErrorToQuestion (CCCQuestion question, Map<String, String> parseValidationError) {
 		if (parseValidationError.get(parse_errors_error) != null) {
 			question.setMessage(parseValidationError.get(parse_errors_error));
@@ -291,6 +297,12 @@ public class GenerateReport implements ReportOutput {
 
 	
 	
+	/**
+	 * Split the CDE public ID and Version, and assign them to the question  
+	 * @param question
+	 * @param draftFieldName
+	 * @return CCCQuestion
+	 */
 	protected static CCCQuestion assignCdeIdVersionToQuestion (CCCQuestion question, String draftFieldName) {
 		String idVersion = draftFieldName.substring(draftFieldName.indexOf(publicid_prefix),
 				draftFieldName.length());
@@ -308,6 +320,7 @@ public class GenerateReport implements ReportOutput {
 	
 	
 	/**
+	 * List of Standard CRF CDEs & NRDS CDEs
 	 * @param String cdePublicId
 	 * @param String cdeVersion
 	 * @return CRF data for the given CDE
@@ -341,6 +354,7 @@ public class GenerateReport implements ReportOutput {
 	}
 
 	/**
+	 * Populate an NRDS CDE
 	 * @param CCCQuestion
 	 * @param string
 	 * @return Return NrdsCde for a question
@@ -360,6 +374,7 @@ public class GenerateReport implements ReportOutput {
 	
 	
 	/**
+	 * Populate a missing NRDS CDE from a NRDS 
 	 * @param nrdsDb
 	 * @return Return NrdsCde for a CDE returned from the static list of NRDS CDEs
 	 * 
@@ -372,6 +387,7 @@ public class GenerateReport implements ReportOutput {
 	}	
 
 	/**
+	 * Populate a Standard CRF CDE
 	 * @param cdeCrfData
 	 * @param cdeName
 	 * @return Return NrdsCde for a question
@@ -389,6 +405,7 @@ public class GenerateReport implements ReportOutput {
 	
 	
 	/**
+	 * Populate a missing Standard CRF CDE
 	 * @param stdCrfCdeDb
 	 * @return Return StandardCrfCde for a CDE returned from the static list of Standard CRF CDEs
 	 * 
@@ -403,39 +420,6 @@ public class GenerateReport implements ReportOutput {
 		return stdCrdCde;
 	}	
 	
-
-	/**
-	 * FIXME remove refineMissingCdesList method.
-	 * It creates IllegalStateException because of changing an iterator which is in use.
-	 * It is not removed for educational purposes.
-	 * 
-	 * @param nrdsCdeList
-	 * @param standardCrfCdeList
-	 * @return Reduces the NRDS and Standard CRF CDE lists to the CDEs that are missing in the RAVE ALS input file
-	 * 
-	 */	
-	protected static void refineMissingCdesList (List<NrdsCde> nrdsCdeList, List<StandardCrfCde> standardCrfCdeList) {
-		for (Iterator<CategoryNrds> iterator = categoryNrdsList.iterator(); iterator.hasNext();) {
-			CategoryNrds nrds = iterator.next();
-			for (NrdsCde nrdsCdeStatic : nrdsCdeList) {
-			    if (nrdsCdeStatic.getCdeIdVersion().equals(nrds.getCdeId()+"v"+nrds.getDeVersion())) {
-			        // Remove the current element from the iterator and the list.
-			    	if (iterator!=null)
-			    		iterator.remove();
-			    }
-		    }
-		}
-		for (Iterator<CategoryCde> iterator = categoryCdeList.iterator(); iterator.hasNext();) {
-			CategoryCde cde = iterator.next();
-			for (StandardCrfCde stdCrfCdeStatic : standardCrfCdeList) {
-				if (stdCrfCdeStatic.getCdeIdVersion().equals(cde.getCdeId()+"v"+cde.getDeVersion())) {
-			        // Remove the current element from the iterator and the list.
-					if (iterator!=null)					
-						iterator.remove();
-				}
-			}
-		}
-	}
 	
 	protected static List<CategoryNrds> createMissingNrdsCategoryNrdsList(List<NrdsCde> nrdsCdeList) {
 		List<CategoryNrds> missing = new ArrayList<>();
@@ -467,6 +451,11 @@ public class GenerateReport implements ReportOutput {
 		return missing;
 	}	
 	
+	/**
+	 * Calculate and set counts for different parameters on the summary page
+	 * @param report
+	 * @return CCCReport
+	 */
 	protected static CCCReport computeFormsAndQuestionsCount (CCCReport report) {
 		int stdManMissingCount = 0;
 		int stdOptMissingCount = 0;
@@ -626,13 +615,15 @@ public class GenerateReport implements ReportOutput {
 	}
 
 	
+	/**
+	 *  Iterate through the Questions in the form to check for their Congruency statuses.
+	 *  The form takes the highest status occurring in any of the questions in this order
+	 *  Congruent being the lowest, Errors being the highest and
+	 *   Warnings if only warnings are present. 
+	 * @param form
+	 * @return CCCForm
+	 */
 	protected static CCCForm setFormCongruencyStatus (CCCForm form) {
-		/*
-		 *  Iterate through the Questions in the form to check for their Congruency statuses.
-		 *  The form takes the highest status occurring in any of the questions in this order
-		 *  Congruent being the lowest, Errors being the highest and
-		 *   Warnings if only warnings are present.
-		 */		
 		for (CCCQuestion question : form.getQuestions()) {
 			if (question.getQuestionCongruencyStatus()!=null) {
 				if (congStatus_warn.equals(question.getQuestionCongruencyStatus())) {
