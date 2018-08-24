@@ -56,6 +56,12 @@ returns CCCReport object
 or 400 - wrong ID format
 or 404 - not found
 ********
+Retrieve an existed Excel report generated earlier.
+curl -v http://localhost:8080/gateway/retrieveexcelreporterror/A9D4DF89-7680-48F5-8E0E-7094567944D1
+returns Save as Excel object
+or 400 - wrong ID format
+or 404 - not found
+********
 Swagger 2 - Documentation
 Swagger and Swagger-UI are added.
 To try services by Swagger UI you have to have your browser cookie "_cchecker". The cookie is created by calling RESTful service "/parseservice".

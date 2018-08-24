@@ -3,8 +3,11 @@
  */
 package gov.nih.nci.cadsr.cchecker;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+//TODO Tomcat dependency
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -485,7 +489,38 @@ public class GatewayBootController {
 		}
 		response.flushBuffer();
 	}
-		
+	
+	@CrossOrigin
+	@GetMapping("/retrieveexcelreporterror/{idseq}")
+	public void retrieveExcelReportError(HttpServletRequest request, HttpServletResponse response, 
+			@PathVariable("idseq") String idseq) throws Exception {
+		if  (!ParameterValidator.validateIdSeq(idseq)) {
+			response.setHeader("Content-Type", "text/plain");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			IOUtils.copy(new ByteArrayInputStream(("Report ID is not valid: " + idseq + '\n').getBytes()),
+				response.getOutputStream());
+		} 
+		else {
+			String filePath = buildExcelFilePath(idseq);
+			logger.debug("...retrieveExcelReportError from: " + filePath);
+			response.setHeader("Content-Type", MS_EXCEL_MIME_TYPE);
+			response.setHeader("Content-Disposition", "attachment; filename=" + fileExcelReportPrefix + idseq + EXCEL_FILE_EXT);
+			response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
+			response.setStatus(HttpServletResponse.SC_OK);
+			InputStream istream = openFileAsInputStream(filePath);
+			if (istream != null) {
+				IOUtils.copy(openFileAsInputStream(filePath), response.getOutputStream());
+			}
+			else {
+				response.setHeader("Content-Type", "text/plain");
+				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+				IOUtils.copy(new ByteArrayInputStream(("Report with ID is not found: " + idseq + '\n').getBytes()),
+					response.getOutputStream());
+			}
+		}
+		response.flushBuffer();
+	}
+	
 	private Cookie retrieveCookie(HttpServletRequest request) {
 		Cookie[] cookieArr = request.getCookies();
 		Cookie sessionCookie = null;
@@ -502,12 +537,13 @@ public class GatewayBootController {
 	}
 
 	/**
-	 * This method is for feasibility only. We will retrieve ALSData from DB.
+	 * Return path to previously generated Excel file.
 	 * 
-	 * @return String file to ALS Excel file
+	 * @param String idseq not null
+	 * @return String file full path to Excel report file.
 	 */
-	private String buildFilePath(String sessionUID) {
-		return UPLOADED_FOLDER + sessionUID + EXCEL_FILE_EXT;
+	private String buildExcelFilePath(String idseq) {
+		return UPLOADED_FOLDER + fileExcelReportPrefix + idseq + EXCEL_FILE_EXT;
 	}
 
 	/**
@@ -547,7 +583,25 @@ public class GatewayBootController {
 		Path pathNew = Files.write(path, bytes, StandardOpenOption.CREATE_NEW);
 		return pathNew;
 	}
-
+	/**
+	 * 
+	 * @param filename full path not null
+	 * @return BufferedInputStream
+	 * @throws Exception
+	 */
+	protected BufferedInputStream openFileAsInputStream(String filePathString) throws Exception {
+		BufferedInputStream bis = null;
+		Path path = Paths.get(filePathString);
+		if (Files.exists(path)) {
+			FileInputStream fis = new FileInputStream(filePathString);
+			bis = new BufferedInputStream(fis);
+		}
+		else {
+			logger.error("Requested firl is not found: " + filePathString);
+		}
+		return bis;
+	}
+	
 	protected void assignAccessControlHeader(HttpHeaders httpHeaders) {
 		httpHeaders.setAccessControlAllowOrigin(ACCESS_CONTROL_ALLOW_ORIGIN);
 	}
