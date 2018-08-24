@@ -150,10 +150,10 @@ public class DataElementRepository {
 	public <T> T retrieveBlobData(String idseq, Class<T> clazz, String retrieveQueryStr, String columnName) {
 		T blobData = null;
 		try {
-			byte[] alsDataByteArr = null;
+			byte[] dataByteArr = null;
 			LobHandler lobHandler = new DefaultLobHandler();
 			logger.debug("retrieveBlobData for ID: " + idseq + ", retrieveQueryStr: " + retrieveQueryStr);
-			alsDataByteArr = (byte[]) jdbcTemplate.queryForObject(retrieveQueryStr, new Object[] { idseq },
+			dataByteArr = (byte[]) jdbcTemplate.queryForObject(retrieveQueryStr, new Object[] { idseq },
 				new RowMapper<Object>() {
 						// queryForObject expects that at least one object is found, otherwise: DataAccessException
 						@Override
@@ -162,7 +162,7 @@ public class DataElementRepository {
 							return requestData;
 						}
 					});
-			blobData = readFromJSON(alsDataByteArr, clazz);
+			blobData = readFromJSON(dataByteArr, clazz);
 		} 
 		catch (Exception e) {
 			logger.error("retrieveBlobData error on idseq: " + idseq, e);

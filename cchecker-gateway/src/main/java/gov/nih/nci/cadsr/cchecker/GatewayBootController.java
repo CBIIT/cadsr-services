@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -439,25 +440,19 @@ public class GatewayBootController {
 			@RequestParam(name="_cchecker", required=true) String idseq) {
 		logger.debug("retrieveErrorReport called: " + idseq);
 
-		Cookie cookie = retrieveCookie(request);
-		if (cookie == null) {
-			return buildErrorResponse("Session is not found", HttpStatus.BAD_REQUEST);
+		if (!ParameterValidator.validateIdSeq(idseq)) {
+			return buildErrorResponse("Report ID is invalid: " + idseq + '\n', HttpStatus.BAD_REQUEST);
 		}
-		String sessionCookieValue = cookie.getValue();
-		//FIXME idseq format check! check session token
-		logger.debug("checkService session cookie: " + sessionCookieValue);
-		CCCReport data = retrieveReportError(idseq);
-		HttpStatus httpStatus;
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.add("Content-Type", "application/json");
-		if (data != null) {
+		try {
+			CCCReport data = retrieveReportError(idseq);
+			HttpHeaders httpHeaders = new HttpHeaders();
 			httpHeaders.add("Content-Type", "application/json");
-			httpStatus = HttpStatus.OK;
+			return new ResponseEntity<CCCReport>(data, httpHeaders, HttpStatus.OK);
 		}
-		else {
-			httpStatus = HttpStatus.BAD_REQUEST;
+		catch (HttpClientErrorException e){
+			return buildErrorResponse("Report is not found by ID: " + idseq + '\n', e.getStatusCode());
 		}
-		return new ResponseEntity<CCCReport>(data, httpHeaders, httpStatus);
+	
 	}
 	
 	@CrossOrigin
@@ -529,7 +524,7 @@ public class GatewayBootController {
 		// header
 		// assignAccessControlHeader(httpHeaders);
 		logger.error(errorMessage);
-		return new ResponseEntity<String>(errorMessage, httpHeaders, HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<String>(errorMessage, httpHeaders, httpStatus);
 	}
 
 	/**

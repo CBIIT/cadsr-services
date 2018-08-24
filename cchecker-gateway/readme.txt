@@ -50,10 +50,18 @@ displayExceptions=true/false
 The next call shall open Save as dialog for a report previously generated:
 curl -v --cookie "_cchecker=0BCAEE78-9916-4ADA-B7CD-CE5854AFDD82" http://localhost:8080/gateway/genexcelreporterror
 ********
+Retrieve an existed report
+curl -v http://localhost:8080/gateway/retrievereporterror?_cchecker=235393B4-3676-4A79-871C-EE632D4E8279
+returns CCCReport object
+or 400 - wrong ID format
+or 404 - not found
+********
 Swagger 2 - Documentation
 Swagger and Swagger-UI are added.
 To try services by Swagger UI you have to have your browser cookie "_cchecker". The cookie is created by calling RESTful service "/parseservice".
 http://localhost:8080/gateway/swagger-ui.html
+http://localhost:8080/gateway/v2/api-docs
+********
 ********
 Test services
 ********

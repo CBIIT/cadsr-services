@@ -113,18 +113,18 @@ public class CCheckerDbController {
 		logger.debug("retrieveErrorReport called: " + idseq);
 		//FIXME idseq format check! check session token
 
-		CCCReport alsData = dataElemenRepository.retrieveReportError(idseq);
+		CCCReport cccReport = dataElemenRepository.retrieveReportError(idseq);
 		HttpStatus httpStatus;
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.add("Content-Type", "application/json");
-		if (alsData != null) {
+		if (cccReport != null) {
 			httpHeaders.add("Content-Type", "application/json");
 			httpStatus = HttpStatus.OK;
 		}
 		else {
-			httpStatus = HttpStatus.BAD_REQUEST;
+			httpStatus = HttpStatus.NOT_FOUND;
 		}
-		return new ResponseEntity<CCCReport>(alsData, httpHeaders, httpStatus);
+		return new ResponseEntity<CCCReport>(cccReport, httpHeaders, httpStatus);
 	}
 	@PostMapping("/rest/createreporterror")
 	//@ResponseBody

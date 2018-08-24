@@ -58,10 +58,14 @@ If environment is set up just run java command
 http://localhost:4803
 
 5. Retrieve ALSData
-curl -v http://localhost:4803/rest/retrievealsdata?_cchecker=0BCAEE78-9916-4ADA-B7CD-CE5854AFDD82
+curl -v http://localhost:4803/rest/retrievealsdata?_cchecker=235393B4-3676-4A79-871C-EE632D4E8279
 
 6. Retrieve Category CDE List
 curl -v http://localhost:4803/rest/retrievecategorycde
 
 7. Retrieve Category CDE List
 curl -v http://localhost:4803/rest/retrievecategorynrds
+
+5. Retrieve an existing report
+curl -v http://localhost:4803/rest/retrievereporterror?_cchecker=235393B4-3676-4A79-871C-EE632D4E8279
+returns 404 if not found
