@@ -1,5 +1,10 @@
 #~/bin/sh
-
+if [ -d "/var/local/cadsr-services" ]; then
+        echo "Skipping cadsr-services install"
+else
+  git clone https://github.com/CBIIT/cadsr-services  
+  echo "Cloning the repository"
+fi
 # pull up to date code #
 echo "entering cadsr-services directory"
 cd cadsr-services

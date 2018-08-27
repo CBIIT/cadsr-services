@@ -9,8 +9,7 @@ RUN wget http://www.gtlib.gatech.edu/pub/apache/tomcat/tomcat-9/v9.0.11/bin/apac
     && mv apache-tomcat-9.0.11 /usr/local/apache-tomcat
 
 WORKDIR /var/local
-RUN git clone https://github.com/CBIIT/cadsr-services \
-    && mkdir -p /local/content/cchecker
+RUN mkdir -p /local/content/cchecker
 
 COPY entrypoint/run.sh /usr/bin/
 
