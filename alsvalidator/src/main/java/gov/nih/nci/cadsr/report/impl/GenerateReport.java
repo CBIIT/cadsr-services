@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -121,27 +120,8 @@ public class GenerateReport implements ReportOutput {
 							question = assignCdeIdVersionToQuestion (question, draftFieldName);
 							if (!NumberUtils.isNumber(question.getCdePublicId()) || !NumberUtils.isNumber(question.getCdeVersion()))
 								cdeServiceCall = false;
-	
-							question.setRaveFieldLabel(alsField.getPreText());
-							question.setCdePermitQuestionTextChoices("");
-							question.setRaveControlType(alsField.getControlType());
-	
-							for (String key : ddeMap.keySet()) {
-								if (key.equals(alsField.getDataDictionaryName())) {
-									question.setRaveCodedData(ddeMap.get(key).getCodedData());
-									question.setRaveUserString(ddeMap.get(key).getUserDataString());
-								}
-							}
-	
-							String raveUOM = null;
-							if (alsField.getFixedUnit() != null)
-								raveUOM = alsField.getFixedUnit();
-							else if (alsField.getUnitDictionaryName() != null)
-								raveUOM = alsField.getUnitDictionaryName();
-							question.setRaveUOM(raveUOM);
-							question.setRaveLength(alsField.getFixedUnit());
-							question.setRaveDisplayFormat(alsField.getDataFormat());
-							question.setRaveFieldDataType(alsField.getDataFormat());
+							question = buildCodedData(alsField, question, ddeMap);
+							question = setRaveFields (alsField, question);
 							Map<String, String> parseValidationError = pickFieldErrors(alsField, alsData.getCccError().getAlsErrors());
 							question = setParseErrorToQuestion (question, parseValidationError);
 							CdeDetails cdeDetails = null;
@@ -640,6 +620,48 @@ public class GenerateReport implements ReportOutput {
 		if (form.getCongruencyStatus() == null)
 			form.setCongruencyStatus(congStatus_congruent);
 		return form;		
+	}
+	
+	
+	/**
+	 * Retrieving the RAVE fields and data formats from ALS file to be set in the question object
+	 * @param alsField
+	 * @param question
+	 * @return CCCQuestion
+	 */
+	protected static CCCQuestion setRaveFields (ALSField alsField, CCCQuestion question) {
+		String raveUOM = null;
+		if (alsField.getFixedUnit() != null)
+			raveUOM = alsField.getFixedUnit();
+		else if (alsField.getUnitDictionaryName() != null)
+			raveUOM = alsField.getUnitDictionaryName();
+		question.setRaveUOM(raveUOM);
+		question.setRaveLength(alsField.getFixedUnit());
+		question.setRaveDisplayFormat(alsField.getDataFormat());
+		question.setRaveFieldDataType(alsField.getDataFormat());
+		question.setRaveFieldLabel(alsField.getPreText());
+		question.setCdePermitQuestionTextChoices("");
+		question.setRaveControlType(alsField.getControlType());		
+		return question;
+	}
+	
+	
+	/**
+	 * Iterate through the Coded Data and User data string for the PVs and set them into the question object 
+	 * @param alsField
+	 * @param question
+	 * @param ddeMap
+	 * @return CCCQuestion
+	 */
+	protected static CCCQuestion buildCodedData(ALSField alsField, CCCQuestion question, Map<String, ALSDataDictionaryEntry> ddeMap) {
+		for (String key : ddeMap.keySet()) {
+			if (key.equals(alsField.getDataDictionaryName())) {
+				question.setRaveCodedData(ddeMap.get(key).getCodedData());
+				question.setRaveUserString(ddeMap.get(key).getUserDataString());
+			}
+		}
+		
+		return question;
 	}
 	
 
