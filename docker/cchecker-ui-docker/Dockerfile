@@ -1,30 +1,16 @@
-FROM maven:3.5.4-jdk-8-alpine
+FROM cbiit/centos7_base
 MAINTAINER Shaun Einolf
-
-LABEL \
-  BASE_OS="Alpine Linux" \
-  DEFAULT_IMAGE="alpine" \
-  DEFAULT_TAG="congruencychecker" \
-  DESCRIPTION="Deployment environment for angular portion of cchecker" \
-  VERSION="1.0" \
-  UID="Alpine1"
-
-RUN apk update \ 
-    && apk upgrade \
-    && apk add \
-    apache2 \
-    git \
-    nodejs \
-    nodejs-npm \
-    util-linux \
-    supervisor
+RUN yum -y install epel-release
+RUN yum -y update && yum -y install git httpd sudo util-linux
+RUN curl --silent --location https://rpm.nodesource.com/setup_10.x | sudo bash - \
+    && yum -y install nodejs
 
 RUN npm install -g @angular/cli \
     && git config --global user.email "you@example.com" \ 
     && git config --global user.name "Your Name" 
 
-ADD conf/httpd.conf /etc/apache2
-ADD conf/.htaccess /etc/apache2/conf.d
+ADD conf/httpd.conf /etc/httpd
+ADD conf/.htaccess /etc/httpd/conf.d
 ADD run.sh /usr/bin/
 RUN chmod 777 /usr/bin/run.sh
 RUN mkdir /run/apache2/

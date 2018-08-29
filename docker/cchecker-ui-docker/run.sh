@@ -8,7 +8,8 @@ else
   git clone https://github.com/CBIIT/cadsr-services
 fi
 cd /root/cadsr-services/cchecker-ui
+echo "installing node modules"
 npm install
-ng build --output-path /var/www/localhost/htdocs 
-cp /etc/apache2/conf.d/.htaccess /var/www/localhost/htdocs
+ng build --output-path /var/www/html 
+cp /etc/httpd/conf.d/.htaccess /var/www/html
 exec httpd -D FOREGROUND
