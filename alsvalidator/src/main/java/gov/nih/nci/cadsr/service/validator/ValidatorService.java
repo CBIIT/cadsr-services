@@ -102,7 +102,8 @@ public class ValidatorService {
 				if (cdeDetails.getValueDomain().getPermissibleValues()!=null) {
 					for (PermissibleValuesModel pv : cdeDetails.getValueDomain().getPermissibleValues()) {
 						pvList.add(pv.getValue());
-						pvVmList.add(pv.getShortMeaning());
+						if (pv.getShortMeaning()!=null)
+							pvVmList.add(pv.getShortMeaning().toLowerCase());
 						if (allowableCdes.length() > 0)
 							allowableCdes.append("|"+pv.getValue());
 						else 
@@ -285,7 +286,7 @@ public class ValidatorService {
 		// Checking for the presence of RAVE user data string in the PV Value meaning list - PV Checker result
 		if (!pvVmList.isEmpty()) {
 			for (String userDataString : question.getRaveUserString()) {
-				if (pvVmList.contains(userDataString)) {
+				if (pvVmList.contains(userDataString.toLowerCase())) {
 					question.setPvResult(matchString);
 				} else {
 					question.setPvResult(errorString);
@@ -472,7 +473,7 @@ public class ValidatorService {
 	
 	
 	/**
-	 * Assing a question message to a question
+	 * Assign a question message to a question
 	 * @param questionMessage
 	 * @param newMessage
 	 * @return String
