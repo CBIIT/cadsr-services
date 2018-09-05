@@ -213,7 +213,7 @@ public class CongruencyCheckerReportInvoker {
 			cell = row.createCell(summaryFormsValidResultColNum);
 			cell.setCellValue(form.getCongruencyStatus());
 		}
-
+		autoSizeColumns(sheet);
 		String[] rowHeaders = { "Rave Form OID", "caDSR Form ID", "Version", "Total Number Of Questions Checked",
 				"Field Order", "CDE Public ID", "CDE Version", "NCI Category", "Question Congruency Status", "Message",
 				"Rave Field Label", "Rave Field Label Result", "CDE Permitted Question Text Choices",
@@ -335,6 +335,7 @@ public class CongruencyCheckerReportInvoker {
 				if (rowNumAfterCD > rowNum)
 					rowNum = rowNumAfterCD;
 				}
+				autoSizeColumns(sheet2);
 			  }
 		   }
 		}				
@@ -344,7 +345,6 @@ public class CongruencyCheckerReportInvoker {
 		
 		try {
 			FileOutputStream outputStream = new FileOutputStream(OUTPUT_XLSX_FILE_PATH);
-			autoSizeColumns(workbook);
 			workbook.write(outputStream);
 			workbook.close();
 		} catch (FileNotFoundException e) {
@@ -495,12 +495,7 @@ public class CongruencyCheckerReportInvoker {
 	} 
 	
 	
-	public static void autoSizeColumns(XSSFWorkbook workbook) {
-		if (workbook!=null) {
-	    int numberOfSheets = workbook.getNumberOfSheets();
-	    for (int i = 0; (i < numberOfSheets) && (i < 2); i++) {
-	        Sheet sheet = workbook.getSheetAt(i);
-	        if (sheet!=null) {
+	public static void autoSizeColumns(XSSFSheet sheet) {
 		        if (sheet.getPhysicalNumberOfRows() > 0) {
 		        	for (int j = sheet.getFirstRowNum()+3; j < sheet.getLastRowNum(); j++) {
 			            Row row = sheet.getRow(j);
@@ -518,9 +513,6 @@ public class CongruencyCheckerReportInvoker {
 			            }
 		            }
 		        }
-	        }
-	      }
-	   }
 	}	
 	
 	private static void writeToJSON (CCCReport cccReport) {

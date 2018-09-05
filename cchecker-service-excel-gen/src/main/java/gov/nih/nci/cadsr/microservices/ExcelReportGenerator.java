@@ -15,8 +15,6 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -134,7 +132,8 @@ public class ExcelReportGenerator {
 				cell = row.createCell(summaryFormsValidResultColNum);
 				cell.setCellValue(form.getCongruencyStatus());
 			}
-
+			if (sheet != null)
+				autoSizeColumns(sheet);
 			String[] rowHeaders = { "Rave Form OID", "caDSR Form ID", "Version", "Total Number Of Questions Checked",
 					"Field Order", "CDE Public ID", "CDE Version", "NCI Category", "Question Congruency Status", "Message",
 					"Rave Field Label", "Rave Field Label Result", "CDE Permitted Question Text Choices",
@@ -256,6 +255,8 @@ public class ExcelReportGenerator {
 					if (rowNumAfterCD > rowNum)
 						rowNum = rowNumAfterCD;
 					}
+					if (sheet2!=null)
+					autoSizeColumns(sheet2);
 				   }
 			    }
 			}
@@ -266,7 +267,6 @@ public class ExcelReportGenerator {
 			try {
 				outputStream = new FileOutputStream(OUTPUT_XLSX_FILE_PATH);
 				logger.debug("..outputStream created for " + OUTPUT_XLSX_FILE_PATH);
-				autoSizeColumns(workbook);
 				logger.debug("...autoSizeColumns done");
 				workbook.write(outputStream);
 				logger.debug("...workbook.write done");
@@ -288,38 +288,29 @@ public class ExcelReportGenerator {
 			}
 		}
 		
-		public static void autoSizeColumns(Workbook workbook) {
-			if (workbook!=null) {
-			    int numberOfSheets = workbook.getNumberOfSheets();
-			    logger.debug("autoSizeColumns NumberOfSheets: " + numberOfSheets);
-			    //FIXME this is slow; consider re-sizing Form sheets only
-			    for (int i = 0; (i < numberOfSheets) && (i < 2); i++) {
-			    	try {
-				        Sheet sheet = workbook.getSheetAt(i);
-				        if (sheet != null) {
-					        if (sheet.getPhysicalNumberOfRows() > 0) {
-					        	for (int j = sheet.getFirstRowNum()+3; j < sheet.getLastRowNum(); j++) {
-						            Row row = sheet.getRow(j); 
-						            if (row != null) {
-							            Iterator<Cell> cellIterator = row.cellIterator();
+			public static void autoSizeColumns(XSSFSheet sheet) {
+				try {
+				        if (sheet.getPhysicalNumberOfRows() > 0) {
+				        	for (int j = sheet.getFirstRowNum()+3; j < sheet.getLastRowNum(); j++) {
+					            Row row = sheet.getRow(j);
+					            if (row!=null) {
+						            Iterator<Cell> cellIterator = row.cellIterator();
+						            if (cellIterator!=null) {
 							            while (cellIterator.hasNext()) {
 							                Cell cell = cellIterator.next();
-							                if (cell != null) {
+							                if (cell!=null) {
 								                int columnIndex = cell.getColumnIndex();
-								                sheet.autoSizeColumn(columnIndex);
+								                sheet.autoSizeColumn(columnIndex); 
 							                }
 							            }
 						            }
 					            }
-					        }
+				            }
 				        }
-			    	}
-			    	catch (Exception e) {
-			    		logger.error("autoSizeColumns Exception on i=: " + i + ", " + e);
-			    	}
-			    }
-			}
-		}
+		    		} catch (Exception e) {
+		    		logger.error("autoSizeColumns Exception "+e.getMessage());
+		    	}
+			}	
 		
 		public static XSSFWorkbook buildNrdsTab (XSSFWorkbook workbook, List<NrdsCde> nrdsCdeList) {
 			Row row;
