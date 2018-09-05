@@ -638,7 +638,11 @@ public class GenerateReport implements ReportOutput {
 		question.setRaveUOM(raveUOM);
 		question.setRaveLength(alsField.getFixedUnit());
 		question.setRaveDisplayFormat(alsField.getDataFormat());
-		question.setRaveFieldDataType(alsField.getDataFormat());
+		// TODO This will need to be checked against a mapping between caDSR datatype to Rave 
+		// datatypes that gets applied during the ObjectCart Import.
+		// Customer will provide a table for the Checker to use to 
+		//compare Rave type with caDSR type to check validity.
+		question.setRaveFieldDataType(alsField.getControlType());
 		question.setRaveFieldLabel(alsField.getPreText());
 		question.setCdePermitQuestionTextChoices("");
 		question.setRaveControlType(alsField.getControlType());		
