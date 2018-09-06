@@ -540,7 +540,8 @@ public class AlsParser implements Parser{
 	protected static ALSData getDataDictionaryEntries(Sheet sheet, ALSData alsData, CCCError cccError) throws NullPointerException {
 		Map<String, ALSDataDictionaryEntry> ddeMap = new HashMap<String, ALSDataDictionaryEntry>();
 			ALSDataDictionaryEntry dde = new ALSDataDictionaryEntry();
-			ALSError alsError;	
+			ALSError alsError;
+			final String regex_space = "[\\p{Z}\\s]";//"'\u00A0', '\u2007', '\u202F'";
 			List<Integer> ordinal = new ArrayList<Integer>();
 			List<String> cd = new ArrayList<String>();
 			List<String> uds = new ArrayList<String>();
@@ -600,7 +601,7 @@ public class AlsParser implements Parser{
 						}
 					if (row.getCell(cell_ddeUserDataString)!=null) {
 						String udsStr = dataFormatter.formatCellValue(row.getCell(cell_ddeUserDataString));
-						udsStr = udsStr.replace('\u00A0',' ');						
+						udsStr = udsStr.replaceAll(regex_space," ");
 						uds.add(udsStr);							
 					}	else
 						{
