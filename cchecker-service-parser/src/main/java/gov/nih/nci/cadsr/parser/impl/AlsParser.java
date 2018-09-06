@@ -598,9 +598,11 @@ public class AlsParser implements Parser{
 							alsError.setErrorSeverity(errorSeverity_warn);
 							cccError.addAlsError(alsError);	
 						}
-					if (row.getCell(cell_ddeUserDataString)!=null)
-						uds.add(dataFormatter.formatCellValue(row.getCell(cell_ddeUserDataString)));
-					else
+					if (row.getCell(cell_ddeUserDataString)!=null) {
+						String udsStr = dataFormatter.formatCellValue(row.getCell(cell_ddeUserDataString));
+						udsStr = udsStr.replace('\u00A0',' ');						
+						uds.add(udsStr);							
+					}	else
 						{
 							alsError = getErrorInstance();
 							alsError.setErrorDesc(err_msg_18);
