@@ -8,8 +8,6 @@ services:
   server:
     container_name: cchecker-gateway
     build: ./cchecker-server-docker
-    volumes:
-      - "/tmp/local:/var/local/"
     ports:
      - "8080:8080"
     environment:
