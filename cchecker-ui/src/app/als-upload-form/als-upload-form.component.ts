@@ -14,7 +14,8 @@ export class AlsUploadFormComponent implements OnInit {
   file:FormData=null;
   submitted:boolean;
   uploadProgress:Number=0;
-  
+  name:String;
+
   constructor(private router:Router, private restService:RestService, private formListService:FormListService) { 
   }
   
@@ -38,7 +39,7 @@ export class AlsUploadFormComponent implements OnInit {
 
   // submit name, file to server for processing //
   uploadFile = () =>  {
-    this.restService.uploadAlsFile(this.file).subscribe(
+    this.restService.uploadAlsFile(this.file, this.name).subscribe(
       e => {
         if (e.type === HttpEventType.Response) {
           this.formListService.setFormListData(e.body);

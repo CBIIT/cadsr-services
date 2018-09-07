@@ -30,8 +30,8 @@ export class RestService {
   } ; 
 
   // upload file service //
-  uploadAlsFile(file){
-    return this.http.post('http://localhost:8080/gateway/parseservice?owner=me2',file,
+  uploadAlsFile(file, name){
+    return this.http.post(`http://localhost:8080/gateway/parseservice?owner=${name}`,file,
     {
       observe:"events",
       reportProgress:true,
