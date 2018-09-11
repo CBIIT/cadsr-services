@@ -3,7 +3,7 @@ MAINTAINER Shaun Einolf
 
 RUN yum -y update && yum -y install git java-1.8.0-openjdk-devel sudo util-linux wget
 WORKDIR /tmp
-RUN wget http://www.gtlib.gatech.edu/pub/apache/tomcat/tomcat-9/v9.0.11/bin/apache-tomcat-9.0.11.tar.gz \
+RUN wget https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.11/bin/apache-tomcat-9.0.11.tar.gz \
     && tar xvfz apache-tomcat-9.0.11.tar.gz \
     && mv apache-tomcat-9.0.11 /usr/local/apache-tomcat
 
