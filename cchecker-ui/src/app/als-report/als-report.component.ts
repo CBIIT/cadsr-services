@@ -15,6 +15,7 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
   dtFormOptions:Object;
   dtFormSummaryOptions:Object;
   dtNrdsOptions:Object;
+  dtNrdsOptionsMissing:Object;
   dtSummaryOptions:Object;
   errorMessage:String;  
   raveForm:Object;
@@ -107,6 +108,17 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
       scroller:true
       }, baseDtOptions
     );
+
+    // options for NRDS tables //
+    this.dtNrdsOptionsMissing = Object.assign({
+      columns:[
+        {width:"35%",cellType:"th", title:"CDE ID Version"},
+        {width:"65%",cellType:"th", title:"CDE Name"}
+      ],
+      scrollY:350,
+      scroller:true
+      }, baseDtOptions
+    );    
         
     // options for summary bottom table //        
     this.dtFormSummaryOptions = Object.assign({

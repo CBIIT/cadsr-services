@@ -190,16 +190,11 @@
        <ng-template ngbTabContent>
          <div class="tableHeader">NRDS CDEs missing from the ALS file</div>
 
-        <table datatable [dtOptions]="dtNrdsOptions" class="display compact">
+        <table datatable [dtOptions]="dtNrdsOptionsMissing" class="display compact">
             <tbody>
                 <tr *ngFor="let missingNrds of reportData.missingNrdsCdeList">
-                    <td>{{missingNrds.raveFormOid}}</td>
-                    <td>{{missingNrds.raveFieldOrder}}</td>
-                    <td>{{missingNrds.raveFieldLabel}}</td>
                     <td>{{missingNrds.cdeIdVersion}}</td>
                     <td>{{missingNrds.cdeName}}</td>
-                    <td>{{missingNrds.result}}</td>
-                    <td>{{missingNrds.message}}</td>
                 </tr>
             </tbody>            
         </table>
