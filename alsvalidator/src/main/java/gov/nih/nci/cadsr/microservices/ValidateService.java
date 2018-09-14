@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @EnableAutoConfiguration
 @EnableAsync
 public class ValidateService {
-	private static final Logger logger = LoggerFactory.getLogger(ALSValidatorService.class);
+	private static final Logger logger = LoggerFactory.getLogger(ValidateService.class);
 	protected static String CCHECKER_DB_SERVICE_URL_RETRIEVE;
 	protected static String CDEBROWSER_REST_GET_CDE;
 	
