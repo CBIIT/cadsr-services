@@ -323,7 +323,7 @@
                   <td>{{question.raveControlType}}</td>
                   <td>{{question.controlTypeResult}}</td>
                   <td>{{question.cdeValueDomainType}}</td>
-                  <td>{{question.raveCodedData}}</td>
+                  <td><span *ngFor="let line of question.raveCodedData">{{line}}<br /></span></td>
                   <td>{{question.codedDataResult}}</td>
                   <td>{{question.allowableCdeValue}}</td>
                   <td>{{question.raveUserString}}</td>
