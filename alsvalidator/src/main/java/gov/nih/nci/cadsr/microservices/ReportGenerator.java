@@ -162,7 +162,7 @@ public class ReportGenerator implements ReportOutput {
 				if ((dataElementDetails == null) || (StringUtils.isBlank(dataElementDetails.getId()))
 					|| (StringUtils.isBlank(dataElementDetails.getFormattedVersion()))) continue;//DE not found
 				CdeFormInfo cdeFormInfoNew = new CdeFormInfo(
-					dataElementDetails.getId(),
+					""+dataElementDetails.getPublicId(),
 					dataElementDetails.getFormattedVersion());
 				if (cdeFormInfoNew.equals(cdeFormInfo)) {
 					resMap.put(cdeFormInfo, cdeDetails);
@@ -172,6 +172,7 @@ public class ReportGenerator implements ReportOutput {
 				}
 			}
 			if (notFound) {
+				logger.info("CDE not found for: " + cdeFormInfo);
 				resMap.put(cdeFormInfo, new CdeDetails());
 			}
 		}

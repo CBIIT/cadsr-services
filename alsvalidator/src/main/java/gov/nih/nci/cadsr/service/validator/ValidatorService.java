@@ -67,10 +67,10 @@ public class ValidatorService {
 	 */
 	public static CCCQuestion validate(ALSField field, CCCQuestion question, CdeDetails cdeDetails) {
 		try {
-		if (cdeDetails.getDataElement()==null && cdeDetails.getValueDomain()==null) {			
+		if (cdeDetails.getDataElement()==null && cdeDetails.getValueDomain()==null) {
 			question.setMessage(msg1);
 			question.setQuestionCongruencyStatus(congStatus_errors);
-			logger.debug("CDE data not available for "+question.getCdePublicId());
+			logger.debug("CDE data not available for publicId:version="+question.getCdePublicId() + ":" + question.getCdeVersion());
 		} else {
 			
 			//Checking for retired CDEs 
