@@ -157,9 +157,9 @@ public class ReportGenerator implements ReportOutput {
 		for (CdeFormInfo cdeFormInfo : cdeFormInfoList) {
 			boolean notFound = true;
 			for (CdeDetails cdeDetails : foundCdeArr) {
-				if(cdeDetails.getDataElement() == null) continue;//we did not find a CDE, and we received an empty one.
+				if ((cdeDetails == null) || (cdeDetails.getDataElement() == null)) continue;//we did not find a CDE, and we received an empty one.
 				DataElementDetails dataElementDetails = cdeDetails.getDataElement().getDataElementDetails();
-				if ((cdeDetails == null) || (StringUtils.isBlank(dataElementDetails.getId()))
+				if ((dataElementDetails == null) || (StringUtils.isBlank(dataElementDetails.getId()))
 					|| (StringUtils.isBlank(dataElementDetails.getFormattedVersion()))) continue;//DE not found
 				CdeFormInfo cdeFormInfoNew = new CdeFormInfo(
 					dataElementDetails.getId(),
