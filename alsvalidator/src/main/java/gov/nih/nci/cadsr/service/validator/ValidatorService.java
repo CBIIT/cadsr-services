@@ -451,8 +451,10 @@ public class ValidatorService {
 	 * @return int
 	 */
 	protected static int computeRaveLength (String raveLength) {
+		int raveLengthInt = 0;
 		if (raveLength!=null && !raveLength.equals("%")) {
-			if (raveLength.indexOf(characters_string)>-1) {
+			raveLength = raveLength.toLowerCase();
+			if (raveLength.indexOf(characters_string) > -1) {
 				raveLength.replaceAll(punct_pattern,"");
 				int index = 0;
 				if ((raveLength.indexOf("(") > -1) || (raveLength.indexOf(")") > -1)) {
@@ -469,7 +471,12 @@ public class ValidatorService {
 		} else {
 			raveLength = "0";
 		}
-		return Integer.parseInt(raveLength.trim());
+		try {
+			raveLengthInt = Integer.parseInt(raveLength.trim());
+		} catch (NumberFormatException nfe) {
+			logger.debug("Error in computing Rave Length from Field Unit: "+raveLength+" :: "+nfe.getMessage());
+		}
+		return raveLengthInt;
 	}
 	
 	
