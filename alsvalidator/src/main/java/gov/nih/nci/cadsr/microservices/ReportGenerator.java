@@ -15,7 +15,8 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -42,7 +43,7 @@ import gov.nih.nci.cadsr.service.validator.ValidatorService;
 
 public class ReportGenerator implements ReportOutput {
 //former GenerateReport
-	private static final Logger logger = Logger.getLogger(ReportGenerator.class);
+	private static final Logger logger = LoggerFactory.getLogger(ReportGenerator.class);
 	private static String congStatus_errors = "ERRORS";
 	private static String congStatus_warn = "WARNINGS";
 	private static String parse_errors_error = "ERROR";
