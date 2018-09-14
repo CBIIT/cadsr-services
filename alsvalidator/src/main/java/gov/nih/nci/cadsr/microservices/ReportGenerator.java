@@ -97,7 +97,7 @@ public class ReportGenerator implements ReportOutput {
 						question = assignCdeIdVersionToQuestion (question, draftFieldName);
 						if (!NumberUtils.isNumber(question.getCdePublicId()) || !NumberUtils.isNumber(question.getCdeVersion()))
 							continue;//Not CDE data
-						logger.debug("formOid: " + formOid + ", question.getCdePublicId(): " + question.getCdePublicId() + ", question.getCdeVersion(): " + question.getCdeVersion());
+						//logger.debug("formOid: " + formOid + ", question.getCdePublicId(): " + question.getCdePublicId() + ", question.getCdeVersion(): " + question.getCdeVersion());
 						CdeFormInfo cdeFormInfo = new CdeFormInfo(question.getCdePublicId(), question.getCdeVersion());
 						cdeFormInfoList.add(cdeFormInfo);						
 					}
@@ -273,7 +273,7 @@ public class ReportGenerator implements ReportOutput {
 							// from a static table of NCI standard CRFs
 							CdeStdCrfData cdeCrfData = fetchCdeStandardCrfData(question.getCdePublicId(), question.getCdeVersion());
 							if (cdeCrfData!=null)
-								question.setNciCategory(cdeCrfData.getNciCategory());						
+								question.setNciCategory(cdeCrfData.getNciCategory());
 							if (cdeCrfData!=null && cdeDetails.getDataElement()!=null)  {
 							if (nrds_cde.equalsIgnoreCase(question.getNciCategory())) {
 								nrdsCdeList.add(buildNrdsCde(question,

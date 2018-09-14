@@ -7,13 +7,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import gov.nih.nci.cadsr.dao.model.PermissibleValuesModel;
 import gov.nih.nci.cadsr.data.ALSField;
 import gov.nih.nci.cadsr.data.CCCQuestion;
-import gov.nih.nci.cadsr.microservices.ValidateService;
 import gov.nih.nci.cadsr.service.model.cdeData.CdeDetails;
 import gov.nih.nci.cadsr.service.model.cdeData.dataElement.OtherVersion;
 import gov.nih.nci.cadsr.service.model.cdeData.dataElement.ReferenceDocument;
