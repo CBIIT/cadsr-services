@@ -109,7 +109,7 @@ public class ReportGenerator implements ReportOutput {
 		return cdeFormMap;
 	}
 	public Map<CdeFormInfo, CdeDetails> execAsync(List<CdeFormInfo> cdeFormInfoList) {
-		long start = System.currentTimeMillis();
+		//long start = System.currentTimeMillis();
 		Map<CdeFormInfo, CdeDetails> resMap = new HashMap<>();
 		CdeFormInfo curr;
 		int step = 3;// FIXME make it 5 at least
@@ -117,14 +117,14 @@ public class ReportGenerator implements ReportOutput {
 		List<CompletableFuture<CdeDetails>> arrFuture = new ArrayList<>(cdeFormInfoList.size());
 		for (int i = 0; i < cdeFormInfoList.size(); i += step) {// bunch step
 			idx = 0;
-			long stepStart = System.currentTimeMillis();
+			//long stepStart = System.currentTimeMillis();
 			for (int j = i; ((j < cdeFormInfoList.size()) && (idx < step)); j++, idx++) {
 				curr = cdeFormInfoList.get(j);
 				if ((StringUtils.isNotBlank(curr.getCdeId())) && (StringUtils.isNotBlank(curr.getVersion()))) {
 					arrFuture.add(cdeServiceDetails.retrieveDataElement(curr.getCdeId(), curr.getVersion()));
 				}
 			}
-			long stepEnd = System.currentTimeMillis();
+			//long stepEnd = System.currentTimeMillis();
 			//System.out.println("Time to send execAsync in milliseconds # : " + i + " : "+ (stepEnd - stepStart));
 			
 			if (idx == step) {//TODO we can do better for general case
@@ -173,8 +173,8 @@ public class ReportGenerator implements ReportOutput {
 				resMap.put(cdeFormInfo, new CdeDetails());
 			}
 		}
-		long end = System.currentTimeMillis();
-		System.out.println("Time to complete execAsync in seconds: " + (end - start) / 1000);
+		//long end = System.currentTimeMillis();
+		//System.out.println("Time to complete execAsync in seconds: " + (end - start) / 1000);
 		return resMap;
 	}	
 	/**
@@ -254,19 +254,18 @@ public class ReportGenerator implements ReportOutput {
 							Map<String, String> parseValidationError = pickFieldErrors(alsField, alsData.getCccError().getAlsErrors());
 							question = setParseErrorToQuestion (question, parseValidationError);
 							CdeDetails cdeDetails = null;
-							logger.debug("cdeServiceCall: " + cdeServiceCall);
+							//logger.debug("cdeServiceCall: " + cdeServiceCall);
 							if (cdeServiceCall) {
 								try {
-								// Service Call to retrieve CDEDetails
+									//Service Call to retrieve CDE List
 									CdeFormInfo cdeToValidate = new CdeFormInfo(question.getCdePublicId(), question.getCdeVersion());
 									cdeDetails = formCdeDetailsMap.get(cdeToValidate);
 								} catch (Exception e) {
 									//FIXME error handling
 									e.printStackTrace();
 									continue;
-									
 								}
-								// Service Call to validate the CDEDetails against the ALSField & Question objects
+								//Service Call to validate the CDEDetails against the ALSField & Question objects
 								question = ValidatorService.validate(alsField, question, cdeDetails);
 							}
 							// from a static table of NCI standard CRFs

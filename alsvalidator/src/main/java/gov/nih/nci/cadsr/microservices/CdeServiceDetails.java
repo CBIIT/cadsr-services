@@ -31,10 +31,10 @@ public class CdeServiceDetails {
 	@Async("threadPoolTaskExecutor")
 	public CompletableFuture<CdeDetails> retrieveDataElement(String publicId, String versionNumber) {
 		CdeDetails cdeDetails = null;
-		// Get the data model from the database
-		System.out.println("Execute method asynchronously publicId:versionNumber " 
-				+ publicId + ":" + versionNumber + 
-			" -  " + Thread.currentThread().getName());
+		// Get the data model from CDE Browser RESTful API
+//		System.out.println("Execute method asynchronously publicId:versionNumber " 
+//				+ publicId + ":" + versionNumber + 
+//			" -  " + Thread.currentThread().getName());
 		String cdeBrowserRestApiUrl = String.format(CDEBROWSER_REST_GET_CDE, publicId, versionNumber);
 		RestTemplate restTemplate = new RestTemplate();
 		cdeDetails = restTemplate.getForObject(cdeBrowserRestApiUrl, CdeDetails.class);
