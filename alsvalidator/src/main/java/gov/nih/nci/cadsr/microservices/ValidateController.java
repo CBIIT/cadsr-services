@@ -1,15 +1,16 @@
 package gov.nih.nci.cadsr.microservices;
+/*
+ * Copyright (C) 2018 Leidos Biomedical Research, Inc. - All rights reserved.
+ */
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/*
- * Copyright (C) 2018 Leidos Biomedical Research, Inc. - All rights reserved.
- */
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -27,30 +28,16 @@ import gov.nih.nci.cadsr.data.ALSForm;
 import gov.nih.nci.cadsr.data.CCCError;
 import gov.nih.nci.cadsr.data.CCCReport;
 import gov.nih.nci.cadsr.data.ValidateParamWrapper;
-import gov.nih.nci.cadsr.report.ReportOutput;
-import gov.nih.nci.cadsr.report.impl.GenerateReport;
-/**
- * This class is not used, and superseded by ValidateController
- *
- */
-//@RestController
-//@EnableAutoConfiguration
-public class AlsValidatorController {
-	private final static Logger logger = LoggerFactory.getLogger(AlsValidatorController.class);
-	private static String CCHECKER_DB_SERVICE_URL_RETRIEVE = ALSValidatorService.CCHECKER_DB_SERVICE_URL_RETRIEVE;
-	/**
-	 * This service shall always return CCCReport Entity.
-	 * 
-	 * @param request
-	 * @param response
-	 * @param idseq
-	 * @param checkUOM
-	 * @param checkCRF
-	 * @param displayExceptions
-	 * @param requestEntity
-	 * @return ResponseEntity<CCCReport>
-	 */
-	//@PostMapping("/rest/validateservice")
+
+@RestController
+@EnableAutoConfiguration
+public class ValidateController {
+	private final static Logger logger = LoggerFactory.getLogger(ValidateController.class);
+	private static String CCHECKER_DB_SERVICE_URL_RETRIEVE = ValidateService.CCHECKER_DB_SERVICE_URL_RETRIEVE;
+	@Autowired
+	private CdeServiceDetails cdeServiceDetails;//
+
+	@PostMapping("/rest/validateservice")
 	public ResponseEntity<CCCReport> validateService(HttpServletRequest request, HttpServletResponse response,
 		@RequestParam(name="_cchecker", required=true) String idseq, 
 		RequestEntity<ValidateParamWrapper> requestEntity) {
@@ -71,7 +58,9 @@ public class AlsValidatorController {
 				List<String> selForms = validateParamEntity.getSelForms();
 				
 				if ((selForms != null) && (! selForms.isEmpty())) {
-					ReportOutput report = new GenerateReport();
+					ReportGenerator report = new ReportGenerator();
+					//@Autowired did not work using setters
+					report.setCdeServiceDetails(cdeServiceDetails);
 					errorsReport = report.getFinalReportData(alsData, getFormIdList(selForms, alsData.getForms()), checkUOM, checkCRF, displayExceptions);
 					logger.info("Created CCCReport with amount of forms: " + errorsReport.getCccForms().size());
 				}
@@ -172,6 +161,5 @@ public class AlsValidatorController {
 				}
 		}
 		return formIdsList;
-	}	
-	
+	}
 }
