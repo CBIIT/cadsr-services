@@ -59,7 +59,7 @@ public class ExcelReportGenerator {
 		private static String nciStdOptErrorLbl = "# NCI Standard Template Optional Modules Questions With Errors ";
 		private static String nciStdOptWarnLbl = "# NCI Standard Template Optional Modules Questions With Warnings ";		
 		private static int formStartColumn = 4;	
-		private static int allowableCdeValueCol = 19;
+		private static int pvResultCol = 20;
 		private static int codedDataColStart = 16;
 		private static String matching_nrds_cdes_tab_name = "NRDS CDEs in ALS";
 		private static String nrds_missing_cde_tab_name = "NRDS CDEs missing";
@@ -212,17 +212,19 @@ public class ExcelReportGenerator {
 							newCell.setCellValue("Cell empty");
 						else	
 							newCell.setCellValue(codedDataResult.get(m)); 
+						newCell = row.createCell(colNum3++);
+						if (m != 0)
+							newCell.setCellValue("");
+						else	
+							newCell.setCellValue(question.getAllowableCdeValue()); 						
 						newCell = row.createCell(colNum3);
-						newCell.setCellValue(raveUserString.get(m)); // substituting pv values from ALS for now TODO - needs to get actual values from caDSR db			
+						newCell.setCellValue(raveUserString.get(m));			
 						if (m != raveCodedData.size()-1)
 							row = sheet2.createRow(rowNum++);
 					}
 					int rowNumAfterCD = rowNum;
 					row = rowBeforeCD;
-					int newColNum = allowableCdeValueCol;
-					newCell = row.createCell(newColNum++);
-					newCell.setCellStyle(cellStyle);				
-					newCell.setCellValue(question.getAllowableCdeValue());
+					int newColNum = pvResultCol;
 					newCell = row.createCell(newColNum++);
 					newCell.setCellValue(question.getPvResult());				
 					newCell = row.createCell(newColNum++);
