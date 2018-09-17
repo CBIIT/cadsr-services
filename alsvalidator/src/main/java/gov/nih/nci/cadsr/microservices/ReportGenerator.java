@@ -113,7 +113,7 @@ public class ReportGenerator implements ReportOutput {
 		//long start = System.currentTimeMillis();
 		Map<CdeFormInfo, CdeDetails> resMap = new HashMap<>();
 		CdeFormInfo curr;
-		int step = 3;// FIXME make it 5 at least
+		int step = 7;//we send 7 requests at a time
 		int idx;
 		List<CompletableFuture<CdeDetails>> arrFuture = new ArrayList<>(cdeFormInfoList.size());
 		for (int i = 0; i < cdeFormInfoList.size(); i += step) {// bunch step
@@ -127,14 +127,8 @@ public class ReportGenerator implements ReportOutput {
 			}
 			//long stepEnd = System.currentTimeMillis();
 			//System.out.println("Time to send execAsync in milliseconds # : " + i + " : "+ (stepEnd - stepStart));
-			
-			if (idx == step) {//TODO we can do better for general case
-				CompletableFuture.allOf(arrFuture.get(i), arrFuture.get(i + 1), arrFuture.get(i + 2)).join();
-			} 
-			else if (idx == (step - 1))
-				CompletableFuture.allOf(arrFuture.get(i), arrFuture.get(i + 1)).join();
-			else if (idx == (step - 2))
-				CompletableFuture.allOf(arrFuture.get(i)).join();
+			//We wait till all requests are completed
+			CompletableFuture.allOf(arrFuture.toArray(new CompletableFuture[arrFuture.size()])).join();
 			//System.out.println("Time to joint execAsync in milliseconds step # : " + i + " : "+ (System.currentTimeMillis() - stepEnd));
 		}
 

@@ -52,7 +52,7 @@ public class ValidateService {
     @Bean(name = "threadPoolTaskExecutor")
     public Executor asyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(5);
+        executor.setCorePoolSize(8);
         executor.setMaxPoolSize(12);
         executor.setQueueCapacity(500);
         executor.setThreadNamePrefix("RetrieveCDE-");

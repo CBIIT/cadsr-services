@@ -336,7 +336,7 @@ public class ValidatorService {
 	 */
 	protected static CCCQuestion checkDataTypeCheckerResult (CCCQuestion question, String raveDataFormat, String vdDataType) {
 		Boolean result = false;
-		logger.debug("Field Data Format: "+raveDataFormat+" vdDataType: "+vdDataType);
+		//logger.debug("Field Data Format - raveDataFormat: " + raveDataFormat + " vdDataType: " + vdDataType);
 		question.setCdeDataType(vdDataType);
 		if (raveDataFormat!=null) {
 			if (raveDataFormat.startsWith("$")) {
