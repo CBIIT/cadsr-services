@@ -376,8 +376,10 @@ public class GatewayBootController {
 
 		// set session cookie
 		Cookie sessionCookie = retrieveCookie(request);
+		
 		if (sessionCookie != null) {
 			sessionCookie.setValue(idseq);
+			logger.debug("retrieveCookie:" + sessionCookie.getValue());
 		} else {
 			sessionCookie = new Cookie(sessionCookieName, idseq);
 		}
@@ -530,7 +532,7 @@ public class GatewayBootController {
 				if (sessionCookieName.equals(currCookie.getName())) {
 					logger.debug("found sesion cookie: " + currCookie.getValue());
 					sessionCookie = currCookie;
-					break;
+					//break;
 				}
 			}
 		}
