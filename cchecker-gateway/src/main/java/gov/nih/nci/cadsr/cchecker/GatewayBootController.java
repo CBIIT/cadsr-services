@@ -378,11 +378,12 @@ public class GatewayBootController {
 		Cookie sessionCookie = retrieveCookie(request);
 		
 		if (sessionCookie != null) {
+			logger.debug("...old cookie value received in parseService:" + sessionCookie.getValue());
 			sessionCookie.setValue(idseq);
-			logger.debug("retrieveCookie:" + sessionCookie.getValue());
 		} else {
 			sessionCookie = new Cookie(sessionCookieName, idseq);
 		}
+		logger.debug("set new Cookie value:" + sessionCookie.getValue());
 		response.addCookie(cookie);
 
 		// If decided always return json type, put Content-Type to annotations
@@ -398,7 +399,7 @@ public class GatewayBootController {
 			@RequestParam(name = "checkCRF", required = false, defaultValue = "false") boolean checkCRF,
 			@RequestParam(name = "displayExceptions", required = false, defaultValue = "false") boolean displayExceptions,
 			RequestEntity<List<String>> requestEntity) {
-		logger.debug("request received parseService");
+		logger.debug("request received checkService");
 		// check for session cookie
 		Cookie cookie = retrieveCookie(request);
 		if (cookie == null) {
@@ -438,7 +439,7 @@ public class GatewayBootController {
 		else {
 			logger.error("submitPostRequestSaveReportError received statusCode: " + statusCode);
 			errorCode = statusCode;//This can be user error or server error
-			return buildErrorResponse("Session data is not found based on: " + sessionCookieValue, errorCode);
+			return buildErrorResponse("Error on validation for : " + sessionCookieValue, errorCode);
 		}
 	}
 	
@@ -530,12 +531,13 @@ public class GatewayBootController {
 		if (cookieArr != null) {
 			for (Cookie currCookie : cookieArr) {
 				if (sessionCookieName.equals(currCookie.getName())) {
-					logger.debug("found sesion cookie: " + currCookie.getValue());
+					logger.debug("...found session cookie: " + currCookie.getValue());
 					sessionCookie = currCookie;
-					//break;
+					//if we have many cookie values take the last one
 				}
 			}
 		}
+		logger.info("using sesion cookie: " + sessionCookie.getValue());
 		return sessionCookie;
 	}
 
