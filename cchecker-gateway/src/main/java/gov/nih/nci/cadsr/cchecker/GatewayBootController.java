@@ -78,6 +78,7 @@ public class GatewayBootController {
 	static final String FATAL_ERROR_STATUS = "FATAL";
 	static final String EXCEL_FILE_EXT = ".xlsx";
 	public static final String fileExcelReportPrefix = "Report-";
+	public static final String COOKIE_PATH = "/gateway";
 
 	{
 		loadProperties();
@@ -91,7 +92,7 @@ public class GatewayBootController {
 		cookie.setMaxAge(-1); // negative value means that the cookie is not
 								// stored persistently and will be deleted when
 								// the Web browser exits
-		cookie.setPath("/");
+		cookie.setPath(COOKIE_PATH);
 		return cookie;
 	}
 

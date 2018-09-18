@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -79,10 +80,8 @@ public class ReportGenerator implements ReportOutput {
 			if (selForms.contains(alsField.getFormOid())) {
 				if (formOid != null) {
 					if (!formOid.equals(alsField.getFormOid())) {
-						if (! cdeFormInfoList.isEmpty()) {
-							cdeFormMap.put(formOid, cdeFormInfoList);
-							cdeFormInfoList = new ArrayList<>();
-						}
+						cdeFormMap.put(formOid, cdeFormInfoList);
+						cdeFormInfoList = new ArrayList<>();
 						formOid = alsField.getFormOid();
 					} 
 				} else {
@@ -99,19 +98,31 @@ public class ReportGenerator implements ReportOutput {
 							continue;//Not CDE data
 						//logger.debug("formOid: " + formOid + ", question.getCdePublicId(): " + question.getCdePublicId() + ", question.getCdeVersion(): " + question.getCdeVersion());
 						CdeFormInfo cdeFormInfo = new CdeFormInfo(question.getCdePublicId(), question.getCdeVersion());
-						cdeFormInfoList.add(cdeFormInfo);						
+						cdeFormInfoList.add(cdeFormInfo);
 					}
 				}
 			}
 		}
-		if (! cdeFormInfoList.isEmpty()) {
-			cdeFormMap.put(formOid, cdeFormInfoList);//last form
-		}
+		//add the last form CDE List
+		cdeFormMap.put(formOid, cdeFormInfoList);
+		
 		return cdeFormMap;
 	}
-	public Map<CdeFormInfo, CdeDetails> execAsync(List<CdeFormInfo> cdeFormInfoList) {
+	/**
+	 * 
+	 * @param cdeFormInfoListOrg not null
+	 * @return Map<CdeFormInfo, CdeDetails>
+	 */
+	
+	public Map<CdeFormInfo, CdeDetails> execAsync(List<CdeFormInfo> cdeFormInfoListOrg) {
 		//long start = System.currentTimeMillis();
 		Map<CdeFormInfo, CdeDetails> resMap = new HashMap<>();
+		if ((cdeFormInfoListOrg == null) || (cdeFormInfoListOrg.isEmpty())) return resMap;
+		
+		//We have mentioned that in many ALS forms we have CDEs duplicate, so we do not need to request the same CDE info multiple times
+		List<CdeFormInfo> cdeFormInfoList = cdeFormInfoListOrg.stream().distinct().collect(Collectors.toList());
+		//System.out.println(".....Removed amount of duplicates: " + (cdeFormInfoListOrg.size() - cdeFormInfoList.size()));
+		
 		CdeFormInfo curr;
 		int step = 7;//we send 7 requests at a time
 		int idx;
