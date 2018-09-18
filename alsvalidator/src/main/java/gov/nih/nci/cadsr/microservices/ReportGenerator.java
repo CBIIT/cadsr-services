@@ -57,7 +57,9 @@ public class ReportGenerator implements ReportOutput {
 	private static String publicid_prefix = "PID";
 	private static String version_prefix = "_V";
 	private static List<CategoryCde> categoryCdeList;
-	private static List<CategoryNrds> categoryNrdsList;	
+	private static List<CategoryNrds> categoryNrdsList;
+	private static String noCdeMsg = "No CDE provided";
+	
 	static{
 		categoryCdeList = retrieveCdeCrfData();
 		categoryNrdsList = retrieveNrdsData();
@@ -298,6 +300,7 @@ public class ReportGenerator implements ReportOutput {
 						} else {
 							question.setRaveFieldLabel(alsField.getPreText());
 							question.setQuestionCongruencyStatus(congStatus_warn);
+							question.setMessage(noCdeMsg);
 							Map<String, String> parseValidationError = pickFieldErrors(alsField, alsData.getCccError().getAlsErrors());
 							question = setParseErrorToQuestion (question, parseValidationError);
 							questionsList.add(question);

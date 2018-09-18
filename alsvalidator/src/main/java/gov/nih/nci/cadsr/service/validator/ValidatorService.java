@@ -42,8 +42,10 @@ public class ValidatorService {
 	private static final String msg8 = "Control Type nor present in the ALS input data";
 	private static final String msg9 = "Additional PVs in Valid Value list";
 	private static final String msg10 = "PVs not in caDSR DB";
-	private static final String msg11 = "Data  type from ALS input doesn't match with caDSR DB";
+	private static final String msg11 = "Data type from ALS input doesn't match with caDSR DB";
 	private static final String msg12 = "Unit of Measure from ALS input is not compatible with that of caDSR DB";
+	private static final String msg13 = "Format doesn't match with caDSR DB";
+	private static final String msg14 = "Value Domain Max length in caDSR DB doesn't match with Fixed Unit";	
 	private static String congStatus_errors = "ERRORS";
 	private static String congStatus_warn = "WARNINGS";
 	private static List<String> characterDataFormats = Arrays.asList("CHAR", "VARCHAR2", "CHARACTER", "ALPHANUMERIC",
@@ -377,7 +379,7 @@ public class ValidatorService {
 					question.setUomCheckerResult(matchString);
 				} else {
 					question.setUomCheckerResult(warningString);
-					question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg12));					
+					question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg12));
 					if (question.getQuestionCongruencyStatus()==null)
 						question.setQuestionCongruencyStatus(congStatus_warn);
 				}
@@ -399,6 +401,7 @@ public class ValidatorService {
 				question.setLengthCheckerResult(matchString);
 			} else {
 				question.setLengthCheckerResult(warningString);
+				question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg14));				
 				if (question.getQuestionCongruencyStatus()==null)
 					question.setQuestionCongruencyStatus(congStatus_warn);
 			}
@@ -421,6 +424,7 @@ public class ValidatorService {
 					question.setFormatCheckerResult(matchString);
 				} else {
 					question.setFormatCheckerResult(warningString);
+					question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg13));
 					if (question.getQuestionCongruencyStatus()==null)
 						question.setQuestionCongruencyStatus(congStatus_warn);
 				} 
