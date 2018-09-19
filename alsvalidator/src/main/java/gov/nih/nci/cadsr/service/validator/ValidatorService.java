@@ -43,9 +43,9 @@ public class ValidatorService {
 	private static final String msg9 = "Additional PVs in Valid Value list";
 	private static final String msg10 = "PVs not in caDSR DB";
 	private static final String msg11 = "Data type from ALS input doesn't match with caDSR DB";
-	private static final String msg12 = "Unit of Measure from ALS input is not compatible with that of caDSR DB";
-	private static final String msg13 = "Format doesn't match with caDSR DB";
-	private static final String msg14 = "Value Domain Max length in caDSR DB doesn't match with Fixed Unit";	
+	private static final String msg12 = "Unit of Measure from ALS input doesn't match with that of the Value Domain";
+	private static final String msg13 = "Format doesn't match with that of the Value Domain";
+	private static final String msg14 = "Value Domain Max length doesn't match with Fixed Unit from ALS input data";	
 	private static String congStatus_errors = "ERRORS";
 	private static String congStatus_warn = "WARNINGS";
 	private static List<String> characterDataFormats = Arrays.asList("CHAR", "VARCHAR2", "CHARACTER", "ALPHANUMERIC",
@@ -374,15 +374,24 @@ public class ValidatorService {
 	 */
 	protected static CCCQuestion setUomCheckerResult (CCCQuestion question, String unitOfMeasure) {
 		question.setCdeUOM(unitOfMeasure);
-		if (question.getRaveUOM()!=null) {
-				if (question.getRaveUOM().equals(unitOfMeasure)) {
-					question.setUomCheckerResult(matchString);
-				} else {
-					question.setUomCheckerResult(warningString);
-					question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg12));
-					if (question.getQuestionCongruencyStatus()==null)
-						question.setQuestionCongruencyStatus(congStatus_warn);
-				}
+		if (unitOfMeasure!=null) {
+			if (question.getRaveUOM()!=null) {
+					if (question.getRaveUOM().equals(unitOfMeasure)) {
+						question.setUomCheckerResult(matchString);
+					} else {
+						question.setUomCheckerResult(warningString);
+						question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg12));
+						if (question.getQuestionCongruencyStatus()==null)
+							question.setQuestionCongruencyStatus(congStatus_warn);
+					}
+			} else {
+				question.setUomCheckerResult(warningString);
+				question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg12));
+				if (question.getQuestionCongruencyStatus()==null)
+					question.setQuestionCongruencyStatus(congStatus_warn);
+			} 
+		} else {
+			question.setUomCheckerResult(matchString);
 		}
 		return question;
 	}
@@ -401,7 +410,7 @@ public class ValidatorService {
 				question.setLengthCheckerResult(matchString);
 			} else {
 				question.setLengthCheckerResult(warningString);
-				question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg14));				
+				question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg14));
 				if (question.getQuestionCongruencyStatus()==null)
 					question.setQuestionCongruencyStatus(congStatus_warn);
 			}
