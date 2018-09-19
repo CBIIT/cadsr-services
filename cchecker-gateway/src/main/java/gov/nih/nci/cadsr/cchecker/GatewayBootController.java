@@ -538,6 +538,9 @@ public class GatewayBootController {
 					//if we have many cookie values take the last one
 				}
 			}
+		}
+
+		if (sessionCookie != null) {
 			logger.info("found session cookie: " + sessionCookie.getValue());
 		}
 		else {
