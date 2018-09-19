@@ -375,15 +375,7 @@ public class GatewayBootController {
 		FormsUiData formUiData = FormService.buildFormsUiData(alsData);
 
 		// set session cookie
-		Cookie sessionCookie = retrieveCookie(request);
-		
-		if (sessionCookie != null) {
-			logger.debug("...old cookie value received in parseService:" + sessionCookie.getValue());
-			sessionCookie.setValue(idseq);
-		} else {
-			sessionCookie = new Cookie(sessionCookieName, idseq);
-		}
-		logger.debug("set new Cookie value:" + sessionCookie.getValue());
+		logger.debug("set new Cookie value: " + idseq);
 		response.addCookie(cookie);
 
 		// If decided always return json type, put Content-Type to annotations
