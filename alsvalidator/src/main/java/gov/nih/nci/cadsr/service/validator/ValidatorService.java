@@ -45,7 +45,7 @@ public class ValidatorService {
 	private static final String msg11 = "Data type from ALS input doesn't match with caDSR DB";
 	private static final String msg12 = "Unit of Measure from ALS input doesn't match with that of the Value Domain";
 	private static final String msg13 = "Format doesn't match with that of the Value Domain";
-	private static final String msg14 = "Value Domain Max length doesn't match with Fixed Unit from ALS input data";	
+	private static final String msg14 = "Fixed Unit from ALS input data doesn't match with Value Domain Max length";	
 	private static String congStatus_errors = "ERRORS";
 	private static String congStatus_warn = "WARNINGS";
 	private static List<String> characterDataFormats = Arrays.asList("CHAR", "VARCHAR2", "CHARACTER", "ALPHANUMERIC",
@@ -405,16 +405,25 @@ public class ValidatorService {
 	 */
 	protected static CCCQuestion setLengthCheckerResult (CCCQuestion question, Integer vdMaxLength) {
 		String raveLength = question.getRaveLength();
-		if (raveLength!=null) {
-			if (Float.valueOf(computeRaveLength(raveLength)) < Float.valueOf(vdMaxLength)) {
-				question.setLengthCheckerResult(matchString);
+		if (vdMaxLength!=null) {
+			if (raveLength!=null) {
+				if (Float.valueOf(computeRaveLength(raveLength)) < Float.valueOf(vdMaxLength)) {
+					question.setLengthCheckerResult(matchString);
+				} else {
+					question.setLengthCheckerResult(warningString);
+					question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg14));
+					if (question.getQuestionCongruencyStatus()==null)
+						question.setQuestionCongruencyStatus(congStatus_warn);
+				}
 			} else {
 				question.setLengthCheckerResult(warningString);
 				question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg14));
 				if (question.getQuestionCongruencyStatus()==null)
-					question.setQuestionCongruencyStatus(congStatus_warn);
+					question.setQuestionCongruencyStatus(congStatus_warn);				
 			}
-		}		
+		} else {
+			question.setLengthCheckerResult(matchString);
+		}
 		return question;
 	}
 	
