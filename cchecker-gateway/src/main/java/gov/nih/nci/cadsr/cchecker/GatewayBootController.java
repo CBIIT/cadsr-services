@@ -391,7 +391,16 @@ public class GatewayBootController {
 		HttpHeaders httpHeaders = createHttpOkHeaders();
 		return new ResponseEntity<FormsUiData>(formUiData, httpHeaders, HttpStatus.OK);
 	}
-
+	/**
+	 * 
+	 * @param request
+	 * @param response
+	 * @param checkUOM
+	 * @param checkCRF
+	 * @param displayExceptions
+	 * @param requestEntity not null and not empty
+	 * @return ResponseEntity
+	 */
 	@CrossOrigin
 	@PostMapping("/checkservice")
 	public ResponseEntity<?> checkService(HttpServletRequest request, HttpServletResponse response,
@@ -402,18 +411,12 @@ public class GatewayBootController {
 		logger.debug("request received checkService");
 		// check for session cookie
 		Cookie cookie = retrieveCookie(request);
-		if (cookie == null) {
-			return buildErrorResponse("Session is not found", HttpStatus.BAD_REQUEST);
+		String sessionCookieValue = null;
+		
+		if ((cookie == null) || (StringUtils.isBlank((sessionCookieValue = cookie.getValue()))) || (!ParameterValidator.validateIdSeq(sessionCookieValue))) {
+			return buildErrorResponse("Session is not found or not valid: " + sessionCookieValue, HttpStatus.BAD_REQUEST);
 		}
-		
-		String sessionCookieValue = cookie.getValue();
-		if (! ParameterValidator.validateIdSeq(sessionCookieValue)) {
-			return buildErrorResponse("Session is not valid: " + sessionCookieValue, HttpStatus.BAD_REQUEST);
-		}
-		
-		Cookie sessionCookie = new Cookie(sessionCookieName, sessionCookieValue);
-		response.addCookie(sessionCookie);
-		
+
 		logger.debug("checkService session cookie: " + sessionCookieValue);
 		
 		List<String> formNames = requestEntity.getBody();
@@ -468,15 +471,14 @@ public class GatewayBootController {
 	@GetMapping("/genexcelreporterror")
 	public void genExcelReportError(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		Cookie cookie = retrieveCookie(request);
-		if ((cookie == null) || (StringUtils.isBlank(cookie.getValue())) || (!ParameterValidator.validateIdSeq(cookie.getValue()))) {
+		String sessionCookieValue = null;
+		if ((cookie == null) || (StringUtils.isBlank((sessionCookieValue = cookie.getValue()))) || (!ParameterValidator.validateIdSeq(sessionCookieValue))) {
 			response.setHeader("Content-Type", "text/plain");
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			IOUtils.copy(new ByteArrayInputStream("Session Cookie is not found or not valid".getBytes()),
+			IOUtils.copy(new ByteArrayInputStream(("Session Cookie is not found or not valid: " + sessionCookieValue).getBytes()),
 				response.getOutputStream());
 		} 
 		else {
-			String sessionCookieValue = cookie.getValue();
-
 			RestTemplate restTemplate = new RestTemplate();
 			String urlStr = String.format(URL_GEN_EXCEL_REPORT_ERROR_FORMAT, sessionCookieValue);
 			logger.debug("...retrieveData: " + urlStr);
@@ -536,8 +538,11 @@ public class GatewayBootController {
 					//if we have many cookie values take the last one
 				}
 			}
+			logger.info("found session cookie: " + sessionCookie.getValue());
 		}
-		logger.info("using sesion cookie: " + sessionCookie.getValue());
+		else {
+			logger.debug("session cookie is not found");
+		}
 		return sessionCookie;
 	}
 
