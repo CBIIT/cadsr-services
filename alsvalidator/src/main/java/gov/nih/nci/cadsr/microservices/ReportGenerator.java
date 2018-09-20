@@ -298,12 +298,14 @@ public class ReportGenerator implements ReportOutput {
 								questionsList.add(question);
 							}
 						} else {
-							question.setRaveFieldLabel(alsField.getPreText());
-							question.setQuestionCongruencyStatus(congStatus_warn);
-							question.setMessage(noCdeMsg+draftFieldName);
-							Map<String, String> parseValidationError = pickFieldErrors(alsField, alsData.getCccError().getAlsErrors());
-							question = setParseErrorToQuestion (question, parseValidationError);
-							questionsList.add(question);
+							if (!"FORM_OID".equalsIgnoreCase(draftFieldName)) {
+								question.setRaveFieldLabel(alsField.getPreText());
+								question.setQuestionCongruencyStatus(congStatus_warn);
+								question.setMessage(noCdeMsg+draftFieldName);
+								Map<String, String> parseValidationError = pickFieldErrors(alsField, alsData.getCccError().getAlsErrors());
+								question = setParseErrorToQuestion (question, parseValidationError);
+								questionsList.add(question);
+							}
 						}
 				}
 			}
