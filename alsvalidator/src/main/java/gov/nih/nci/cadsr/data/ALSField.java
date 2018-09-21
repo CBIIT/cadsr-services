@@ -18,6 +18,7 @@ String unitDictionaryName;
 String controlType;
 String preText;
 String fixedUnit;
+String defaultValue;
 
 Map<String, ALSDataDictionaryEntry> ddeMap = new HashMap<String, ALSDataDictionaryEntry>();
 
@@ -81,6 +82,12 @@ public String getFixedUnit() {
 }
 public void setFixedUnit(String fixedUnit) {
 	this.fixedUnit = fixedUnit;
+}
+public String getDefaultValue() {
+	return defaultValue;
+}
+public void setDefaultValue(String defaultValue) {
+	this.defaultValue = defaultValue;
 }
 public Map<String, ALSDataDictionaryEntry> getDdeMap() {
 	return ddeMap;

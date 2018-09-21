@@ -298,7 +298,13 @@ public class ReportGenerator implements ReportOutput {
 								questionsList.add(question);
 							}
 						} else {
-							if (!"FORM_OID".equalsIgnoreCase(draftFieldName)) {
+							if ("FORM_OID".equalsIgnoreCase(draftFieldName)) {
+								if (alsField.getDefaultValue()!=null) {
+									if (alsField.getDefaultValue().indexOf(publicid_prefix) > -1 && alsField.getDefaultValue().indexOf(version_prefix) > -1) {
+										form = assignIdVersionToForm(form, alsField.getDefaultValue());
+									}
+								}
+							} else {
 								question.setRaveFieldLabel(alsField.getPreText());
 								question.setQuestionCongruencyStatus(congStatus_warn);
 								question.setMessage(noCdeMsg+draftFieldName);
@@ -810,5 +816,25 @@ public class ReportGenerator implements ReportOutput {
 		return question;
 	}
 	
+	
+	/**
+	 * Split the FORM public ID and Version, and assign them to the Form  
+	 * @param question
+	 * @param defaultValue
+	 * @return CCCForm
+	 */
+	protected static CCCForm assignIdVersionToForm (CCCForm form, String defaultValue) {
+		String idVersion = defaultValue.substring(defaultValue.indexOf(publicid_prefix),
+				defaultValue.length());
+		idVersion = defaultValue.substring(defaultValue.indexOf(publicid_prefix), defaultValue.length());
+		String id = idVersion.substring(3, idVersion.indexOf("_"));
+		String version = (idVersion.substring(idVersion.indexOf(version_prefix) + 2, idVersion.length()));
+		id = id.trim();
+		String[] versionTokens = version.split("\\_");
+		version = versionTokens[0] + "." + versionTokens[1];
+		form.setFormPublicId(id.trim());
+		form.setFormVersion(version);			
+		return form;
+	}	
 
 }

@@ -163,7 +163,11 @@ public class ExcelReportGenerator {
 				row = sheet2.createRow(rowNum++);
 				newCell = row.createCell(0);
 				newCell.setCellValue(cccForm.getRaveFormOid());
-				colNum = colNum+3;
+				sheet.autoSizeColumn(newCell.getColumnIndex());				
+				newCell = row.createCell(1);
+				newCell.setCellValue(cccForm.getFormPublicId());
+				newCell = row.createCell(2);
+				newCell.setCellValue(cccForm.getFormVersion());
 				newCell = row.createCell(3);
 				newCell.setCellValue(cccForm.getCountTotalQuestions());
 	            CellStyle cellStyle = workbook.createCellStyle(); //Create new style
@@ -293,7 +297,7 @@ public class ExcelReportGenerator {
 			public static void autoSizeColumns(XSSFSheet sheet) {
 				try {
 				        if (sheet.getPhysicalNumberOfRows() > 0) {
-				        	for (int j = sheet.getFirstRowNum()+3; j < sheet.getLastRowNum(); j++) {
+				        	for (int j = sheet.getFirstRowNum()+2; j < sheet.getLastRowNum(); j++) {
 					            Row row = sheet.getRow(j);
 					            if (row!=null) {
 						            Iterator<Cell> cellIterator = row.cellIterator();

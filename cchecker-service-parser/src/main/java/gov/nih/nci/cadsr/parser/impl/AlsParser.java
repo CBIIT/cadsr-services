@@ -63,6 +63,7 @@ public class AlsParser implements Parser{
 	private static int cell_fieldControlType = 11;
 	private static int cell_fieldPreText = 14;
 	private static int cell_fieldFixedUnit = 15;
+	private static int cell_fieldDefaultValue = 20;	
 	private static int cell_ddeDataDictionaryName = 0;
 	private static int cell_ddeCodedData = 1;
 	private static int cell_ddeOrdinal = 2;
@@ -397,6 +398,11 @@ public class AlsParser implements Parser{
 						String draftFieldName = dataFormatter.formatCellValue(row.getCell(cell_draftFieldName));
 						String idVersion = "";
 						field.setDraftFieldName(draftFieldName);
+						if ("FORM_OID".equalsIgnoreCase(draftFieldName)) {
+							if (row.getCell(cell_fieldDefaultValue)!=null) { 
+									field.setDefaultValue(dataFormatter.formatCellValue(row.getCell(cell_fieldDefaultValue)));
+								} 
+						}						
 						if (!(draftFieldName.indexOf("PID") > -1 && draftFieldName.indexOf("_V") > -1)) {
 							alsError = getErrorInstance();
 							alsError.setErrorDesc(err_msg_21);
