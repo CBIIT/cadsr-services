@@ -5,9 +5,10 @@ package gov.nih.nci.cadsr.data;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import gov.nih.nci.cadsr.data.CCCForm;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CCCReport {
 	
 String reportOwner;

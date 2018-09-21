@@ -13,6 +13,8 @@ String formName;
 int countTotalQuestions;
 String version;
 String congruencyStatus; // Congruent, Errors, Warnings
+String formPublicId;
+String formVersion;
 
 List<CCCQuestion> questions = new ArrayList<CCCQuestion>();
 
@@ -45,6 +47,18 @@ public String getCongruencyStatus() {
 }
 public void setCongruencyStatus(String congruencyStatus) {
 	this.congruencyStatus = congruencyStatus;
+}
+public String getFormPublicId() {
+	return formPublicId;
+}
+public void setFormPublicId(String formPublicId) {
+	this.formPublicId = formPublicId;
+}
+public String getFormVersion() {
+	return formVersion;
+}
+public void setFormVersion(String formVersion) {
+	this.formVersion = formVersion;
 }
 public List<CCCQuestion> getQuestions() {
 	return questions;
