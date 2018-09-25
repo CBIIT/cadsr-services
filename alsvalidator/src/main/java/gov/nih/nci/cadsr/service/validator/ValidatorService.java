@@ -406,8 +406,8 @@ public class ValidatorService {
 	protected static CCCQuestion setLengthCheckerResult (CCCQuestion question, Integer vdMaxLength) {
 		String raveLength = question.getRaveLength();
 		if (vdMaxLength!=null) {
-			if (raveLength!=null) {
-				if (Float.valueOf(computeRaveLength(raveLength)) < Float.valueOf(vdMaxLength)) {
+			if (raveLength!=null) {			
+				if (!(Float.valueOf(computeRaveLength(raveLength)) > Float.valueOf(vdMaxLength))) {
 					question.setLengthCheckerResult(matchString);
 				} else {
 					question.setLengthCheckerResult(warningString);
