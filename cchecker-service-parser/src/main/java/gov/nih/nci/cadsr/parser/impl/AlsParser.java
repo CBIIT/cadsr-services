@@ -33,6 +33,7 @@ import gov.nih.nci.cadsr.data.ALSField;
 import gov.nih.nci.cadsr.data.ALSForm;
 import gov.nih.nci.cadsr.data.ALSUnitDictionaryEntry;
 import gov.nih.nci.cadsr.data.CCCError;
+import gov.nih.nci.cadsr.data.CCCForm;
 import gov.nih.nci.cadsr.parser.Parser;
 
 public class AlsParser implements Parser{
@@ -107,6 +108,8 @@ public class AlsParser implements Parser{
 	private static String err_msg_22 = "This is an unknown control type.";		
 	private static String err_msg_23 = "CDE public id and version should be numeric.";	
 	private static String err_msg_24 = "Ordinal should be numeric.";	
+	private static String publicid_prefix = "PID";
+	private static String version_prefix = "_V";	
 
 	/**
 	 * Parsing an ALS input file into data objects for validating against the
@@ -401,9 +404,20 @@ public class AlsParser implements Parser{
 						if ("FORM_OID".equalsIgnoreCase(draftFieldName)) {
 							if (row.getCell(cell_fieldDefaultValue)!=null) { 
 									field.setDefaultValue(dataFormatter.formatCellValue(row.getCell(cell_fieldDefaultValue)));
+										String defaultValue = field.getDefaultValue();
+										if (defaultValue.indexOf(publicid_prefix) > -1 && defaultValue.indexOf(version_prefix) > -1) {
+										String idVn = defaultValue.substring(defaultValue.indexOf(publicid_prefix),defaultValue.length());
+										String id = idVn.substring(3, idVn.indexOf("_"));
+										String version = (idVn.substring(idVn.indexOf(version_prefix) + 2, idVn.length()));
+										id = id.trim();
+										String[] versionTokens = version.split("\\_");
+										version = versionTokens[0] + "." + versionTokens[1];
+										field.setFormPublicId(id.trim());
+										field.setVersion(version);
+									}
 								} 
 						}						
-						if (!(draftFieldName.indexOf("PID") > -1 && draftFieldName.indexOf("_V") > -1)) {
+						if (!(draftFieldName.indexOf(publicid_prefix) > -1 && draftFieldName.indexOf(version_prefix) > -1)) {
 							alsError = getErrorInstance();
 							alsError.setErrorDesc(err_msg_21);
 							alsError.setCellValue(draftFieldName);
@@ -421,9 +435,9 @@ public class AlsParser implements Parser{
 							alsError.setErrorSeverity(errorSeverity_warn);
 							alsData.getCccError().addAlsError(alsError);							
 						} else {
-								idVersion = draftFieldName.substring(draftFieldName.indexOf("PID"), draftFieldName.length());
+								idVersion = draftFieldName.substring(draftFieldName.indexOf(publicid_prefix), draftFieldName.length());
 								String id = idVersion.substring(3, idVersion.indexOf("_"));
-								String version = (idVersion.substring(idVersion.indexOf("_V") + 2, idVersion.length()));
+								String version = (idVersion.substring(idVersion.indexOf(version_prefix) + 2, idVersion.length()));
 						        id = id.trim();
 						        String[] versionTokens = version.split("\\_");
 						        Integer.parseInt(versionTokens[0]);

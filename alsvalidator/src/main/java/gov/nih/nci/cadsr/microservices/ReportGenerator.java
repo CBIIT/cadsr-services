@@ -824,9 +824,7 @@ public class ReportGenerator implements ReportOutput {
 	 * @return CCCForm
 	 */
 	protected static CCCForm assignIdVersionToForm (CCCForm form, String defaultValue) {
-		String idVersion = defaultValue.substring(defaultValue.indexOf(publicid_prefix),
-				defaultValue.length());
-		idVersion = defaultValue.substring(defaultValue.indexOf(publicid_prefix), defaultValue.length());
+		String idVersion = defaultValue.substring(defaultValue.indexOf(publicid_prefix), defaultValue.length());
 		String id = idVersion.substring(3, idVersion.indexOf("_"));
 		String version = (idVersion.substring(idVersion.indexOf(version_prefix) + 2, idVersion.length()));
 		id = id.trim();
