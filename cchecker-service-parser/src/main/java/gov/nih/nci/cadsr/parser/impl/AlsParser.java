@@ -33,7 +33,6 @@ import gov.nih.nci.cadsr.data.ALSField;
 import gov.nih.nci.cadsr.data.ALSForm;
 import gov.nih.nci.cadsr.data.ALSUnitDictionaryEntry;
 import gov.nih.nci.cadsr.data.CCCError;
-import gov.nih.nci.cadsr.data.CCCForm;
 import gov.nih.nci.cadsr.parser.Parser;
 
 public class AlsParser implements Parser{
@@ -102,7 +101,7 @@ public class AlsParser implements Parser{
 	private static String err_msg_16 = "Coded Data is empty.";
 	private static String err_msg_17 = "Ordinal is empty.";
 	private static String err_msg_18 = "User Data String is empty.";
-	private static String err_msg_19 = "Specify is empty."; // TODO May not be needed if we leave out Specify. If so, remove.
+	private static String err_msg_19 = "Specify is empty.";
 	private static String err_msg_20 = "Unit Dictionary Name is empty.";
 	private static String err_msg_21 = "Question doesn't contain a CDE public id and version";	
 	private static String err_msg_22 = "This is an unknown control type.";		
@@ -440,10 +439,11 @@ public class AlsParser implements Parser{
 								String version = (idVersion.substring(idVersion.indexOf(version_prefix) + 2, idVersion.length()));
 						        id = id.trim();
 						        String[] versionTokens = version.split("\\_");
-						        Integer.parseInt(versionTokens[0]);
-						        Integer.parseInt(versionTokens[1]);
-						        version = versionTokens[0] + "." + versionTokens[1];
-						        if (!NumberUtils.isNumber(id) || !NumberUtils.isNumber(version)) {
+						        if (NumberUtils.isNumber(id) && NumberUtils.isNumber(versionTokens[0]) && NumberUtils.isNumber(versionTokens[1])) {
+							        Integer.parseInt(versionTokens[0]);
+							        Integer.parseInt(versionTokens[1]);
+							        version = versionTokens[0] + "." + versionTokens[1];						        							        	
+						        } else {
 									alsError = getErrorInstance();
 									alsError.setErrorDesc(err_msg_23);
 									alsError.setCellValue(idVersion);
@@ -459,7 +459,7 @@ public class AlsParser implements Parser{
 									if (unitDictionaryName!=null)
 										alsError.setUnitDictionaryName(unitDictionaryName);								
 									alsError.setErrorSeverity(errorSeverity_error);
-									alsData.getCccError().addAlsError(alsError);						        	
+									alsData.getCccError().addAlsError(alsError);
 						        }
 						}
 					}
