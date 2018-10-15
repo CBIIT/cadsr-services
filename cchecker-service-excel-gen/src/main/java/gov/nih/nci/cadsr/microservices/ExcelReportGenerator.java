@@ -220,7 +220,7 @@ public class ExcelReportGenerator {
 						if (m != 0)
 							newCell.setCellValue("");
 						else	
-							newCell.setCellValue(question.getAllowableCdeValue()); 						
+							newCell.setCellValue(question.getAllowableCdeValue());
 						newCell = row.createCell(colNum3);
 						newCell.setCellValue(raveUserString.get(m));			
 						if (m != raveCodedData.size()-1)
@@ -230,10 +230,15 @@ public class ExcelReportGenerator {
 					row = rowBeforeCD;
 					int newColNum = pvResultCol;
 					newCell = row.createCell(newColNum++);
-					newCell.setCellValue(question.getPvResult());				
-					newCell = row.createCell(newColNum++);
-					newCell.setCellStyle(cellStyle);				
-					newCell.setCellValue(question.getAllowableCdeTextChoices());
+					newCell.setCellValue(question.getPvResult());
+					int allowableCdeColumn = newColNum++;
+					for (String allowableCdeText : question.getAllowableCdeTextChoices()) {
+						newCell = row.createCell(allowableCdeColumn);
+						newCell.setCellStyle(cellStyle);				
+						newCell.setCellValue(allowableCdeText);						
+						row = sheet2.createRow(rowNum++);
+					}
+					row = rowBeforeCD;
 					newCell = row.createCell(newColNum++);
 					newCell.setCellValue(question.getRaveFieldDataType());				
 					newCell = row.createCell(newColNum++);

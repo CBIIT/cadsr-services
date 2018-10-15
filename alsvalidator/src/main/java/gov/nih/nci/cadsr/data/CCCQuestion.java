@@ -26,7 +26,7 @@ List<String> codedDataResult = new ArrayList<String>();
 String allowableCdeValue;
 List<String> raveUserString;
 String pvResult;
-String allowableCdeTextChoices;
+List<String> allowableCdeTextChoices = new ArrayList<String>();
 
 String raveFieldDataType;
 String datatypeCheckerResult;
@@ -149,10 +149,10 @@ public String getPvResult() {
 public void setPvResult(String pvResult) {
 	this.pvResult = pvResult;
 }
-public String getAllowableCdeTextChoices() {
+public List<String> getAllowableCdeTextChoices() {
 	return allowableCdeTextChoices;
 }
-public void setAllowableCdeTextChoices(String allowableCdeTextChoices) {
+public void setAllowableCdeTextChoices(List<String> allowableCdeTextChoices) {
 	this.allowableCdeTextChoices = allowableCdeTextChoices;
 }
 public String getRaveFieldDataType() {

@@ -11,7 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
+import gov.nih.nci.cadsr.dao.model.AlternateNameUiModel;
 import gov.nih.nci.cadsr.dao.model.PermissibleValuesModel;
+import gov.nih.nci.cadsr.dao.model.ValueMeaningUiModel;
 import gov.nih.nci.cadsr.data.ALSField;
 import gov.nih.nci.cadsr.data.CCCQuestion;
 import gov.nih.nci.cadsr.service.model.cdeData.CdeDetails;
@@ -89,11 +91,12 @@ public class ValidatorService {
 
 			// Gathering Permissible Values and Value Meanings in separate lists			
 			List<String> pvList = new ArrayList<String>();
+			List<String> pvOtherNamesList = new ArrayList<String>();
 			List<String> pvVmList = new ArrayList<String>();
 			int pvMaxLen = 0;
 			int vdMaxLen = 0;
 			StringBuffer allowableCdes = new StringBuffer();
-			StringBuffer allowableVmTextChoices = new StringBuffer();
+			List<String> allowableCdeTextChoicesList = new ArrayList<String>();
 			
 			if (cdeDetails.getValueDomain()!=null) {
 				if (cdeDetails.getValueDomain().getValueDomainDetails()!=null) {
@@ -106,15 +109,21 @@ public class ValidatorService {
 					for (PermissibleValuesModel pv : cdeDetails.getValueDomain().getPermissibleValues()) {
 						pvList.add(pv.getValue());
 						if (pv.getShortMeaning()!=null)
-							pvVmList.add(pv.getShortMeaning().toLowerCase());
+							pvOtherNamesList.add(pv.getShortMeaning().toLowerCase());
+						pvVmList = buildPvAltNamesList (cdeDetails, pv.getVmIdseq());
 						if (allowableCdes.length() > 0)
 							allowableCdes.append("|"+pv.getValue());
 						else 
 							allowableCdes.append(pv.getValue());
-						if (allowableVmTextChoices.length() > 0)
-							allowableVmTextChoices.append("|"+pv.getShortMeaning());
-						else
-							allowableVmTextChoices.append(pv.getShortMeaning());
+						StringBuffer allowableVmTextChoices = new StringBuffer();						
+						for (String altName : pvVmList) {					
+							if (allowableVmTextChoices.length() > 0)
+								allowableVmTextChoices.append("|"+altName);
+							else
+								allowableVmTextChoices.append(altName);							
+						}
+						logger.debug("Allowable CDEs: "+allowableVmTextChoices.toString());
+						allowableCdeTextChoicesList.add(allowableVmTextChoices.toString());
 						if (pv.getValue().length() > pvMaxLen)
 							pvMaxLen = pv.getValue().length();
 					}
@@ -123,14 +132,14 @@ public class ValidatorService {
 
 			// Setting the Allowable CDEs
 			if (allowableCdes.length() > 0) 
-				question.setAllowableCdeValue(allowableCdes.toString());			
+				question.setAllowableCdeValue(allowableCdes.toString());
 			
 			// Checking for the presence of RAVE user data string in the PV Value meaning list - PV Checker result
-			question = setPvCheckerResult (pvVmList, question);
+			question = setPvCheckerResult (pvList, pvOtherNamesList, pvVmList, question);
 			
 			// Setting the Allowable CDE  Value Meaning Text Choices if PV Checker Result is Error.
-			if (question.getPvResult()!=null && question.getPvResult().equalsIgnoreCase(errorString))
-				question.setAllowableCdeTextChoices(allowableVmTextChoices.toString());
+			//if (question.getPvResult()!=null && question.getPvResult().equalsIgnoreCase(errorString))
+				question.setAllowableCdeTextChoices(allowableCdeTextChoicesList);
 				
 			// Checking for the presence of RAVE Coded data in the PV values list - Coded Data Checker Result
 			question = setCodedDataCheckerResult(pvList, question);
@@ -280,16 +289,16 @@ public class ValidatorService {
 	
 	
 	/**
-	 * Check the PV VMs against the User Data String in the ALS input file
-	 * @param pvVmList
+	 * Check the PV values, Long name and VM's alternate names against the User Data String in the ALS input file
+	 * @param pvList
 	 * @param question
 	 * @return CCCQuestion
 	 */
-	protected static CCCQuestion setPvCheckerResult (List<String> pvVmList, CCCQuestion question) {
+	protected static CCCQuestion setPvCheckerResult (List<String> pvList, List<String> pvOtherList, List<String> pvVmList, CCCQuestion question) {
 		// Checking for the presence of RAVE user data string in the PV Value meaning list - PV Checker result
-		if (!pvVmList.isEmpty()) {
+		if (!pvList.isEmpty()) {
 			for (String userDataString : question.getRaveUserString()) {
-				if (pvVmList.contains(userDataString.toLowerCase())) {
+				if (pvList.contains(userDataString.toLowerCase()) || pvOtherList.contains(userDataString.toLowerCase()) || pvVmList.contains(userDataString.toLowerCase())) {
 					question.setPvResult(matchString);
 				} else {
 					question.setPvResult(errorString);
@@ -515,6 +524,35 @@ public class ValidatorService {
 		else 
 			errorMessage = newMessage;
 		return errorMessage;
+	}
+	
+	/**
+	 * Build a list of Value Meaning Alternate Names for a given Permissible Values
+	 * @param vmIdSeq
+	 * @param cdeDetails
+	 * @return List<String>
+	 */			
+	protected static List<String> buildPvAltNamesList(CdeDetails cdeDetails, String vmIdSeq) {
+		List<ValueMeaningUiModel> vmUiModelList = new ArrayList<ValueMeaningUiModel>();
+		List<String> allowableCdeValueList = new ArrayList<String>();		
+		if (cdeDetails.getValueDomain()!=null) {
+			if (cdeDetails.getValueDomain().getValueMeaning()!=null) {
+				vmUiModelList = cdeDetails.getValueDomain().getValueMeaning();
+				if (!vmUiModelList.isEmpty()) {
+					for (ValueMeaningUiModel vm : vmUiModelList) {
+						if (vm.getVmIdseq().equalsIgnoreCase(vmIdSeq)) {
+							if (vm.getAlternateNames()!=null) {
+								for (AlternateNameUiModel altName : vm.getAlternateNames()) {
+									logger.debug("Alt Name: "+altName.getName());
+									allowableCdeValueList.add(altName.getName());
+								}
+							} 
+						}
+					}					
+				}									
+			}
+		}
+		return allowableCdeValueList;		
 	}	
 
 }
