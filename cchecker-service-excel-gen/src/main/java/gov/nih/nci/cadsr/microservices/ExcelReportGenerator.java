@@ -5,6 +5,7 @@ package gov.nih.nci.cadsr.microservices;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -206,6 +207,7 @@ public class ExcelReportGenerator {
 					List<String> raveCodedData = question.getRaveCodedData();
 					List<String> raveUserString = question.getRaveUserString();
 					List<String> codedDataResult = question.getCodedDataResult();
+					List<Row> rowsCdData = new ArrayList<Row>();
 					Row rowBeforeCD = row;
 					for (int m = 0; m < raveCodedData.size(); m++)	{
 						int colNum3 = codedDataColStart;
@@ -222,21 +224,23 @@ public class ExcelReportGenerator {
 						else	
 							newCell.setCellValue(question.getAllowableCdeValue());
 						newCell = row.createCell(colNum3);
-						newCell.setCellValue(raveUserString.get(m));			
+						newCell.setCellValue(raveUserString.get(m));
+						rowsCdData.add(row);
 						if (m != raveCodedData.size()-1)
 							row = sheet2.createRow(rowNum++);
 					}
 					int rowNumAfterCD = rowNum;
-					row = rowBeforeCD;
+					row = rowBeforeCD;					
 					int newColNum = pvResultCol;
 					newCell = row.createCell(newColNum++);
 					newCell.setCellValue(question.getPvResult());
 					int allowableCdeColumn = newColNum++;
-					for (String allowableCdeText : question.getAllowableCdeTextChoices()) {
+					// Adding Allowable CDE text choices (in case of not match)
+					for (int n = 0; n < question.getAllowableCdeTextChoices().size(); n++) {
+						row = rowsCdData.get(n);					
 						newCell = row.createCell(allowableCdeColumn);
 						newCell.setCellStyle(cellStyle);				
-						newCell.setCellValue(allowableCdeText);						
-						row = sheet2.createRow(rowNum++);
+						newCell.setCellValue(question.getAllowableCdeTextChoices().get(n));
 					}
 					row = rowBeforeCD;
 					newCell = row.createCell(newColNum++);
