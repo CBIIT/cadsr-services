@@ -297,7 +297,7 @@ public class ValidatorService {
 				if (pvVmList!=null) {
 					if (pvVmList.contains(userDataString) || pvValue.equals(userDataString)) {
 						question.setPvResult(matchString);
-						isMatch = true;												
+						isMatch = true;
 					}
 					StringBuffer allowableVmTextChoices = new StringBuffer();
 					// Building a list of Allowable CDE text choices (in case of a 'Not match' for PV checker)
@@ -309,15 +309,14 @@ public class ValidatorService {
 					}
 					allowCdesList.add(allowableVmTextChoices.toString());					
 				}
-
-				if (!isMatch) {
-					question.setPvResult(errorString);
-					question.setAllowableCdeTextChoices(allowCdesList);					
-					if((question.getMessage() != null) && (question.getMessage().indexOf(msg9) == -1))
-						question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg9));
-					question.setQuestionCongruencyStatus(congStatus_errors);
-				}
 			}
+			if (!isMatch) {
+				question.setPvResult(errorString);
+				question.setAllowableCdeTextChoices(allowCdesList);					
+				if((question.getMessage() != null) && (question.getMessage().indexOf(msg9) == -1))
+					question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg9));
+				question.setQuestionCongruencyStatus(congStatus_errors);
+			}			
 		}
 		return question;
 	}
