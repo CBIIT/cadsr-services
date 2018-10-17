@@ -1,4 +1,6 @@
 /target/
+/bin/
+/keep/
 /dwld/
 .DS_Store
 *.DS_Store
