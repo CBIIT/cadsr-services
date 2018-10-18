@@ -13,6 +13,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -28,6 +30,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
@@ -41,6 +44,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import gov.nih.nci.cadsr.data.ALSData;
@@ -557,7 +562,7 @@ public class GatewayBootController {
 	 * @param httpStatus
 	 * @return ResponseEntity
 	 */
-	private ResponseEntity<String> buildErrorResponse(String errorMessage, HttpStatus httpStatus) {
+	protected static ResponseEntity<String> buildErrorResponse(String errorMessage, HttpStatus httpStatus) {
 		// TODO what context type shall be returned on an error - ? Now
 		// text/plain
 		HttpHeaders httpHeaders = new HttpHeaders();
@@ -602,7 +607,7 @@ public class GatewayBootController {
 			bis = new BufferedInputStream(fis);
 		}
 		else {
-			logger.error("Requested firl is not found: " + filePathString);
+			logger.error("Requested file is not found: " + filePathString);
 		}
 		return bis;
 	}
@@ -674,5 +679,29 @@ public class GatewayBootController {
 		alsData = submitPostRequestParser(filepath);
 		response.addCookie(cookie);
 		return alsData.getAlsData();
+	}
+	
+	@GetMapping("/testfeed/{id}")
+	public ResponseBodyEmitter handleRequest(@PathVariable("id") String amount) {
+		int num = Integer.parseInt(amount);
+		final SseEmitter emitter = new SseEmitter();
+		ExecutorService service = Executors.newSingleThreadExecutor();
+		service.execute(() -> {
+			for (int i = 0; i < num; i++) {
+				try {
+					emitter.send(""+i, MediaType.TEXT_PLAIN);
+	
+					Thread.sleep(200);
+				} 
+				catch (Exception e) {
+					e.printStackTrace();
+					emitter.completeWithError(e);
+					return;
+				}
+			}
+			emitter.complete();
+		});
+
+		return emitter;
 	}
 }
