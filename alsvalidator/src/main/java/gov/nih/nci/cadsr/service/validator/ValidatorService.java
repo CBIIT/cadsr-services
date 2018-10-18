@@ -35,21 +35,20 @@ public class ValidatorService {
 	private static final String retiredArchivedStatus = "RETIRED ARCHIVED";
 	private static final String retiredPhasedOutStatus = "RETIRED PHASED OUT";
 	private static final String retiredWithdrawnStatus = "RETIRED WITHDRAWN";
-	private static final String msg1 = "CDE not in caDSR database";
-	private static final String msg2 = "CDE has been retired";
-	private static final String msg3 = "Newer version of CDE exists: ";
-	private static final String msg4_1 = "caDSR Max Length too short. PVs MaxLength ";
-	private static final String msg4_2 = ", caDSR MaxLength ";
-	private static final String msg5 = "This CDE is not enumerated but question in input file has Coded Data (Permissible values)";
-	private static final String msg6 = "Question Text in input file does not match available CDE question text(s)";
-	private static final String msg7 = "Unknown Control Type from caDSR DB";
-	private static final String msg8 = "Control Type nor present in the ALS input data";
-	private static final String msg9 = "Additional PVs in Valid Value list";
-	private static final String msg10 = "PVs not in caDSR DB";
-	private static final String msg11 = "Data type from ALS input doesn't match with caDSR DB";
-	private static final String msg12 = "Unit of Measure from ALS input doesn't match with that of the Value Domain";
-	private static final String msg13 = "Format doesn't match with that of the Value Domain";
-	private static final String msg14 = "Fixed Unit from ALS input data doesn't match with Value Domain Max length";	
+	private static final String msg1 = "CDE not found in caDSR database.";
+	private static final String msg2 = "CDE has been retired.";
+	private static final String msg3 = "Newer version of CDE exists: {%.1f}.";
+	private static final String msg4 = "Value domain Max Length too short. PVs MaxLength is {%d} , caDSR MaxLength is {%d}.";
+	private static final String msg5 = "This CDE is not enumerated but question in input file has Coded Data (Permissible values) - %s.";
+	private static final String msg6 = "Question Text in input file does not match available CDE question text(s) - %s.";
+	private static final String msg7 = "Control Type {%s} isn't compatible with the corresponding mapping for Value domain type {%s}.";
+	private static final String msg8 = "Missing Control Type in the ALS input data.";
+	private static final String msg9 = "Additional PVs in Valid Value list.";
+	private static final String msg10 = "The Coded data {%s} for the question do not belong to the corresponding Value domain.";
+	private static final String msg11 = "Data type {%s} from ALS input data doesn't match with the corresponding Value Domain's data type {%s}.";
+	private static final String msg12 = "Unit of Measure {%s} from ALS input data doesn't match with the corresponding Value Domain's UOM {%s}.";
+	private static final String msg13 = "Format {%s} doesn't match with the corresponding Value Domain's format {%s}.";
+	private static final String msg14 = "Fixed Unit {%s} from ALS input data doesn't match with the corresponding Value Domain's Max length {%d}.";
 	private static String congStatus_errors = "ERRORS";
 	private static String congStatus_warn = "WARNINGS";
 	private static List<String> characterDataFormats = Arrays.asList("CHAR", "VARCHAR2", "CHARACTER", "ALPHANUMERIC",
@@ -169,9 +168,9 @@ public class ValidatorService {
 	 */
 	protected static CCCQuestion checkCdeRetired(CdeDetails cdeDetails, CCCQuestion question) {
 		//Checking for retired CDEs 
-		if (cdeDetails.getDataElement()!=null && (cdeDetails.getDataElement().getDataElementDetails().getWorkflowStatus().equalsIgnoreCase(retiredArchivedStatus)
-				|| cdeDetails.getDataElement().getDataElementDetails().getWorkflowStatus().equalsIgnoreCase(retiredPhasedOutStatus)
-				|| cdeDetails.getDataElement().getDataElementDetails().getWorkflowStatus().equalsIgnoreCase(retiredWithdrawnStatus))) {	
+		if (cdeDetails.getDataElement()!=null && (retiredArchivedStatus.equalsIgnoreCase(cdeDetails.getDataElement().getDataElementDetails().getWorkflowStatus())
+				|| retiredPhasedOutStatus.equalsIgnoreCase(cdeDetails.getDataElement().getDataElementDetails().getWorkflowStatus())
+				|| retiredWithdrawnStatus.equalsIgnoreCase(cdeDetails.getDataElement().getDataElementDetails().getWorkflowStatus()))) {	
 			question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg2));
 			if (question.getQuestionCongruencyStatus()==null)
 				question.setQuestionCongruencyStatus(congStatus_warn);
@@ -199,7 +198,7 @@ public class ValidatorService {
 			}
 							
 			if (newerVersionExists) {
-				question.setMessage(assignQuestionErrorMessage(question.getMessage(),msg3+latestVersion));
+				question.setMessage(assignQuestionErrorMessage(question.getMessage(),String.format(msg3, latestVersion)));
 				if (question.getQuestionCongruencyStatus()==null)
 					question.setQuestionCongruencyStatus(congStatus_warn);
 			} 
@@ -225,7 +224,7 @@ public class ValidatorService {
 				rdDocText =  rd.getDocumentText();
 				rdDocTextList.add(rdDocText);
 				// Concatenating the entire list of AQTs and PQTs together 
-				if (rd.getDocumentType().equalsIgnoreCase("Preferred Question Text") || rd.getDocumentType().equalsIgnoreCase("Alternate Question Text")) {
+				if ("Preferred Question Text".equalsIgnoreCase(rd.getDocumentType()) || "Alternate Question Text".equalsIgnoreCase(rd.getDocumentType())) {
 					if (rdDocs.length() > 0)
 						rdDocs.append("|"+rdDocText);
 					else 
@@ -238,7 +237,7 @@ public class ValidatorService {
 			question.setRaveFieldLabelResult(matchString);
 		} else {
 			question.setRaveFieldLabelResult(errorString);
-			question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg6));
+			question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg6, rdDocTextList)));
 			question.setQuestionCongruencyStatus(congStatus_errors);
 		}
 		// Setting the concatenated string of AQTs and PQTs into CDE permitted question text choices
@@ -254,19 +253,32 @@ public class ValidatorService {
 	 * @return CCCQuestion
 	 */
 	protected static CCCQuestion setRaveControlTypeResult (String vdType, CCCQuestion question) {
-			question.setCdeValueDomainType(vdType);		
+			question.setCdeValueDomainType(vdType);
+			List<Object> errorVal = new ArrayList<Object>();
+			errorVal.add(question.getRaveControlType());
+			if (vdType!=null) {
+				if ("N".equalsIgnoreCase(vdType))
+					errorVal.add("Non-enumerated");
+				else if ("E".equalsIgnoreCase(vdType))
+					errorVal.add("Enumerated");
+				else
+					errorVal.add("Unknown");
+			}	else
+				errorVal.add("Unknown");
+			// TODO: This validation is pending a mapping table with the control types and their appropriate data types
+			// For now we're just directly checking ALS input against the value domain.
 			if (question.getRaveControlType()!=null) {
-				if (question.getRaveControlType().equalsIgnoreCase("TEXT") && vdType.equalsIgnoreCase("N")) {
+				if ("TEXT".equalsIgnoreCase(question.getRaveControlType()) && "N".equalsIgnoreCase(vdType)) {
 					question.setControlTypeResult(matchString);
 					if (!question.getRaveCodedData().isEmpty()) {
-						question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg5));
+						question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg5, question.getRaveCodedData())));
 					}
 						
-				} else if (!question.getRaveControlType().equalsIgnoreCase("TEXT") && vdType.equalsIgnoreCase("E")) {
+				} else if (!"TEXT".equalsIgnoreCase(question.getRaveControlType()) && "E".equalsIgnoreCase(vdType)) {
 					question.setControlTypeResult(matchString);
 				} else {
 					question.setControlTypeResult(errorString);
-					question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg7));
+					question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg7, errorVal.toArray())));
 					question.setQuestionCongruencyStatus(congStatus_errors);
 				}	
 			} else {
@@ -337,7 +349,7 @@ public class ValidatorService {
 				} else {
 					cdResult.add(errorString);
 					if ((question.getMessage()!=null) && (question.getMessage().indexOf(msg10) == -1))
-						question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg10));
+						question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg10, question.getRaveCodedData())));
 					question.setQuestionCongruencyStatus(congStatus_errors);
 				}
 			}
@@ -357,8 +369,11 @@ public class ValidatorService {
 	 */
 	protected static CCCQuestion checkDataTypeCheckerResult (CCCQuestion question, String raveDataFormat, String vdDataType) {
 		Boolean result = false;
+		List<Object> errorVal = new ArrayList<Object>();		
 		question.setCdeDataType(vdDataType);
 		if (raveDataFormat!=null) {
+			errorVal.add(raveDataFormat);
+			errorVal.add(vdDataType);			
 			if (raveDataFormat.startsWith("$")) {
 				if (characterDataFormats.contains(vdDataType)) 
 					result = true;
@@ -377,7 +392,7 @@ public class ValidatorService {
 			question.setDatatypeCheckerResult(matchString);
 		else {
 			question.setDatatypeCheckerResult(errorString);
-			question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg11));			
+			question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg11, errorVal.toArray())));			
 			question.setQuestionCongruencyStatus(congStatus_errors);
 		}
 		return question;
@@ -392,19 +407,22 @@ public class ValidatorService {
 	 */
 	protected static CCCQuestion setUomCheckerResult (CCCQuestion question, String unitOfMeasure) {
 		question.setCdeUOM(unitOfMeasure);
+		List<Object> errorVal = new ArrayList<Object>();
+			errorVal.add(question.getRaveUOM());
+			errorVal.add(unitOfMeasure);		
 		if (unitOfMeasure!=null) {
 			if (question.getRaveUOM()!=null) {
 					if (question.getRaveUOM().equals(unitOfMeasure)) {
 						question.setUomCheckerResult(matchString);
 					} else {
 						question.setUomCheckerResult(warningString);
-						question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg12));
+						question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg12, errorVal.toArray())));
 						if (question.getQuestionCongruencyStatus()==null)
 							question.setQuestionCongruencyStatus(congStatus_warn);
 					}
 			} else {
 				question.setUomCheckerResult(warningString);
-				question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg12));
+				question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg12, errorVal.toArray())));
 				if (question.getQuestionCongruencyStatus()==null)
 					question.setQuestionCongruencyStatus(congStatus_warn);
 			} 
@@ -423,19 +441,22 @@ public class ValidatorService {
 	 */
 	protected static CCCQuestion setLengthCheckerResult (CCCQuestion question, Integer vdMaxLength) {
 		String raveLength = question.getRaveLength();
+		List<Object> errorVal = new ArrayList<Object>();
+		errorVal.add(raveLength);
+		errorVal.add(vdMaxLength);				
 		if (vdMaxLength!=null) {
 			if (raveLength!=null) {			
 				if (!(Float.valueOf(computeRaveLength(raveLength)) > Float.valueOf(vdMaxLength))) {
 					question.setLengthCheckerResult(matchString);
 				} else {
 					question.setLengthCheckerResult(warningString);
-					question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg14));
+					question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg14, errorVal.toArray())));
 					if (question.getQuestionCongruencyStatus()==null)
 						question.setQuestionCongruencyStatus(congStatus_warn);
 				}
 			} else {
 				question.setLengthCheckerResult(warningString);
-				question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg14));
+				question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg14, errorVal.toArray())));
 				if (question.getQuestionCongruencyStatus()==null)
 					question.setQuestionCongruencyStatus(congStatus_warn);				
 			}
@@ -455,12 +476,15 @@ public class ValidatorService {
 	 */
 	protected static CCCQuestion checkFormatCheckerResult (CCCQuestion question, String raveDataFormat, String vdDisplayFormat) {
 		question.setCdeDisplayFormat(vdDisplayFormat);
+		List<Object> errorVal = new ArrayList<Object>();
+		errorVal.add(raveDataFormat);
+		errorVal.add(vdDisplayFormat);
 		if (raveDataFormat!=null) {
 				if (raveDataFormat.equals(vdDisplayFormat)) {
 					question.setFormatCheckerResult(matchString);
 				} else {
 					question.setFormatCheckerResult(warningString);
-					question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg13));
+					question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg13, errorVal.toArray())));
 					if (question.getQuestionCongruencyStatus()==null)
 						question.setQuestionCongruencyStatus(congStatus_warn);
 				} 
@@ -479,8 +503,11 @@ public class ValidatorService {
 	 */
 	protected static CCCQuestion checkCdeMaxLength (CCCQuestion question, int pvMaxLen, int vdMaxLen, int cdeMaxLen) {
 		question.setCdeMaxLength(vdMaxLen);
+		List<Object> errorVal = new ArrayList<Object>();
+		errorVal.add(pvMaxLen);
+		errorVal.add(vdMaxLen);
 		if (pvMaxLen > vdMaxLen)
-			question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg4_1 + pvMaxLen + msg4_2 + vdMaxLen));
+			question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg4, errorVal.toArray())));
 		return question;
 	}
 	
@@ -492,7 +519,7 @@ public class ValidatorService {
 	 */
 	protected static int computeRaveLength (String raveLength) {
 		int raveLengthInt = 0;
-		if (raveLength!=null && !raveLength.equals("%")) {
+		if (raveLength!=null && !"%".equals(raveLength)) {
 			raveLength = raveLength.toLowerCase();
 			if (raveLength.indexOf(characters_string) > -1) {
 				raveLength.replaceAll(punct_pattern,"");

@@ -58,7 +58,7 @@ public class ReportGenerator implements ReportOutput {
 	private static String version_prefix = "_V";
 	private static List<CategoryCde> categoryCdeList;
 	private static List<CategoryNrds> categoryNrdsList;
-	private static String noCdeMsg = "No CDE provided : ";
+	private static String noCdeMsg = "No CDE provided : {%s}.";
 	
 	static{
 		categoryCdeList = retrieveCdeCrfData();
@@ -93,14 +93,16 @@ public class ReportGenerator implements ReportOutput {
 				question.setFieldOrder(alsField.getOrdinal());
 				question.setRaveFormOId(alsField.getFormOid());
 				String draftFieldName = alsField.getDraftFieldName();
-				if (draftFieldName!=null) {
-					if (draftFieldName.indexOf(publicid_prefix) > -1 && draftFieldName.indexOf(version_prefix) > -1) {
-						question = assignCdeIdVersionToQuestion (question, draftFieldName);
-						if (!NumberUtils.isNumber(question.getCdePublicId()) || !NumberUtils.isNumber(question.getCdeVersion()))
-							continue;//Not CDE data
-						//logger.debug("formOid: " + formOid + ", question.getCdePublicId(): " + question.getCdePublicId() + ", question.getCdeVersion(): " + question.getCdeVersion());
-						CdeFormInfo cdeFormInfo = new CdeFormInfo(question.getCdePublicId(), question.getCdeVersion());
-						cdeFormInfoList.add(cdeFormInfo);
+				if (!"FORM_OID".equals(alsField.getFieldOid())) { //Skipping rows that do not have CDEs/questions to validate i.e., rows that have FORM_OID in FieldOid
+					if (draftFieldName!=null) {
+						if (draftFieldName.indexOf(publicid_prefix) > -1 && draftFieldName.indexOf(version_prefix) > -1) {
+							question = assignCdeIdVersionToQuestion (question, draftFieldName);
+							if (!NumberUtils.isNumber(question.getCdePublicId()) || !NumberUtils.isNumber(question.getCdeVersion()))
+								continue;//Not CDE data
+							//logger.debug("formOid: " + formOid + ", question.getCdePublicId(): " + question.getCdePublicId() + ", question.getCdeVersion(): " + question.getCdeVersion());							
+							CdeFormInfo cdeFormInfo = new CdeFormInfo(question.getCdePublicId(), question.getCdeVersion());
+							cdeFormInfoList.add(cdeFormInfo);
+						}
 					}
 				}
 			}
@@ -254,65 +256,73 @@ public class ReportGenerator implements ReportOutput {
 					question.setFieldOrder(alsField.getOrdinal());
 					question.setRaveFormOId(alsField.getFormOid());
 					String draftFieldName = alsField.getDraftFieldName();
-					if (draftFieldName!=null) {
-						if (draftFieldName.indexOf(publicid_prefix) > -1 && draftFieldName.indexOf(version_prefix) > -1) {
-							question = assignCdeIdVersionToQuestion (question, draftFieldName);
-							if (!NumberUtils.isNumber(question.getCdePublicId()) || !NumberUtils.isNumber(question.getCdeVersion()))
-								cdeServiceCall = false;
-							question = buildCodedData(alsField, question, ddeMap);
-							question = setRaveFields (alsField, question);
-							Map<String, String> parseValidationError = pickFieldErrors(alsField, alsData.getCccError().getAlsErrors());
-							question = setParseErrorToQuestion (question, parseValidationError);
-							CdeDetails cdeDetails = null;
-							//logger.debug("cdeServiceCall: " + cdeServiceCall);
-							if (cdeServiceCall) {
-								try {
-									//Service Call to retrieve CDE List
-									CdeFormInfo cdeToValidate = new CdeFormInfo(question.getCdePublicId(), question.getCdeVersion());
-									cdeDetails = formCdeDetailsMap.get(cdeToValidate);
-								} catch (Exception e) {
-									//FIXME error handling
-									e.printStackTrace();
-									continue;
-								}
-								//Service Call to validate the CDEDetails against the ALSField & Question objects
-								question = ValidatorService.validate(alsField, question, cdeDetails);
-							}
-							// from a static table of NCI standard CRFs
-							CdeStdCrfData cdeCrfData = fetchCdeStandardCrfData(question.getCdePublicId(), question.getCdeVersion());
-							if (cdeCrfData!=null)
-								question.setNciCategory(cdeCrfData.getNciCategory());
-							if (cdeCrfData!=null && cdeDetails.getDataElement()!=null)  {
-							if (nrds_cde.equalsIgnoreCase(question.getNciCategory())) {
-								nrdsCdeList.add(buildNrdsCde(question,
-										cdeDetails.getDataElement().getDataElementDetails().getLongName()));
-								}
-							else if ((mandatory_crf.equalsIgnoreCase(question.getNciCategory()))
-									|| (optional_crf.equalsIgnoreCase(question.getNciCategory()))
-									|| (conditional_crf.equalsIgnoreCase(question.getNciCategory()))) {
-									standardCrfCdeList.add(buildCrfCde(cdeCrfData, cdeDetails.getDataElement().getDataElementDetails().getLongName())); 
-								}
-							}
-
-							if (question.getQuestionCongruencyStatus() != null) {
-								questionsList.add(question);
-							}
-						} else {
-							if ("FORM_OID".equalsIgnoreCase(draftFieldName)) {
-								if (alsField.getDefaultValue()!=null) {
-									if (alsField.getDefaultValue().indexOf(publicid_prefix) > -1 && alsField.getDefaultValue().indexOf(version_prefix) > -1) {
-										form = assignIdVersionToForm(form, alsField.getDefaultValue());
-									}
-								}
-							} else {
-								question.setRaveFieldLabel(alsField.getPreText());
-								question.setQuestionCongruencyStatus(congStatus_warn);
-								question.setMessage(noCdeMsg+draftFieldName);
+					if (!"FORM_OID".equals(alsField.getFieldOid())) {//Skipping rows that do not have CDEs/questions to validate i.e., rows that have FORM_OID in FieldOid
+						if (draftFieldName!=null) {
+							if (draftFieldName.indexOf(publicid_prefix) > -1 && draftFieldName.indexOf(version_prefix) > -1) {
+								question = assignCdeIdVersionToQuestion (question, draftFieldName);
+								if (!NumberUtils.isNumber(question.getCdePublicId()) || !NumberUtils.isNumber(question.getCdeVersion()))
+									cdeServiceCall = false;
+								question = buildCodedData(alsField, question, ddeMap);
+								question = setRaveFields (alsField, question);
 								Map<String, String> parseValidationError = pickFieldErrors(alsField, alsData.getCccError().getAlsErrors());
 								question = setParseErrorToQuestion (question, parseValidationError);
-								questionsList.add(question);
+								CdeDetails cdeDetails = null;
+								//logger.debug("cdeServiceCall: " + cdeServiceCall);
+								if (cdeServiceCall) {
+									try {
+										//Service Call to retrieve CDE List
+										CdeFormInfo cdeToValidate = new CdeFormInfo(question.getCdePublicId(), question.getCdeVersion());
+										cdeDetails = formCdeDetailsMap.get(cdeToValidate);
+									} catch (Exception e) {
+										//FIXME error handling
+										e.printStackTrace();
+										continue;
+									}
+									//Service Call to validate the CDEDetails against the ALSField & Question objects
+									question = ValidatorService.validate(alsField, question, cdeDetails);
+								}
+								// from a static table of NCI standard CRFs
+								CdeStdCrfData cdeCrfData = fetchCdeStandardCrfData(question.getCdePublicId(), question.getCdeVersion());
+								if (cdeCrfData!=null)
+									question.setNciCategory(cdeCrfData.getNciCategory());
+								if (cdeCrfData!=null && cdeDetails.getDataElement()!=null)  {
+								if (nrds_cde.equalsIgnoreCase(question.getNciCategory())) {
+									nrdsCdeList.add(buildNrdsCde(question,
+											cdeDetails.getDataElement().getDataElementDetails().getLongName()));
+									}
+								else if ((mandatory_crf.equalsIgnoreCase(question.getNciCategory()))
+										|| (optional_crf.equalsIgnoreCase(question.getNciCategory()))
+										|| (conditional_crf.equalsIgnoreCase(question.getNciCategory()))) {
+										standardCrfCdeList.add(buildCrfCde(cdeCrfData, cdeDetails.getDataElement().getDataElementDetails().getLongName())); 
+									}
+								}
+	
+								if (question.getQuestionCongruencyStatus() != null) {
+									questionsList.add(question);
+								}
+							} else {
+								if ("FORM_OID".equalsIgnoreCase(alsField.getFieldOid())) {
+									if (alsField.getDefaultValue()!=null) {
+										if (alsField.getDefaultValue().indexOf(publicid_prefix) > -1 && alsField.getDefaultValue().indexOf(version_prefix) > -1) {
+											form = assignIdVersionToForm(form, alsField.getDefaultValue());
+										}
+									}
+								} else {
+									question.setRaveFieldLabel(alsField.getPreText());
+									question.setQuestionCongruencyStatus(congStatus_warn);
+									question.setMessage(String.format(noCdeMsg, draftFieldName));
+									Map<String, String> parseValidationError = pickFieldErrors(alsField, alsData.getCccError().getAlsErrors());
+									question = setParseErrorToQuestion (question, parseValidationError);
+									questionsList.add(question);
+								}
 							}
 						}
+					} else {
+						if (alsField.getDefaultValue()!=null) {
+							if (alsField.getDefaultValue().indexOf(publicid_prefix) > -1 && alsField.getDefaultValue().indexOf(version_prefix) > -1) {
+								form = assignIdVersionToForm(form, alsField.getDefaultValue());
+							}
+						}					
 				}
 			}
 		}

@@ -355,7 +355,28 @@ public class AlsParser implements Parser{
 					
 					if (row.getCell(cell_fieldOid)!=null) {
 							fieldOid = dataFormatter.formatCellValue(row.getCell(cell_fieldOid));						
-							field.setFieldOid(fieldOid); 
+							field.setFieldOid(fieldOid);
+							String preFormId = null;
+							if (row.getCell(cell_fieldDefaultValue)!=null) {
+								preFormId = dataFormatter.formatCellValue(row.getCell(cell_fieldDefaultValue));
+							} else if (row.getCell(cell_draftFieldName)!=null) {
+								preFormId = dataFormatter.formatCellValue(row.getCell(cell_draftFieldName));
+							}
+							if ("FORM_OID".equalsIgnoreCase(fieldOid)) {
+								if (preFormId!=null) {
+										field.setDefaultValue(preFormId);
+											if (preFormId.indexOf(publicid_prefix) > -1 && preFormId.indexOf(version_prefix) > -1) {
+											String idVn = preFormId.substring(preFormId.indexOf(publicid_prefix),preFormId.length());
+											String id = idVn.substring(3, idVn.indexOf("_"));
+											String version = (idVn.substring(idVn.indexOf(version_prefix) + 2, idVn.length()));
+											id = id.trim();
+											String[] versionTokens = version.split("\\_");
+											version = versionTokens[0] + "." + versionTokens[1];
+											field.setFormPublicId(id.trim());
+											field.setVersion(version);
+										}
+									} 
+							}
 					} else {
 						alsError = getErrorInstance();
 						alsError.setErrorDesc(err_msg_7);
@@ -399,23 +420,7 @@ public class AlsParser implements Parser{
 					if (row.getCell(cell_draftFieldName)!=null) {
 						String draftFieldName = dataFormatter.formatCellValue(row.getCell(cell_draftFieldName));
 						String idVersion = "";
-						field.setDraftFieldName(draftFieldName);
-						if ("FORM_OID".equalsIgnoreCase(draftFieldName)) {
-							if (row.getCell(cell_fieldDefaultValue)!=null) { 
-									field.setDefaultValue(dataFormatter.formatCellValue(row.getCell(cell_fieldDefaultValue)));
-										String defaultValue = field.getDefaultValue();
-										if (defaultValue.indexOf(publicid_prefix) > -1 && defaultValue.indexOf(version_prefix) > -1) {
-										String idVn = defaultValue.substring(defaultValue.indexOf(publicid_prefix),defaultValue.length());
-										String id = idVn.substring(3, idVn.indexOf("_"));
-										String version = (idVn.substring(idVn.indexOf(version_prefix) + 2, idVn.length()));
-										id = id.trim();
-										String[] versionTokens = version.split("\\_");
-										version = versionTokens[0] + "." + versionTokens[1];
-										field.setFormPublicId(id.trim());
-										field.setVersion(version);
-									}
-								} 
-						}						
+						field.setDraftFieldName(draftFieldName);						
 						if (!(draftFieldName.indexOf(publicid_prefix) > -1 && draftFieldName.indexOf(version_prefix) > -1)) {
 							alsError = getErrorInstance();
 							alsError.setErrorDesc(err_msg_21);
