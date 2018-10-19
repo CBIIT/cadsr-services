@@ -67,6 +67,7 @@ public class ExcelReportGenerator {
 		private static String nrds_missing_cde_header = "NRDS CDEs missing from the ALS file";
 		private static String matching_nrds_cdes_header = "NRDS CDEs included in Protocol Forms with Warnings or Errors";
 		private static String congStatus_Congruent = "CONGRUENT";
+		private static int cell_max_limit = 32767;
 
 		/**
 		 * @param
@@ -189,7 +190,12 @@ public class ExcelReportGenerator {
 					newCell.setCellValue(question.getQuestionCongruencyStatus());
 					newCell = row.createCell(colNum2++);
 					newCell.setCellStyle(cellStyle);
-					newCell.setCellValue(question.getMessage());
+					String message = question.getMessage();
+					// Checking for the length of the string for max limit before writing to cell
+					if (message!=null && message.length() > cell_max_limit){
+						message = message.substring(0, 32767);
+					}
+					newCell.setCellValue(message);
 					newCell = row.createCell(colNum2++);
 					newCell.setCellValue(question.getRaveFieldLabel());
 					newCell = row.createCell(colNum2++);
@@ -219,16 +225,24 @@ public class ExcelReportGenerator {
 						else	
 							newCell.setCellValue(codedDataResult.get(m)); 
 						newCell = row.createCell(colNum3++);
-						if (m != 0)
-							newCell.setCellValue("");
-						else	
-							newCell.setCellValue(question.getAllowableCdeValue());
+						if (m != 0) {
+								newCell.setCellValue(""); 
+							} else {
+								String allowableCdeVal = question.getAllowableCdeValue();
+								// Checking for the length of the string for max limit before writing to cell								
+								if (allowableCdeVal!=null && allowableCdeVal.length() > cell_max_limit){
+									allowableCdeVal = allowableCdeVal.substring(0, 32767);
+								}
+								newCell.setCellValue(allowableCdeVal);
+							} 
+							
+							
 						newCell = row.createCell(colNum3);
 						newCell.setCellValue(raveUserString.get(m));
 						rowsCdData.add(row);
 						if (m != raveCodedData.size()-1)
 							row = sheet2.createRow(rowNum++);
-					}
+					} 
 					int rowNumAfterCD = rowNum;
 					row = rowBeforeCD;					
 					int newColNum = pvResultCol;
@@ -239,8 +253,13 @@ public class ExcelReportGenerator {
 					for (int n = 0; n < question.getAllowableCdeTextChoices().size(); n++) {
 						row = rowsCdData.get(n);					
 						newCell = row.createCell(allowableCdeColumn);
-						newCell.setCellStyle(cellStyle);				
-						newCell.setCellValue(question.getAllowableCdeTextChoices().get(n));
+						newCell.setCellStyle(cellStyle);
+						String allowabeCdeTextChoices = question.getAllowableCdeTextChoices().get(n);
+						// Checking for the length of the string for max limit before writing to cell						
+						if (allowabeCdeTextChoices!=null && allowabeCdeTextChoices.length() > cell_max_limit){
+							allowabeCdeTextChoices = allowabeCdeTextChoices.substring(0, 32767);
+						}						
+						newCell.setCellValue(allowabeCdeTextChoices);
 					}
 					row = rowBeforeCD;
 					newCell = row.createCell(newColNum++);
