@@ -18,9 +18,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import gov.nih.nci.cadsr.data.ALSData;
@@ -41,7 +43,7 @@ import gov.nih.nci.cadsr.report.ReportOutput;
 import gov.nih.nci.cadsr.service.model.cdeData.CdeDetails;
 import gov.nih.nci.cadsr.service.model.cdeData.dataElement.DataElementDetails;
 import gov.nih.nci.cadsr.service.validator.ValidatorService;
-
+@Service
 public class ReportGenerator implements ReportOutput {
 //former GenerateReport
 	private static final Logger logger = LoggerFactory.getLogger(ReportGenerator.class);
@@ -64,6 +66,7 @@ public class ReportGenerator implements ReportOutput {
 		categoryCdeList = retrieveCdeCrfData();
 		categoryNrdsList = retrieveNrdsData();
 	}
+	@Autowired
 	private CdeServiceDetails cdeServiceDetails;
 	
 	public CdeServiceDetails getCdeServiceDetails() {

@@ -36,7 +36,8 @@ public class ValidateController {
 	private static String CCHECKER_DB_SERVICE_URL_RETRIEVE = ValidateService.CCHECKER_DB_SERVICE_URL_RETRIEVE;
 	@Autowired
 	private CdeServiceDetails cdeServiceDetails;//
-
+	@Autowired
+	private ReportGenerator reportGenerator;//
 	@PostMapping("/rest/validateservice")
 	public ResponseEntity<CCCReport> validateService(HttpServletRequest request, HttpServletResponse response,
 		@RequestParam(name="_cchecker", required=true) String idseq, 
@@ -57,11 +58,9 @@ public class ValidateController {
 				logger.debug("Retrieved parsed file for validation, with name: " + alsData.getFileName());
 				List<String> selForms = validateParamEntity.getSelForms();
 				
-				if ((selForms != null) && (! selForms.isEmpty())) {
-					ReportGenerator report = new ReportGenerator();
-					//@Autowired did not work using setters
-					report.setCdeServiceDetails(cdeServiceDetails);
-					errorsReport = report.getFinalReportData(alsData, getFormIdList(selForms, alsData.getForms()), checkUOM, checkCRF, displayExceptions);
+				if ((selForms != null) && (! selForms.isEmpty())) 
+				{
+					errorsReport = reportGenerator.getFinalReportData(alsData, getFormIdList(selForms, alsData.getForms()), checkUOM, checkCRF, displayExceptions);
 					logger.info("Created CCCReport with amount of forms: " + errorsReport.getCccForms().size());
 				}
 				else {//source default data to add
