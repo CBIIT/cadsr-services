@@ -371,9 +371,11 @@ public class AlsParser implements Parser{
 											String version = (idVn.substring(idVn.indexOf(version_prefix) + 2, idVn.length()));
 											id = id.trim();
 											String[] versionTokens = version.split("\\_");
-											version = versionTokens[0] + "." + versionTokens[1];
-											field.setFormPublicId(id.trim());
-											field.setVersion(version);
+											if (NumberUtils.isNumber(id) && NumberUtils.isNumber(versionTokens[0]) && NumberUtils.isNumber(versionTokens[1])) {
+												version = versionTokens[0] + "." + versionTokens[1];
+												field.setFormPublicId(id.trim());
+												field.setVersion(version);
+											}
 										}
 									} 
 							}

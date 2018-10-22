@@ -68,6 +68,15 @@ public class ExcelReportGenerator {
 		private static String matching_nrds_cdes_header = "NRDS CDEs included in Protocol Forms with Warnings or Errors";
 		private static String congStatus_Congruent = "CONGRUENT";
 		private static int cell_max_limit = 32767;
+		private static int cell_write_limit = 32700;
+		private static final int idxSummaryLbl = 0;
+		private static final int idxSummaryVal = 1;
+		private static final int widthSummaryVal = 12800;
+		private static final int widthFormColsShort = 5120;
+		private static final int widthFormColsLong = 25600;			
+		private static Integer[] shortColumnsforForm = {0,1,2,3,4,5,6,7,8,11,13,14,15,17,20,22,23,24,25,26,27,28,29,30,31,32,33,34};
+		private static Integer[] longColumnsforForm = { 9,10,12,16,18,19,21 };
+		private static String croppedStringText = "// CONTENT CROPPED TO 32,700 CHARACTERS. // \n ";
 
 		/**
 		 * @param
@@ -107,7 +116,10 @@ public class ExcelReportGenerator {
 			summaryLabels.put(nciStdOptErrorLbl, String.valueOf(cccReport.getCountOptCrfWithErrors()));
 			summaryLabels.put(nciStdOptWarnLbl, String.valueOf(cccReport.getCountOptCrfwWithWarnings()));		
 			
-			int rowNum = 0;
+			int rowNum = 0;			
+			sheet.setColumnWidth(idxSummaryLbl, widthFormColsLong);
+			sheet.setColumnWidth(idxSummaryVal, widthSummaryVal);	
+			
 			logger.debug("Creating excel");
 			for (Map.Entry<String, String> label : summaryLabels.entrySet()) {
 				row = sheet.createRow(rowNum++);
@@ -134,8 +146,6 @@ public class ExcelReportGenerator {
 				cell = row.createCell(summaryFormsValidResultColNum);
 				cell.setCellValue(form.getCongruencyStatus());
 			}
-			if (sheet != null)
-				autoSizeColumns(sheet);
 			String[] rowHeaders = { "Rave Form OID", "caDSR Form ID", "Version", "Total Number Of Questions Checked",
 					"Field Order", "CDE Public ID", "CDE Version", "NCI Category", "Question Congruency Status", "Message",
 					"Rave Field Label", "Rave Field Label Result", "CDE Permitted Question Text Choices",
@@ -150,6 +160,10 @@ public class ExcelReportGenerator {
 						continue;
 					} else {				
 				XSSFSheet sheet2 = workbook.createSheet(cccForm.getRaveFormOid());
+				// Setting width for columns that are expected to be Short
+				setColumnWidth(sheet2, shortColumnsforForm, widthFormColsShort);
+				// Setting width for columns that are expected to be Long
+				setColumnWidth(sheet2, longColumnsforForm, widthFormColsLong);
 				rowNum = 0;
 				row = sheet2.createRow(rowNum++);
 				newCell = row.createCell(0);
@@ -164,8 +178,7 @@ public class ExcelReportGenerator {
 				colNum = 0;
 				row = sheet2.createRow(rowNum++);
 				newCell = row.createCell(0);
-				newCell.setCellValue(cccForm.getRaveFormOid());
-				sheet.autoSizeColumn(newCell.getColumnIndex());				
+				newCell.setCellValue(cccForm.getRaveFormOid());	
 				newCell = row.createCell(1);
 				newCell.setCellValue(cccForm.getFormPublicId());
 				newCell = row.createCell(2);
@@ -193,7 +206,7 @@ public class ExcelReportGenerator {
 					String message = question.getMessage();
 					// Checking for the length of the string for max limit before writing to cell
 					if (message!=null && message.length() > cell_max_limit){
-						message = message.substring(0, 32767);
+						message = croppedStringText+message.substring(0, cell_write_limit);
 					}
 					newCell.setCellValue(message);
 					newCell = row.createCell(colNum2++);
@@ -231,7 +244,7 @@ public class ExcelReportGenerator {
 								String allowableCdeVal = question.getAllowableCdeValue();
 								// Checking for the length of the string for max limit before writing to cell								
 								if (allowableCdeVal!=null && allowableCdeVal.length() > cell_max_limit){
-									allowableCdeVal = allowableCdeVal.substring(0, 32767);
+									allowableCdeVal = croppedStringText+allowableCdeVal.substring(0, cell_write_limit);
 								}
 								newCell.setCellValue(allowableCdeVal);
 							} 
@@ -257,7 +270,7 @@ public class ExcelReportGenerator {
 						String allowabeCdeTextChoices = question.getAllowableCdeTextChoices().get(n);
 						// Checking for the length of the string for max limit before writing to cell						
 						if (allowabeCdeTextChoices!=null && allowabeCdeTextChoices.length() > cell_max_limit){
-							allowabeCdeTextChoices = allowabeCdeTextChoices.substring(0, 32767);
+							allowabeCdeTextChoices = croppedStringText+allowabeCdeTextChoices.substring(0, cell_write_limit);
 						}						
 						newCell.setCellValue(allowabeCdeTextChoices);
 					}
@@ -289,8 +302,6 @@ public class ExcelReportGenerator {
 					if (rowNumAfterCD > rowNum)
 						rowNum = rowNumAfterCD;
 					}
-					if (sheet2!=null)
-					autoSizeColumns(sheet2);
 				   }
 			    }
 			}
@@ -301,7 +312,6 @@ public class ExcelReportGenerator {
 			try {
 				outputStream = new FileOutputStream(OUTPUT_XLSX_FILE_PATH);
 				logger.debug("..outputStream created for " + OUTPUT_XLSX_FILE_PATH);
-				logger.debug("...autoSizeColumns done");
 				workbook.write(outputStream);
 				logger.debug("...workbook.write done");
 				workbook.close();
@@ -322,30 +332,13 @@ public class ExcelReportGenerator {
 			}
 		}
 		
-			public static void autoSizeColumns(XSSFSheet sheet) {
-				try {
-				        if (sheet.getPhysicalNumberOfRows() > 0) {
-				        	for (int j = sheet.getFirstRowNum()+2; j < sheet.getLastRowNum(); j++) {
-					            Row row = sheet.getRow(j);
-					            if (row!=null) {
-						            Iterator<Cell> cellIterator = row.cellIterator();
-						            if (cellIterator!=null) {
-							            while (cellIterator.hasNext()) {
-							                Cell cell = cellIterator.next();
-							                if (cell!=null) {
-								                int columnIndex = cell.getColumnIndex();
-								                sheet.autoSizeColumn(columnIndex); 
-							                }
-							            }
-						            }
-					            }
-				            }
-				        }
-		    		} catch (Exception e) {
-		    		logger.error("autoSizeColumns Exception "+e.getMessage());
-		    	}
-			}	
 		
+		/**
+		 * Builds and returns an excel tab (sheet) with NRDS CDEs
+		 * @param workbook
+		 * @param nrdsCdeList
+		 * @return XSSFWorkbook
+		 */
 		public static XSSFWorkbook buildNrdsTab (XSSFWorkbook workbook, List<NrdsCde> nrdsCdeList) {
 			Row row;
 			final String[] nrdsRowHeaders = { "Rave Form OID", "RAVE Field Order", "RAVE Field Label", "CDE ID Version", "CDE Name", "Result", "Message"};
@@ -389,6 +382,12 @@ public class ExcelReportGenerator {
 			return workbook;
 		}
 		
+		/**
+		 * Builds and returns an excel tab (sheet) with NRDS CDEs that are not part of the ALS
+		 * @param workbook
+		 * @param missingNrdsCdeList
+		 * @return XSSFWorkbook
+		 */
 		public static XSSFWorkbook buildMissingNrdsCdesTab (XSSFWorkbook workbook, List<NrdsCde> missingNrdsCdeList) {
 			Row row;
 			final int idxOfCdeId = 0;//0-based
@@ -428,6 +427,12 @@ public class ExcelReportGenerator {
 		}	
 		
 		
+		/**
+		 * Build the Standard CRF tabs
+		 * @param workbook
+		 * @param stdCrfCdeList
+		 * @return XSSFWorkbook
+		 */
 		public static XSSFWorkbook buildStdCrfMissingTabs (XSSFWorkbook workbook, List<StandardCrfCde> stdCrfCdeList) {
 			final String[] templateTypes = {"Mandatory", "Optional", "Conditional"};
 			final String[] tabNames = {"Standard CRF Mandatory Missing", "Standard CRF Optional Missing", "Standard CRF Conditional Missing"};
@@ -438,6 +443,13 @@ public class ExcelReportGenerator {
 		}	
 		
 		
+		/**
+		 * Build a CRF tab
+		 * @param sheet
+		 * @param stdCrfCdeList
+		 * @param category
+		 * @return XSSFSheet
+		 */
 		private static XSSFSheet buildCrfTab (XSSFSheet sheet, List<StandardCrfCde> stdCrfCdeList, String category) {
 			Row row;
 			final String[] crfRowHeaders = { "CDE IDVersion", "CDE Name", "Template Name", "CRF ID Version"};
@@ -473,7 +485,7 @@ public class ExcelReportGenerator {
 					colNum = 0;
 					row = sheet.createRow(rowNum++);
 					newCell = row.createCell(colNum++);
-					newCell.setCellValue(cde.getCdeIdVersion());			
+					newCell.setCellValue(cde.getCdeIdVersion());
 					newCell = row.createCell(colNum++);
 					newCell.setCellValue(cde.getCdeName());
 					newCell = row.createCell(colNum++);
@@ -483,6 +495,21 @@ public class ExcelReportGenerator {
 				}
 			}		
 			return sheet;
-		} 		
+		} 	
+		
+		
+		/**
+		 * Set width for columns in the form tabs
+		 * @param sheet
+		 * @param columns
+		 * @param colWidth
+		 * @return XSSFSheet
+		 */
+		private static XSSFSheet setColumnWidth (XSSFSheet sheet, Integer[] columns, int colWidth) {
+			for (Integer colIndx : columns) {
+				sheet.setColumnWidth(colIndx, colWidth);
+			}
+			return sheet;	
+		}
 		
 }

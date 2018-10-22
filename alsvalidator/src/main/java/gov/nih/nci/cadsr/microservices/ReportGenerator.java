@@ -839,9 +839,11 @@ public class ReportGenerator implements ReportOutput {
 		String version = (idVersion.substring(idVersion.indexOf(version_prefix) + 2, idVersion.length()));
 		id = id.trim();
 		String[] versionTokens = version.split("\\_");
-		version = versionTokens[0] + "." + versionTokens[1];
-		form.setFormPublicId(id.trim());
-		form.setFormVersion(version);			
+		if (NumberUtils.isNumber(id) && NumberUtils.isNumber(versionTokens[0]) && NumberUtils.isNumber(versionTokens[1])) {
+			version = versionTokens[0] + "." + versionTokens[1];
+			form.setFormPublicId(id.trim());
+			form.setFormVersion(version);
+		}			
 		return form;
 	}	
 
