@@ -3,6 +3,7 @@
  */
 package gov.nih.nci.cadsr.microservices;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -11,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -44,8 +47,8 @@ import gov.nih.nci.cadsr.service.model.cdeData.CdeDetails;
 import gov.nih.nci.cadsr.service.model.cdeData.dataElement.DataElementDetails;
 import gov.nih.nci.cadsr.service.validator.ValidatorService;
 @Service
-public class ReportGenerator implements ReportOutput {
-//former GenerateReport
+public class ReportGeneratorFeed implements ReportOutput {
+//former ReportGenerator
 	private static final Logger logger = LoggerFactory.getLogger(ReportGenerator.class);
 	private static String congStatus_errors = "ERRORS";
 	private static String congStatus_warn = "WARNINGS";
@@ -66,6 +69,7 @@ public class ReportGenerator implements ReportOutput {
 		categoryCdeList = retrieveCdeCrfData();
 		categoryNrdsList = retrieveNrdsData();
 	}
+	
 	@Autowired
 	private CdeServiceDetails cdeServiceDetails;
 	
@@ -76,7 +80,14 @@ public class ReportGenerator implements ReportOutput {
 	public void setCdeServiceDetails(CdeServiceDetails cdeServiceDetails) {
 		this.cdeServiceDetails = cdeServiceDetails;
 	}
-
+	//we will keep here a status of requests: sessionID-form processed number
+	private ConcurrentMap<String, String> requestStatusMap = new ConcurrentHashMap<>();
+	
+	public String feedRequestStatus(String sessionId) {
+		String feedNumber = requestStatusMap.get(sessionId);
+		if (feedNumber == null) feedNumber = "0";
+		return feedNumber;
+	}
 	public Map<String, List<CdeFormInfo>> buildFormCdeList(ALSData alsData, List<String> selForms) {
 		String formOid = null;
 		Map<String, List<CdeFormInfo>> cdeFormMap = new HashMap<>();
@@ -102,7 +113,7 @@ public class ReportGenerator implements ReportOutput {
 							question = assignCdeIdVersionToQuestion (question, draftFieldName);
 							if (!NumberUtils.isNumber(question.getCdePublicId()) || !NumberUtils.isNumber(question.getCdeVersion()))
 								continue;//Not CDE data
-							//logger.debug("formOid: " + formOid + ", question.getCdePublicId(): " + question.getCdePublicId() + ", question.getCdeVersion(): " + question.getCdeVersion());							
+							//logger.debug("formOid: " + formOid + ", question.getCdePublicId(): " + question.getCdePublicId() + ", question.getCdeVersion(): " + question.getCdeVersion());
 							CdeFormInfo cdeFormInfo = new CdeFormInfo(question.getCdePublicId(), question.getCdeVersion());
 							cdeFormInfoList.add(cdeFormInfo);
 						}
@@ -191,8 +202,10 @@ public class ReportGenerator implements ReportOutput {
 		//long end = System.currentTimeMillis();
 		//System.out.println("Time to complete execAsync in seconds: " + (end - start) / 1000);
 		return resMap;
-	}	
+	}
 	/**
+	 * TODO Consider to add session ID parameter.
+	 * 
 	 * @param  alsData not null
 	 * @param  selForms not null
 	 * @return Populates the output object for the report after initial
@@ -202,7 +215,9 @@ public class ReportGenerator implements ReportOutput {
 	public CCCReport getFinalReportData(String idseq, ALSData alsData, List<String> selForms, Boolean checkUom,
 			Boolean checkStdCrfCde, Boolean displayExceptionDetails) {
 		logger.info("getFinalReportData selected forms: " + selForms);
-		logger.info("getFinalReportData selected alsData: " + alsData.getFileName());
+		logger.info("getFinalReportData selected alsData: " + alsData.getFileName() + ", session: " + idseq);
+		
+		String sessionId = idseq;//we keep track of form number processed by session ID
 		
 		CCCReport cccReport = new CCCReport();
 		cccReport.setReportOwner(alsData.getReportOwner());
@@ -227,10 +242,15 @@ public class ReportGenerator implements ReportOutput {
 		Map<String, List<CdeFormInfo>> cdeFormInfoMap = buildFormCdeList(alsData, selForms);
 		List<CdeFormInfo> cdeFormInfoList;
 		Map<CdeFormInfo, CdeDetails> formCdeDetailsMap = new HashMap<>();
+		
+		int feedFormNumber = 1;//this is to feed to UI
+		
 		for (ALSField alsField : alsData.getFields()) {
 			Boolean cdeServiceCall = true;
 			if (selForms.contains(alsField.getFormOid())) {
 				if (formOid == null ) {//the first form
+					requestStatusMap.put(sessionId, ""+feedFormNumber);
+					logger.debug("Current form to feed map, session: " + sessionId + ", form: " + feedFormNumber + ", FormOid:" + alsField.getFormOid());
 					formOid = alsField.getFormOid();
 					cdeFormInfoList = cdeFormInfoMap.get(formOid);
 					formCdeDetailsMap = execAsync(cdeFormInfoList);
@@ -242,6 +262,11 @@ public class ReportGenerator implements ReportOutput {
 							} else {
 								form.setQuestions(questionsList); 
 								form = setFormCongruencyStatus(form);
+							}
+							feedFormNumber++;
+							if (StringUtils.isNotBlank(sessionId)) {
+								requestStatusMap.put(sessionId, ""+feedFormNumber);
+								logger.debug("Current form to feed map, session: " + sessionId + ", form: " + feedFormNumber);
 							}
 							form.setRaveFormOid(formOid);
 							form.setCountTotalQuestions(totalQuestCount);
@@ -260,66 +285,66 @@ public class ReportGenerator implements ReportOutput {
 					question.setRaveFormOId(alsField.getFormOid());
 					String draftFieldName = alsField.getDraftFieldName();
 					if (!"FORM_OID".equals(alsField.getFieldOid())) {//Skipping rows that do not have CDEs/questions to validate i.e., rows that have FORM_OID in FieldOid
-						if (draftFieldName!=null) {
-							if (draftFieldName.indexOf(publicid_prefix) > -1 && draftFieldName.indexOf(version_prefix) > -1) {
-								question = assignCdeIdVersionToQuestion (question, draftFieldName);
-								if (!NumberUtils.isNumber(question.getCdePublicId()) || !NumberUtils.isNumber(question.getCdeVersion()))
-									cdeServiceCall = false;
-								question = buildCodedData(alsField, question, ddeMap);
-								question = setRaveFields (alsField, question);
-								Map<String, String> parseValidationError = pickFieldErrors(alsField, alsData.getCccError().getAlsErrors());
-								question = setParseErrorToQuestion (question, parseValidationError);
-								CdeDetails cdeDetails = null;
-								//logger.debug("cdeServiceCall: " + cdeServiceCall);
-								if (cdeServiceCall) {
-									try {
-										//Service Call to retrieve CDE List
-										CdeFormInfo cdeToValidate = new CdeFormInfo(question.getCdePublicId(), question.getCdeVersion());
-										cdeDetails = formCdeDetailsMap.get(cdeToValidate);
-									} catch (Exception e) {
-										//FIXME error handling
-										e.printStackTrace();
-										continue;
-									}
-									//Service Call to validate the CDEDetails against the ALSField & Question objects
-									question = ValidatorService.validate(alsField, question, cdeDetails);
+					if (draftFieldName!=null) {
+						if (draftFieldName.indexOf(publicid_prefix) > -1 && draftFieldName.indexOf(version_prefix) > -1) {
+							question = assignCdeIdVersionToQuestion (question, draftFieldName);
+							if (!NumberUtils.isNumber(question.getCdePublicId()) || !NumberUtils.isNumber(question.getCdeVersion()))
+								cdeServiceCall = false;
+							question = buildCodedData(alsField, question, ddeMap);
+							question = setRaveFields (alsField, question);
+							Map<String, String> parseValidationError = pickFieldErrors(alsField, alsData.getCccError().getAlsErrors());
+							question = setParseErrorToQuestion (question, parseValidationError);
+							CdeDetails cdeDetails = null;
+							//logger.debug("cdeServiceCall: " + cdeServiceCall);
+							if (cdeServiceCall) {
+								try {
+									//Service Call to retrieve CDE List
+									CdeFormInfo cdeToValidate = new CdeFormInfo(question.getCdePublicId(), question.getCdeVersion());
+									cdeDetails = formCdeDetailsMap.get(cdeToValidate);
+								} catch (Exception e) {
+									//FIXME error handling
+									e.printStackTrace();
+									continue;
 								}
-								// from a static table of NCI standard CRFs
-								CdeStdCrfData cdeCrfData = fetchCdeStandardCrfData(question.getCdePublicId(), question.getCdeVersion());
-								if (cdeCrfData!=null)
-									question.setNciCategory(cdeCrfData.getNciCategory());
-								if (cdeCrfData!=null && cdeDetails.getDataElement()!=null)  {
-								if (nrds_cde.equalsIgnoreCase(question.getNciCategory())) {
-									nrdsCdeList.add(buildNrdsCde(question,
-											cdeDetails.getDataElement().getDataElementDetails().getLongName()));
-									}
-								else if ((mandatory_crf.equalsIgnoreCase(question.getNciCategory()))
-										|| (optional_crf.equalsIgnoreCase(question.getNciCategory()))
-										|| (conditional_crf.equalsIgnoreCase(question.getNciCategory()))) {
-										standardCrfCdeList.add(buildCrfCde(cdeCrfData, cdeDetails.getDataElement().getDataElementDetails().getLongName())); 
-									}
+								//Service Call to validate the CDEDetails against the ALSField & Question objects
+								question = ValidatorService.validate(alsField, question, cdeDetails);
+							}
+							// from a static table of NCI standard CRFs
+							CdeStdCrfData cdeCrfData = fetchCdeStandardCrfData(question.getCdePublicId(), question.getCdeVersion());
+							if (cdeCrfData!=null)
+								question.setNciCategory(cdeCrfData.getNciCategory());
+							if (cdeCrfData!=null && cdeDetails.getDataElement()!=null)  {
+							if (nrds_cde.equalsIgnoreCase(question.getNciCategory())) {
+								nrdsCdeList.add(buildNrdsCde(question,
+										cdeDetails.getDataElement().getDataElementDetails().getLongName()));
 								}
-	
-								if (question.getQuestionCongruencyStatus() != null) {
-									questionsList.add(question);
-								}
-							} else {
-								if ("FORM_OID".equalsIgnoreCase(alsField.getFieldOid())) {
-									if (alsField.getDefaultValue()!=null) {
-										if (alsField.getDefaultValue().indexOf(publicid_prefix) > -1 && alsField.getDefaultValue().indexOf(version_prefix) > -1) {
-											form = assignIdVersionToForm(form, alsField.getDefaultValue());
-										}
-									}
-								} else {
-									question.setRaveFieldLabel(alsField.getPreText());
-									question.setQuestionCongruencyStatus(congStatus_warn);
-									question.setMessage(String.format(noCdeMsg, draftFieldName));
-									Map<String, String> parseValidationError = pickFieldErrors(alsField, alsData.getCccError().getAlsErrors());
-									question = setParseErrorToQuestion (question, parseValidationError);
-									questionsList.add(question);
+							else if ((mandatory_crf.equalsIgnoreCase(question.getNciCategory()))
+									|| (optional_crf.equalsIgnoreCase(question.getNciCategory()))
+									|| (conditional_crf.equalsIgnoreCase(question.getNciCategory()))) {
+									standardCrfCdeList.add(buildCrfCde(cdeCrfData, cdeDetails.getDataElement().getDataElementDetails().getLongName())); 
 								}
 							}
+
+							if (question.getQuestionCongruencyStatus() != null) {
+								questionsList.add(question);
+							}
+						} else {
+							if ("FORM_OID".equalsIgnoreCase(alsField.getFieldOid())) {
+								if (alsField.getDefaultValue()!=null) {
+									if (alsField.getDefaultValue().indexOf(publicid_prefix) > -1 && alsField.getDefaultValue().indexOf(version_prefix) > -1) {
+										form = assignIdVersionToForm(form, alsField.getDefaultValue());
+									}
+								}
+							} else {
+								question.setRaveFieldLabel(alsField.getPreText());
+								question.setQuestionCongruencyStatus(congStatus_warn);
+								question.setMessage(String.format(noCdeMsg, draftFieldName));
+								Map<String, String> parseValidationError = pickFieldErrors(alsField, alsData.getCccError().getAlsErrors());
+								question = setParseErrorToQuestion (question, parseValidationError);
+								questionsList.add(question);
+							}
 						}
+				}
 					} else {
 						if (alsField.getDefaultValue()!=null) {
 							if (alsField.getDefaultValue().indexOf(publicid_prefix) > -1 && alsField.getDefaultValue().indexOf(version_prefix) > -1) {
@@ -369,6 +394,7 @@ public class ReportGenerator implements ReportOutput {
 		cccReport.setMissingStandardCrfCdeList(missingStdCrfCdeList);		
 		cccReport = computeFormsAndQuestionsCount(cccReport);		
 		cccReport = addFormNamestoForms(cccReport, alsData.getForms());		
+		requestStatusMap.remove(sessionId);
 		return cccReport;
 	}
 	
@@ -846,7 +872,7 @@ public class ReportGenerator implements ReportOutput {
 			version = versionTokens[0] + "." + versionTokens[1];
 			form.setFormPublicId(id.trim());
 			form.setFormVersion(version);
-		}			
+		}
 		return form;
 	}	
 

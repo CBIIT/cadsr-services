@@ -72,7 +72,7 @@ public class AlsValidatorController {
 				
 				if ((selForms != null) && (! selForms.isEmpty())) {
 					ReportOutput report = new GenerateReport();
-					errorsReport = report.getFinalReportData(alsData, getFormIdList(selForms, alsData.getForms()), checkUOM, checkCRF, displayExceptions);
+					errorsReport = report.getFinalReportData(idseq, alsData, getFormIdList(selForms, alsData.getForms()), checkUOM, checkCRF, displayExceptions);
 					logger.info("Created CCCReport with amount of forms: " + errorsReport.getCccForms().size());
 				}
 				else {//source default data to add

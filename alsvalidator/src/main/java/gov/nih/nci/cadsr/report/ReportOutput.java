@@ -11,10 +11,11 @@ import gov.nih.nci.cadsr.data.CCCReport;
 public interface ReportOutput {
 
 	/**
+	 * @param idseq 
 	 * @ALSData
 	 * @return Populates the CDE Congruency Checker Report object
 	 * 
 	 */
-	public CCCReport getFinalReportData(ALSData alsData, List<String> selForms, Boolean checkUom, Boolean checkStdCrfCde, Boolean displayExceptionDetails) throws NullPointerException;
+	public CCCReport getFinalReportData(String idseq, ALSData alsData, List<String> selForms, Boolean checkUom, Boolean checkStdCrfCde, Boolean displayExceptionDetails) throws NullPointerException;
 
 }

@@ -16,6 +16,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,7 +40,16 @@ public class ValidateController {
 	@Autowired
 	private CdeServiceDetails cdeServiceDetails;//
 	@Autowired
-	private ReportGenerator reportGenerator;//
+	private ReportGeneratorFeed reportGeneratorFeed;//
+	
+	@CrossOrigin
+	@GetMapping("/rest/feedvalidateformnumber/{idseq}")
+	public ResponseEntity<?> feedValidateStatus(HttpServletRequest request,
+			@PathVariable("idseq") String idseq) {
+		String formUndervalidation = reportGeneratorFeed.feedRequestStatus(idseq);
+		//logger.debug("feedValidateStatus called: " + idseq + ", current form: " + formUndervalidation);
+		return new ResponseEntity<String>(formUndervalidation, HttpStatus.OK);
+	}
 	@PostMapping("/rest/validateservice")
 	public ResponseEntity<CCCReport> validateService(HttpServletRequest request, HttpServletResponse response,
 		@RequestParam(name="_cchecker", required=true) String idseq, 
@@ -60,7 +72,7 @@ public class ValidateController {
 				
 				if ((selForms != null) && (! selForms.isEmpty())) 
 				{
-					errorsReport = reportGenerator.getFinalReportData(alsData, getFormIdList(selForms, alsData.getForms()), checkUOM, checkCRF, displayExceptions);
+					errorsReport = reportGeneratorFeed.getFinalReportData(idseq, alsData, getFormIdList(selForms, alsData.getForms()), checkUOM, checkCRF, displayExceptions);
 					logger.info("Created CCCReport with amount of forms: " + errorsReport.getCccForms().size());
 				}
 				else {//source default data to add

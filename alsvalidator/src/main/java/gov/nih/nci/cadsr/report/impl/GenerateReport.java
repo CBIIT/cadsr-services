@@ -63,7 +63,7 @@ public class GenerateReport implements ReportOutput {
 	 * @return Populates the output object for the report after initial
 	 *         validation and parsing of data
 	 */
-	public CCCReport getFinalReportData(ALSData alsData, List<String> selForms, Boolean checkUom,
+	public CCCReport getFinalReportData(String idseq, ALSData alsData, List<String> selForms, Boolean checkUom,
 			Boolean checkStdCrfCde, Boolean displayExceptionDetails) throws NullPointerException {
 		logger.info("getFinalReportData selected forms: " + selForms);
 		logger.info("getFinalReportData selected alsData: " + alsData.getFileName());

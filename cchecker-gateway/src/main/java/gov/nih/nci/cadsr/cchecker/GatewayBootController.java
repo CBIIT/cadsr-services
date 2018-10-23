@@ -67,12 +67,14 @@ public class GatewayBootController {
 	static String CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL;
 	static String CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL;	
 	static String CCHECKER_VALIDATE_SERVICE_URL;
+	static String CCHECKER_FEED_VALIDATE_SERVICE_URL;
 	static String CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL;
 
 	private static String URL_RETRIEVE_ALS_FORMAT;
 	private static String URL_RETRIEVE_REPORT_ERROR_FORMAT;
 	private static String URL_RETRIEVE_REPORT_FULL_FORMAT;
 	private static String URL_GEN_EXCEL_REPORT_ERROR_FORMAT;
+	private static String URL_FEED_VALIDATE_STATUS_FORMAT;
 	public final String MS_EXCEL_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
 	
@@ -84,6 +86,9 @@ public class GatewayBootController {
 	static final String EXCEL_FILE_EXT = ".xlsx";
 	public static final String fileExcelReportPrefix = "Report-";
 	public static final String COOKIE_PATH = "/gateway";
+	
+	static final int timeBetweenFeeds = 2000;
+	static final int maxFeedRequests = 300;
 
 	{
 		loadProperties();
@@ -180,6 +185,15 @@ public class GatewayBootController {
 	}
 	/**
 	 * 
+	 * 
+	 * @param idseq - session cookie for a document under validation; not null. Format shall be checked before this call.
+	 * @return ALSData
+	 */
+	protected String retrieveFeedValidate(String idseq) {
+		return retrieveData(idseq, URL_FEED_VALIDATE_STATUS_FORMAT, String.class);
+	}
+	/**
+	 * 
 	 * @param idseq
 	 *            - saved previously in DB not null
 	 * @return Data
@@ -190,7 +204,7 @@ public class GatewayBootController {
 			RestTemplate restTemplate = new RestTemplate();
 
 			String urlStr = String.format(retrieveUrlStr, idseq);
-			logger.debug("...retrieveData from URL: " + urlStr);
+			//logger.debug("...retrieveData from URL: " + urlStr);
 
 			data = restTemplate.getForObject(urlStr, clazz);
 		}
@@ -638,6 +652,7 @@ public class GatewayBootController {
 		CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL = GatewayBootWebApplication.CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL;
 		CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL = GatewayBootWebApplication.CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL;
 		CCHECKER_VALIDATE_SERVICE_URL = GatewayBootWebApplication.CCHECKER_VALIDATE_SERVICE_URL;
+		CCHECKER_FEED_VALIDATE_SERVICE_URL = GatewayBootWebApplication.CCHECKER_FEED_VALIDATE_SERVICE_URL;
 		CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL = GatewayBootWebApplication.CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL;
 		ACCESS_CONTROL_ALLOW_ORIGIN = GatewayBootWebApplication.ACCESS_CONTROL_ALLOW_ORIGIN;
 		logger.debug("GatewayBootController CCHECKER_PARSER_URL: " + CCHECKER_PARSER_URL);
@@ -649,16 +664,19 @@ public class GatewayBootController {
 		logger.debug("GatewayBootController CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL: " + CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL);
 		logger.debug("GatewayBootController CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL: " + CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL);
 		logger.debug("GatewayBootController CCHECKER_VALIDATE_SERVICE_URL: " + CCHECKER_VALIDATE_SERVICE_URL);
+		logger.debug("GatewayBootController CCHECKER_FEED_VALIDATE_SERVICE_URL: " + CCHECKER_FEED_VALIDATE_SERVICE_URL);
 		logger.debug("GatewayBootController ACCESS_CONTROL_ALLOW_ORIGIN: " + ACCESS_CONTROL_ALLOW_ORIGIN);
 		URL_RETRIEVE_ALS_FORMAT = CCHECKER_DB_SERVICE_URL_RETRIEVE + "?" + sessionCookieName + "=%s";
 		URL_GEN_EXCEL_REPORT_ERROR_FORMAT = CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL + "?" + sessionCookieName + "=%s";
 		URL_RETRIEVE_REPORT_ERROR_FORMAT = CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_ERROR + "?" + sessionCookieName + "=%s";
 		URL_RETRIEVE_REPORT_FULL_FORMAT = CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL + "?" + sessionCookieName + "=%s";
+		URL_FEED_VALIDATE_STATUS_FORMAT = CCHECKER_FEED_VALIDATE_SERVICE_URL + "/%s";
 		logger.debug("GatewayBootController URL_RETRIEVE_ALS_FORMAT: " + URL_RETRIEVE_ALS_FORMAT);
 		logger.debug("GatewayBootController URL_RETRIEVE_REPORT_ERROR_FORMAT: " + URL_RETRIEVE_REPORT_ERROR_FORMAT);
 		logger.debug("GatewayBootController URL_RETRIEVE_REPORT_FULL_FORMAT: " + URL_RETRIEVE_REPORT_FULL_FORMAT);
 		logger.debug("GatewayBootController CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL: " + CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL);
 		logger.debug("GatewayBootController URL_GEN_EXCEL_REPORT_ERROR: " + URL_GEN_EXCEL_REPORT_ERROR_FORMAT);
+		logger.debug("GatewayBootController URL_FEED_VALIDATE_STATUS_FORMAT: " + URL_FEED_VALIDATE_STATUS_FORMAT);
 	}
 
 	//TODO Remove this test service
@@ -680,9 +698,10 @@ public class GatewayBootController {
 		response.addCookie(cookie);
 		return alsData.getAlsData();
 	}
-	
+	//TODO remove test method testFeed
+	@CrossOrigin
 	@GetMapping("/testfeed/{id}")
-	public ResponseBodyEmitter handleRequest(@PathVariable("id") String amount) {
+	public ResponseBodyEmitter testFeed(@PathVariable("id") String amount) {
 		int num = Integer.parseInt(amount);
 		final SseEmitter emitter = new SseEmitter();
 		ExecutorService service = Executors.newSingleThreadExecutor();
@@ -694,6 +713,51 @@ public class GatewayBootController {
 					Thread.sleep(200);
 				} 
 				catch (Exception e) {
+					e.printStackTrace();
+					emitter.completeWithError(e);
+					return;
+				}
+			}
+			emitter.complete();
+		});
+
+		return emitter;
+	}
+	/**
+	 * Returns form under validation number.
+	 * 
+	 * @param idseq not null
+	 * @return SseEmitter
+	 */
+	@CrossOrigin
+	@GetMapping("/feedvalidatestatus/{idseq}")
+	public ResponseBodyEmitter feedStatus(@PathVariable("idseq") String idseq) {
+		logger.debug("feedStatus called with idseq: " + idseq);
+
+		final SseEmitter emitter = new SseEmitter();
+		if  (!ParameterValidator.validateIdSeq(idseq)) {
+			logger.error("feedstatus wrong parameter format: " + idseq);
+			return null;
+		}
+
+		ExecutorService service = Executors.newSingleThreadExecutor();
+		service.execute(() -> {
+			String res = "-1";//we expect to receive a form number
+			//TODO make loop run until we got "0"
+			for (int i = 0; i < maxFeedRequests; i++) {//let's restrict not to risk endless cycle
+				try {
+					res = retrieveFeedValidate(idseq);
+					if (!("0".equals(res))) {
+							emitter.send(res, MediaType.TEXT_PLAIN);
+							Thread.sleep(timeBetweenFeeds);
+					}
+					else {
+						logger.info("feedvalidatestatus is over: " + idseq);
+						break;
+					}
+				} 
+				catch (Exception e) {
+					logger.error("Error in feedvalidatestatus " + e);
 					e.printStackTrace();
 					emitter.completeWithError(e);
 					return;

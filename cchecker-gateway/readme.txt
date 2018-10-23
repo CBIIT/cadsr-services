@@ -61,6 +61,13 @@ curl -v http://localhost:8080/gateway/retrieveexcelreporterror/A9D4DF89-7680-48F
 returns Save as Excel object
 or 400 - wrong ID format
 or 404 - not found
+**********
+Feed Validation status
+/feedvalidatestatus/{session-cookie idseq}
+Example:
+http://localhost:8080/gateway/feedvalidatestatus/A9D4DF89-7680-48F5-8E0E-7094567944D1
+return SSE with current form number
+
 ********
 Swagger 2 - Documentation
 Swagger and Swagger-UI are added.

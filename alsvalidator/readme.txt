@@ -25,8 +25,8 @@ http://localhost:4805/rest/validateservice?_cchecker=0BCAEE78-9916-4ADA-B7CD-CE5
 "formnamelist.json" file contains all parameters. Parameter selForms is required. It has selected form name list.
 Example:
 {
-	"checkUom":true,
-	"selForms": ["HISTOLOGY_AND_DISEASE","PATIENT_ELIGIBILITY"]
+	"checkUom":false,
+	"selForms": ["Literal Laboratory"]
 }
 
 Other request parameters are all "false" by default:
@@ -34,6 +34,7 @@ checkUOM=true/false
 checkCRF=true/false
 displayExceptions=true/false
 
-Example of Form list: ["Enrollment","ELIGIBILITY_CHECKLIST"]
-["HISTOLOGY_AND_DISEASE","PATIENT_ELIGIBILITY"]
-["Enrollment","HISTOLOGY_AND_DISEASE","ADMINISTRATIVE_ENROLLMENT","ELIGIBILITY_CHECKLIST","MOLECULAR_MARKER"]
+
+To call feed current form number:
+http://localhost:4805/rest/validateservice/feedvalidateformnumber/8519163A-ECB2-40C4-B229-5C13E0F4279B
+curl -X GET -i http://localhost:4805/rest/feedvalidateformnumber/8519163A-ECB2-40C4-B229-5C13E0F4279B

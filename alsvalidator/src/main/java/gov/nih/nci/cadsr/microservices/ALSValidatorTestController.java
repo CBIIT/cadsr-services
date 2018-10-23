@@ -50,7 +50,8 @@ public class ALSValidatorTestController {
 	public ResponseEntity<?> buildErrorReport(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody ReportInputWrapper reportInput) throws NullPointerException {
 		ReportOutput report = new GenerateReport();
-		CCCReport errorsReport = report.getFinalReportData(reportInput.getAlsData(), reportInput.getSelForms(), reportInput.getCheckUom(), reportInput.getCheckStdCrfCde(), reportInput.getDisplayExceptionDetails());
+		//This is a test session 357EB610-FB9D-4A8C-A48E-85F92A527FBA
+		CCCReport errorsReport = report.getFinalReportData("357EB610-FB9D-4A8C-A48E-85F92A527FBA", reportInput.getAlsData(), reportInput.getSelForms(), reportInput.getCheckUom(), reportInput.getCheckStdCrfCde(), reportInput.getDisplayExceptionDetails());
 		HttpHeaders httpHeaders = createHttpOkHeaders();
 		return new ResponseEntity<CCCReport>(errorsReport, httpHeaders, HttpStatus.OK);
 	}	
