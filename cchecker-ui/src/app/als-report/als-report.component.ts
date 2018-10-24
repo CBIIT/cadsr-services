@@ -57,9 +57,12 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
         this.statusMessage = `${filename} downloaded succesfully.`
       }, 
       error => {
+        this.errorMessage = 'Cannot communicate with the server';
         const reader: FileReader = new FileReader();  
         reader.readAsText(error.error)
         reader.onloadend = (error):void => this.errorMessage = reader.result;
+        console.log("ASDASD")
+
       })
   };
 
