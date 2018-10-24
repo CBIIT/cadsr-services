@@ -5,8 +5,7 @@
    Please select forms and try again.
 </div>
 
-<div class="alert alert-danger" role="alert" *ngIf="errorMessage">
-   {{errorMessage}}
+<div class="alert alert-danger" role="alert" *ngIf="errorMessage" [innerHTML]="errorMessage">
 </div>
 
 <div class="alert alert-success" role="alert" *ngIf="statusMessage">

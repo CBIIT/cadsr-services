@@ -51,19 +51,21 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
     this.statusMessage = null;
     this.restService.generateExcel().subscribe(
       data => {
+     
         const filename = data.headers.get('Content-Disposition').replace('attachment; filename=','')
         var blob = new Blob([data.body], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
         saveAs(blob, filename);
         this.statusMessage = `${filename} downloaded succesfully.`
       }, 
       error => {
-        this.errorMessage = 'Cannot communicate with the server';
+        this.errorMessage = 'Unexpected error, please contact Application Support (<a href="mailto:NCIAppSupport@nih.gov">NCIAppSupport@nih.gov</a>)';
         const reader: FileReader = new FileReader();  
         reader.readAsText(error.error)
         reader.onloadend = (error):void => this.errorMessage = reader.result;
-        console.log("ASDASD")
+      });
 
-      })
+      
+
   };
 
   ngOnInit() { 
