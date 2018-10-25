@@ -791,15 +791,29 @@ public class GatewayBootController {
 
 		ExecutorService service = Executors.newSingleThreadExecutor();
 		service.execute(() -> {
-			String res = "-1";//we expect to receive a form number
+			String resPre = "-1";//we expect to receive a form number
+			String res;
+			try {
+				Thread.sleep(timeBetweenFeeds*2);//delay to give validator some time to start
+			} catch (Exception e1) {
+				// Do nothing
+			}
 			//TODO make loop run until we got "0"
 			for (int i = 0; i < maxFeedRequests; i++) {//let's restrict not to risk endless cycle
 				try {
 					res = retrieveFeedValidate(idseq);
-					logger.debug("feedvalidatestatus current form for " + idseq + ", " + res);
+					if (logger.isDebugEnabled()) {
+						if (! StringUtils.equals(res, resPre))  {//reduce amount of logs
+							logger.debug("feedvalidatestatus current form for " + idseq + ", " + res);
+							resPre = res;
+						}
+					}
 					if (!("0".equals(res))) {
 							emitter.send(res, MediaType.TEXT_PLAIN);
 							Thread.sleep(timeBetweenFeeds);
+					}
+					else if (("0".equals(res)) && (i < 1)) {//it looks like this request goes to validator sooner than the form validate
+						Thread.sleep(timeBetweenFeeds);
 					}
 					else {
 						logger.info("feedvalidatestatus is over: " + idseq);
