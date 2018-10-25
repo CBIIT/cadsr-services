@@ -803,7 +803,7 @@ public class ReportGenerator implements ReportOutput {
 		// datatypes that gets applied during the ObjectCart Import.
 		// Customer will provide a table for the Checker to use to 
 		//compare Rave type with caDSR type to check validity.
-		question.setRaveFieldDataType(alsField.getControlType());
+		question.setRaveFieldDataType(alsField.getDataFormat());
 		question.setRaveFieldLabel(alsField.getPreText());
 		question.setCdePermitQuestionTextChoices("");
 		question.setRaveControlType(alsField.getControlType());		

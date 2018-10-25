@@ -24,8 +24,8 @@ String cdeValueDomainType;
 List<String> raveCodedData = new ArrayList<String>();
 List<String> codedDataResult = new ArrayList<String>();
 String allowableCdeValue;
-List<String> raveUserString;
-String pvResult;
+List<String> raveUserString = new ArrayList<String>();
+List<String> pvResults = new ArrayList<String>();
 List<String> allowableCdeTextChoices = new ArrayList<String>();
 
 String raveFieldDataType;
@@ -143,11 +143,12 @@ public List<String> getRaveUserString() {
 public void setRaveUserString(List<String> raveUserString) {
 	this.raveUserString = raveUserString;
 }
-public String getPvResult() {
-	return pvResult;
+
+public List<String> getPvResults() {
+	return pvResults;
 }
-public void setPvResult(String pvResult) {
-	this.pvResult = pvResult;
+public void setPvResults(List<String> pvResults) {
+	this.pvResults = pvResults;
 }
 public List<String> getAllowableCdeTextChoices() {
 	return allowableCdeTextChoices;

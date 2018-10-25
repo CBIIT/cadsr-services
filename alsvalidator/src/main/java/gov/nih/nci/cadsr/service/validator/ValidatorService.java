@@ -61,6 +61,9 @@ public class ValidatorService {
 	private static final String punct_pattern = "\\p{P}";
 	private static final String patternHolderChar = "d";
 	private static final String patternHolderNum = "9";
+	private static final String regex_space = "[\\p{Z}\\s]";//"'\u00A0', '\u2007', '\u202F'";
+	private static final String alternateNames_key = "AlternateNames";
+	private static final String vmPvMeanings_key = "PVMeanings";
 
 	
 	/**
@@ -96,7 +99,7 @@ public class ValidatorService {
 			Map<String, List<String>> pvVmMap =  new HashMap<String, List<String>>();
 			int pvMaxLen = 0;
 			int vdMaxLen = 0;
-			StringBuffer allowableCdes = new StringBuffer();
+			String allowableCdes = "";
 			
 			if (cdeDetails.getValueDomain()!=null) {
 				if (cdeDetails.getValueDomain().getValueDomainDetails()!=null) {
@@ -107,25 +110,27 @@ public class ValidatorService {
 
 				if (cdeDetails.getValueDomain().getPermissibleValues()!=null) {
 					for (PermissibleValuesModel pv : cdeDetails.getValueDomain().getPermissibleValues()) {
-						pvList.add(pv.getValue());
+						String pvVal = cleanStringforNbsp(pv.getValue());
+						pvList.add(pvVal);
 						pvVmList = new ArrayList<String>();
-						pvVmList = buildPvAltNamesList (cdeDetails, pv.getVmIdseq());
+						Map<String, List<String>> vmMap = buildValueMeaningMap (cdeDetails, pv.getVmIdseq()); 
+						pvVmList = vmMap.get(alternateNames_key);						
 						if (pv.getShortMeaning()!=null)
 							pvVmList.add(pv.getShortMeaning());
-						pvVmMap.put(pv.getValue(), pvVmList);
+						pvVmMap.put(pvVal, pvVmList);
 						if (allowableCdes.length() > 0)
-							allowableCdes.append("|"+pv.getValue());
+							allowableCdes = allowableCdes + "|"+pvVal;
 						else 
-							allowableCdes.append(pv.getValue());
-						if (pv.getValue().length() > pvMaxLen)
-							pvMaxLen = pv.getValue().length();
+							allowableCdes = allowableCdes + pvVal;
+						if (pvVal.length() > pvMaxLen)
+							pvMaxLen = pvVal.length();
 					}
 				}
 			}			
 
 			// Setting the Allowable CDEs
 			if (allowableCdes.length() > 0) 
-				question.setAllowableCdeValue(allowableCdes.toString());
+				question.setAllowableCdeValue(allowableCdes);
 			
 			// Checking for the presence of RAVE user data string in the PV Value meaning list - PV Checker result
 			question = setPvCheckerResult (pvVmMap, question);
@@ -137,7 +142,7 @@ public class ValidatorService {
 			question = checkDataTypeCheckerResult (question, field.getDataFormat(), cdeDetails.getValueDomain().getValueDomainDetails().getDataType());
 				
 			// Comparing RAVE UOM (FixedUnit) with the caDSR Value Domain Unit of Measure - UOM Checker Result	
-			question = setUomCheckerResult (question, cdeDetails.getValueDomain().getValueDomainDetails().getUnitOfMeasure());			
+			question = setUomCheckerResult (question, cdeDetails.getValueDomain().getValueDomainDetails().getUnitOfMeasure());
 					
 			// Comparing RAVE Length (FixedUnit) with the caDSR Value Domain Max length - RAVE Length Checker result
 			question = setLengthCheckerResult (question, cdeDetails.getValueDomain().getValueDomainDetails().getMaximumLength());
@@ -302,33 +307,35 @@ public class ValidatorService {
 		List<String> userDataStringList = question.getRaveUserString();
 		List<String> codedDataList = question.getRaveCodedData();
 		List<String> allowCdesList = new ArrayList<String>();
+		List<String> pvCheckerResultsList = new ArrayList<String>();
+		
 		if (userDataStringList!=null) {
 			for (String userDataString : userDataStringList) {
 				String pvValue = codedDataList.get(userDataStringList.indexOf(userDataString));
-				List<String> pvVmList = pvVmMap.get(pvValue);
+				List<String> pvVmList = pvVmMap.get(pvValue);				
 				if (pvVmList!=null) {
-					if (pvVmList.contains(userDataString) || pvValue.equals(userDataString)) {
-						question.setPvResult(matchString);
+					if (pvVmList.contains(userDataString)) {
 						isMatch = true;
-					}
-					StringBuffer allowableVmTextChoices = new StringBuffer();
-					// Building a list of Allowable CDE text choices (in case of a 'Not match' for PV checker)
-					for (String altName : pvVmList) {
-						if (allowableVmTextChoices.length() > 0)
-							allowableVmTextChoices.append("|"+altName);
-						else
-							allowableVmTextChoices.append(altName);
-					}
-					allowCdesList.add(allowableVmTextChoices.toString());					
+						pvCheckerResultsList.add(matchString);
+						allowCdesList.add("");
+					} else {
+						isMatch = false;
+						pvCheckerResultsList.add(errorString);
+						allowCdesList.add(createAllowableTextChoices(pvVmList));
+					}	
+				} else {					
+					isMatch = false;
+					pvCheckerResultsList.add(errorString);
+					allowCdesList.add("");
 				}
 			}
+			question.setPvResults(pvCheckerResultsList);
+			question.setAllowableCdeTextChoices(allowCdesList);
 			if (!isMatch) {
-				question.setPvResult(errorString);
-				question.setAllowableCdeTextChoices(allowCdesList);					
 				if((question.getMessage() != null) && (question.getMessage().indexOf(msg9) == -1))
 					question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg9));
 				question.setQuestionCongruencyStatus(congStatus_errors);
-			}			
+			}
 		}
 		return question;
 	}
@@ -563,29 +570,65 @@ public class ValidatorService {
 	}
 	
 	/**
-	 * Build a list of Value Meaning Alternate Names for a set of Permissible Values
+	 * Build a map with two lists - Value Meaning Alternate Names and PV meanings
 	 * @param vmIdSeq
 	 * @param cdeDetails
 	 * @return List<String>
 	 */			
-	protected static List<String> buildPvAltNamesList(CdeDetails cdeDetails, String vmIdSeq) {
+	protected static Map<String, List<String>> buildValueMeaningMap(CdeDetails cdeDetails, String vmIdSeq) {
 		List<ValueMeaningUiModel> vmUiModelList = new ArrayList<ValueMeaningUiModel>();
-		List<String> allowableCdeValueList = new ArrayList<String>();		
+		Map<String, List<String>> vmAltNamesPvMeaningMap =  new HashMap<String, List<String>>();
+		List<String> altNameList = new ArrayList<String>();
+		List<String> pvMeanList = new ArrayList<String>();
 		if (cdeDetails.getValueDomain()!=null) {
 			if (cdeDetails.getValueDomain().getValueMeaning()!=null) {
 				vmUiModelList = cdeDetails.getValueDomain().getValueMeaning();
 					for (ValueMeaningUiModel vm : vmUiModelList) {
-						if (vm.getVmIdseq().equalsIgnoreCase(vmIdSeq)) {
+						if (vm.getVmIdseq().equalsIgnoreCase(vmIdSeq)) {							
 							if (vm.getAlternateNames()!=null) {
 								for (AlternateNameUiModel altName : vm.getAlternateNames()) {
-									allowableCdeValueList.add(altName.getName());
+									altNameList.add(cleanStringforNbsp(altName.getName()));
 								}
 							} 
+							if (vm.getPvMeaning()!=null) {
+								pvMeanList.add(cleanStringforNbsp(vm.getPvMeaning()));
+							}
 						}
 					}								
 			}
 		}
-		return allowableCdeValueList;		
+		vmAltNamesPvMeaningMap.put(alternateNames_key, altNameList);
+		vmAltNamesPvMeaningMap.put(vmPvMeanings_key, pvMeanList);
+		return vmAltNamesPvMeaningMap;		
+	}	
+	
+	
+	/**
+	 * Cleaning the string for any potential occurrence of NBSP characters such as 'c2A0'
+	 * @param String
+	 * @return String
+	 */			
+	protected static String cleanStringforNbsp (String textToBeCleaned) {
+		textToBeCleaned = textToBeCleaned.replaceAll(regex_space, " "); 
+		return textToBeCleaned;		
+	}
+	
+	
+	/**
+	 * Creating a Single concatenation of allowable CDE text choices
+	 * @param pvVmList
+	 * @return String
+	 */				
+	protected static String createAllowableTextChoices (List<String> pvVmList) {
+		StringBuffer allowableVmTextChoices = new StringBuffer();
+		// Building a list of Allowable CDE text choices (in case of a 'Not match' for PV checker)
+		for (String altName : pvVmList) {
+			if (allowableVmTextChoices.length() > 0)
+				allowableVmTextChoices.append("|"+altName);
+			else
+				allowableVmTextChoices.append(altName);
+		}
+		return allowableVmTextChoices.toString();
 	}	
 
 }
