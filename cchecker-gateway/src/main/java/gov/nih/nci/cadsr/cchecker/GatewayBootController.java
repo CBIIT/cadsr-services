@@ -730,7 +730,7 @@ public class GatewayBootController {
 	 * @return SseEmitter
 	 */
 	@CrossOrigin
-	@GetMapping("/feedvalidatestatus/{idseq}")
+	@GetMapping("/testfeedvalidatestatus/{idseq}")
 	public ResponseBodyEmitter feedStatus(@PathVariable("idseq") String idseq) {
 		logger.debug("feedStatus called with idseq: " + idseq);
 
@@ -758,6 +758,56 @@ public class GatewayBootController {
 				} 
 				catch (Exception e) {
 					logger.error("Error in feedvalidatestatus " + e);
+					e.printStackTrace();
+					emitter.completeWithError(e);
+					return;
+				}
+			}
+			emitter.complete();
+		});
+
+		return emitter;
+	}
+	/**
+	 * Returns form under validation number.
+	 * 
+	 * @param idseq not null
+	 * @return SseEmitter
+	 */
+	@CrossOrigin
+	@GetMapping("/feedvalidatestatus")
+	public ResponseBodyEmitter feedStatusByCookie(HttpServletRequest request, HttpServletResponse response) {
+
+		Cookie cookie = retrieveCookie(request);
+		final String idseq;
+		
+		if ((cookie == null) || (StringUtils.isBlank((idseq = cookie.getValue()))) || (!ParameterValidator.validateIdSeq(idseq))) {
+			logger.debug("feedvalidatestatus session cookie is not found");
+			return null;
+		}
+
+		logger.debug("feedvalidatestatus session cookie: " + idseq);
+		final SseEmitter emitter = new SseEmitter();
+
+		ExecutorService service = Executors.newSingleThreadExecutor();
+		service.execute(() -> {
+			String res = "-1";//we expect to receive a form number
+			//TODO make loop run until we got "0"
+			for (int i = 0; i < maxFeedRequests; i++) {//let's restrict not to risk endless cycle
+				try {
+					res = retrieveFeedValidate(idseq);
+					logger.debug("feedvalidatestatus current form for " + idseq + ", " + res);
+					if (!("0".equals(res))) {
+							emitter.send(res, MediaType.TEXT_PLAIN);
+							Thread.sleep(timeBetweenFeeds);
+					}
+					else {
+						logger.info("feedvalidatestatus is over: " + idseq);
+						break;
+					}
+				} 
+				catch (Exception e) {
+					logger.error("Error in feedvalidatestatus " + idseq + ", " + e);
 					e.printStackTrace();
 					emitter.completeWithError(e);
 					return;
