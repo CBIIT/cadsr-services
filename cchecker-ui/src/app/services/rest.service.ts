@@ -38,6 +38,16 @@ export class RestService {
       withCredentials:true,
     })} ;
 
+  // gets validation status //
+  validateFeedStatus() {
+    return this.http.get('http://localhost:8080/gateway/feedvalidatestatus',
+    {
+      observe:'events',
+      reportProgress:true,
+      responseType: "text",
+      withCredentials:true
+    });
+  }
 
 
 

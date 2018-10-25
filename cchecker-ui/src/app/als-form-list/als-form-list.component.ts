@@ -4,6 +4,7 @@ import { FormListService } from '../services/formlist.service';
 import { Observable } from 'rxjs';
 import { ReportService } from '../services/report.service'
 import { Router } from '../../../node_modules/@angular/router';
+import { HttpEventType }  from '@angular/common/http';
 
 @Component({
   selector: 'app-als-form-list',
@@ -16,7 +17,8 @@ export class AlsFormListComponent implements OnInit {
   formListData:Observable<Object>;
   validating:Boolean;
   validItemsLength:Observable<Object>;
-  
+  abc;
+  def;
   constructor(private formListService:FormListService, private restService:RestService, private reportService:ReportService, private router:Router) {
   }
 
@@ -35,17 +37,31 @@ export class AlsFormListComponent implements OnInit {
     this.checkedItems.subscribe(data=>checkedItems=data).unsubscribe();
     this.formListData.subscribe(data=>formListData=data).unsubscribe();
     this.validating = true;
-
-    this.restService.checkForms(checkedItems,formListData).subscribe(
-      data => this.reportService.setReportData(data),
-      error => {
-        this.errorMessage = error;
-        this.validating = false;
-      },
-      () => {
-        this.validating = false;
-        this.router.navigateByUrl('/report')
-      })
+    this.abc = 
+      this.restService.checkForms(checkedItems,formListData).subscribe(
+        data => {
+          this.reportService.setReportData(data)
+        },
+        error => {
+          this.errorMessage = error;
+          this.validating = false;
+        },
+        () => {
+          this.validating = false;
+          this.router.navigateByUrl('/report')
+        })
+    this.def = console.log("TEST")
+      this.restService.validateFeedStatus().subscribe(
+        e => {
+            console.log(e)
+        },
+        error => {
+          console.log("ERROR")
+        },
+        () => {
+          console.log("FINISHED")
+        }
+      )           
   };
 
   // gets checkd status of record //
