@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -529,14 +531,11 @@ public class ValidatorService {
 		if (raveLength!=null && !"%".equals(raveLength)) {
 			raveLength = raveLength.toLowerCase();
 			if (raveLength.indexOf(characters_string) > -1) {
-				raveLength.replaceAll(punct_pattern,"");
-				int index = 0;
-				if ((raveLength.indexOf("(") > -1) || (raveLength.indexOf(")") > -1)) {
-					index = 1;
-				}  else {
-					index = 0;
+				Pattern pattern = Pattern.compile("\\d+");
+				Matcher matcher = pattern.matcher(raveLength);
+				while (matcher.find()) {					
+					raveLength = matcher.group();
 				}
-				raveLength = raveLength.substring(index,raveLength.indexOf(characters_string));
 			} else if (StringUtils.countOccurrencesOf(raveLength, patternHolderChar) > 1) {
 				raveLength = String.valueOf(StringUtils.countOccurrencesOf(raveLength, patternHolderChar));
 			} else if (StringUtils.countOccurrencesOf(raveLength, patternHolderNum) > 1) {
