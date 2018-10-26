@@ -14,11 +14,13 @@ import { HttpEventType }  from '@angular/common/http';
 export class AlsFormListComponent implements OnInit {
   checkedItems:Observable<String[]>;
   errorMessage:String;  
+  formValidationStatus:Number=1;
   formListData:Observable<Object>;
   validating:Boolean;
   validItemsLength:Observable<Object>;
-  abc;
-  def;
+  checkFormsService;
+  feedService;
+
   constructor(private formListService:FormListService, private restService:RestService, private reportService:ReportService, private router:Router) {
   }
 
@@ -37,7 +39,9 @@ export class AlsFormListComponent implements OnInit {
     this.checkedItems.subscribe(data=>checkedItems=data).unsubscribe();
     this.formListData.subscribe(data=>formListData=data).unsubscribe();
     this.validating = true;
-    this.abc = 
+
+    // run check forms //
+    this.checkFormsService = 
       this.restService.checkForms(checkedItems,formListData).subscribe(
         data => {
           this.reportService.setReportData(data)
@@ -50,10 +54,18 @@ export class AlsFormListComponent implements OnInit {
           this.validating = false;
           this.router.navigateByUrl('/report')
         })
-    this.def = console.log("TEST")
+
+    // runs feed progress service //
+    this.feedService = 
       this.restService.validateFeedStatus().subscribe(
         e => {
-            console.log(e)
+          if (e.type === HttpEventType.DownloadProgress) {
+            let currentForm = e['partialText'].split('\n\n').filter(val => val!='' && val != 'data:').pop();
+            if (currentForm) {
+              this.formValidationStatus = currentForm.replace('data:','');
+            }
+
+          }
         },
         error => {
           console.log("ERROR")
@@ -63,6 +75,9 @@ export class AlsFormListComponent implements OnInit {
         }
       )           
   };
+
+  // gets current form for validation progress message //
+  getCurrentForm = () => `${this.formValidationStatus}`;
 
   // gets checkd status of record //
   getCheckedStatus = record => this.formListService.getCheckedStatus(record);

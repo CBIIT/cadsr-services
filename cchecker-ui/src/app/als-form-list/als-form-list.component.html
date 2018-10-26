@@ -11,7 +11,6 @@
 </div>
 
 <ng-container *ngIf="(formListData |  async)?.formsList.length">
-    <p>Some description up here</p>
     <div>
         <button [disabled]="!(checkedItems | async)?.length || validating" class="btn btn-primary" (click)="checkForms()">Check Form<span *ngIf="(checkedItems | async)?.length>1">s</span></button>
     </div><br />
@@ -28,9 +27,9 @@
             <input type="checkbox" id="mustDisplayException" name="mustDisplayException" (change)="setFormListOptionCheckbox($event)" ([ngModel])="mustDisplayException" [checked]="(formListData | async)?.mustDisplayException">
             <label for="mustDisplayException">Display Exception Details</label>        
         </div>  
-    </div>
+    </div><Br />
     <div *ngIf="validating">
-        <app-progress-bar [statusMessage]="'Validating'" [type]="'busy'" [percentage]="100"></app-progress-bar><br />
+        <app-progress-bar [statusMessage]="'Validating Form ' + getCurrentForm() + ' of ' + (checkedItems | async)?.length" [type]="'busy'" [percentage]="100"></app-progress-bar><br />
     </div>
 
     <table cellspacing="0" cellpadding="0" margin="0"class="alsFormList">
