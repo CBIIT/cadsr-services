@@ -3,7 +3,6 @@
  */
 package gov.nih.nci.cadsr.microservices;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -49,7 +48,7 @@ import gov.nih.nci.cadsr.service.validator.ValidatorService;
 @Service
 public class ReportGeneratorFeed implements ReportOutput {
 //former ReportGenerator
-	private static final Logger logger = LoggerFactory.getLogger(ReportGenerator.class);
+	private static final Logger logger = LoggerFactory.getLogger(ReportGeneratorFeed.class);
 	private static String congStatus_errors = "ERRORS";
 	private static String congStatus_warn = "WARNINGS";
 	private static String parse_errors_error = "ERROR";
