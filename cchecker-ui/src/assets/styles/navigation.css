@@ -34,7 +34,7 @@
 }
 
 #links ul li a {
-	color: #fff;
+	color: #fff !important;
 	display: block;
 	padding: 10px;
 	text-decoration: none;
@@ -42,7 +42,7 @@
 
 #links ul li a:hover {
 	background-color: #444;
-	color: #fff;
+	color: #fff !important;
 	border-radius: 3px;
 }
 
@@ -73,7 +73,7 @@
 }
 
 #main #navigation ul li.selected {
-	background-color:#337AB7;
+	background-color:#0054AD;
 }
 
 #main #navigation ul li:last-child {
@@ -93,7 +93,7 @@
 }
 
 #main #navigation ul li a {
-	color: #fff;
+	color: #fff !important;
 	display: block;
 	padding: 12px;
 	text-decoration: none;
@@ -101,13 +101,13 @@
 
 #main #navigation ul li a:hover {
 	background-color: #444;
-	color: #fff;
+	color: #fff !important;
 	border-radius: 3px;
 }
 
 #main #navigation ul li.selected a:hover {
-	background-color: #337ab7;
-	color: #fff;
+	background-color: #0054AD;
+	color: #fff !important;
 	border-radius: 3px;
 }
 

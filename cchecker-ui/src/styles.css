@@ -7,6 +7,9 @@ body {
 	font-family: Arial, Helvetica, sans-serif;
 }
 
+a {
+	color:#0054AD !important;
+}
 #container {
 	width: 1100px;
 	margin: auto;
@@ -111,15 +114,23 @@ form input {
 	padding-bottom:15px;
 }
 
-
 .nav-item a {
-    border:1px solid #007bff !important;
-	padding:10px
+    border:1px solid #0054AD !important;
+	padding:10px;
+	color:#0054AD;
 }
 
- .tab-pane {
- 	padding-top:0px;
- }
+.nav-pills .nav-link.active, .nav-pills .show>.nav-link {
+    background-color: #0054AD !important;
+}
+
+.nav-link.active {
+	color:#ffffff !important;
+}
+
+.tab-pane {
+padding-top:0px;
+}
 
 table.dataTable thead th, table.dataTable thead td {
   vertical-align: top !important;
@@ -127,4 +138,9 @@ table.dataTable thead th, table.dataTable thead td {
 
 table.dataTable tbody td {
   vertical-align: top !important;
+}
+
+/* override bootstrap */
+.btn.btn-primary {
+    background-color: #0054AD !important;
 }

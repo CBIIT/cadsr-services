@@ -35,7 +35,7 @@
     <table cellspacing="0" cellpadding="0" margin="0"class="alsFormList">
     <tr>
         <th>
-            <input type="checkbox" name="selectAllforms" (change)="setCheckAllStatus($event)" [checked]="(checkedItems | async)?.length==validItemsLength">
+            <input type="checkbox" name="selectAllforms" aria-label="Check All Forms" (change)="setCheckAllStatus($event)" [checked]="(checkedItems | async)?.length==validItemsLength">
         </th>
         <th>
             Form Name
@@ -52,7 +52,7 @@
         <!-- render this row always -->
         <tr [ngClass]="{'rowOdd':i%2==0,'rowEven':i%2==1}">
             <td class="checbox">
-                <input type="checkbox" *ngIf="record.isValid" (change)="setCheckedItem(record)" name="checkedItem" value="a" [checked]="getCheckedStatus(record)">
+                <input type="checkbox" attr.aria-label="{{record.formName}} checkbox" *ngIf="record.isValid" (change)="setCheckedItem(record)" name="checkedItem" value="a" [checked]="getCheckedStatus(record)">
                 <span *ngIf="!record.isValid" class="fa fa-lg fa-exclamation-triangle"></span>
             </td>
             <td>
@@ -89,16 +89,16 @@
 
     <div class="formCriteriaCheckboxes">
         <div>
-            <input type="checkbox" id="checkUom" name="checkUom" (change)="setFormListOptionCheckbox($event)" ([ngModel])="checkUom" [checked]="(formListData | async)?.checkUom">
-            <label for="checkUom">Check UOM</label>        
+            <input type="checkbox" id="checkUom_1" name="checkUom" (change)="setFormListOptionCheckbox($event)" ([ngModel])="checkUom" [checked]="(formListData | async)?.checkUom">
+            <label for="checkUom_1">Check UOM</label>        
         </div>
         <div>
-            <input type="checkbox" id="checkStdCrfCde" name="checkStdCrfCde" (change)="setFormListOptionCheckbox($event)" ([ngModel])="checkStdCrfCde" [checked]="(formListData | async)?.checkStdCrfCde">
-            <label for="checkStdCrfCde">Check against CDEs in Standard CRF Modules</label>        
+            <input type="checkbox" id="checkStdCrfCde_1" name="checkStdCrfCde" (change)="setFormListOptionCheckbox($event)" ([ngModel])="checkStdCrfCde" [checked]="(formListData | async)?.checkStdCrfCde">
+            <label for="checkStdCrfCde_1">Check against CDEs in Standard CRF Modules</label>        
         </div>
         <div>
-            <input type="checkbox" id="mustDisplayException" name="mustDisplayException" (change)="setFormListOptionCheckbox($event)" ([ngModel])="mustDisplayException" [checked]="(formListData | async)?.mustDisplayException">
-            <label for="mustDisplayException">Display Exception Details</label>        
+            <input type="checkbox" id="mustDisplayException_1" name="mustDisplayException" (change)="setFormListOptionCheckbox($event)" ([ngModel])="mustDisplayException" [checked]="(formListData | async)?.mustDisplayException">
+            <label for="mustDisplayException_1">Display Exception Details</label>        
         </div>  
     </div>
 
