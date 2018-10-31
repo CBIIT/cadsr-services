@@ -351,8 +351,18 @@ public class ValidatorService {
 	 */
 	protected static CCCQuestion setCodedDataCheckerResult (List<String> pvList, CCCQuestion question) {
 		List<String> cdResult = new ArrayList<String>();
+		String at_str = "@@";
+		String hash_str = "##";		
+		String comma_str = ",";
+		String semicolon_str = ";";
 		if (!pvList.isEmpty()) {
 			for (String codedData : question.getRaveCodedData()) {
+				if (codedData!=null) {
+					if (codedData.indexOf(at_str) > -1)
+						codedData = replacePattern(codedData, at_str, comma_str);
+					if (codedData.indexOf(hash_str) > -1)
+						codedData = replacePattern(codedData, hash_str, semicolon_str);
+				}
 				if (pvList.contains(codedData)) {
 					cdResult.add(matchString);
 				} else {
@@ -629,5 +639,22 @@ public class ValidatorService {
 		}
 		return allowableVmTextChoices.toString();
 	}	
+	
+	/**
+	 * Finds a given pattern and replaces it with a replacement string
+	 * @param stringWithPattern
+	 * @param patternToReplace
+	 * @param replacement
+	 * @return String
+	 */				
+	protected static String replacePattern (String stringWithPattern, String patternToReplace, String replacement) {
+		Pattern pattern = Pattern.compile(patternToReplace);
+		Matcher matcher;		
+		matcher = pattern.matcher(stringWithPattern);
+		if (matcher.find()) {					
+			stringWithPattern = matcher.replaceAll(replacement);
+		}		
+		return stringWithPattern;
+	}		
 
 }
