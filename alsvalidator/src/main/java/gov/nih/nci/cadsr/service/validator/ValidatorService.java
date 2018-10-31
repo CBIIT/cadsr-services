@@ -60,10 +60,10 @@ public class ValidatorService {
 	private static List<String> dateDataFormats = Arrays.asList("DATE", "xsd:date");
 	private static List<String> timeDataFormats = Arrays.asList("TIME", "xsd:time");
 	private static final String characters_string = "characters";
-	private static final String punct_pattern = "\\p{P}";
 	private static final String patternHolderChar = "d";
 	private static final String patternHolderNum = "9";
 	private static final String regex_space = "[\\p{Z}\\s]";//"'\u00A0', '\u2007', '\u202F'";
+	private static final String regex_inverted_qm = "[\\u00bf]";// u00BF, 0xbf, U+00BF, c2BF	- ¿	(INVERTED QUESTION MARK)
 	private static final String alternateNames_key = "AlternateNames";
 	private static final String vmPvMeanings_key = "PVMeanings";
 
@@ -112,7 +112,7 @@ public class ValidatorService {
 
 				if (cdeDetails.getValueDomain().getPermissibleValues()!=null) {
 					for (PermissibleValuesModel pv : cdeDetails.getValueDomain().getPermissibleValues()) {
-						String pvVal = cleanStringforNbsp(pv.getValue());
+						String pvVal = replacePattern(cleanStringforNbsp(pv.getValue()), regex_inverted_qm, "'");
 						pvList.add(pvVal);
 						pvVmList = new ArrayList<String>();
 						Map<String, List<String>> vmMap = buildValueMeaningMap (cdeDetails, pv.getVmIdseq()); 
@@ -596,11 +596,11 @@ public class ValidatorService {
 						if (vm.getVmIdseq().equalsIgnoreCase(vmIdSeq)) {							
 							if (vm.getAlternateNames()!=null) {
 								for (AlternateNameUiModel altName : vm.getAlternateNames()) {
-									altNameList.add(cleanStringforNbsp(altName.getName()));
+									altNameList.add(replacePattern(cleanStringforNbsp(altName.getName()), regex_inverted_qm, "'"));
 								}
 							} 
 							if (vm.getPvMeaning()!=null) {
-								pvMeanList.add(cleanStringforNbsp(vm.getPvMeaning()));
+								pvMeanList.add(replacePattern(cleanStringforNbsp(vm.getPvMeaning()), regex_inverted_qm, "'"));
 							}
 						}
 					}								
