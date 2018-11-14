@@ -10,7 +10,7 @@ export class RestService {
   }
 
   // generate excel report //
-  generateExcel = () => this.http.get('http://localhost:8080/gateway/genexcelreporterror',
+  generateExcel = () => this.http.get('http://172.16.239.11/gateway/genexcelreporterror',
   {
     observe:'response',
     responseType: "blob",
@@ -23,7 +23,7 @@ export class RestService {
     const checkUom = formListData['checkUom'] ? 'true':'false';
     const checkCRF = formListData['checkStdCrfCde'] ? 'true':'false';
     const displayExceptions = formListData['mustDisplayException'] ? 'true':'false';
-    return this.http.post('http://localhost:8080/gateway/checkservice',checkedItems,
+    return this.http.post('http://172.16.239.11/gateway/checkservice',checkedItems,
     {
       withCredentials:true
     })
@@ -31,7 +31,7 @@ export class RestService {
 
   // upload file service //
   uploadAlsFile(file, name){
-    return this.http.post(`http://localhost:8080/gateway/parseservice?owner=${name}`,file,
+    return this.http.post(`http://172.16.239.11/gateway/parseservice?owner=${name}`,file,
     {
       observe:"events",
       reportProgress:true,
@@ -40,7 +40,7 @@ export class RestService {
 
   // gets validation status //
   validateFeedStatus() {
-    return this.http.get('http://localhost:8080/gateway/feedvalidatestatus',
+    return this.http.get('http://172.16.239.11/gateway/feedvalidatestatus',
     {
       observe:'events',
       reportProgress:true,
