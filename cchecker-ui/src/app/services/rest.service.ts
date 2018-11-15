@@ -1,16 +1,21 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
+
 
 @Injectable({
   providedIn: 'root'
 })
 
 export class RestService {
-  constructor(private http:HttpClient) {
+  path:string;
+
+  constructor(private http:HttpClient, private router:Router) {
+    this.path = `${window.location.protocol}//${window.location.hostname}:8080`;
   }
 
   // generate excel report //
-  generateExcel = () => this.http.get('http://172.16.239.11:8080/gateway/genexcelreporterror',
+  generateExcel = () => this.http.get(`${this.path}/gateway/genexcelreporterror`,
   {
     observe:'response',
     responseType: "blob",
@@ -23,7 +28,7 @@ export class RestService {
     const checkUom = formListData['checkUom'] ? 'true':'false';
     const checkCRF = formListData['checkStdCrfCde'] ? 'true':'false';
     const displayExceptions = formListData['mustDisplayException'] ? 'true':'false';
-    return this.http.post('http://172.16.239.11:8080/gateway/checkservice',checkedItems,
+    return this.http.post(`${this.path}/gateway/checkservice`,checkedItems,
     {
       withCredentials:true
     })
@@ -31,7 +36,8 @@ export class RestService {
 
   // upload file service //
   uploadAlsFile(file, name){
-    return this.http.post(`http://172.16.239.11:8080/gateway/parseservice?owner=${name}`,file,
+    console.log(this.path)
+    return this.http.post(`${this.path}/gateway/parseservice?owner=${name}`,file,
     {
       observe:"events",
       reportProgress:true,
@@ -40,7 +46,7 @@ export class RestService {
 
   // gets validation status //
   validateFeedStatus() {
-    return this.http.get('http://172.16.239.11:8080/gateway/feedvalidatestatus',
+    return this.http.get(`${this.path}/gateway/feedvalidatestatus`,
     {
       observe:'events',
       reportProgress:true,
