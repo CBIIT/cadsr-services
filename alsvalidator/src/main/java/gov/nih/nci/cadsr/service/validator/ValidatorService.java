@@ -62,8 +62,12 @@ public class ValidatorService {
 	private static final String characters_string = "characters";
 	private static final String patternHolderChar = "d";
 	private static final String patternHolderNum = "9";
-	private static final String regex_space = "[\\p{Z}\\s]";//"'\u00A0', '\u2007', '\u202F'";
+	private static final String regex_nbsp_space = "[\\p{Z}\\s]";//"'\u00A0', '\u2007', '\u202F'" - (NON BREAKING SPACE)
+	private static final String space_str = " ";
 	private static final String regex_inverted_qm = "[\\u00bf]";// u00BF, 0xbf, U+00BF, c2BF	- ¿	(INVERTED QUESTION MARK)
+	private static final String apostrophe_str = "'";
+	private static final String regex_super_2 = "[\\u00b2]";// u00B2, 0xb2, U+00B2, c2B2	- ²	(SUPERSCRIPT TWO)
+	private static final String superscript_2_str = "²";
 	private static final String alternateNames_key = "AlternateNames";
 	private static final String vmPvMeanings_key = "PVMeanings";
 
@@ -112,7 +116,7 @@ public class ValidatorService {
 
 				if (cdeDetails.getValueDomain().getPermissibleValues()!=null) {
 					for (PermissibleValuesModel pv : cdeDetails.getValueDomain().getPermissibleValues()) {
-						String pvVal = replacePattern(cleanStringforNbsp(pv.getValue()), regex_inverted_qm, "'");
+						String pvVal = cleanUtfString(pv.getValue());
 						pvList.add(pvVal);
 						pvVmList = new ArrayList<String>();
 						Map<String, List<String>> vmMap = buildValueMeaningMap (cdeDetails, pv.getVmIdseq()); 
@@ -229,7 +233,7 @@ public class ValidatorService {
 		if (cdeDetails.getDataElement()!=null) {
 			for (ReferenceDocument rd : cdeDetails.getDataElement().getQuestionTextReferenceDocuments()) {
 				rdDocText =  rd.getDocumentText();
-				rdDocTextList.add(rdDocText);
+				rdDocTextList.add(cleanUtfString(rdDocText));
 				// Concatenating the entire list of AQTs and PQTs together 
 				if ("Preferred Question Text".equalsIgnoreCase(rd.getDocumentType()) || "Alternate Question Text".equalsIgnoreCase(rd.getDocumentType())) {
 					if (rdDocs.length() > 0)
@@ -596,11 +600,11 @@ public class ValidatorService {
 						if (vm.getVmIdseq().equalsIgnoreCase(vmIdSeq)) {							
 							if (vm.getAlternateNames()!=null) {
 								for (AlternateNameUiModel altName : vm.getAlternateNames()) {
-									altNameList.add(replacePattern(cleanStringforNbsp(altName.getName()), regex_inverted_qm, "'"));
+									altNameList.add(cleanUtfString(altName.getName()));
 								}
 							} 
 							if (vm.getPvMeaning()!=null) {
-								pvMeanList.add(replacePattern(cleanStringforNbsp(vm.getPvMeaning()), regex_inverted_qm, "'"));
+								pvMeanList.add(cleanUtfString(vm.getPvMeaning()));
 							}
 						}
 					}								
@@ -618,8 +622,8 @@ public class ValidatorService {
 	 * @return String
 	 */			
 	protected static String cleanStringforNbsp (String textToBeCleaned) {
-		textToBeCleaned = textToBeCleaned.replaceAll(regex_space, " "); 
-		return textToBeCleaned;		
+		textToBeCleaned = textToBeCleaned.replaceAll(regex_nbsp_space, " "); 
+		return textToBeCleaned;
 	}
 	
 	
@@ -651,10 +655,27 @@ public class ValidatorService {
 		Pattern pattern = Pattern.compile(patternToReplace);
 		Matcher matcher;		
 		matcher = pattern.matcher(stringWithPattern);
-		if (matcher.find()) {					
+
+		if (matcher.find()) {
 			stringWithPattern = matcher.replaceAll(replacement);
-		}		
+		}
 		return stringWithPattern;
 	}		
+	
+	/**
+	 * Identifies UTF characters to replace them with the appropriate character
+	 * @param stringToClean
+	 * @return String
+	 */					
+	protected static String cleanUtfString (String stringToClean) {
+		Map<String, String> utfPatternReplacement = new HashMap<String, String>();
+		utfPatternReplacement.put(regex_nbsp_space, space_str);
+		utfPatternReplacement.put(regex_inverted_qm, apostrophe_str);
+		utfPatternReplacement.put(regex_super_2, superscript_2_str);
+		for (String patternToReplace : utfPatternReplacement.keySet()) {
+			replacePattern(stringToClean, patternToReplace, utfPatternReplacement.get(patternToReplace));
+		}
+		return stringToClean;
+	}			
 
 }
