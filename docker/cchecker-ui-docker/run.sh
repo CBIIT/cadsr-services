@@ -12,4 +12,7 @@ echo "installing node modules"
 npm install
 ng build --output-path /var/www/html 
 cp /etc/httpd/conf.d/.htaccess /var/www/html
+
+# remote apache pid to prevent apache from failing to start #
+rm /var/run/httpd/httpd.pid
 exec httpd -D FOREGROUND
