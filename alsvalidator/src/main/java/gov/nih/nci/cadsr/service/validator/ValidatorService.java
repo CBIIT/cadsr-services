@@ -679,8 +679,9 @@ public class ValidatorService {
 	protected static String cleanUtfString (String stringToClean) {
 		Map<String, String> utfPatternReplacement = new HashMap<String, String>();
 		utfPatternReplacement.put(regex_nbsp_space, space_str);
-		utfPatternReplacement.put(regex_inverted_qm, apostrophe_str);
-		utfPatternReplacement.put(regex_super_2, superscript_2_str);
+		//we do not need this replacement. Expected that platform encoding is UTF-8 (en_US.UTF-8 in $LANG)
+//		utfPatternReplacement.put(regex_inverted_qm, apostrophe_str);
+//		utfPatternReplacement.put(regex_super_2, superscript_2_str);
 		for (String patternToReplace : utfPatternReplacement.keySet()) {
 			replacePattern(stringToClean, patternToReplace, utfPatternReplacement.get(patternToReplace));
 		}
