@@ -3,7 +3,7 @@ docker-compose configuration for cchecker
 
 ## Requirements ##
 * Docker installed and running
-* docker-compose file suitable for your environment (default docker-compose.yml)
+* docker-compose file suitable for your environment (default docker-compose.yml). Edit either docker-compose-dev.yml or docker-compose-prod.yml and replace apiUrl with correct server url.
 
 ## NOTE ##
 1. If install fails to connect to the internet add a file daemon.json file in /etc/docker

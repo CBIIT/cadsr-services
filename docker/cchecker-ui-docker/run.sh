@@ -11,7 +11,8 @@ cd /root/cadsr-services/cchecker-ui
 echo "installing node modules"
 npm install
 
-if [ $configuration ]; then
+if [ $configuration ]; then 
+  sed "s#REPLACEME#$apiUrl#g" -i src/environments/environment.${configuration}.ts
   ng build -c=$configuration --output-path /var/www/html
 else
   ng build --output-path /var/www/html

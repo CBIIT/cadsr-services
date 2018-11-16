@@ -7,6 +7,7 @@ services:
      - "8081:80"
     environment:
       - configuration=production
+      - apiUrl=https://prodserver:8080
     networks:
       app_net:
         ipv4_address: 172.16.239.10
