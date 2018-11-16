@@ -1,3 +1,17 @@
 #!/bin/sh
 docker-compose stop
-docker-compose up
+if [ $1 ]; then
+  while [ -n "$1" ]; do # while loop starts
+
+    case "$1" in
+
+    -f) echo "docker-compose -f $2 up" ;;
+
+    esac
+
+    shift
+
+  done
+else
+  docker-compose up
+fi

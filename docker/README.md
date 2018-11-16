@@ -3,6 +3,7 @@ docker-compose configuration for cchecker
 
 ## Requirements ##
 * Docker installed and running
+* docker-compose file suitable for your environment (default docker-compose.yml)
 
 ## NOTE ##
 1. If install fails to connect to the internet add a file daemon.json file in /etc/docker
@@ -17,7 +18,7 @@ docker-compose configuration for cchecker
 ## Installation ##
 1. git clone https://github.com/CBIIT/cadsr-services
 2. cd cadsr-services/docker
-3. run startall
+3. run startall (optional tier docker-compose -f docker-compose-dev.yml, -c docker-compose-production.yml)
 4. give container a minute or two to completely start angular ui and apache
 5. visit http://localhost:8081 in a browser
 
