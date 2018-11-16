@@ -10,7 +10,13 @@ fi
 cd /root/cadsr-services/cchecker-ui
 echo "installing node modules"
 npm install
-ng build --output-path /var/www/html 
+
+if [ $configuration ]; then
+  ng build -c=$configuration --output-path /var/www/html
+else
+  ng build --output-path /var/www/html
+fi
+
 cp /etc/httpd/conf.d/.htaccess /var/www/html
 
 # remote apache pid to prevent apache from failing to start #

@@ -14,6 +14,7 @@ export class AlsUploadFormComponent implements OnInit {
   file:FormData=null;
   submitted:boolean;
   uploadProgress:Number=0;
+  alsFile:FormData;
   name:String;
 
   constructor(private router:Router, private restService:RestService, private formListService:FormListService) { 
