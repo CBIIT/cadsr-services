@@ -36,7 +36,7 @@
              ]
           },
           "configurations": {
-            "production": {
+            "prod": {
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -69,8 +69,8 @@
             "browserTarget": "cchecker-ui:build"
           },
           "configurations": {
-            "production": {
-              "browserTarget": "cchecker-ui:build:production"
+            "prod": {
+              "browserTarget": "cchecker-ui:build:prod"
             },
             "dev": {
               "browserTarget": "cchecker-ui:build:dev"
@@ -132,8 +132,8 @@
             "devServerTarget": "cchecker-ui:serve"
           },
           "configurations": {
-            "production": {
-              "devServerTarget": "cchecker-ui:serve:production"
+            "prod": {
+              "devServerTarget": "cchecker-ui:serve:prod"
             },
             "dev": {
               "devServerTarget": "cchecker-ui:serve:dev"
