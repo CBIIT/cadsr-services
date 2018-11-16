@@ -5,7 +5,7 @@ if [ $1 ]; then
 
     case "$1" in
 
-    -f) echo "docker-compose -f $2 up" ;;
+    -f) exec docker-compose -f $2 up ;;
 
     esac
 
