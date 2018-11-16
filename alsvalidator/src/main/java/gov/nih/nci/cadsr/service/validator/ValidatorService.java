@@ -3,6 +3,13 @@
  */
 package gov.nih.nci.cadsr.service.validator;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -64,10 +71,10 @@ public class ValidatorService {
 	private static final String patternHolderNum = "9";
 	private static final String regex_nbsp_space = "[\\p{Z}\\s]";//"'\u00A0', '\u2007', '\u202F'" - (NON BREAKING SPACE)
 	private static final String space_str = " ";
-	private static final String regex_inverted_qm = "[\\u00bf]";// u00BF, 0xbf, U+00BF, c2BF	- ¿	(INVERTED QUESTION MARK)
-	private static final String apostrophe_str = "'";
-	private static final String regex_super_2 = "[\\u00b2]";// u00B2, 0xb2, U+00B2, c2B2	- ²	(SUPERSCRIPT TWO)
-	private static final String superscript_2_str = "²";
+	protected static final String regex_inverted_qm = "[\\u00bf]";// u00BF, 0xbf, U+00BF, c2BF	- ¿	(INVERTED QUESTION MARK)
+	protected static final String apostrophe_str = "'";
+	protected static final String regex_super_2 = "[\\u00b2]";// u00B2, 0xb2, U+00B2, c2B2	- ²	(SUPERSCRIPT TWO)
+	protected static final String superscript_2_str = "²";
 	private static final String alternateNames_key = "AlternateNames";
 	private static final String vmPvMeanings_key = "PVMeanings";
 
@@ -670,12 +677,26 @@ public class ValidatorService {
 	protected static String cleanUtfString (String stringToClean) {
 		Map<String, String> utfPatternReplacement = new HashMap<String, String>();
 		utfPatternReplacement.put(regex_nbsp_space, space_str);
-		utfPatternReplacement.put(regex_inverted_qm, apostrophe_str);
-		utfPatternReplacement.put(regex_super_2, superscript_2_str);
+		//commented clean up below, and used cleanUpNonUtf8 call instead
+//		utfPatternReplacement.put(regex_inverted_qm, apostrophe_str);
+//		utfPatternReplacement.put(regex_super_2, superscript_2_str);
 		for (String patternToReplace : utfPatternReplacement.keySet()) {
 			replacePattern(stringToClean, patternToReplace, utfPatternReplacement.get(patternToReplace));
 		}
-		return stringToClean;
+		return cleanUpNonUtf8(stringToClean);
 	}			
-
+	protected static String cleanUpNonUtf8(String stringToClean) {
+		String converted = "";
+		try {
+			CharsetDecoder utf8decoder = Charset.forName("UTF-8").newDecoder();
+			utf8decoder.onUnmappableCharacter(CodingErrorAction.IGNORE).onMalformedInput(CodingErrorAction.IGNORE);
+			byte[] arrBytes = stringToClean.getBytes("UTF-8");
+			CharBuffer cbuffer = utf8decoder.decode(ByteBuffer.wrap(arrBytes));
+			converted = new String(cbuffer.array());
+		}
+		catch (CharacterCodingException | UnsupportedEncodingException e) {
+			logger.error("cleanUpNonUtf8 " + stringToClean, e);
+		}
+		return converted;
+	}
 }
