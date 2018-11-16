@@ -6,7 +6,7 @@ services:
     ports:
      - "8081:80"
     environment:
-      - configuration=production
+      - configuration=prod
       - apiUrl=https://prodserver:8080
     networks:
       app_net:
