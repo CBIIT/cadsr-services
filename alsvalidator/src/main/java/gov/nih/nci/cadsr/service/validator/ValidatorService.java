@@ -318,7 +318,7 @@ public class ValidatorService {
 	 */
 	protected static CCCQuestion setPvCheckerResult (Map<String, List<String>> pvVmMap, CCCQuestion question) {
 		// Checking for the presence of RAVE user data string in the PV Value meaning list - PV Checker result
-		Boolean isMatch = false;
+		Boolean isMatch = true;
 		List<String> userDataStringList = question.getRaveUserString();
 		List<String> codedDataList = question.getRaveCodedData();
 		List<String> allowCdesList = new ArrayList<String>();
