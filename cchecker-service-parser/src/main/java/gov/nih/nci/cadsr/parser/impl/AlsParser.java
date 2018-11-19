@@ -181,7 +181,7 @@ public class AlsParser implements Parser{
 			alsError = getErrorInstance();
 			if (ioe.getMessage().indexOf("Invalid header signature") > -1) {
 				logger.debug(ioe.getMessage());
-				alsError.setErrorDesc("Invalid file format, please check if the uploaded file is in XLS format.");
+				alsError.setErrorDesc("Invalid file format, please check if the uploaded file is in Excel XLSX format.");
 			} else {
 				alsError.setErrorDesc(ioe.getMessage());				
 			}
