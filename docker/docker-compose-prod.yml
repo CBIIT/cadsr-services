@@ -8,7 +8,6 @@ services:
     environment:
       - configuration=prod
       - apiUrl=https://prodserver:8080
-      - cdetier=prod
     networks:
       app_net:
         ipv4_address: 172.16.239.10
@@ -21,6 +20,7 @@ services:
       app_net:
         ipv4_address: 172.16.239.11
     environment:
+      cdetier: prod
       LANG: $LANG
       db_driver: $db_driver
       db_url: $db_url
