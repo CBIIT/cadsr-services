@@ -125,7 +125,7 @@ public class ValidatorService {
 
 				if (cdeDetails.getValueDomain().getPermissibleValues()!=null) {
 					for (PermissibleValuesModel pv : cdeDetails.getValueDomain().getPermissibleValues()) {
-						String pvVal = cleanUtfString(pv.getValue());
+						String pvVal = cleanStringforNbsp(pv.getValue());
 						pvList.add(pvVal);
 						pvVmList = new ArrayList<String>();
 						Map<String, List<String>> vmMap = buildValueMeaningMap (cdeDetails, pv.getVmIdseq()); 
@@ -242,7 +242,7 @@ public class ValidatorService {
 		if (cdeDetails.getDataElement()!=null) {
 			for (ReferenceDocument rd : cdeDetails.getDataElement().getQuestionTextReferenceDocuments()) {
 				rdDocText =  rd.getDocumentText();
-				rdDocTextList.add(cleanUtfString(rdDocText));
+				rdDocTextList.add(cleanStringforNbsp(rdDocText));
 				// Concatenating the entire list of AQTs and PQTs together 
 				if ("Preferred Question Text".equalsIgnoreCase(rd.getDocumentType()) || "Alternate Question Text".equalsIgnoreCase(rd.getDocumentType())) {
 					if (rdDocs.length() > 0)
@@ -609,11 +609,11 @@ public class ValidatorService {
 						if (vm.getVmIdseq().equalsIgnoreCase(vmIdSeq)) {							
 							if (vm.getAlternateNames()!=null) {
 								for (AlternateNameUiModel altName : vm.getAlternateNames()) {
-									altNameList.add(cleanUtfString(altName.getName()));
+									altNameList.add(cleanStringforNbsp(altName.getName()));
 								}
 							} 
 							if (vm.getPvMeaning()!=null) {
-								pvMeanList.add(cleanUtfString(vm.getPvMeaning()));
+								pvMeanList.add(cleanStringforNbsp(vm.getPvMeaning()));
 							}
 						}
 					}								
@@ -670,36 +670,5 @@ public class ValidatorService {
 		}
 		return stringWithPattern;
 	}		
-	
-	/**
-	 * Identifies UTF characters to replace them with the appropriate character
-	 * @param stringToClean
-	 * @return String
-	 */					
-	protected static String cleanUtfString (String stringToClean) {
-		Map<String, String> utfPatternReplacement = new HashMap<String, String>();
-		utfPatternReplacement.put(regex_nbsp_space, space_str);
-		//we do not need this replacement. Expected that platform encoding is UTF-8 (en_US.UTF-8 in $LANG)
-//		utfPatternReplacement.put(regex_inverted_qm, apostrophe_str);
-//		utfPatternReplacement.put(regex_super_2, superscript_2_str);
-		for (String patternToReplace : utfPatternReplacement.keySet()) {
-			replacePattern(stringToClean, patternToReplace, utfPatternReplacement.get(patternToReplace));
-		}
-		//return cleanUpNonUtf8(stringToClean);//this does not help cleaning on Linux
-		return stringToClean;
-	}			
-	protected static String cleanUpNonUtf8(String stringToClean) {
-		String converted = "";
-		try {
-			CharsetDecoder utf8decoder = Charset.forName("UTF-8").newDecoder();
-			utf8decoder.onUnmappableCharacter(CodingErrorAction.IGNORE).onMalformedInput(CodingErrorAction.IGNORE);
-			byte[] arrBytes = stringToClean.getBytes("UTF-8");
-			CharBuffer cbuffer = utf8decoder.decode(ByteBuffer.wrap(arrBytes));
-			converted = new String(cbuffer.array());
-		}
-		catch (CharacterCodingException | UnsupportedEncodingException e) {
-			logger.error("cleanUpNonUtf8 " + stringToClean, e);
-		}
-		return converted;
-	}
+
 }
