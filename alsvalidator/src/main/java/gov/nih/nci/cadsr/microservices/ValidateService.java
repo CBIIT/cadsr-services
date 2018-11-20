@@ -25,11 +25,17 @@ public class ValidateService {
 	private static final Logger logger = LoggerFactory.getLogger(ValidateService.class);
 	protected static String CCHECKER_DB_SERVICE_URL_RETRIEVE;
 	protected static String CDEBROWSER_REST_GET_CDE;
+	protected static String CDEBROWSER_CDE_TIER;
+	public static final String CDE_TIER_ENV = "cdetier";
+	public static final String CDE_TIER_PROD = "prod";
+	public static final String CDE_TIER_PROD_SHIFT = "";//we do not need -prod
+	public static final String CDE_TIER_DEFAULT = "dev";
+	public static final String CDE_TIER_URL_PLACEHOLDER = "@@cdetier@@";
 	
 	public static String getCDEBROWSER_REST_GET_CDE() {
 		return CDEBROWSER_REST_GET_CDE;
 	}
-
+	
 	@RequestMapping("/")
 	String home() {
 		return "Congruency Checker Validator Service is running!\n";
@@ -43,7 +49,23 @@ public class ValidateService {
 		properties.load(input);
 		CCHECKER_DB_SERVICE_URL_RETRIEVE = properties.getProperty("CCHECKER_DB_SERVICE_URL_RETRIEVE");
 		logger.info("CCHECKER_DB_SERVICE_URL_RETRIEVE: " + CCHECKER_DB_SERVICE_URL_RETRIEVE);
-		CDEBROWSER_REST_GET_CDE = properties.getProperty("CDEBROWSER_REST_GET_CDE");
+		
+		CDEBROWSER_CDE_TIER = System.getenv(CDE_TIER_ENV);
+		if (CDEBROWSER_CDE_TIER == null) {
+			CDEBROWSER_CDE_TIER = CDE_TIER_DEFAULT;
+			logger.error("Environment variable " + CDE_TIER_ENV + " is not found, using " + CDEBROWSER_CDE_TIER);
+		}
+		else {
+			logger.info("Environment variable " + CDE_TIER_ENV + " is " + CDEBROWSER_CDE_TIER);
+		}
+		String formattedPropUrl = properties.getProperty("CDEBROWSER_REST_GET_CDE");
+		if (CDEBROWSER_CDE_TIER.startsWith(CDE_TIER_PROD)) {
+			CDEBROWSER_REST_GET_CDE = formattedPropUrl.replace(CDE_TIER_URL_PLACEHOLDER, "");
+		}
+		else {
+			CDEBROWSER_REST_GET_CDE = formattedPropUrl.replace(CDE_TIER_URL_PLACEHOLDER,  ('-'+ CDEBROWSER_CDE_TIER));
+		}
+		
 		logger.info("CDEBROWSER_REST_GET_CDE: " + CDEBROWSER_REST_GET_CDE);
 		
 		SpringApplication.run(ValidateService.class, args);
