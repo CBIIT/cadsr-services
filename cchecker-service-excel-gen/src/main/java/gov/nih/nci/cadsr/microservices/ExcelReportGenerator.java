@@ -38,7 +38,7 @@ public class ExcelReportGenerator {
 		private static String raveProtocolNumLbl = "Rave Protocol number ";
 		private static String reportDateLbl = "Date Validated ";
 		private static String formCountLbl = "# Forms in protocol ";
-		private static String totalCountFormLbl = "# Total Forms Congruent ";
+		private static String totalQuestCongLbl = "# Total Questions Congruent ";
 		private static String totalQuestCheckLbl = "# Total Questions Checked ";
 		private static String totalQuestWarnLbl = "# Total Questions with Warnings ";
 		private static String totalQuestErrorLbl = "# Total Questions with Errors ";
@@ -94,11 +94,11 @@ public class ExcelReportGenerator {
 			summaryLabels.put(raveProtocolNumLbl, cccReport.getRaveProtocolNumber());
 			summaryLabels.put(reportDateLbl, cccReport.getReportDate());
 			summaryLabels.put(formCountLbl, String.valueOf(cccReport.getTotalFormsCount()));
-			summaryLabels.put(totalCountFormLbl, String.valueOf(cccReport.getTotalFormsCong()));
 			summaryLabels.put(totalQuestCheckLbl, String.valueOf(cccReport.getCountQuestionsChecked()));
+			summaryLabels.put(totalQuestCongLbl, String.valueOf(cccReport.getCountCongruentQuestions()));			
 			summaryLabels.put(totalQuestWarnLbl, String.valueOf(cccReport.getCountQuestionsWithWarnings()));
 			summaryLabels.put(totalQuestErrorLbl, String.valueOf(cccReport.getCountQuestionsWithErrors()));
-			summaryLabels.put(totalunassociatedQuestLbl, "");
+			summaryLabels.put(totalunassociatedQuestLbl, String.valueOf(cccReport.getCountQuestionsWithoutCde()));
 			summaryLabels.put(reqQuestMissLbl, String.valueOf(cccReport.getCountNrdsMissing()));
 			summaryLabels.put(reqNrdsQuestCongLbl, String.valueOf(cccReport.getCountNrdsCongruent()));
 			summaryLabels.put(reqNrdsQuestWarnLbl, String.valueOf(cccReport.getCountNrdsWithWarnings()));

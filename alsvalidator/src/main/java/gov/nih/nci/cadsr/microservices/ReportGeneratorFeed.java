@@ -230,6 +230,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 		String formOid = null;
 		int totalQuestCount = 0;
 		int totalFormsCongruent = 0;
+		int totalQuestWithoutCde = 0;
 
 
 		List<CCCQuestion> questionsList = new ArrayList<CCCQuestion>();
@@ -328,6 +329,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 								questionsList.add(question);
 							}
 						} else {
+							totalQuestWithoutCde++;
 							if ("FORM_OID".equalsIgnoreCase(alsField.getFieldOid())) {
 								if (alsField.getDefaultValue()!=null) {
 									if (alsField.getDefaultValue().indexOf(publicid_prefix) > -1 && alsField.getDefaultValue().indexOf(version_prefix) > -1) {
@@ -345,6 +347,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 						}
 				}
 					} else {
+						totalQuestWithoutCde++;
 						if (alsField.getDefaultValue()!=null) {
 							if (alsField.getDefaultValue().indexOf(publicid_prefix) > -1 && alsField.getDefaultValue().indexOf(version_prefix) > -1) {
 								form = assignIdVersionToForm(form, alsField.getDefaultValue());
@@ -387,6 +390,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 		}
 		
 		cccReport.setTotalFormsCong(totalFormsCongruent);
+		cccReport.setCountQuestionsWithoutCde(totalQuestWithoutCde);
 		cccReport.setMissingNrdsCdeList(missingNrdsCdesList);
 		cccReport.setCountNrdsMissing(missingNrdsCdesList.size());
 		cccReport.setNrdsCdeList(nrdsCdeList);

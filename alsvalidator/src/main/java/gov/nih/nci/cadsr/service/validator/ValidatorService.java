@@ -242,10 +242,11 @@ public class ValidatorService {
 		if (cdeDetails.getDataElement()!=null) {
 			for (ReferenceDocument rd : cdeDetails.getDataElement().getQuestionTextReferenceDocuments()) {
 				rdDocText =  rd.getDocumentText();
-				if (rdDocText!=null)
-					rdDocTextList.add(cleanStringforNbsp(rdDocText));
+				if (rdDocText==null)
+					continue;
 				// Concatenating the entire list of AQTs and PQTs together 
 				if ("Preferred Question Text".equalsIgnoreCase(rd.getDocumentType()) || "Alternate Question Text".equalsIgnoreCase(rd.getDocumentType())) {
+					rdDocTextList.add(rdDocText = cleanStringforNbsp(rdDocText));
 					if (rdDocs.length() > 0)
 						rdDocs.append("|"+rdDocText);
 					else 
@@ -634,8 +635,6 @@ public class ValidatorService {
 	protected static String cleanStringforNbsp (String textToBeCleaned) {
 		if (textToBeCleaned!=null)
 			textToBeCleaned = textToBeCleaned.replaceAll(regex_nbsp_space, " ");
-		else 
-			textToBeCleaned = "";
 		return textToBeCleaned;
 	}
 	
