@@ -24,6 +24,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.jsoup.Jsoup;
 
 import gov.nih.nci.cadsr.data.ALSCrfDraft;
 import gov.nih.nci.cadsr.data.ALSData;
@@ -529,8 +530,12 @@ public class AlsParser implements Parser{
 						alsError.setErrorSeverity(errorSeverity_error);
 						cccError.addAlsError(alsError);
 					} 
-					if (row.getCell(cell_fieldPreText)!=null)
-						field.setPreText(dataFormatter.formatCellValue(row.getCell(cell_fieldPreText)));
+					if (row.getCell(cell_fieldPreText)!=null) {
+							logger.debug("Before conversion: "+dataFormatter.formatCellValue(row.getCell(cell_fieldPreText)));
+							logger.debug("A :: Converted Text: "+html2text(dataFormatter.formatCellValue(row.getCell(cell_fieldPreText))));
+							logger.debug("B :: Converted Text: "+html2textB(dataFormatter.formatCellValue(row.getCell(cell_fieldPreText))));
+							field.setPreText(html2text(dataFormatter.formatCellValue((row.getCell(cell_fieldPreText))))); 
+						}
 					if (row.getCell(cell_fieldFixedUnit)!=null)
 						field.setFixedUnit(dataFormatter.formatCellValue(row.getCell(cell_fieldFixedUnit)));
 					for (ALSForm form : alsData.getForms()) {
@@ -768,5 +773,13 @@ public class AlsParser implements Parser{
 		ALSError alsError = new ALSError();
 		return alsError;
 	}	
+	
+	public static String html2text(String html) {
+	    return Jsoup.parse(html).text();
+	}
+	
+	public static String html2textB(String html) {
+	    return html.toString().replaceAll("\\<.*?>","");
+	}
 
 }
