@@ -34,5 +34,44 @@ public class AlsParserTest {
 		testHtmlStripReplaceMethod(htmlText2, strippedText2);
 
 	}
+	@Test
+	public void testStripHtmlV1Math() {
+		String expectedResult = "Start Date x < 2 and x > 1";
+		String htmlText1 = "<font color=\"red\"><b>" + expectedResult + "</b></font>";
 
+		String actual = AlsParser.stripHtmlV1(htmlText1);
+		assertEquals(expectedResult, actual);
+	}
+	/**
+	 * stripHtmlV2 cannot deal with '<'
+	 */
+	@Test
+	public void testStripHtmlV2MathWrongResult() {
+		String expectedResult = "Start Date x < 2 and x > 1";
+		String expectedWrongResult = "Start Date x  1";
+		String htmlText1 = "<font color=\"red\"><b>" + expectedResult + "</b></font>";
+
+		String actual = AlsParser.stripHtmlV2(htmlText1);
+		assertEquals(expectedWrongResult, actual);
+	}
+	@Test
+	public void testStripHtmlV1Math2() {
+		String expectedResult = "Start Date x < 2";
+		String htmlText1 = "<font color=\"red\"><b>" + expectedResult + "</b></font>";
+
+		String actual = AlsParser.stripHtmlV1(htmlText1);
+		assertEquals(expectedResult, actual);
+	}
+	/**
+	 * stripHtmlV2 cannot deal with '<'
+	 */
+	@Test
+	public void testStripHtmlV2Math2WrongResult() {
+		String expectedResult = "Start Date x < 2";
+		String expectedWrongResult = "Start Date x ";
+		String htmlText1 = "<font color=\"red\"><b>" + expectedResult + "</b></font>";
+
+		String actual = AlsParser.stripHtmlV2(htmlText1);
+		assertEquals(expectedWrongResult, actual);
+	}
 }
