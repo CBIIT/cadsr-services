@@ -531,10 +531,7 @@ public class AlsParser implements Parser{
 						cccError.addAlsError(alsError);
 					} 
 					if (row.getCell(cell_fieldPreText)!=null) {
-							logger.debug("Before conversion: "+dataFormatter.formatCellValue(row.getCell(cell_fieldPreText)));
-							logger.debug("A :: Converted Text: "+html2text(dataFormatter.formatCellValue(row.getCell(cell_fieldPreText))));
-							logger.debug("B :: Converted Text: "+html2textB(dataFormatter.formatCellValue(row.getCell(cell_fieldPreText))));
-							field.setPreText(html2text(dataFormatter.formatCellValue((row.getCell(cell_fieldPreText))))); 
+							field.setPreText(stripHtmlV2(dataFormatter.formatCellValue((row.getCell(cell_fieldPreText))))); 
 						}
 					if (row.getCell(cell_fieldFixedUnit)!=null)
 						field.setFixedUnit(dataFormatter.formatCellValue(row.getCell(cell_fieldFixedUnit)));
@@ -774,11 +771,21 @@ public class AlsParser implements Parser{
 		return alsError;
 	}	
 	
-	public static String html2text(String html) {
+	/**
+	 * Returns the html stripped String using Jsoup (3rd party lib)
+	 * @param html
+	 * @return String
+	 */
+	public static String stripHtmlV1(String html) {
 	    return Jsoup.parse(html).text();
 	}
 	
-	public static String html2textB(String html) {
+	/**
+	 * Returns the html stripped String with String replaceAll
+	 * @param html
+	 * @return String
+	 */	
+	public static String stripHtmlV2(String html) {
 	    return html.toString().replaceAll("\\<.*?>","");
 	}
 
