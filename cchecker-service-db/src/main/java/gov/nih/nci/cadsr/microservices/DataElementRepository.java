@@ -44,7 +44,7 @@ public class DataElementRepository {
 	private JdbcTemplate jdbcTemplate;
     @Transactional(readOnly=true)
     public List<DataElements> findAll() {
-        return getAll("select preferred_definition from SBR.DATA_ELEMENTS where de_idseq = '99BA9DC8-2CC9-4E69-E034-080020C9C0E0'", DataElements.class);
+        return getAll("select preferred_definition from SBR.DATA_ELEMENTS_VIEW where de_idseq = '99BA9DC8-2CC9-4E69-E034-080020C9C0E0'", DataElements.class);
         //return getAll("select 'test' preferred_definition from dual", DataElements.class);
     }
     /**
@@ -218,8 +218,8 @@ public class DataElementRepository {
 		return "SELECT * from SBREXT.MDSR_STANDARD_FORM_CDE_AGR";
 	}
     protected String retrieveNrdsCdeListQuery() {
-		return "SELECT CDE_ID, de.VERSION DE_VERSION, de.LONG_NAME DE_NAME FROM sbr.data_elements de "
-			+ "inner join sbr.contexts cnt on "
+		return "SELECT CDE_ID, de.VERSION DE_VERSION, de.LONG_NAME DE_NAME FROM sbr.data_elements_view de "
+			+ "inner join sbr.contexts_view cnt on "
 			+ "de.CONTE_IDSEQ = cnt.CONTE_IDSEQ and cnt.NAME = 'NRDS' and de.ASL_NAME = 'RELEASED'";
 	}
 
