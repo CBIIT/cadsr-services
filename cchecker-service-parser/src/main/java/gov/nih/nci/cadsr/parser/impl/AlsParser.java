@@ -779,5 +779,14 @@ public class AlsParser implements Parser{
 	public static String stripHtml(String html) {
 	    return Jsoup.parse(html).text();
 	}
+	
+	/**
+	 * Returns the html stripped String with String replaceAll
+	 * @param html
+	 * @return String
+	 */	
+	public static String stripHtmlV2(String html) {
+	    return html.toString().replaceAll("\\<.*?>","");
+	}
 
 }
