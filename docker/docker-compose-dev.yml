@@ -7,7 +7,7 @@ services:
      - "8081:80"
     environment:
       - apiUrl=http://devserver:8080
-      - cdetier=dev
+      - configuration=dev     
     networks:
       app_net:
         ipv4_address: 172.16.239.10
