@@ -231,6 +231,9 @@ public class ReportGeneratorFeed implements ReportOutput {
 		int totalQuestCount = 0;
 		int totalFormsCongruent = 0;
 		int totalQuestWithoutCde = 0;
+		int totalNrdsCong = 0;
+		int totalNrdsWarn = 0;
+		int totalNrdsError = 0;
 
 
 		List<CCCQuestion> questionsList = new ArrayList<CCCQuestion>();
@@ -317,6 +320,13 @@ public class ReportGeneratorFeed implements ReportOutput {
 							if (nrds_cde.equalsIgnoreCase(question.getNciCategory())) {
 								nrdsCdeList.add(buildNrdsCde(question,
 										cdeDetails.getDataElement().getDataElementDetails().getLongName()));
+									if (congStatus_congruent.equals(question.getQuestionCongruencyStatus())) {
+										totalNrdsCong++;
+									} else if (congStatus_errors.equals(question.getQuestionCongruencyStatus())) {
+										totalNrdsError++;
+									} else if (congStatus_warn.equals(question.getQuestionCongruencyStatus())) {
+										totalNrdsWarn++;
+									}
 								}
 							else if ((mandatory_crf.equalsIgnoreCase(question.getNciCategory()))
 									|| (optional_crf.equalsIgnoreCase(question.getNciCategory()))
@@ -391,6 +401,9 @@ public class ReportGeneratorFeed implements ReportOutput {
 		
 		cccReport.setTotalFormsCong(totalFormsCongruent);
 		cccReport.setCountQuestionsWithoutCde(totalQuestWithoutCde);
+		cccReport.setCountNrdsCongruent(totalNrdsCong);
+		cccReport.setCountNrdsWithErrors(totalNrdsError);
+		cccReport.setCountNrdsWithWarnings(totalNrdsWarn);
 		cccReport.setMissingNrdsCdeList(missingNrdsCdesList);
 		cccReport.setCountNrdsMissing(missingNrdsCdesList.size());
 		cccReport.setNrdsCdeList(nrdsCdeList);
