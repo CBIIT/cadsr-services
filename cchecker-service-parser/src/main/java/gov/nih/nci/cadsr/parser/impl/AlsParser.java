@@ -531,7 +531,7 @@ public class AlsParser implements Parser{
 						cccError.addAlsError(alsError);
 					} 
 					if (row.getCell(cell_fieldPreText)!=null) {
-							field.setPreText(stripHtmlV2(dataFormatter.formatCellValue((row.getCell(cell_fieldPreText))))); 
+							field.setPreText(stripHtml(dataFormatter.formatCellValue((row.getCell(cell_fieldPreText))))); 
 						}
 					if (row.getCell(cell_fieldFixedUnit)!=null)
 						field.setFixedUnit(dataFormatter.formatCellValue(row.getCell(cell_fieldFixedUnit)));
@@ -776,17 +776,8 @@ public class AlsParser implements Parser{
 	 * @param html
 	 * @return String
 	 */
-	public static String stripHtmlV1(String html) {
+	public static String stripHtml(String html) {
 	    return Jsoup.parse(html).text();
-	}
-	
-	/**
-	 * Returns the html stripped String with String replaceAll
-	 * @param html
-	 * @return String
-	 */	
-	public static String stripHtmlV2(String html) {
-	    return html.toString().replaceAll("\\<.*?>","");
 	}
 
 }
