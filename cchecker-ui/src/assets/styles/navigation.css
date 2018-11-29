@@ -1,4 +1,16 @@
 /* top header navigation */
+#topnavigation {
+	margin-top:10px;
+	background-color:#282828;
+}
+
+
+#topnavigation ul {
+	list-style: none;
+	padding: 0px;
+	margin: 0px;
+	display: inline-block;
+}
 
 #links ul {
 	list-style: none;
@@ -18,11 +30,7 @@
 }
 
 #links ul li:last-child {
-	border-style: solid;
-	border-radius: 0px 5px 5px 0px;
-	border-top: 1px solid #585858;
-	border-right: 1px solid #282828;
-	border-left: 1px solid #282828;
+
 }
 
 #links ul li:first-child {

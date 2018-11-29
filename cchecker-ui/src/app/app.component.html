@@ -3,8 +3,10 @@
   <!-- Header -->
   <div id="header">
     <ul>
-        <li id="logo"></li>
-        <li id="title"><h2>Congruency Checker</h2></li>
+        <li id="logo">
+          <img src="../assets/images/nci_logo.svg" alt="National Cancer Institute">
+        </li>
+        <!-- <li id="title"><h2>Congruency Checker</h2></li>
         <li id="links">
           <ul>
               <li><a [routerLink]="['/']">Home</a></li>
@@ -12,8 +14,20 @@
               <li><a [href]="cdeBrowserUrl" target="blank">CDE Browser</a></li>
               <li><a [routerLink]="['/']">Help</a></li>
             </ul>
-        </li>
+        </li> -->
     </ul>
+  </div>
+  <div id="topnavigation">
+        <ul>
+          <li id="links">
+          <ul>
+              <li><a [routerLink]="['/']">Home</a></li>
+              <li><a [href]="formBuilderUrl" target="blank">Form Builder</a></li>
+              <li><a [href]="cdeBrowserUrl" target="blank">CDE Browser</a></li>
+              <li><a [routerLink]="['/']">Help</a></li>
+          </ul>
+          </li>
+        </ul>
   </div>
   <!-- End Header -->
 
