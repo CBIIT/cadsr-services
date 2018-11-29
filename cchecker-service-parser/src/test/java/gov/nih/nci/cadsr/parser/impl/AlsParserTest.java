@@ -20,20 +20,37 @@ public class AlsParserTest {
 	}
 
 	@Test
-	public void testHtmlStripPatterns() {
+	public void testHtmlStripPatternsJsoup1() {
 		String htmlText1 = "<font color=\"red\">Start Date</font>";
 		String strippedText1 = "Start Date";
+		testHtmlStripJsoupMethod(htmlText1, strippedText1);
+	}
+	
+	@Test
+	public void testHtmlStripPatternsReplace1() {
+		String htmlText1 = "<font color=\"red\">Start Date</font>";
+		String strippedText1 = "Start Date";
+		testHtmlStripReplaceMethod(htmlText1, strippedText1);
+	}
+	
+	@Test
+	public void testHtmlStripPatternsJsoup2() {
+		String htmlText2 = "<H10 style=\"color:red;\">***Any solid or nodular lesion greater than or equal to 1 cm in diameter with evidence of deep infiltration in the skin "
+				+ "and/or vertical growth.</H10>";
+		String strippedText2 = "***Any solid or nodular lesion greater than or equal to 1 cm in diameter with evidence of deep infiltration in the skin and/or vertical growth.";		
+		testHtmlStripJsoupMethod(htmlText2, strippedText2);
+	}
+	
+	@Test
+	public void testHtmlStripPatternsReplace2() {
 		String htmlText2 = "<H10 style=\"color:red;\">***Any solid or nodular lesion greater than or equal to 1 cm in diameter with evidence of deep infiltration in the skin "
 				+ "and/or vertical growth.</H10>";
 		String strippedText2 = "***Any solid or nodular lesion greater than or equal to 1 cm in diameter with evidence of deep infiltration in the skin and/or vertical growth.";
-
-		testHtmlStripJsoupMethod(htmlText1, strippedText1);
-		testHtmlStripReplaceMethod(htmlText1, strippedText1);
-		
-		testHtmlStripJsoupMethod(htmlText2, strippedText2);
 		testHtmlStripReplaceMethod(htmlText2, strippedText2);
-
-	}
+	}	
+	
+	
+	
 	@Test
 	public void teststripHtmlMath() {
 		String expectedResult = "Start Date x < 2 and x > 1";
