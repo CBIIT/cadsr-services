@@ -1,0 +1,2 @@
+0 0 * * * find /local/content/cchecker -type f -name *.xlsx -mtime +14 -delete > /dev/null 2>&1
+#
