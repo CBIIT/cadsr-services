@@ -512,6 +512,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 	protected static CdeStdCrfData fetchCdeStandardCrfData(String cdePublicId, String cdeVersion) {
 		CdeStdCrfData cdeCrfData = null;
 		if (NumberUtils.isNumber(cdePublicId) && NumberUtils.isNumber(cdeVersion)) {
+			String moduleType = null;
 			for (CategoryCde cde : categoryCdeList) {
 				if (cde.getCdeId() == Float.valueOf(cdePublicId) && cde.getDeVersion() == Float.valueOf(cdeVersion)) {
 					cdeCrfData = new CdeStdCrfData();
@@ -519,7 +520,11 @@ public class ReportGeneratorFeed implements ReportOutput {
 					cdeCrfData.setCdeVersion(cdeVersion);
 					cdeCrfData.setCrfIdVersion(cde.getFormId()); // Mock data
 					cdeCrfData.setCrfName(cde.getFormName()); // Mock data
-					cdeCrfData.setNciCategory(cde.getModuleType());
+					if (moduleType == null)
+						moduleType = cde.getModuleType();
+					else 
+						moduleType = moduleType + ", " + cde.getModuleType();
+					cdeCrfData.setNciCategory(moduleType);
 				}
 			}
 			if (cdeCrfData == null) {
@@ -672,33 +677,39 @@ public class ReportGeneratorFeed implements ReportOutput {
 					if (congStatus_congruent.equals(tempQuestion.getQuestionCongruencyStatus())) {
 						countQuestCongruent++;
 						if (tempQuestion.getNciCategory()!=null) {
-							if (mandatory_crf.equals(tempQuestion.getNciCategory())) {
+							if (tempQuestion.getNciCategory().indexOf(mandatory_crf) > -1) {
 								manCrfCong++;	
-							} else if (conditional_crf.equals(tempQuestion.getNciCategory())) {
+							} 
+							if (tempQuestion.getNciCategory().indexOf(conditional_crf) > -1) {
 								condCrfCong++;
-							} else if (optional_crf.equals(tempQuestion.getNciCategory())) {
+							}
+							if (tempQuestion.getNciCategory().indexOf(optional_crf) > -1) {
 								optCrfCong++;
 							}
 						}
 					} else if (congStatus_warn.equals(tempQuestion.getQuestionCongruencyStatus())) {
 						countQuestWarn++;
 						if (tempQuestion.getNciCategory()!=null) {
-							if (mandatory_crf.equals(tempQuestion.getNciCategory())) {
+							if (tempQuestion.getNciCategory().indexOf(mandatory_crf) > -1) {
 								manCrfWarn++;	
-							} else if (conditional_crf.equals(tempQuestion.getNciCategory())) {
+							} 
+							if (tempQuestion.getNciCategory().indexOf(conditional_crf) > -1) {
 								condCrfWarn++;
-							} else if (optional_crf.equals(tempQuestion.getNciCategory())) {
+							}
+							if (tempQuestion.getNciCategory().indexOf(optional_crf) > -1) {
 								optCrfWarn++;
 							}
 						}						
 					} else if (congStatus_errors.equals(tempQuestion.getQuestionCongruencyStatus())) {
 						countQuestError++;
 						if (tempQuestion.getNciCategory()!=null) {
-							if (mandatory_crf.equals(tempQuestion.getNciCategory())) {
+							if (tempQuestion.getNciCategory().indexOf(mandatory_crf) > -1) {
 								manCrfErr++;	
-							} else if (conditional_crf.equals(tempQuestion.getNciCategory())) {
+							}
+							if (tempQuestion.getNciCategory().indexOf(conditional_crf) > -1) {
 								condCrfErr++;
-							} else if (optional_crf.equals(tempQuestion.getNciCategory())) {
+							}
+							if (tempQuestion.getNciCategory().indexOf(optional_crf) > -1) {
 								optCrfErr++;
 							}
 						}						
