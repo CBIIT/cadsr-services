@@ -19,7 +19,7 @@
 		<log4j.version>1.2.14</log4j.version>
 		<ojdbc.version>12.1.0.2.0</ojdbc.version>
 		<commons.version>3.0</commons.version>
-		<jackson.version>2.9.5</jackson.version>
+		<jackson.version>2.9.7</jackson.version>
 		<jackson-mapper-asl.version>1.9.13</jackson-mapper-asl.version>
 	</properties>
 	<repositories>
@@ -42,7 +42,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.5.15.RELEASE</version>
+		<version>1.5.18.RELEASE</version>
 	</parent>
 	<build>
 		<sourceDirectory>src/main/java</sourceDirectory>
