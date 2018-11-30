@@ -30,3 +30,8 @@ docker-compose configuration for cchecker
 
 ## To stop docker container once installed ##
 1. docker stop cchecker-ui
+
+## To remove all images and containers in case of need to completely rebuild run the following ##
+1. docker kill $(docker ps -q)
+2. docker rm $(docker ps -a -q)
+3. docker rmi $(docker images -q)
