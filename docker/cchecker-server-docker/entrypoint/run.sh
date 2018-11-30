@@ -52,6 +52,10 @@ cp target/cchecker-gateway-0.0.1-SNAPSHOT.war ./gateway.war
 mv gateway.war /usr/local/apache-tomcat/webapps
 echo "done building cchecker-gateway"
 
+echo "starting crond"
+crond && tail -f /dev/null &
+echo "done starting crond"
+
 echo "entering apache-tomcat directory"
 echo "starting tomcat"
 cd /usr/local/apache-tomcat

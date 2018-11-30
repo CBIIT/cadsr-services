@@ -1,7 +1,7 @@
 FROM cbiit/centos7_base
 MAINTAINER Shaun Einolf
 
-RUN yum -y update && yum -y install git java-1.8.0-openjdk-devel sudo util-linux wget
+RUN yum -y update && yum -y install cronie git java-1.8.0-openjdk-devel sudo util-linux wget
 WORKDIR /tmp
 RUN wget https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.11/bin/apache-tomcat-9.0.11.tar.gz \
     && tar xvfz apache-tomcat-9.0.11.tar.gz \
@@ -19,6 +19,9 @@ WORKDIR /var/local
 RUN mkdir -p /local/content/cchecker
 
 COPY entrypoint/run.sh /usr/bin/
+COPY crondelete /etc/cron.d/crondelete
+RUN chmod 0644 /etc/cron.d/crondelete
+RUN crontab /etc/cron.d/crondelete
 
 EXPOSE 1551 8080 4801
 ENTRYPOINT "/usr/bin/run.sh"
