@@ -240,7 +240,7 @@ var TSMakeLogDate = function() {
 
 	
 			<!-- output_css "modern" -->
-    <link href="https://a.slack-edge.com/bv1-6/modern.vendor.b646a7a.min.css" rel="stylesheet" type="text/css" crossorigin="anonymous" onload="window._cdn && _cdn.ok(this, arguments)" onerror="window._cdn && _cdn.failed(this, arguments)">
+    <link href="https://a.slack-edge.com/bv1-6/modern.vendor.8885a4b.min.css" rel="stylesheet" type="text/css" crossorigin="anonymous" onload="window._cdn && _cdn.ok(this, arguments)" onerror="window._cdn && _cdn.failed(this, arguments)">
     <link href="https://a.slack-edge.com/bv1-6/application.aee68ad.min.css" rel="stylesheet" type="text/css" crossorigin="anonymous" onload="window._cdn && _cdn.ok(this, arguments)" onerror="window._cdn && _cdn.failed(this, arguments)">
 
 	<!-- output_css "slack_kit_helpers" -->
@@ -376,7 +376,7 @@ var TSMakeLogDate = function() {
 			<input type="hidden" name="signin" value="1">
 			<input type="hidden" name="redir" value="/files-pri/T6HBRRKDX-FEHCMEFSL/download/untitled-1.svg">
 			<input type="hidden" name="has_remember" value="1">
-						<input type="hidden" name="crumb" value="s-1543861961-77127e72051d937df0fd8b130a66a2bb73e19cdc9b070bcdb622c6dcde38abb3-☃" />
+						<input type="hidden" name="crumb" value="s-1543862017-8785694b23642f47ebe4bbaa09603ec44ec6dbf342dd282000f6132939a1378d-☃" />
 
 			
 			<p class="browser_password align_left">Enter your <strong>email address</strong> and <strong>password</strong>.</p>
@@ -412,7 +412,7 @@ var TSMakeLogDate = function() {
 			 <p class="large_bottom_margin"><strong>Long password? Hard to type?</strong><br /> We can email you a magic link so you can sign in without having to type your password.</p>
 
 			<form id="magic_login" action="/" method="post" accept-encoding="UTF-8" class="align_center float_none margin_auto medium_bottom_margin">
-				<input type="hidden" name="crumb" value="s-1543861961-77127e72051d937df0fd8b130a66a2bb73e19cdc9b070bcdb622c6dcde38abb3-☃" />
+				<input type="hidden" name="crumb" value="s-1543862017-8785694b23642f47ebe4bbaa09603ec44ec6dbf342dd282000f6132939a1378d-☃" />
 				<input type="hidden" name="email">
 				<input type="hidden" name="signin_request_magiclogin" value="1">
 				<button class="btn btn_large btn_outline full_width"><ts-icon class="ts_icon_magic"></ts-icon>Email Me A Link</button>
@@ -558,10 +558,10 @@ var TSMakeLogDate = function() {
 		app: "web",
 		user_id: '',
 		team_id: 'T00',
-		visitor_uid: "8duxhm40jofv6fisel2jj42v",
+		visitor_uid: "3rwnut0brrwteki3s48wo5wwc",
 		no_login: true,
-		version_ts: "1543856778",
-		version_uid: "8c0b4d4c1f88215e2f353361d8e32d558a6ad022",
+		version_ts: "1543861237",
+		version_uid: "b5fdcc55d41b5f68aabe67d1af09e7e866d69f87",
 		cache_version: "v17-ostrich",
 		cache_ts_version: "v2-bunny",
 		redir_domain: "slack-redir.net",
@@ -1101,8 +1101,8 @@ var TSMakeLogDate = function() {
 <script type="text/javascript" src="https://a.slack-edge.com/bv1-6/rollup-core_required_libs.b705130f6364ef5b9de6.min.js" crossorigin="anonymous" onload="window._cdn && _cdn.ok(this, arguments)" onerror="window._cdn && _cdn.failed(this, arguments)"></script>
 
 	<!-- output_js "application" -->
-<script type="text/javascript" src="https://a.slack-edge.com/bv1-6/modern.vendor.1614664b5754fca9b307.min.js" crossorigin="anonymous" onload="window._cdn && _cdn.ok(this, arguments)" onerror="window._cdn && _cdn.failed(this, arguments)"></script>
-<script type="text/javascript" src="https://a.slack-edge.com/bv1-6/application.f6461266f37f6f228713.min.js" crossorigin="anonymous" onload="window._cdn && _cdn.ok(this, arguments)" onerror="window._cdn && _cdn.failed(this, arguments)"></script>
+<script type="text/javascript" src="https://a.slack-edge.com/bv1-6/modern.vendor.9d7421e7a17e2afafab3.min.js" crossorigin="anonymous" onload="window._cdn && _cdn.ok(this, arguments)" onerror="window._cdn && _cdn.failed(this, arguments)"></script>
+<script type="text/javascript" src="https://a.slack-edge.com/bv1-6/application.4262657ba6c32d9c2a4f.min.js" crossorigin="anonymous" onload="window._cdn && _cdn.ok(this, arguments)" onerror="window._cdn && _cdn.failed(this, arguments)"></script>
 
 	<!-- output_js "page" -->
 
@@ -1116,7 +1116,7 @@ var TSMakeLogDate = function() {
 
 	<!-- output_js "secondary" -->
 <script type="text/javascript" src="https://a.slack-edge.com/bv1-6/rollup-secondary_a_required.620313ad92f082a6ac2c.min.js" crossorigin="anonymous" onload="window._cdn && _cdn.ok(this, arguments)" onerror="window._cdn && _cdn.failed(this, arguments)"></script>
-<script type="text/javascript" src="https://a.slack-edge.com/bv1-6/rollup-secondary_b_required.0ec58e72395db03dbd1c.min.js" crossorigin="anonymous" onload="window._cdn && _cdn.ok(this, arguments)" onerror="window._cdn && _cdn.failed(this, arguments)"></script>
+<script type="text/javascript" src="https://a.slack-edge.com/bv1-6/rollup-secondary_b_required.57a0845f0886080ffc98.min.js" crossorigin="anonymous" onload="window._cdn && _cdn.ok(this, arguments)" onerror="window._cdn && _cdn.failed(this, arguments)"></script>
 
 					
 	
@@ -1250,7 +1250,7 @@ var TSMakeLogDate = function() {
 
 <style>.color_9f69e7:not(.nuc) {color:#9F69E7;}.color_4bbe2e:not(.nuc) {color:#4BBE2E;}.color_e7392d:not(.nuc) {color:#E7392D;}.color_3c989f:not(.nuc) {color:#3C989F;}.color_674b1b:not(.nuc) {color:#674B1B;}.color_e96699:not(.nuc) {color:#E96699;}.color_e0a729:not(.nuc) {color:#E0A729;}.color_684b6c:not(.nuc) {color:#684B6C;}.color_5b89d5:not(.nuc) {color:#5B89D5;}.color_2b6836:not(.nuc) {color:#2B6836;}.color_99a949:not(.nuc) {color:#99A949;}.color_df3dc0:not(.nuc) {color:#DF3DC0;}.color_4cc091:not(.nuc) {color:#4CC091;}.color_9b3b45:not(.nuc) {color:#9B3B45;}.color_d58247:not(.nuc) {color:#D58247;}.color_bb86b7:not(.nuc) {color:#BB86B7;}.color_5a4592:not(.nuc) {color:#5A4592;}.color_db3150:not(.nuc) {color:#DB3150;}.color_235e5b:not(.nuc) {color:#235E5B;}.color_9e3997:not(.nuc) {color:#9E3997;}.color_53b759:not(.nuc) {color:#53B759;}.color_c386df:not(.nuc) {color:#C386DF;}.color_385a86:not(.nuc) {color:#385A86;}.color_a63024:not(.nuc) {color:#A63024;}.color_5870dd:not(.nuc) {color:#5870DD;}.color_ea2977:not(.nuc) {color:#EA2977;}.color_50a0cf:not(.nuc) {color:#50A0CF;}.color_d55aef:not(.nuc) {color:#D55AEF;}.color_d1707d:not(.nuc) {color:#D1707D;}.color_43761b:not(.nuc) {color:#43761B;}.color_e06b56:not(.nuc) {color:#E06B56;}.color_8f4a2b:not(.nuc) {color:#8F4A2B;}.color_902d59:not(.nuc) {color:#902D59;}.color_de5f24:not(.nuc) {color:#DE5F24;}.color_a2a5dc:not(.nuc) {color:#A2A5DC;}.color_827327:not(.nuc) {color:#827327;}.color_3c8c69:not(.nuc) {color:#3C8C69;}.color_8d4b84:not(.nuc) {color:#8D4B84;}.color_84b22f:not(.nuc) {color:#84B22F;}.color_4ec0d6:not(.nuc) {color:#4EC0D6;}.color_e23f99:not(.nuc) {color:#E23F99;}.color_e475df:not(.nuc) {color:#E475DF;}.color_619a4f:not(.nuc) {color:#619A4F;}.color_a72f79:not(.nuc) {color:#A72F79;}.color_7d414c:not(.nuc) {color:#7D414C;}.color_aba727:not(.nuc) {color:#ABA727;}.color_965d1b:not(.nuc) {color:#965D1B;}.color_4d5e26:not(.nuc) {color:#4D5E26;}.color_dd8527:not(.nuc) {color:#DD8527;}.color_bd9336:not(.nuc) {color:#BD9336;}.color_e85d72:not(.nuc) {color:#E85D72;}.color_dc7dbb:not(.nuc) {color:#DC7DBB;}.color_bc3663:not(.nuc) {color:#BC3663;}.color_9d8eee:not(.nuc) {color:#9D8EEE;}.color_8469bc:not(.nuc) {color:#8469BC;}.color_73769d:not(.nuc) {color:#73769D;}.color_b14cbc:not(.nuc) {color:#B14CBC;}</style>
 
-<!-- slack-www-hhvm-main-iad-cqfn / 2018-12-03 10:32:41 / v8c0b4d4c1f88215e2f353361d8e32d558a6ad022 / B:H -->
+<!-- slack-www-hhvm-main-iad-2p9k / 2018-12-03 10:33:37 / vb5fdcc55d41b5f68aabe67d1af09e7e866d69f87 / B:H -->
 
 
 </body>
