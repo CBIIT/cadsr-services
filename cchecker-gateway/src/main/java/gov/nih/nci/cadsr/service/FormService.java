@@ -6,7 +6,8 @@ package gov.nih.nci.cadsr.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.ALSError;
@@ -16,7 +17,7 @@ import gov.nih.nci.cadsr.data.FormsUiData;
 
 public class FormService {
 
-	private static final Logger logger = Logger.getLogger(FormService.class);
+	private static final Logger logger = LoggerFactory.getLogger(FormService.class);
 	private static String errorSeverity_warn = "WARNING";
 	
 	public static FormsUiData buildFormsUiData (ALSData alsData) {
