@@ -78,6 +78,55 @@ public class ValidatorServiceTest {
 		int actualResult = ValidatorService.computeRaveLength("(999.99)");
 		assertEquals(expectedResult, actualResult);
 	}		
+	
+	@Test
+	public void testCompareDataTypeString () {
+		Boolean expectedResult = true;
+		Boolean actualResult = ValidatorService.compareDataType("$8", "ALPHANUMERIC");
+		assertEquals(expectedResult, actualResult);
+	}			
 
+	@Test
+	public void testCompareDataTypeDate1 () {
+		Boolean expectedResult = true;
+		Boolean actualResult = ValidatorService.compareDataType("mon dd yyyy", "DATE");
+		assertEquals(expectedResult, actualResult);
+	}				
+	
+	@Test
+	public void testCompareDataTypeDate2 () {
+		Boolean expectedResult = true;
+		Boolean actualResult = ValidatorService.compareDataType("MM DD YYYY", "DATE");
+		assertEquals(expectedResult, actualResult);
+	}					
+
+	@Test
+	public void testCompareDataTypeDate3 () {
+		Boolean expectedResult = true;
+		Boolean actualResult = ValidatorService.compareDataType("yy mm dd", "DATE");
+		assertEquals(expectedResult, actualResult);
+	}					
+	
+	@Test
+	public void testCompareDataTypeDate4 () {
+		Boolean expectedResult = true;
+		Boolean actualResult = ValidatorService.compareDataType("yyyy mm dd", "DATE");
+		assertEquals(expectedResult, actualResult);
+	}						
+	
+	@Test
+	public void testCompareDataTypeDate5 () {
+		Boolean expectedResult = true;
+		Boolean actualResult = ValidatorService.compareDataType("DD MM YY", "DATE");
+		assertEquals(expectedResult, actualResult);
+	}							
+	
+	@Test
+	public void testCompareDataTypeDate6 () {
+		Boolean expectedResult = true;
+		Boolean actualResult = ValidatorService.compareDataType("DY MTH YR", "DATE");
+		assertEquals(expectedResult, actualResult);
+	}								
+	
 	
 }

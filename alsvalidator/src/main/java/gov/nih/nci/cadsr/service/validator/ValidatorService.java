@@ -3,13 +3,6 @@
  */
 package gov.nih.nci.cadsr.service.validator;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.CharacterCodingException;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.CodingErrorAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -60,12 +53,13 @@ public class ValidatorService {
 	private static final String msg14 = "Fixed Unit {%s} from ALS input data doesn't match with the corresponding Value Domain's Max length {%d}.";
 	private static String congStatus_errors = "ERRORS";
 	private static String congStatus_warn = "WARNINGS";
-	private static List<String> characterDataFormats = Arrays.asList("CHAR", "VARCHAR2", "CHARACTER", "ALPHANUMERIC",
-			"java.lang.String", "java.lang.Character", "xsd:string");
-	private static List<String> numericDataFormats = Arrays.asList("NUMBER", "number", "numeric", "integer", "Integer",
-			"java.lang.Integer", "xsd:integer");
-	private static List<String> dateDataFormats = Arrays.asList("DATE", "xsd:date");
-	private static List<String> timeDataFormats = Arrays.asList("TIME", "xsd:time");
+	private static List<String> characterDataFormats = Arrays.asList("CHAR", "VARCHAR2", "CHARACTER", "ALPHANUMERIC", "ALPHA DVG", 
+			"JAVA.LANG.STRING", "JAVA.LANG.CHARACTER", "XSD:STRING", "JAVA.LANG.BOOLEAN");
+	private static List<String> numericDataFormats = Arrays.asList("NUMBER", "MUMERIC", "INTEGER", "NUMERIC ALPHA DVG", 
+			"JAVA.LANG.INTEGER", "XSD:INTEGER", "JAVA.LANG.LONG");
+	private static List<String> dateDataFormats = Arrays.asList("DATE", "XSD:DATE", "DATE ALPHA DVG", "DATETIME", "DATE/TIME", 
+			"JAVA.UTIL.DATE");
+	private static List<String> timeDataFormats = Arrays.asList("TIME", "XSD:TIME", "DATETIME", "DATE/TIME");
 	private static final String characters_string = "characters";
 	private static final String patternHolderChar = "d";
 	private static final String patternHolderNum = "9";
@@ -106,7 +100,8 @@ public class ValidatorService {
 			question = setRaveFieldLabelResult(cdeDetails,question);
 			
 			// Comparing the RAVE control type and the caDSR VD data type for Control Type Checker Result
-			question = setRaveControlTypeResult(cdeDetails.getValueDomain().getValueDomainDetails().getValueDomainType(), question);
+			question = setRaveControlTypeResult(cdeDetails.getValueDomain().getValueDomainDetails().getValueDomainType(), 
+					cdeDetails.getValueDomain().getValueDomainDetails().getDataType(), field.getDataFormat(), question);
 
 			// Gathering Permissible Values and Value Meanings in separate lists			
 			List<String> pvList = new ArrayList<String>();
@@ -274,34 +269,40 @@ public class ValidatorService {
 	 * @param question
 	 * @return CCCQuestion
 	 */
-	protected static CCCQuestion setRaveControlTypeResult (String vdType, CCCQuestion question) {
+	protected static CCCQuestion setRaveControlTypeResult (String vdType, String vdDataType, String raveDataFormat, CCCQuestion question) {
 			question.setCdeValueDomainType(vdType);
 			List<Object> errorVal = new ArrayList<Object>();
 			errorVal.add(question.getRaveControlType());
 			if (vdType!=null) {
-				if ("N".equalsIgnoreCase(vdType))
-					errorVal.add("Non-enumerated");
-				else if ("E".equalsIgnoreCase(vdType))
-					errorVal.add("Enumerated");
-				else
+				if ("N".equalsIgnoreCase(vdType)) {
+					errorVal.add("Non-enumerated"); 
+				} else if ("E".equalsIgnoreCase(vdType)) {
+					errorVal.add("Enumerated"); 
+				} else {
+					errorVal.add("Unknown"); 
+				}
+			} else {
 					errorVal.add("Unknown");
-			}	else
-				errorVal.add("Unknown");
-			// TODO: This validation is pending a mapping table with the control types and their appropriate data types
-			// For now we're just directly checking ALS input against the value domain.
+			}
+			
 			if (question.getRaveControlType()!=null) {
 				if ("TEXT".equalsIgnoreCase(question.getRaveControlType()) && "N".equalsIgnoreCase(vdType)) {
 					question.setControlTypeResult(matchString);
 					if (!question.getRaveCodedData().isEmpty()) {
 						question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg5, question.getRaveCodedData())));
-					}
-						
+					}						
 				} else if (!"TEXT".equalsIgnoreCase(question.getRaveControlType()) && "E".equalsIgnoreCase(vdType)) {
-					question.setControlTypeResult(matchString);
-				} else {
-					question.setControlTypeResult(errorString);
-					question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg7, errorVal.toArray())));
-					question.setQuestionCongruencyStatus(congStatus_errors);
+								question.setControlTypeResult(matchString);
+				} else {					
+					Boolean result = false;
+					result = compareDataType (raveDataFormat, vdDataType);
+					if (result)
+						question.setControlTypeResult(matchString);
+					else {
+							question.setControlTypeResult(errorString);
+							question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg7, errorVal.toArray())));
+							question.setQuestionCongruencyStatus(congStatus_errors); 
+						}
 				}	
 			} else {
 				question.setControlTypeResult(errorString);
@@ -403,25 +404,11 @@ public class ValidatorService {
 	 */
 	protected static CCCQuestion checkDataTypeCheckerResult (CCCQuestion question, String raveDataFormat, String vdDataType) {
 		Boolean result = false;
-		List<Object> errorVal = new ArrayList<Object>();		
+		List<Object> errorVal = new ArrayList<Object>();
 		question.setCdeDataType(vdDataType);
-		if (raveDataFormat!=null) {
-			errorVal.add(raveDataFormat);
-			errorVal.add(vdDataType);			
-			if (raveDataFormat.startsWith("$")) {
-				if (characterDataFormats.contains(vdDataType)) 
-					result = true;
-			} else if (raveDataFormat.startsWith("dd") || raveDataFormat.startsWith("DD")) {
-				if (dateDataFormats.contains(vdDataType)) 
-					result = true;
-			} else if (raveDataFormat.startsWith("hh") || raveDataFormat.startsWith("HH")) {
-				if (timeDataFormats.contains(vdDataType))
-					result = true;
-			} else {
-				if (numericDataFormats.contains(vdDataType))
-					result = true;
-			}
-		}
+		errorVal.add(raveDataFormat);
+		errorVal.add(vdDataType);					
+		result = compareDataType (raveDataFormat, vdDataType);
 		if (result)
 			question.setDatatypeCheckerResult(matchString);
 		else {
@@ -672,6 +659,35 @@ public class ValidatorService {
 			stringWithPattern = matcher.replaceAll(replacement);
 		}
 		return stringWithPattern;
-	}		
-
+	}	
+	
+	/**
+	 * Data Type comparison
+	 * @param raveDataFormat
+	 * @param vdDataType
+	 * @return Boolean
+	 */
+	protected static Boolean compareDataType (String raveDataFormat, String vdDataType) {
+		Boolean result = false;
+		if (raveDataFormat!=null) {
+			if (vdDataType!=null) {
+				if (raveDataFormat.startsWith("$")) {
+					if (characterDataFormats.contains(vdDataType.toUpperCase())) 
+						result = true;
+				} else if (raveDataFormat.toUpperCase().startsWith("DD") || raveDataFormat.toUpperCase().startsWith("DY")  
+						|| raveDataFormat.toUpperCase().startsWith("MM") || raveDataFormat.toUpperCase().startsWith("MON") 
+						|| raveDataFormat.toUpperCase().startsWith("YY") || raveDataFormat.toUpperCase().startsWith("YYYY")) {
+					if (dateDataFormats.contains(vdDataType.toUpperCase())) 
+						result = true;
+				} else if (raveDataFormat.toUpperCase().startsWith("HH") || raveDataFormat.toUpperCase().startsWith("TIME")) {
+					if (timeDataFormats.contains(vdDataType.toUpperCase()))
+						result = true;
+				} else {
+					if (numericDataFormats.contains(vdDataType.toUpperCase()))
+						result = true;
+				}
+			}
+		}
+		return result;
+	}
 }
