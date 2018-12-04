@@ -54,8 +54,8 @@ public class ValidatorService {
 	private static String congStatus_errors = "ERRORS";
 	private static String congStatus_warn = "WARNINGS";
 	private static List<String> characterDataFormats = Arrays.asList("CHAR", "VARCHAR2", "CHARACTER", "ALPHANUMERIC", "ALPHA DVG", 
-			"JAVA.LANG.STRING", "JAVA.LANG.CHARACTER", "XSD:STRING", "JAVA.LANG.BOOLEAN");
-	private static List<String> numericDataFormats = Arrays.asList("NUMBER", "MUMERIC", "INTEGER", "NUMERIC ALPHA DVG", 
+			"NUMERIC ALPHA DVG", "JAVA.LANG.STRING", "JAVA.LANG.CHARACTER", "XSD:STRING", "JAVA.LANG.BOOLEAN");
+	private static List<String> numericDataFormats = Arrays.asList("NUMBER", "NUMERIC", "INTEGER", 
 			"JAVA.LANG.INTEGER", "XSD:INTEGER", "JAVA.LANG.LONG");
 	private static List<String> dateDataFormats = Arrays.asList("DATE", "XSD:DATE", "DATE ALPHA DVG", "DATETIME", "DATE/TIME", 
 			"JAVA.UTIL.DATE");

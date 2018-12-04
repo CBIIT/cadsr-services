@@ -151,7 +151,7 @@ public class ExcelReportGenerator {
 					"Rave Field Label", "Rave Field Label Result", "CDE Permitted Question Text Choices",
 					"Rave Control Type", "Control Type Checker Result", "CDE Value Domain Type", "Rave Coded Data", "Coded Data Result",
 					"Allowable CDE  Value", "Rave User String", "PV  Result", "Allowable CDE  Value Meaning Text Choices",
-					"Rave Field Data Type", "Dataype Checker Result", "CDE Data Type", "Rave UOM", "UOM Checker Result", "CDE UOM",
+					"Rave Field Data Type", "Datatype Checker Result", "CDE Data Type", "Rave UOM", "UOM Checker Result", "CDE UOM",
 					"Rave Length", "Length Checker Result", "CDE Maximum Length", "Rave Display Format", "Format Checker Result",
 					"CDE Display Format" };
 			for (CCCForm cccForm : forms) {
