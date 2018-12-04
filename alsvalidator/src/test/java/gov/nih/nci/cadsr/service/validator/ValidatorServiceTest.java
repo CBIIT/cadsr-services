@@ -2,12 +2,36 @@ package gov.nih.nci.cadsr.service.validator;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
 
+import gov.nih.nci.cadsr.data.CCCQuestion;
+import gov.nih.nci.cadsr.service.model.cdeData.CdeDetails;
+import gov.nih.nci.cadsr.service.model.cdeData.dataElement.DataElement;
+import gov.nih.nci.cadsr.service.model.cdeData.dataElement.DataElementDetails;
+import gov.nih.nci.cadsr.service.model.cdeData.dataElement.OtherVersion;
+
 public class ValidatorServiceTest {
+	
+	CCCQuestion question;
+	CdeDetails cdeDetails;
+	DataElement de;
+	DataElementDetails deDetails; 	
+	private static final String retiredArchivedStatus = "RETIRED ARCHIVED";
+	private static final String retiredPhasedOutStatus = "RETIRED PHASED OUT";
+	private static final String retiredWithdrawnStatus = "RETIRED WITHDRAWN";	
+	private static final String errMsg1 = "CDE has been retired.";
+	private static final String errMsg2 = "Newer version of CDE exists: {%.1f}.";	
+	
+	public void init() {
+		question = new CCCQuestion();
+		cdeDetails = new CdeDetails();
+		de = new DataElement();
+		deDetails = new DataElementDetails();
+	}
 
 	public void testReplacePattern(String stringWithPattern, String patternToReplace, String replacement,
 			String expectedResult) {
@@ -80,11 +104,18 @@ public class ValidatorServiceTest {
 	}		
 	
 	@Test
-	public void testCompareDataTypeString () {
+	public void testCompareDataTypeString1 () {
 		Boolean expectedResult = true;
 		Boolean actualResult = ValidatorService.compareDataType("$8", "ALPHANUMERIC");
 		assertEquals(expectedResult, actualResult);
-	}			
+	}
+	
+	@Test
+	public void testCompareDataTypeString2 () {
+		Boolean expectedResult = true;
+		Boolean actualResult = ValidatorService.compareDataType("$700", "character");
+		assertEquals(expectedResult, actualResult);
+	}	
 
 	@Test
 	public void testCompareDataTypeDate1 () {
@@ -128,5 +159,80 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}								
 	
+	@Test
+	public void testCompareDataTypeTime1 () {
+		Boolean expectedResult = true;
+		Boolean actualResult = ValidatorService.compareDataType("HH:nn", "TIME");
+		assertEquals(expectedResult, actualResult);
+	}									
+	
+	@Test
+	public void testCompareDataTypeTime2 () {
+		Boolean expectedResult = true;
+		Boolean actualResult = ValidatorService.compareDataType("hh:mm:ss", "TIME");
+		assertEquals(expectedResult, actualResult);
+	}										
+	
+	@Test
+	public void testCompareDataTypeTime3 () {
+		Boolean expectedResult = true;
+		Boolean actualResult = ValidatorService.compareDataType("TIME (HR(24):MN)", "TIME");
+		assertEquals(expectedResult, actualResult);
+	}
+	
+	@Test
+	public void testCompareDataTypeNumeric1 () {
+		Boolean expectedResult = true;
+		Boolean actualResult = ValidatorService.compareDataType("1024", "NUMBER");
+		assertEquals(expectedResult, actualResult);
+	}	
+	
+	@Test
+	public void testCompareDataTypeNumeric2 () {
+		Boolean expectedResult = true;
+		Boolean actualResult = ValidatorService.compareDataType("5.2", "JAVA.LANG.LONG");
+		assertEquals(expectedResult, actualResult);
+	}		
+	
+	public void invokeCheckCdeRetiredStatus(String errMsg, String status) {
+		deDetails.setWorkflowStatus(status);
+		de.setDataElementDetails(deDetails);
+		cdeDetails.setDataElement(de);
+		CCCQuestion actualResult = ValidatorService.checkCdeRetired(cdeDetails, question);
+		assertEquals(errMsg, actualResult.getMessage());
+	}	
+		
+	@Test
+	public void testCheckCdeRetiredArchived () {
+		init();
+		invokeCheckCdeRetiredStatus(errMsg1, retiredArchivedStatus);
+	}	
+	
+	@Test
+	public void testCheckCdeRetiredPhasedOut () {
+		init();
+		invokeCheckCdeRetiredStatus(errMsg1, retiredPhasedOutStatus);
+	}		
+	
+	@Test
+	public void testCheckCdeRetiredWithdrawn () {
+		init();
+		invokeCheckCdeRetiredStatus(errMsg1, retiredWithdrawnStatus);
+	}
+	
+	@Test
+	public void testCheckCdeVersions() {
+		init();
+		Float latestVersion = new Float("5.0");
+		question.setCdeVersion("4.0");
+		OtherVersion otherVersion = new OtherVersion();
+		otherVersion.setVersion(latestVersion);
+		List<OtherVersion> otherVersions = new ArrayList<OtherVersion>();
+		otherVersions.add(otherVersion);
+		de.setOtherVersions(otherVersions);
+		cdeDetails.setDataElement(de);
+		CCCQuestion actualResult = ValidatorService.checkCdeVersions(cdeDetails, question);
+		assertEquals(String.format(errMsg2, latestVersion), actualResult.getMessage());
+	}
 	
 }

@@ -64,7 +64,6 @@ public class ValidatorService {
 	private static final String patternHolderChar = "d";
 	private static final String patternHolderNum = "9";
 	private static final String regex_nbsp_space = "[\\p{Z}\\s]";//"'\u00A0', '\u2007', '\u202F'" - (NON BREAKING SPACE)
-	private static final String space_str = " ";
 	protected static final String regex_inverted_qm = "[\\u00bf]";// u00BF, 0xbf, U+00BF, c2BF	- ¿	(INVERTED QUESTION MARK)
 	protected static final String apostrophe_str = "'";
 	protected static final String regex_super_2 = "[\\u00b2]";// u00B2, 0xb2, U+00B2, c2B2	- ²	(SUPERSCRIPT TWO)
@@ -285,6 +284,13 @@ public class ValidatorService {
 					errorVal.add("Unknown");
 			}
 			
+			/* Compare Rave ControlType to caDSR Value Domain Type
+			If caDSR VD is non-enumerated, and the Rave ControlType is "Text", it is valid.  
+			If Value Domain is non-enumerated and ControlType is not "Text", then check the Rave Datatype. 
+			If Rave Datatype matches caDSR Value Domain datatype, then result is "Match" otherwise 
+			it's an error. (we will provide the team with a list of the mappings between the Rave Datatypes 
+			and caDSR datatypes ,the names are not the same). */ 
+			
 			if (question.getRaveControlType()!=null) {
 				if ("TEXT".equalsIgnoreCase(question.getRaveControlType()) && "N".equalsIgnoreCase(vdType)) {
 					question.setControlTypeResult(matchString);
@@ -326,6 +332,15 @@ public class ValidatorService {
 		List<String> codedDataList = question.getRaveCodedData();
 		List<String> allowCdesList = new ArrayList<String>();
 		List<String> pvCheckerResultsList = new ArrayList<String>();
+		
+		/* Compare to PV.ValueMeaning.longName and the matched PV.Value. 
+		 The UserDataString must match the PermissibleValues.ValueMeaning.LongName 
+		 for the matched CodedData PV Value OR it can be the same as the matched 
+		 PV Value (which means the UserDataString =  CodedData ). 
+		 It is also compared to all the ValueMeaning Alternate Names.
+		 Exceptions: If it does not match the PV Value MEaning or the PV for the CodedData, 
+		 or one of the ValueMeaning Alternate Names, "ERROR" */
+		
 		
 		if (userDataStringList!=null) {
 			for (String userDataString : userDataStringList) {
@@ -371,6 +386,10 @@ public class ValidatorService {
 		String hash_str = "##";		
 		String comma_str = ",";
 		String semicolon_str = ";";
+		
+		/* Compare each CodedData value to all of the Value Domain's PermissibleValue.value
+			Exceptions: If it does not match one of the CDEs PV Value, "ERROR"
+		 */
 		if (!pvList.isEmpty()) {
 			for (String codedData : question.getRaveCodedData()) {
 				if (codedData!=null) {
@@ -431,6 +450,12 @@ public class ValidatorService {
 		List<Object> errorVal = new ArrayList<Object>();
 			errorVal.add(question.getRaveUOM());
 			errorVal.add(unitOfMeasure);		
+			
+			/* If the Value Domain Unit of Measure in not null/blank, then check to see 
+			   If there is a matching value in FixedUnit or CodedUnit.
+			   If it does not match, then display the Rave UOM and the Value Domain UOM and result "WARNING".
+			 */
+			
 		if (unitOfMeasure!=null) {
 			if (question.getRaveUOM()!=null) {
 					if (question.getRaveUOM().equals(unitOfMeasure)) {
@@ -465,6 +490,10 @@ public class ValidatorService {
 		List<Object> errorVal = new ArrayList<Object>();
 		errorVal.add(raveLength);
 		errorVal.add(vdMaxLength);				
+		
+		/* If caDSR VD maxlengthNumber does not match FixedUnit number of characters, 
+		display both Rave value and caDSR value and result  "WARNING" */
+		
 		if (vdMaxLength!=null) {
 			if (raveLength!=null) {			
 				if (!(Float.valueOf(computeRaveLength(raveLength)) > Float.valueOf(vdMaxLength))) {
@@ -527,6 +556,11 @@ public class ValidatorService {
 		List<Object> errorVal = new ArrayList<Object>();
 		errorVal.add(pvMaxLen);
 		errorVal.add(vdMaxLen);
+		
+		/* Compare to ALS.Fields.FixedUnit, and compare to Value Domain PermissibleValue.Value.  
+		If the caDSR VD MaximumLengthNumber is less than the longest PermissibleValue.Value, 
+		report "caDSR Max Length too short. "PVs MaxLength X, caDSR MaxLength X" */
+		
 		if (pvMaxLen > vdMaxLen)
 			question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg4, errorVal.toArray())));
 		return question;
