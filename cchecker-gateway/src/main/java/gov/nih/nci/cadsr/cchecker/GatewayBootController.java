@@ -39,8 +39,10 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -58,6 +60,8 @@ import gov.nih.nci.cadsr.data.ValidateParamWrapper;
 import gov.nih.nci.cadsr.service.FormService;
 
 @Controller
+//@RestController
+//@RequestMapping("/")
 public class GatewayBootController {
 	static String CCHECKER_PARSER_URL;
 	static String CCHECKER_DB_SERVICE_URL_CREATE;
@@ -314,12 +318,12 @@ public class GatewayBootController {
 	}
 	
 	/**
-	 * Upload one file.
+	 * Upload one file. maxAge is in seconds, negative means undefined.
 	 * 
 	 * @param uploadfile
 	 * @return ResponseEntity
 	 */
-	@CrossOrigin
+	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
 	@PostMapping("/parseservice")
 	// @ResponseBody
 	public ResponseEntity<?> parseService(HttpServletRequest request, HttpServletResponse response,
@@ -412,7 +416,7 @@ public class GatewayBootController {
 	 * @param requestEntity not null and not empty
 	 * @return ResponseEntity
 	 */
-	@CrossOrigin
+	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
 	@PostMapping("/checkservice")
 	public ResponseEntity<?> checkService(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(name = "checkUOM", required = false, defaultValue = "false") boolean checkUOM,
@@ -457,7 +461,7 @@ public class GatewayBootController {
 		}
 	}
 	
-	@CrossOrigin
+	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
 	@GetMapping("/retrievereporterror/{idseq}")
 	public ResponseEntity<?> retrieveErrorReport(HttpServletRequest request,
 			@PathVariable("idseq") String idseq) {
@@ -478,7 +482,7 @@ public class GatewayBootController {
 	
 	}
 	
-	@CrossOrigin
+	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
 	@GetMapping("/genexcelreporterror")
 	public void genExcelReportError(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		Cookie cookie = retrieveCookie(request);
@@ -507,7 +511,7 @@ public class GatewayBootController {
 		response.flushBuffer();
 	}
 	
-	@CrossOrigin
+	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
 	@GetMapping("/retrieveexcelreporterror/{idseq}")
 	public void retrieveExcelReportError(HttpServletRequest request, HttpServletResponse response, 
 			@PathVariable("idseq") String idseq) throws Exception {
@@ -687,7 +691,7 @@ public class GatewayBootController {
 	 * @param filename
 	 * @return ALSData
 	 */
-	@CrossOrigin
+	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
 	@GetMapping("/parsefileservice")
 	@ResponseBody
 	public ALSData parseFileService(HttpServletRequest request, HttpServletResponse response,
@@ -699,7 +703,7 @@ public class GatewayBootController {
 		return alsData.getAlsData();
 	}
 	//TODO remove test method testFeed
-	@CrossOrigin
+	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
 	@GetMapping("/testfeed/{id}")
 	public ResponseBodyEmitter testFeed(@PathVariable("id") String amount) {
 		int num = Integer.parseInt(amount);
@@ -729,7 +733,7 @@ public class GatewayBootController {
 	 * @param idseq not null
 	 * @return SseEmitter
 	 */
-	@CrossOrigin
+	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
 	@GetMapping("/testfeedvalidatestatus/{idseq}")
 	public ResponseBodyEmitter feedStatus(@PathVariable("idseq") String idseq) {
 		logger.debug("feedStatus called with idseq: " + idseq);
@@ -774,7 +778,7 @@ public class GatewayBootController {
 	 * @param idseq not null
 	 * @return SseEmitter
 	 */
-	@CrossOrigin
+	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
 	@GetMapping("/feedvalidatestatus")
 	public ResponseBodyEmitter feedStatusByCookie(HttpServletRequest request, HttpServletResponse response) {
 
