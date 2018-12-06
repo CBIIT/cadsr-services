@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -33,6 +34,7 @@ public class ValidatorService {
 	private static final Logger logger = LoggerFactory.getLogger(ValidatorService.class);
 	private static final String errorString = "ERROR";
 	private static final String matchString = "MATCH";
+	private static final String notCheckedString = "NOT CHECKED";
 	private static final String warningString = "WARNING";
 	private static final String retiredArchivedStatus = "RETIRED ARCHIVED";
 	private static final String retiredPhasedOutStatus = "RETIRED PHASED OUT";
@@ -53,13 +55,10 @@ public class ValidatorService {
 	private static final String msg14 = "Fixed Unit {%s} from ALS input data doesn't match with the corresponding Value Domain's Max length {%d}.";
 	private static String congStatus_errors = "ERRORS";
 	private static String congStatus_warn = "WARNINGS";
-	private static List<String> characterDataFormats = Arrays.asList("CHAR", "VARCHAR2", "CHARACTER", "ALPHANUMERIC", "ALPHA DVG", 
-			"NUMERIC ALPHA DVG", "JAVA.LANG.STRING", "JAVA.LANG.CHARACTER", "XSD:STRING", "JAVA.LANG.BOOLEAN");
-	private static List<String> numericDataFormats = Arrays.asList("NUMBER", "NUMERIC", "INTEGER", 
-			"JAVA.LANG.INTEGER", "XSD:INTEGER", "JAVA.LANG.LONG");
-	private static List<String> dateDataFormats = Arrays.asList("DATE", "XSD:DATE", "DATE ALPHA DVG", "DATETIME", "DATE/TIME", 
-			"JAVA.UTIL.DATE");
-	private static List<String> timeDataFormats = Arrays.asList("TIME", "XSD:TIME", "DATETIME", "DATE/TIME");
+	private static List<String> characterDataFormats = Arrays.asList("ALPHANUMERIC", "ALPHA DVG", "CHARACTER", "JAVA.LANG.STRING", "NUMERIC ALPHA DVG", "XSD:STRING");
+	private static List<String> numericDataFormats = Arrays.asList("NUMBER", "INTEGER", "JAVA.LANG.INTEGER", "XSD:INTEGER");
+	private static List<String> dateDataFormats = Arrays.asList("DATE", "XSD:DATE");
+	private static List<String> timeDataFormats = Arrays.asList("TIME", "XSD:TIME");
 	private static final String characters_string = "characters";
 	private static final String patternHolderChar = "d";
 	private static final String patternHolderNum = "9";
@@ -72,6 +71,7 @@ public class ValidatorService {
 	protected static final String superscript_2_str = "(0xb2)";
 	private static final String alternateNames_key = "AlternateNames";
 	private static final String vmPvMeanings_key = "PVMeanings";
+	private static final List<String> nonEnumList = Arrays.asList("TEXT", "LONGTEXT");
 
 	
 	/**
@@ -292,23 +292,24 @@ public class ValidatorService {
 			and caDSR datatypes ,the names are not the same). */ 
 			
 			if (question.getRaveControlType()!=null) {
-				if ("TEXT".equalsIgnoreCase(question.getRaveControlType()) && "N".equalsIgnoreCase(vdType)) {
+				if (isNonEnumerated(question.getRaveControlType().toUpperCase()) && "N".equalsIgnoreCase(vdType)) {
 					question.setControlTypeResult(matchString);
 					if (!question.getRaveCodedData().isEmpty()) {
 						question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg5, question.getRaveCodedData())));
 					}						
-				} else if (!"TEXT".equalsIgnoreCase(question.getRaveControlType()) && "E".equalsIgnoreCase(vdType)) {
+				} else if ((!isNonEnumerated(question.getRaveControlType().toUpperCase())) && "E".equalsIgnoreCase(vdType)) {
 								question.setControlTypeResult(matchString);
 				} else {					
-					Boolean result = false;
-					result = compareDataType (raveDataFormat, vdDataType);
-					if (result)
-						question.setControlTypeResult(matchString);
-					else {
-							question.setControlTypeResult(errorString);
+					String result = compareDataType (raveDataFormat, vdDataType);
+					question.setControlTypeResult(result);
+					if (errorString.equals(result)) {
 							question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg7, errorVal.toArray())));
 							question.setQuestionCongruencyStatus(congStatus_errors); 
 						}
+					// Introducing Not Checked status for those data types that are not part of the 
+					// designated data types that will be verified against the CDE
+					if (notCheckedString.equals(result) && question.getQuestionCongruencyStatus()==null)
+						question.setQuestionCongruencyStatus(congStatus_warn);
 				}	
 			} else {
 				question.setControlTypeResult(errorString);
@@ -422,19 +423,20 @@ public class ValidatorService {
 	 * @return CCCQuestion
 	 */
 	protected static CCCQuestion checkDataTypeCheckerResult (CCCQuestion question, String raveDataFormat, String vdDataType) {
-		Boolean result = false;
 		List<Object> errorVal = new ArrayList<Object>();
 		question.setCdeDataType(vdDataType);
 		errorVal.add(raveDataFormat);
 		errorVal.add(vdDataType);					
-		result = compareDataType (raveDataFormat, vdDataType);
-		if (result)
-			question.setDatatypeCheckerResult(matchString);
-		else {
-			question.setDatatypeCheckerResult(errorString);
-			question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg11, errorVal.toArray())));			
+		String result = compareDataType (raveDataFormat, vdDataType);
+		question.setDatatypeCheckerResult(result);
+		if (errorString.equals(result)) {
+			question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg11, errorVal.toArray())));
 			question.setQuestionCongruencyStatus(congStatus_errors);
 		}
+		// Introducing Not Checked status for those data types that are not part of the 
+		// designated data types that will be verified against the CDE
+		if (notCheckedString.equals(result) && question.getQuestionCongruencyStatus()==null)
+			question.setQuestionCongruencyStatus(congStatus_warn);
 		return question;
 	}
 	
@@ -701,27 +703,55 @@ public class ValidatorService {
 	 * @param vdDataType
 	 * @return Boolean
 	 */
-	protected static Boolean compareDataType (String raveDataFormat, String vdDataType) {
+	protected static String compareDataType (String raveDataFormat, String vdDataType) {
 		Boolean result = false;
-		if (raveDataFormat!=null) {
+		if (raveDataFormat!=null && (raveDataFormat.trim().length() > 0)) {
 			if (vdDataType!=null) {
 				if (raveDataFormat.startsWith("$")) {
 					if (characterDataFormats.contains(vdDataType.toUpperCase())) 
 						result = true;
+					else
+						return notCheckedString;
 				} else if (raveDataFormat.toUpperCase().startsWith("DD") || raveDataFormat.toUpperCase().startsWith("DY")  
 						|| raveDataFormat.toUpperCase().startsWith("MM") || raveDataFormat.toUpperCase().startsWith("MON") 
 						|| raveDataFormat.toUpperCase().startsWith("YY") || raveDataFormat.toUpperCase().startsWith("YYYY")) {
 					if (dateDataFormats.contains(vdDataType.toUpperCase())) 
 						result = true;
+					else
+						return notCheckedString;
 				} else if (raveDataFormat.toUpperCase().startsWith("HH") || raveDataFormat.toUpperCase().startsWith("TIME")) {
 					if (timeDataFormats.contains(vdDataType.toUpperCase()))
 						result = true;
-				} else {
+					else
+						return notCheckedString;
+				} else if (NumberUtils.isNumber(raveDataFormat)) {
 					if (numericDataFormats.contains(vdDataType.toUpperCase()))
 						result = true;
-				}
+					else
+						return notCheckedString;
+				} else 
+					// Introducing Not Checked status for those data types that are not part of the 
+					// designated data types that will be verified against the CDE
+					return notCheckedString; 
 			}
 		}
-		return result;
+		if (result)
+			return matchString;
+		else 
+			return errorString;
+
 	}
+	
+	/**
+	 * Checking if a given data type is non-enumerated
+	 * @param dataType
+	 * @return Boolean
+	 */	
+	protected static Boolean isNonEnumerated (String dataType) {
+		if (nonEnumList.contains(dataType.toUpperCase()))
+			return true;
+		else
+			return false;
+	}	
+	
 }

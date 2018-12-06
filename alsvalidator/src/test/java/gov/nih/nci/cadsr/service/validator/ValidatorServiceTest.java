@@ -22,7 +22,10 @@ public class ValidatorServiceTest {
 	DataElementDetails deDetails; 	
 	private static final String retiredArchivedStatus = "RETIRED ARCHIVED";
 	private static final String retiredPhasedOutStatus = "RETIRED PHASED OUT";
-	private static final String retiredWithdrawnStatus = "RETIRED WITHDRAWN";	
+	private static final String retiredWithdrawnStatus = "RETIRED WITHDRAWN";
+	private static final String errorString = "ERROR";
+	private static final String matchString = "MATCH";
+	private static final String notCheckedString = "NOT CHECKED";	
 	private static final String errMsg1 = "CDE has been retired.";
 	private static final String errMsg2 = "Newer version of CDE exists: {%.1f}.";	
 	
@@ -105,92 +108,120 @@ public class ValidatorServiceTest {
 	
 	@Test
 	public void testCompareDataTypeString1 () {
-		Boolean expectedResult = true;
-		Boolean actualResult = ValidatorService.compareDataType("$8", "ALPHANUMERIC");
+		String expectedResult = matchString;
+		String actualResult = ValidatorService.compareDataType("$12", "ALPHANUMERIC");
 		assertEquals(expectedResult, actualResult);
 	}
 	
 	@Test
 	public void testCompareDataTypeString2 () {
-		Boolean expectedResult = true;
-		Boolean actualResult = ValidatorService.compareDataType("$700", "character");
+		String expectedResult = matchString;
+		String actualResult = ValidatorService.compareDataType("$700", "character");
+		assertEquals(expectedResult, actualResult);
+	}
+	
+	@Test
+	public void testCompareDataTypeStringWithSpacesOnly () {
+		String expectedResult = errorString;
+		String actualResult = ValidatorService.compareDataType("  ", "JAVA.LANG.STRING");
 		assertEquals(expectedResult, actualResult);
 	}	
+	
+	@Test
+	public void testCompareDataTypeStringNullCheck () {
+		String expectedResult = errorString;
+		String actualResult = ValidatorService.compareDataType(null, "character");
+		assertEquals(expectedResult, actualResult);
+	}	
+	
+	@Test
+	public void testCompareDataTypeNotChecked1 () {
+		String expectedResult = notCheckedString;
+		String actualResult = ValidatorService.compareDataType("dd:mm:yy hh:nn", "DATETIME");
+		assertEquals(expectedResult, actualResult);
+	}	
+	
+	@Test
+	public void testCompareDataTypeNotChecked2 () {
+		String expectedResult = notCheckedString;
+		String actualResult = ValidatorService.compareDataType("7.1", "JAVA.LANG.LONG");
+		assertEquals(expectedResult, actualResult);
+	}		
 
 	@Test
 	public void testCompareDataTypeDate1 () {
-		Boolean expectedResult = true;
-		Boolean actualResult = ValidatorService.compareDataType("mon dd yyyy", "DATE");
+		String expectedResult = matchString;
+		String actualResult = ValidatorService.compareDataType("mon dd yyyy", "DATE");
 		assertEquals(expectedResult, actualResult);
 	}				
 	
 	@Test
 	public void testCompareDataTypeDate2 () {
-		Boolean expectedResult = true;
-		Boolean actualResult = ValidatorService.compareDataType("MM DD YYYY", "DATE");
+		String expectedResult = matchString;
+		String actualResult = ValidatorService.compareDataType("MM DD YYYY", "DATE");
 		assertEquals(expectedResult, actualResult);
 	}					
 
 	@Test
 	public void testCompareDataTypeDate3 () {
-		Boolean expectedResult = true;
-		Boolean actualResult = ValidatorService.compareDataType("yy mm dd", "DATE");
+		String expectedResult = matchString;
+		String actualResult = ValidatorService.compareDataType("yy mm dd", "DATE");
 		assertEquals(expectedResult, actualResult);
 	}					
 	
 	@Test
 	public void testCompareDataTypeDate4 () {
-		Boolean expectedResult = true;
-		Boolean actualResult = ValidatorService.compareDataType("yyyy mm dd", "DATE");
+		String expectedResult = matchString;
+		String actualResult = ValidatorService.compareDataType("yyyy mm dd", "DATE");
 		assertEquals(expectedResult, actualResult);
 	}						
 	
 	@Test
 	public void testCompareDataTypeDate5 () {
-		Boolean expectedResult = true;
-		Boolean actualResult = ValidatorService.compareDataType("DD MM YY", "DATE");
+		String expectedResult = matchString;
+		String actualResult = ValidatorService.compareDataType("DD MM YY", "DATE");
 		assertEquals(expectedResult, actualResult);
 	}							
 	
 	@Test
 	public void testCompareDataTypeDate6 () {
-		Boolean expectedResult = true;
-		Boolean actualResult = ValidatorService.compareDataType("DY MTH YR", "DATE");
+		String expectedResult = matchString;
+		String actualResult = ValidatorService.compareDataType("DY MTH YR", "DATE");
 		assertEquals(expectedResult, actualResult);
 	}								
 	
 	@Test
 	public void testCompareDataTypeTime1 () {
-		Boolean expectedResult = true;
-		Boolean actualResult = ValidatorService.compareDataType("HH:nn", "TIME");
+		String expectedResult = matchString;
+		String actualResult = ValidatorService.compareDataType("HH:nn", "TIME");
 		assertEquals(expectedResult, actualResult);
 	}									
 	
 	@Test
 	public void testCompareDataTypeTime2 () {
-		Boolean expectedResult = true;
-		Boolean actualResult = ValidatorService.compareDataType("hh:mm:ss", "TIME");
+		String expectedResult = matchString;
+		String actualResult = ValidatorService.compareDataType("hh:mm:ss", "TIME");
 		assertEquals(expectedResult, actualResult);
 	}										
 	
 	@Test
 	public void testCompareDataTypeTime3 () {
-		Boolean expectedResult = true;
-		Boolean actualResult = ValidatorService.compareDataType("TIME (HR(24):MN)", "TIME");
+		String expectedResult = matchString;
+		String actualResult = ValidatorService.compareDataType("TIME (HR(24):MN)", "TIME");
 		assertEquals(expectedResult, actualResult);
 	}
 	
 	@Test
 	public void testCompareDataTypeNumeric1 () {
-		Boolean expectedResult = true;
-		Boolean actualResult = ValidatorService.compareDataType("1024", "NUMBER");
+		String expectedResult = matchString;
+		String actualResult = ValidatorService.compareDataType("1024", "NUMBER");
 		assertEquals(expectedResult, actualResult);
 	}	
 	
 	@Test
 	public void testCompareDataTypeNumeric2 () {
-		Boolean expectedResult = true;
-		Boolean actualResult = ValidatorService.compareDataType("5.2", "JAVA.LANG.LONG");
+		String expectedResult = matchString;
+		String actualResult = ValidatorService.compareDataType("5", "JAVA.LANG.INTEGER");
 		assertEquals(expectedResult, actualResult);
 	}		
 	
@@ -234,5 +265,47 @@ public class ValidatorServiceTest {
 		CCCQuestion actualResult = ValidatorService.checkCdeVersions(cdeDetails, question);
 		assertEquals(String.format(errMsg2, latestVersion), actualResult.getMessage());
 	}
+	
+	@Test
+	public void testIsNonEnumeratedN1() {
+		Boolean expectedResult = true;
+		Boolean actualResult = ValidatorService.isNonEnumerated("TEXT");
+		assertEquals(expectedResult, actualResult);
+	}	
+	
+	@Test
+	public void testIsNonEnumeratedN2() {
+		Boolean expectedResult = true;
+		Boolean actualResult = ValidatorService.isNonEnumerated("longtext");
+		assertEquals(expectedResult, actualResult);
+	}		
+	
+	@Test
+	public void testIsNonEnumeratedE1() {
+		Boolean expectedResult = false;
+		Boolean actualResult = ValidatorService.isNonEnumerated("DropDownList");
+		assertEquals(expectedResult, actualResult);
+	}	
+	
+	@Test
+	public void testIsNonEnumeratedE2() {
+		Boolean expectedResult = false;
+		Boolean actualResult = ValidatorService.isNonEnumerated("RADIOBUTTON");
+		assertEquals(expectedResult, actualResult);
+	}
+	
+	@Test
+	public void testIsNonEnumeratedE3() {
+		Boolean expectedResult = false;
+		Boolean actualResult = ValidatorService.isNonEnumerated("dynamic searchlist");
+		assertEquals(expectedResult, actualResult);
+	}	
+	
+	@Test
+	public void testIsNonEnumeratedE4() {
+		Boolean expectedResult = false;
+		Boolean actualResult = ValidatorService.isNonEnumerated("CheckBox");
+		assertEquals(expectedResult, actualResult);
+	}	
 	
 }
