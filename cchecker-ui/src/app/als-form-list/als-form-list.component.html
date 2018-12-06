@@ -15,7 +15,7 @@
         <button [disabled]="!(checkedItems | async)?.length || validating" class="btn btn-primary" (click)="checkForms()">Check Form<span *ngIf="(checkedItems | async)?.length>1">s</span></button>
     </div><br />
     <div class="formCriteriaCheckboxes" style="border-bottom:1px solid #000">
-        <div>
+        <div style="display:none">
             <input type="checkbox" id="checkUom" name="checkUom" (change)="setFormListOptionCheckbox($event)" ([ngModel])="checkUom" [checked]="(formListData | async)?.checkUom">
             <label for="checkUom">Check UOM</label>        
         </div>
@@ -23,7 +23,7 @@
             <input type="checkbox" id="checkStdCrfCde" name="checkStdCrfCde" (change)="setFormListOptionCheckbox($event)" ([ngModel])="checkStdCrfCde" [checked]="(formListData | async)?.checkStdCrfCde">
             <label for="checkStdCrfCde">Check against CDEs in Standard CRF Modules</label>        
         </div>
-        <div>
+        <div style="display:none">
             <input type="checkbox" id="mustDisplayException" name="mustDisplayException" (change)="setFormListOptionCheckbox($event)" ([ngModel])="mustDisplayException" [checked]="(formListData | async)?.mustDisplayException">
             <label for="mustDisplayException">Display Exception Details</label>        
         </div>  
@@ -88,7 +88,7 @@
 <br />
 
     <div class="formCriteriaCheckboxes">
-        <div>
+        <div style="display:none">
             <input type="checkbox" id="checkUom_1" name="checkUom" (change)="setFormListOptionCheckbox($event)" ([ngModel])="checkUom" [checked]="(formListData | async)?.checkUom">
             <label for="checkUom_1">Check UOM</label>        
         </div>
@@ -96,7 +96,7 @@
             <input type="checkbox" id="checkStdCrfCde_1" name="checkStdCrfCde" (change)="setFormListOptionCheckbox($event)" ([ngModel])="checkStdCrfCde" [checked]="(formListData | async)?.checkStdCrfCde">
             <label for="checkStdCrfCde_1">Check against CDEs in Standard CRF Modules</label>        
         </div>
-        <div>
+        <div style="display:none">
             <input type="checkbox" id="mustDisplayException_1" name="mustDisplayException" (change)="setFormListOptionCheckbox($event)" ([ngModel])="mustDisplayException" [checked]="(formListData | async)?.mustDisplayException">
             <label for="mustDisplayException_1">Display Exception Details</label>        
         </div>  
