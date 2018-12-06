@@ -1,13 +1,21 @@
 package gov.nih.nci.cadsr.cchecker;
 
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+@Controller
 public class IndexController {
+	// inject via application.properties
+	@Value("${welcome.message:test}")
+	private String message = "Hello caDSR CDE Congruency Checker World";
     @RequestMapping(method= RequestMethod.GET,value="/")
-    String index(){
-        return "caDSR CDE Congrruency Checker";
+    String index(Map<String, Object> model){
+    	model.put("pageTitle", this.message);;
+        return "index";
     }
 }
