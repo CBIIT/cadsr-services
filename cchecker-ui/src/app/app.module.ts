@@ -38,7 +38,7 @@ const APP_ROUTES: Routes = [
     FormsModule,
     HttpClientModule,
     NgbModule,
-    RouterModule.forRoot(APP_ROUTES)
+    RouterModule.forRoot(APP_ROUTES, { useHash: true })
 
   ],
   providers: [],
