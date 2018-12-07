@@ -28,7 +28,7 @@ export class RestService {
     const checkUom = formListData['checkUom'] ? 'true':'false';
     const checkCRF = formListData['checkStdCrfCde'] ? 'true':'false';
     const displayExceptions = formListData['mustDisplayException'] ? 'true':'false';
-    return this.http.post(`${this.apiUrl}/gateway/checkservice`,checkedItems,
+    return this.http.post(`${this.apiUrl}/gateway/checkservice?checkCRF=${checkCRF}`,checkedItems,
     {
       withCredentials:true
     })
