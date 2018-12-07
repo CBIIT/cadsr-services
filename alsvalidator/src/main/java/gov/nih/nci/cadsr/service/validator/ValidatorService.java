@@ -707,6 +707,8 @@ public class ValidatorService {
 	 * @param raveDataFormat
 	 * @param vdDataType
 	 * @return Boolean
+	 * 	Introducing Not Checked status for those data types that are not part of the 
+		designated data types that will be verified against the CDE
 	 */
 	protected static String compareDataType (String raveDataFormat, String vdDataType) {
 		Boolean result = false;
@@ -715,20 +717,38 @@ public class ValidatorService {
 				if (raveDataFormat.startsWith("$")) {
 					if (characterDataFormats.contains(vdDataType.toUpperCase())) 
 						result = true;
+					else if (dateDataFormats.contains(vdDataType.toUpperCase()) || timeDataFormats.contains(vdDataType.toUpperCase())
+							|| numericDataFormats.contains(vdDataType.toUpperCase())) {
+						result = false;
+					} else 
+						return notCheckedString; 
 				} else if (raveDataFormat.toUpperCase().startsWith("DD") || raveDataFormat.toUpperCase().startsWith("DY")  
 						|| raveDataFormat.toUpperCase().startsWith("MM") || raveDataFormat.toUpperCase().startsWith("MON") 
 						|| raveDataFormat.toUpperCase().startsWith("YY") || raveDataFormat.toUpperCase().startsWith("YYYY")) {
 					if (dateDataFormats.contains(vdDataType.toUpperCase())) 
 						result = true;
+					else if (characterDataFormats.contains(vdDataType.toUpperCase()) || timeDataFormats.contains(vdDataType.toUpperCase())
+							|| numericDataFormats.contains(vdDataType.toUpperCase())) {
+						result = false;
+					} else 
+						return notCheckedString;					
 				} else if (raveDataFormat.toUpperCase().startsWith("HH") || raveDataFormat.toUpperCase().startsWith("TIME")) {
 					if (timeDataFormats.contains(vdDataType.toUpperCase()))
 						result = true;
+					else if (characterDataFormats.contains(vdDataType.toUpperCase()) || dateDataFormats.contains(vdDataType.toUpperCase())
+							|| numericDataFormats.contains(vdDataType.toUpperCase())) {
+						result = false;
+					} else 
+						return notCheckedString;
 				} else if (NumberUtils.isNumber(raveDataFormat)) {
 					if (numericDataFormats.contains(vdDataType.toUpperCase()))
 						result = true;
+					else if (characterDataFormats.contains(vdDataType.toUpperCase()) || dateDataFormats.contains(vdDataType.toUpperCase())
+							|| timeDataFormats.contains(vdDataType.toUpperCase())) {
+						result = false;
+					} else 
+						return notCheckedString;
 				} else 
-					// Introducing Not Checked status for those data types that are not part of the 
-					// designated data types that will be verified against the CDE
 					return notCheckedString; 
 			}
 		}

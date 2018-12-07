@@ -137,14 +137,14 @@ public class ValidatorServiceTest {
 	@Test
 	public void testCompareDataTypeNotChecked1 () {
 		String expectedResult = notCheckedString;
-		String actualResult = ValidatorService.compareDataType("dd:mm:yy hh:nn", "DATETIME");
+		String actualResult = ValidatorService.compareDataType("dd-mm-yyyy hh:nn:ss", "DATETIME");
 		assertEquals(expectedResult, actualResult);
 	}	
 	
 	@Test
 	public void testCompareDataTypeNotChecked2 () {
 		String expectedResult = notCheckedString;
-		String actualResult = ValidatorService.compareDataType("7.1", "JAVA.LANG.LONG");
+		String actualResult = ValidatorService.compareDataType("NNN TTTT", "java.lang.Object");
 		assertEquals(expectedResult, actualResult);
 	}		
 
