@@ -1,5 +1,7 @@
 function getCookie(cname) {
+	//alert("getCookie " + cname);
     var name = cname + "=";
+    //alert("document.cookie " + document.cookie);
     var ca = document.cookie.split(';');
     for(var i = 0; i < ca.length; i++) {
         var c = ca[i];
