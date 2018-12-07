@@ -55,7 +55,8 @@ public class ValidatorService {
 	private static final String msg14 = "Fixed Unit {%s} from ALS input data doesn't match with the corresponding Value Domain's Max length {%d}.";
 	private static String congStatus_errors = "ERRORS";
 	private static String congStatus_warn = "WARNINGS";
-	private static List<String> characterDataFormats = Arrays.asList("ALPHANUMERIC", "ALPHA DVG", "CHARACTER", "JAVA.LANG.STRING", "NUMERIC ALPHA DVG", "XSD:STRING");
+	private static List<String> characterDataFormats = Arrays.asList("ALPHANUMERIC", "ALPHA DVG", "CHARACTER", "JAVA.LANG.CHARACTER", "JAVA.LANG.STRING", 
+			"NUMERIC ALPHA DVG", "XSD:STRING");
 	private static List<String> numericDataFormats = Arrays.asList("NUMBER", "INTEGER", "JAVA.LANG.INTEGER", "XSD:INTEGER");
 	private static List<String> dateDataFormats = Arrays.asList("DATE", "XSD:DATE");
 	private static List<String> timeDataFormats = Arrays.asList("TIME", "XSD:TIME");
@@ -299,6 +300,10 @@ public class ValidatorService {
 					}						
 				} else if ((!isNonEnumerated(question.getRaveControlType().toUpperCase())) && "E".equalsIgnoreCase(vdType)) {
 								question.setControlTypeResult(matchString);
+				} else	if (isNonEnumerated(question.getRaveControlType().toUpperCase()) && "E".equalsIgnoreCase(vdType)) {
+					question.setControlTypeResult(errorString);						
+					question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg7, errorVal.toArray())));
+					question.setQuestionCongruencyStatus(congStatus_errors); 					
 				} else {					
 					String result = compareDataType (raveDataFormat, vdDataType);
 					question.setControlTypeResult(result);
@@ -710,25 +715,17 @@ public class ValidatorService {
 				if (raveDataFormat.startsWith("$")) {
 					if (characterDataFormats.contains(vdDataType.toUpperCase())) 
 						result = true;
-					else
-						return notCheckedString;
 				} else if (raveDataFormat.toUpperCase().startsWith("DD") || raveDataFormat.toUpperCase().startsWith("DY")  
 						|| raveDataFormat.toUpperCase().startsWith("MM") || raveDataFormat.toUpperCase().startsWith("MON") 
 						|| raveDataFormat.toUpperCase().startsWith("YY") || raveDataFormat.toUpperCase().startsWith("YYYY")) {
 					if (dateDataFormats.contains(vdDataType.toUpperCase())) 
 						result = true;
-					else
-						return notCheckedString;
 				} else if (raveDataFormat.toUpperCase().startsWith("HH") || raveDataFormat.toUpperCase().startsWith("TIME")) {
 					if (timeDataFormats.contains(vdDataType.toUpperCase()))
 						result = true;
-					else
-						return notCheckedString;
 				} else if (NumberUtils.isNumber(raveDataFormat)) {
 					if (numericDataFormats.contains(vdDataType.toUpperCase()))
 						result = true;
-					else
-						return notCheckedString;
 				} else 
 					// Introducing Not Checked status for those data types that are not part of the 
 					// designated data types that will be verified against the CDE
