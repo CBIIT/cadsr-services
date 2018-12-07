@@ -9,7 +9,7 @@ RUN npm install -g @angular/cli \
     && git config --global user.email "you@example.com" \ 
     && git config --global user.name "Your Name" 
 
-ADD conf/httpd.conf /etc/httpd
+ADD conf/httpd.conf /etc/httpd/conf
 ADD conf/.htaccess /etc/httpd/conf.d
 ADD run.sh /usr/bin/
 RUN chmod 777 /usr/bin/run.sh
