@@ -147,6 +147,20 @@ public class ValidatorServiceTest {
 		String actualResult = ValidatorService.compareDataType("NNN TTTT", "java.lang.Object");
 		assertEquals(expectedResult, actualResult);
 	}		
+	
+	@Test
+	public void testCompareDataTypeNotCheckedDTNull () {
+		String expectedResult = notCheckedString;
+		String actualResult = ValidatorService.compareDataType("", "java.lang.Byte");
+		assertEquals(expectedResult, actualResult);
+	}
+	
+	@Test
+	public void testCompareDataTypeNotCheckedDTEmpty () {
+		String expectedResult = notCheckedString;
+		String actualResult = ValidatorService.compareDataType(null, "java.lang.Byte");
+		assertEquals(expectedResult, actualResult);
+	}	
 
 	@Test
 	public void testCompareDataTypeDate1 () {

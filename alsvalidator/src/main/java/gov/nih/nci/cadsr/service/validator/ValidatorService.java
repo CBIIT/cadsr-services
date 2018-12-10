@@ -751,6 +751,16 @@ public class ValidatorService {
 				} else 
 					return notCheckedString; 
 			}
+		} else {
+			// Adding 'Not checked' compare for RAVE Data type (Data format) is empty/null in the ALS file
+			if (vdDataType!=null && vdDataType.trim().length() > 0) {
+				if (characterDataFormats.contains(vdDataType.toUpperCase()) || dateDataFormats.contains(vdDataType.toUpperCase())
+						|| timeDataFormats.contains(vdDataType.toUpperCase()) || numericDataFormats.contains(vdDataType.toUpperCase())) {
+						result = false;
+					} else {
+						return notCheckedString;
+					}
+			}
 		}
 		if (result)
 			return matchString;
