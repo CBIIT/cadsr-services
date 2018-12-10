@@ -799,6 +799,14 @@ public class ReportGeneratorFeed implements ReportOutput {
 	 */	
 	protected static CCCReport addFormNamestoForms (CCCReport cccReport, List<ALSForm> alsForms) {
 		for (CCCForm completedForm : cccReport.getCccForms()) {
+			if (completedForm == null) {
+				logger.error("RaveFormOid is null");
+				continue;
+			}
+			else if (StringUtils.isBlank(completedForm.getRaveFormOid())) {
+				logger.error("RaveFormOid is null, form name: " + completedForm.getFormName());
+				continue;
+			}
 			for (ALSForm alsForm: alsForms) {
 				if (completedForm.getRaveFormOid().equalsIgnoreCase(alsForm.getFormOid())) {
 					completedForm.setFormName(alsForm.getDraftFormName());
