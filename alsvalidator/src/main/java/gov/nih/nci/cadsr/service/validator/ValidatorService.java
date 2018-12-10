@@ -536,15 +536,25 @@ public class ValidatorService {
 		List<Object> errorVal = new ArrayList<Object>();
 		errorVal.add(raveDataFormat);
 		errorVal.add(vdDisplayFormat);
-		if (raveDataFormat!=null) {
-				if (raveDataFormat.equals(vdDisplayFormat)) {
-					question.setFormatCheckerResult(matchString);
-				} else {
-					question.setFormatCheckerResult(warningString);
-					question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg13, errorVal.toArray())));
-					if (question.getQuestionCongruencyStatus()==null)
-						question.setQuestionCongruencyStatus(congStatus_warn);
-				} 
+		Boolean result = false;
+		if (raveDataFormat!=null && raveDataFormat.trim().length() > 0) {
+				if (raveDataFormat.equals(vdDisplayFormat)) 
+					result = true;					
+				else 
+					result = false;
+		} else {
+			if (vdDisplayFormat!=null && vdDisplayFormat.trim().length() > 0)
+				result = false;
+			else
+				result = true;
+		}
+		if (result) {
+			question.setFormatCheckerResult(matchString);			
+		} else {
+			question.setFormatCheckerResult(warningString);
+			question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg13, errorVal.toArray())));
+			if (question.getQuestionCongruencyStatus()==null)
+				question.setQuestionCongruencyStatus(congStatus_warn);
 		}
 		return question;
 	}
