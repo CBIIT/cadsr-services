@@ -25,6 +25,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.nih.nci.cadsr.data.ALSCrfDraft;
 import gov.nih.nci.cadsr.data.ALSData;
@@ -38,7 +39,7 @@ import gov.nih.nci.cadsr.parser.Parser;
 
 public class AlsParser implements Parser{
 
-	private static final Logger logger = LoggerFactory.getLogger((AlsParser.class);
+	private static final Logger logger = LoggerFactory.getLogger(AlsParser.class);
 	private static DataFormatter dataFormatter = new DataFormatter();
 	private static String reportDateFormat = "MM/dd/yyyy";
 	private static String crfDraftSheetName = "CRFDraft";
