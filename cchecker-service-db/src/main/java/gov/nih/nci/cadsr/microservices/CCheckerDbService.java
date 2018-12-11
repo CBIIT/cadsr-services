@@ -10,11 +10,14 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Properties;
 
+import javax.sql.DataSource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -54,6 +57,12 @@ public class CCheckerDbService {
 		if (! uploadeDir.exists())	{
 			uploadeDir.mkdirs();//OK for testing only
 		}
-		SpringApplication.run(CCheckerDbService.class, args);
+		final ApplicationContext ctx = SpringApplication.run(CCheckerDbService.class, args);
+		DataSource ds = ctx.getBean(DataSource.class);
+		if (ds != null)
+			logger.debug("DataSource bean in use: "+ ds.getClass().getName());
+		else {
+			logger.error("!!! DataSource bean not defined !!!");
+		}
 	}
 }

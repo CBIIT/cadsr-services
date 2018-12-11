@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -25,6 +24,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.jsoup.Jsoup;
+import org.slf4j.Logger;
 
 import gov.nih.nci.cadsr.data.ALSCrfDraft;
 import gov.nih.nci.cadsr.data.ALSData;
@@ -38,7 +38,7 @@ import gov.nih.nci.cadsr.parser.Parser;
 
 public class AlsParser implements Parser{
 
-	private static final Logger logger = Logger.getLogger(AlsParser.class);
+	private static final Logger logger = LoggerFactory.getLogger((AlsParser.class);
 	private static DataFormatter dataFormatter = new DataFormatter();
 	private static String reportDateFormat = "MM/dd/yyyy";
 	private static String crfDraftSheetName = "CRFDraft";
