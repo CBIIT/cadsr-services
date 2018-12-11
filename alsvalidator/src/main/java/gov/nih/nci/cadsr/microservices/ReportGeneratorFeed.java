@@ -237,6 +237,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 
 
 		List<CCCQuestion> questionsList = new ArrayList<CCCQuestion>();
+		List<CCCQuestion> congQuestionsList = new ArrayList<CCCQuestion>();
 		List<NrdsCde> nrdsCdeList = new ArrayList<NrdsCde>();
 		List<StandardCrfCde> standardCrfCdeList = new ArrayList<StandardCrfCde>();
 		List<NrdsCde> missingNrdsCdesList = new ArrayList<NrdsCde>();
@@ -334,9 +335,12 @@ public class ReportGeneratorFeed implements ReportOutput {
 									standardCrfCdeList.add(buildCrfCde(cdeCrfData, cdeDetails.getDataElement().getDataElementDetails().getLongName())); 
 								}
 							}
-
 							if (question.getQuestionCongruencyStatus() != null) {
-								questionsList.add(question);
+								if (congStatus_congruent.equals(question.getQuestionCongruencyStatus())) {
+									congQuestionsList.add(question);	
+								} else {
+									questionsList.add(question);
+								}										
 							}
 						} else {
 							totalQuestWithoutCde++;
@@ -407,7 +411,8 @@ public class ReportGeneratorFeed implements ReportOutput {
 		cccReport.setMissingNrdsCdeList(missingNrdsCdesList);
 		cccReport.setCountNrdsMissing(missingNrdsCdesList.size());
 		cccReport.setNrdsCdeList(nrdsCdeList);
-		cccReport.setMissingStandardCrfCdeList(missingStdCrfCdeList);		
+		cccReport.setMissingStandardCrfCdeList(missingStdCrfCdeList);
+		cccReport.setCountCongruentQuestions(congQuestionsList.size());
 		cccReport = computeFormsAndQuestionsCount(cccReport);		
 		cccReport = addFormNamestoForms(cccReport, alsData.getForms());		
 		requestStatusMap.remove(sessionId);
@@ -649,7 +654,6 @@ public class ReportGeneratorFeed implements ReportOutput {
 		int stdOptMissingCount = 0;
 		int stdCondMissingCount = 0;
 		int countQuestChecked = 0;
-		int countQuestCongruent = 0;
 		int countQuestWarn = 0;
 		int countQuestError = 0;
 		int manCrfCong = 0;
@@ -674,20 +678,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 			countQuestChecked = countQuestChecked + tempForm.getQuestions().size();
 			for (CCCQuestion tempQuestion : tempForm.getQuestions()) {
 				if (tempQuestion.getQuestionCongruencyStatus()!=null) {
-					if (congStatus_congruent.equals(tempQuestion.getQuestionCongruencyStatus())) {
-						countQuestCongruent++;
-						if (tempQuestion.getNciCategory()!=null) {
-							if (tempQuestion.getNciCategory().indexOf(mandatory_crf) > -1) {
-								manCrfCong++;	
-							} 
-							if (tempQuestion.getNciCategory().indexOf(conditional_crf) > -1) {
-								condCrfCong++;
-							}
-							if (tempQuestion.getNciCategory().indexOf(optional_crf) > -1) {
-								optCrfCong++;
-							}
-						}
-					} else if (congStatus_warn.equals(tempQuestion.getQuestionCongruencyStatus())) {
+					if (congStatus_warn.equals(tempQuestion.getQuestionCongruencyStatus())) {
 						countQuestWarn++;
 						if (tempQuestion.getNciCategory()!=null) {
 							if (tempQuestion.getNciCategory().indexOf(mandatory_crf) > -1) {
@@ -718,7 +709,6 @@ public class ReportGeneratorFeed implements ReportOutput {
 			}
 		}
 		report.setCountQuestionsChecked(countQuestChecked);
-		report.setCountCongruentQuestions(countQuestCongruent);
 		report.setCountQuestionsWithWarnings(countQuestWarn);
 		report.setCountQuestionsWithErrors(countQuestError);
 		report.setCountManCrfMissing(stdManMissingCount);

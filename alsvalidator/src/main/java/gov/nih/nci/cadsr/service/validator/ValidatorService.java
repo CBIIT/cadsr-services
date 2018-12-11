@@ -55,6 +55,7 @@ public class ValidatorService {
 	private static final String msg14 = "Fixed Unit {%s} from ALS input data doesn't match with the corresponding Value Domain's Max length {%d}.";
 	private static String congStatus_errors = "ERRORS";
 	private static String congStatus_warn = "WARNINGS";
+	private static String congStatus_congruent = "CONGRUENT";	
 	private static List<String> characterDataFormats = Arrays.asList("ALPHANUMERIC", "ALPHA DVG", "CHARACTER", "JAVA.LANG.CHARACTER", "JAVA.LANG.STRING", 
 			"NUMERIC ALPHA DVG", "XSD:STRING");
 	private static List<String> numericDataFormats = Arrays.asList("NUMBER", "INTEGER", "JAVA.LANG.INTEGER", "XSD:INTEGER");
@@ -164,6 +165,9 @@ public class ValidatorService {
 			//Comparing the ALS RAVE Data Format with caDSR Value Domain Display Format
 			question = checkFormatCheckerResult (question, field.getDataFormat(), cdeDetails.getValueDomain().getValueDomainDetails().getDisplayFormat());
 
+			// Setting Question Congruency Status to Congruent if it's not WARNINGS or ERRORS
+			if (question.getQuestionCongruencyStatus() == null)
+				question.setQuestionCongruencyStatus(congStatus_congruent);
 		}
 
 		} catch (NullPointerException npe) {
