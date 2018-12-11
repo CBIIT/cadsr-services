@@ -5,20 +5,17 @@ package gov.nih.nci.cadsr.microservices;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
 import gov.nih.nci.cadsr.data.CCCForm;
 import gov.nih.nci.cadsr.data.CCCQuestion;
 import gov.nih.nci.cadsr.data.CCCReport;
@@ -27,7 +24,7 @@ import gov.nih.nci.cadsr.data.StandardCrfCde;
 
 public class ExcelReportGenerator {
 
-		private static final Logger logger = Logger.getLogger(ExcelReportGenerator.class);
+		private static final Logger logger = LoggerFactory.getLogger(ExcelReportGenerator.class);
 		private static String formHeader_1 = "View of Expanded Results for ";
 		private static String formHeader_2 = " form";	
 		private static String summaryFormsHeader = "Report Summary - Click on Form Name to expand results";
