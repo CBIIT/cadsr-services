@@ -234,6 +234,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 		int totalNrdsCong = 0;
 		int totalNrdsWarn = 0;
 		int totalNrdsError = 0;
+		int countQuestChecked = 0;
 
 
 		List<CCCQuestion> questionsList = new ArrayList<CCCQuestion>();
@@ -274,8 +275,10 @@ public class ReportGeneratorFeed implements ReportOutput {
 							}
 							form.setRaveFormOid(formOid);
 							form.setCountTotalQuestions(totalQuestCount);
+							form.setTotalQuestionsChecked(countQuestChecked);
 							formsList.add(form);
 							totalQuestCount = 0;
+							countQuestChecked = 0;
 							formOid = alsField.getFormOid();
 							form = new CCCForm();
 							questionsList = new ArrayList<CCCQuestion>();
@@ -289,6 +292,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 					question.setRaveFormOId(alsField.getFormOid());
 					String draftFieldName = alsField.getDraftFieldName();
 					if (!"FORM_OID".equals(alsField.getFieldOid())) {//Skipping rows that do not have CDEs/questions to validate i.e., rows that have FORM_OID in FieldOid
+						countQuestChecked++;
 					if (draftFieldName!=null) {
 						if (draftFieldName.indexOf(publicid_prefix) > -1 && draftFieldName.indexOf(version_prefix) > -1) {
 							question = assignCdeIdVersionToQuestion (question, draftFieldName);
@@ -361,7 +365,6 @@ public class ReportGeneratorFeed implements ReportOutput {
 						}
 				}
 					} else {
-						totalQuestWithoutCde++;
 						if (alsField.getDefaultValue()!=null) {
 							if (alsField.getDefaultValue().indexOf(publicid_prefix) > -1 && alsField.getDefaultValue().indexOf(version_prefix) > -1) {
 								form = assignIdVersionToForm(form, alsField.getDefaultValue());
@@ -371,6 +374,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 			}
 		}
 		form.setCountTotalQuestions(totalQuestCount);
+		form.setTotalQuestionsChecked(countQuestChecked);
 		form.setRaveFormOid(formOid);
 		if (!questionsList.isEmpty()) {
 			form.setQuestions(questionsList);
@@ -394,8 +398,9 @@ public class ReportGeneratorFeed implements ReportOutput {
 		for (CategoryCde cde : missingCdeStd) {
 			missingStdCrfCdeList.add(buildMissingStdCrfCde(cde));
 		}
-		
+		int totalCountQuestChecked = 0;
 		for (CCCForm tempForm : formsList) {
+			totalCountQuestChecked = totalCountQuestChecked + tempForm.getTotalQuestionsChecked();
 			if (tempForm.getCongruencyStatus()!=null) {
 				if (congStatus_congruent.equals(tempForm.getCongruencyStatus())) {
 					totalFormsCongruent++;
@@ -415,6 +420,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 		cccReport.setCountCongruentQuestions(congQuestionsList.size());
 		cccReport = computeFormsAndQuestionsCount(cccReport);		
 		cccReport = addFormNamestoForms(cccReport, alsData.getForms());		
+		cccReport.setCountQuestionsChecked(totalCountQuestChecked);
 		requestStatusMap.remove(sessionId);
 		return cccReport;
 	}
@@ -653,7 +659,6 @@ public class ReportGeneratorFeed implements ReportOutput {
 		int stdManMissingCount = 0;
 		int stdOptMissingCount = 0;
 		int stdCondMissingCount = 0;
-		int countQuestChecked = 0;
 		int countQuestWarn = 0;
 		int countQuestError = 0;
 		int manCrfCong = 0;
@@ -675,7 +680,6 @@ public class ReportGeneratorFeed implements ReportOutput {
 				stdOptMissingCount++;
 		}
 		for (CCCForm tempForm : report.getCccForms()) {
-			countQuestChecked = countQuestChecked + tempForm.getQuestions().size();
 			for (CCCQuestion tempQuestion : tempForm.getQuestions()) {
 				if (tempQuestion.getQuestionCongruencyStatus()!=null) {
 					if (congStatus_warn.equals(tempQuestion.getQuestionCongruencyStatus())) {
@@ -708,7 +712,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 				}
 			}
 		}
-		report.setCountQuestionsChecked(countQuestChecked);
+
 		report.setCountQuestionsWithWarnings(countQuestWarn);
 		report.setCountQuestionsWithErrors(countQuestError);
 		report.setCountManCrfMissing(stdManMissingCount);

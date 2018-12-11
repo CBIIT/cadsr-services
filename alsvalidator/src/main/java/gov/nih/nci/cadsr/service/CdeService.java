@@ -4,7 +4,8 @@
 package gov.nih.nci.cadsr.service;
 
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.client.RestTemplate;
 
 import gov.nih.nci.cadsr.microservices.ALSValidatorService;
@@ -12,7 +13,7 @@ import gov.nih.nci.cadsr.service.model.cdeData.CdeDetails;
 
 public class CdeService {
 
-	private static final Logger logger = Logger.getLogger(CdeService.class);
+	private static final Logger logger = LoggerFactory.getLogger(CdeService.class);
 	private static final String CDEBROWSER_REST_GET_CDE = ALSValidatorService.getCDEBROWSER_REST_GET_CDE();
 
 	/**

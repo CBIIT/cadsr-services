@@ -11,6 +11,7 @@ public class CCCForm {
 String raveFormOid;
 String formName;
 int countTotalQuestions;
+int totalQuestionsChecked;
 String version;
 String congruencyStatus; // Congruent, Errors, Warnings
 String formPublicId;
@@ -35,6 +36,12 @@ public int getCountTotalQuestions() {
 }
 public void setCountTotalQuestions(int countTotalQuestions) {
 	this.countTotalQuestions = countTotalQuestions;
+}
+public int getTotalQuestionsChecked() {
+	return totalQuestionsChecked;
+}
+public void setTotalQuestionsChecked(int totalQuestionsChecked) {
+	this.totalQuestionsChecked = totalQuestionsChecked;
 }
 public String getVersion() {
 	return version;

@@ -12,7 +12,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +39,7 @@ import gov.nih.nci.cadsr.service.validator.ValidatorService;
 
 public class GenerateReport implements ReportOutput {
 
-	private static final Logger logger = Logger.getLogger(GenerateReport.class);
+	private static final Logger logger = LoggerFactory.getLogger(GenerateReport.class);
 	private static String congStatus_errors = "ERRORS";
 	private static String congStatus_warn = "WARNINGS";
 	private static String parse_errors_error = "ERROR";

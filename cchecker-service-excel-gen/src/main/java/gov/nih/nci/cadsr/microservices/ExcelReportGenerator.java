@@ -184,7 +184,7 @@ public class ExcelReportGenerator {
 				newCell = row.createCell(2);
 				newCell.setCellValue(cccForm.getFormVersion());
 				newCell = row.createCell(3);
-				newCell.setCellValue(cccForm.getCountTotalQuestions());
+				newCell.setCellValue(cccForm.getTotalQuestionsChecked());
 	            CellStyle cellStyle = workbook.createCellStyle(); //Create new style
 	            cellStyle.setWrapText(true);
 				for (int j = 0; j < cccForm.getQuestions().size(); j++) {
