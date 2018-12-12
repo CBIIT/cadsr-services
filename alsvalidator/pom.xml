@@ -11,7 +11,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<log4j.version>1.2.17</log4j.version>
 		<jackson-mapper-asl.version>1.9.13</jackson-mapper-asl.version>
-		<maven-jar-plugin.version>2.6</maven-jar-plugin.version>
+		<!-- this is if you see an error in Eclipse with old m2e plug in -->
+		<!--maven-jar-plugin.version>2.6</maven-jar-plugin.version -->
 	</properties>
 	<repositories>
 		<repository>
@@ -68,7 +69,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>${maven-jar-plugin.version}</version>
+				<!--version>${maven-jar-plugin.version}</version -->
 			</plugin>
 			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>
