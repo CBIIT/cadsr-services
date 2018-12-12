@@ -225,6 +225,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 		cccReport.setRaveProtocolName(alsData.getCrfDraft().getProjectName());
 		cccReport.setRaveProtocolNumber(alsData.getCrfDraft().getPrimaryFormOid());
 		cccReport.setTotalFormsCount(alsData.getForms().size());
+		cccReport.setIsCheckStdCrfCdeChecked(checkStdCrfCde);
 		List<CCCForm> formsList = new ArrayList<CCCForm>();
 		CCCForm form = new CCCForm();
 		String formOid = null;
@@ -319,8 +320,14 @@ public class ReportGeneratorFeed implements ReportOutput {
 							}
 							// from a static table of NCI standard CRFs
 							CdeStdCrfData cdeCrfData = fetchCdeStandardCrfData(question.getCdePublicId(), question.getCdeVersion());
-							if (cdeCrfData!=null)
-								question.setNciCategory(cdeCrfData.getNciCategory());
+							if (cdeCrfData!=null) {
+									if (checkStdCrfCde) {
+										question.setNciCategory(cdeCrfData.getNciCategory());
+									} else {
+										if (nrds_cde.equalsIgnoreCase(cdeCrfData.getNciCategory()))
+											question.setNciCategory(nrds_cde);
+									}
+								}
 							if (cdeCrfData!=null && cdeDetails.getDataElement()!=null)  {
 							if (nrds_cde.equalsIgnoreCase(question.getNciCategory())) {
 								nrdsCdeList.add(buildNrdsCde(question,
@@ -336,7 +343,9 @@ public class ReportGeneratorFeed implements ReportOutput {
 							else if ((mandatory_crf.equalsIgnoreCase(question.getNciCategory()))
 									|| (optional_crf.equalsIgnoreCase(question.getNciCategory()))
 									|| (conditional_crf.equalsIgnoreCase(question.getNciCategory()))) {
-									standardCrfCdeList.add(buildCrfCde(cdeCrfData, cdeDetails.getDataElement().getDataElementDetails().getLongName())); 
+								if (checkStdCrfCde) {
+										standardCrfCdeList.add(buildCrfCde(cdeCrfData, cdeDetails.getDataElement().getDataElementDetails().getLongName()));
+									} 
 								}
 							}
 							if (question.getQuestionCongruencyStatus() != null) {
@@ -395,8 +404,10 @@ public class ReportGeneratorFeed implements ReportOutput {
 		for (CategoryNrds cde : missingCategoryNrdsList) {
 			missingNrdsCdesList.add(buildMissingNrdsCde(cde));
 		}
-		for (CategoryCde cde : missingCdeStd) {
-			missingStdCrfCdeList.add(buildMissingStdCrfCde(cde));
+		if (checkStdCrfCde) {
+			for (CategoryCde cde : missingCdeStd) {
+				missingStdCrfCdeList.add(buildMissingStdCrfCde(cde));
+			}
 		}
 		int totalCountQuestChecked = 0;
 		for (CCCForm tempForm : formsList) {
@@ -416,9 +427,11 @@ public class ReportGeneratorFeed implements ReportOutput {
 		cccReport.setMissingNrdsCdeList(missingNrdsCdesList);
 		cccReport.setCountNrdsMissing(missingNrdsCdesList.size());
 		cccReport.setNrdsCdeList(nrdsCdeList);
-		cccReport.setMissingStandardCrfCdeList(missingStdCrfCdeList);
+		if (checkStdCrfCde) {		
+			cccReport.setMissingStandardCrfCdeList(missingStdCrfCdeList);
+		}
 		cccReport.setCountCongruentQuestions(congQuestionsList.size());
-		cccReport = computeFormsAndQuestionsCount(cccReport);		
+		cccReport = computeFormsAndQuestionsCount(cccReport);
 		cccReport = addFormNamestoForms(cccReport, alsData.getForms());		
 		cccReport.setCountQuestionsChecked(totalCountQuestChecked);
 		requestStatusMap.remove(sessionId);
@@ -671,43 +684,50 @@ public class ReportGeneratorFeed implements ReportOutput {
 		int condCrfWarn = 0;
 		int condCrfErr = 0;
 		
-		for (StandardCrfCde cde : report.getMissingStandardCrfCdeList()) {
-			if (mandatory_crf.equals(cde.getStdTemplateType())) 
-				stdManMissingCount++;
-			else if (conditional_crf.equals(cde.getStdTemplateType()))
-				stdCondMissingCount++;
-			else if (optional_crf.equals(cde.getStdTemplateType()))
-				stdOptMissingCount++;
+		if (report.getIsCheckStdCrfCdeChecked()) {
+			for (StandardCrfCde cde : report.getMissingStandardCrfCdeList()) {
+				if (mandatory_crf.equals(cde.getStdTemplateType())) 
+					stdManMissingCount++;
+				else if (conditional_crf.equals(cde.getStdTemplateType()))
+					stdCondMissingCount++;
+				else if (optional_crf.equals(cde.getStdTemplateType()))
+					stdOptMissingCount++;
+			}
 		}
+		
 		for (CCCForm tempForm : report.getCccForms()) {
 			for (CCCQuestion tempQuestion : tempForm.getQuestions()) {
 				if (tempQuestion.getQuestionCongruencyStatus()!=null) {
 					if (congStatus_warn.equals(tempQuestion.getQuestionCongruencyStatus())) {
 						countQuestWarn++;
-						if (tempQuestion.getNciCategory()!=null) {
-							if (tempQuestion.getNciCategory().indexOf(mandatory_crf) > -1) {
-								manCrfWarn++;	
-							} 
-							if (tempQuestion.getNciCategory().indexOf(conditional_crf) > -1) {
-								condCrfWarn++;
+						if (report.getIsCheckStdCrfCdeChecked()) {
+							if (tempQuestion.getNciCategory()!=null) {
+								if (tempQuestion.getNciCategory().indexOf(mandatory_crf) > -1) {
+									manCrfWarn++;	
+								} 
+								if (tempQuestion.getNciCategory().indexOf(conditional_crf) > -1) {
+									condCrfWarn++;
+								}
+								if (tempQuestion.getNciCategory().indexOf(optional_crf) > -1) {
+									optCrfWarn++;
+								}
 							}
-							if (tempQuestion.getNciCategory().indexOf(optional_crf) > -1) {
-								optCrfWarn++;
-							}
-						}						
+						}
 					} else if (congStatus_errors.equals(tempQuestion.getQuestionCongruencyStatus())) {
 						countQuestError++;
-						if (tempQuestion.getNciCategory()!=null) {
-							if (tempQuestion.getNciCategory().indexOf(mandatory_crf) > -1) {
-								manCrfErr++;	
+						if (report.getIsCheckStdCrfCdeChecked()) {
+							if (tempQuestion.getNciCategory()!=null) {
+								if (tempQuestion.getNciCategory().indexOf(mandatory_crf) > -1) {
+									manCrfErr++;	
+								}
+								if (tempQuestion.getNciCategory().indexOf(conditional_crf) > -1) {
+									condCrfErr++;
+								}
+								if (tempQuestion.getNciCategory().indexOf(optional_crf) > -1) {
+									optCrfErr++;
+								}
 							}
-							if (tempQuestion.getNciCategory().indexOf(conditional_crf) > -1) {
-								condCrfErr++;
-							}
-							if (tempQuestion.getNciCategory().indexOf(optional_crf) > -1) {
-								optCrfErr++;
-							}
-						}						
+						}
 					}					
 				}
 			}

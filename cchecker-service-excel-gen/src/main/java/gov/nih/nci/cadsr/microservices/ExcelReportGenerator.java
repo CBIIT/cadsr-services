@@ -306,7 +306,9 @@ public class ExcelReportGenerator {
 			}
 			buildNrdsTab(workbook, cccReport.getNrdsCdeList());
 			buildMissingNrdsCdesTab(workbook, cccReport.getMissingNrdsCdeList());
-			buildStdCrfMissingTabs(workbook, cccReport.getMissingStandardCrfCdeList());			
+			if (cccReport.getIsCheckStdCrfCdeChecked()) {
+				buildStdCrfMissingTabs(workbook, cccReport.getMissingStandardCrfCdeList());
+			}			
 			FileOutputStream outputStream = null;
 			try {
 				outputStream = new FileOutputStream(OUTPUT_XLSX_FILE_PATH);

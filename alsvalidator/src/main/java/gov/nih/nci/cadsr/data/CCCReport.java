@@ -62,6 +62,9 @@ List<NrdsCde> nrdsCdeList = new ArrayList<NrdsCde>();
 List<NrdsCde> missingNrdsCdeList = new ArrayList<NrdsCde>();
 List<StandardCrfCde> missingStandardCrfCdeList = new ArrayList<StandardCrfCde>();
 
+Boolean isCheckStdCrfCdeChecked;
+
+
 CCCError cccError = new CCCError();
 
 public String getReportOwner() {
@@ -317,6 +320,14 @@ public List<StandardCrfCde> getMissingStandardCrfCdeList() {
 
 public void setMissingStandardCrfCdeList(List<StandardCrfCde> missingStandardCrfCdeList) {
 	this.missingStandardCrfCdeList = missingStandardCrfCdeList;
+}
+
+public Boolean getIsCheckStdCrfCdeChecked() {
+	return isCheckStdCrfCdeChecked;
+}
+
+public void setIsCheckStdCrfCdeChecked(Boolean isCheckStdCrfCdeChecked) {
+	this.isCheckStdCrfCdeChecked = isCheckStdCrfCdeChecked;
 }
 
 public CCCError getCccError() {
