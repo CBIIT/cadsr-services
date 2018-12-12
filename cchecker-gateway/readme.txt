@@ -79,6 +79,7 @@ Swagger and Swagger-UI are added.
 To try services by Swagger UI you have to have your browser cookie "_cchecker". The cookie is created by calling RESTful service "/parseservice".
 http://localhost:8080/gateway/swagger-ui.html
 http://localhost:8080/gateway/v2/api-docs
+http://localhost:8080/gateway/swagger-resources
 ********
 ********
 Test services

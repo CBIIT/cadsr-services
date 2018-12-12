@@ -9,14 +9,24 @@ import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.WebApplicationType;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.web.EmbeddedServletContainerAutoConfiguration;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.web.support.SpringBootServletInitializer;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.context.annotation.ComponentScan;
+
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 
-@SpringBootApplication(exclude = {EmbeddedServletContainerAutoConfiguration.class/*, WebMvcAutoConfiguration.class*/})
+@SpringBootApplication
+@EnableAutoConfiguration
+@EnableSwagger2
+@ComponentScan(basePackages = {"gov.nih.nci.cadsr.cchecker"})
+@EntityScan("gov.nih.nci.cadsr.cchecker.data")
 public class GatewayBootWebApplication extends SpringBootServletInitializer {
 	private final static Logger logger = LoggerFactory.getLogger(GatewayBootWebApplication.class);
 	static String CCHECKER_PARSER_URL;
@@ -67,7 +77,12 @@ public class GatewayBootWebApplication extends SpringBootServletInitializer {
     }
 
     public static void main(String[] args) throws Exception {
-        SpringApplication.run(GatewayBootWebApplication.class, args);
+    	final SpringApplication application = new SpringApplication(GatewayBootWebApplication.class);
+        //application.setBannerMode(Banner.Mode.OFF);
+        //application.setWebApplicationType(WebApplicationType.SERVLET);//defined in properties
+        application.run(args);
+        //we can use the call below if other parameters are not needed
+        //SpringApplication.run(GatewayBootWebApplication.class, args);
     }
 
 }
