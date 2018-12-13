@@ -200,7 +200,7 @@
         </table>
        </ng-template>
    </ngb-tab>
-   <ngb-tab>
+   <ngb-tab *ngIf="reportData.isCheckStdCrfCdeChecked">
        <ng-template ngbTabTitle>Standard CRF Mandatory Missing</ng-template>
        <ng-template ngbTabContent>
            <div class="tableHeader">CDEs in Standard Template "Mandatory" Modules Not Used</div>
@@ -216,7 +216,7 @@
             </table>           
        </ng-template>
    </ngb-tab>
-   <ngb-tab>
+   <ngb-tab *ngIf="reportData.isCheckStdCrfCdeChecked">
        <ng-template ngbTabTitle>Standard CRF Optional Missing</ng-template>
        <ng-template ngbTabContent>
            <div class="tableHeader">CDEs in Standard Template "Optional" Modules Not Used</div>
@@ -232,7 +232,7 @@
             </table>              
        </ng-template>
    </ngb-tab>   
-   <ngb-tab>
+   <ngb-tab *ngIf="reportData.isCheckStdCrfCdeChecked">
        <ng-template ngbTabTitle>Standard CRF Conditional Missing</ng-template>
        <ng-template ngbTabContent>
            <div class="tableHeader">CDEs in Standard Template "Conditional" Modules Not Used</div>
