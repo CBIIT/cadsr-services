@@ -1,5 +1,5 @@
 #!/bin/sh
-timestamp = `date`
+timestamp=`date`
 if [ -d "/root/cadsr-services" ]; then
         echo "Skipping cc ui install"
   cd /root/cadsr-services
