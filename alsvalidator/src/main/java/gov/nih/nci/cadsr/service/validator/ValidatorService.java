@@ -153,7 +153,9 @@ public class ValidatorService {
 			question = checkDataTypeCheckerResult (question, field.getDataFormat(), cdeDetails.getValueDomain().getValueDomainDetails().getDataType());
 				
 			// Comparing RAVE UOM (FixedUnit) with the caDSR Value Domain Unit of Measure - UOM Checker Result	
-			question = setUomCheckerResult (question, cdeDetails.getValueDomain().getValueDomainDetails().getUnitOfMeasure());
+			// Not Checking for UOM, based on Customer's feedback
+			//question = setUomCheckerResult (question, cdeDetails.getValueDomain().getValueDomainDetails().getUnitOfMeasure());
+			question.setCdeUOM(cdeDetails.getValueDomain().getValueDomainDetails().getUnitOfMeasure());
 					
 			// Comparing RAVE Length (FixedUnit) with the caDSR Value Domain Max length - RAVE Length Checker result
 			question = setLengthCheckerResult (question, cdeDetails.getValueDomain().getValueDomainDetails().getMaximumLength());
@@ -595,7 +597,7 @@ public class ValidatorService {
 	 */
 	protected static int computeRaveLength (String raveLength) {
 		int raveLengthInt = 0;
-		if (raveLength!=null && !"%".equals(raveLength)) {
+		if (raveLength!=null && raveLength.trim().length() > 0 && !"%".equals(raveLength)) {
 			raveLength = raveLength.toLowerCase();
 			if (raveLength.indexOf(characters_string) > -1) {
 				Pattern pattern = Pattern.compile("\\d+");
