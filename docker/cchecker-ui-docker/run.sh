@@ -14,11 +14,11 @@ npm install
 
 if [ $configuration ]; then 
   sed "s#REPLACEME#$apiUrl#g" -i src/environments/environment.${configuration}.ts
-  sed "s/timestamp: ''.*/timestamp: '$timestamp',/g" -i src/environments/environment.${configuration}.ts  
+  sed "s/timestamp: .*/timestamp: '$timestamp',/g" -i src/environments/environment.${configuration}.ts  
   ng build -c=$configuration --output-path /var/www/html
 else
   ng build --output-path /var/www/html
-  sed "s/timestamp: ''.*/timestamp: '$timestamp',/g" -i src/environments/environment.ts
+  sed "s/timestamp: .*/timestamp: '$timestamp',/g" -i src/environments/environment.ts
 fi
 
 cp /etc/httpd/conf.d/.htaccess /var/www/html
