@@ -17,8 +17,8 @@ if [ $configuration ]; then
   sed "s/timestamp:.*/timestamp: '$timestamp',/g" -i src/environments/environment.${configuration}.ts  
   ng build -c=$configuration --output-path /var/www/html
 else
-  ng build --output-path /var/www/html
   sed "s/timestamp:.*/timestamp: '$timestamp',/g" -i src/environments/environment.ts
+  ng build --output-path /var/www/html
 fi
 
 cp /etc/httpd/conf.d/.htaccess /var/www/html
