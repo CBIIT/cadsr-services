@@ -11,6 +11,12 @@ cd cadsr-services
 echo "pulling latest code from github"
 git pull 
 
+echo "JAVA_HOME: " $JAVA_HOME
+echo "PATH: " $PATH
+java -version
+echo "Checking this is JDK"
+$JAVA_HOME/bin/javac -version
+
 # buld and run the cchecker parser #
 echo "entering cchecker-service-parser directory"
 cd cchecker-service-parser
