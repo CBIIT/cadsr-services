@@ -7,8 +7,10 @@ or
 creates 
 target/alsvalidator-0.0.1-SNAPSHOT.jar
 
-To run the service:
+To run the service using Maven:
 >mvn spring-boot:run
+To run using jar:
+>java -jar target/alsvalidator-0.0.1-SNAPSHOT.jar
 
 For a manual test take a look into your directory /local/contents/cchecker.
 Find any file created by parseservice with UID-like name on /local/content/cchecker.

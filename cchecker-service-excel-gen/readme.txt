@@ -74,5 +74,5 @@ or to skip tests
 >mvn package -DskipTests=true
 
 9.To run the application using jar file from the main project directory:
->java -jar target/cchecker-parser-0.0.1-SNAPSHOT.jar
+>java -jar target/cchecker-service-excel-gen-0.0.1-SNAPSHOT.jar
 

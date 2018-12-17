@@ -52,7 +52,7 @@ To run the application using jar file from the main project directory passing en
 >java -Ddb_driver=... -Ddb_url=<drivertype>:@<url>:<port>:<sid> -Ddb_user=... -Ddb_credential=...  -jar target/cchecker-service-db-0.0.1-SNAPSHOT.jar
 
 If environment is set up just run java command
->java -jar target/cchecker-db-parser-0.0.1-SNAPSHOT.jar
+>java -jar target/cchecker-service-db-0.0.1-SNAPSHOT.jar
 
 4. Index page of the running service application:
 http://localhost:4803

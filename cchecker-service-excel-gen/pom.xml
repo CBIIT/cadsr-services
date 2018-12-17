@@ -68,8 +68,8 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-			<!--  This is to copy all dependencies libraries to target/lib. Removed if not required -->
-			<plugin>
+			<!--  This is to copy all dependencies libraries to target/lib. Uncomment if required -->
+			<!-- plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
@@ -87,7 +87,7 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin-->
 		</plugins>
 	</build>	
 	<dependencies>
