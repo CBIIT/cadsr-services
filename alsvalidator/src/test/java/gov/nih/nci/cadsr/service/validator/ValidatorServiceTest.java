@@ -1,8 +1,7 @@
 package gov.nih.nci.cadsr.service.validator;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -12,7 +11,6 @@ import gov.nih.nci.cadsr.data.CCCQuestion;
 import gov.nih.nci.cadsr.service.model.cdeData.CdeDetails;
 import gov.nih.nci.cadsr.service.model.cdeData.dataElement.DataElement;
 import gov.nih.nci.cadsr.service.model.cdeData.dataElement.DataElementDetails;
-import gov.nih.nci.cadsr.service.model.cdeData.dataElement.OtherVersion;
 
 public class ValidatorServiceTest {
 	
@@ -20,14 +18,10 @@ public class ValidatorServiceTest {
 	CdeDetails cdeDetails;
 	DataElement de;
 	DataElementDetails deDetails; 	
-	private static final String retiredArchivedStatus = "RETIRED ARCHIVED";
-	private static final String retiredPhasedOutStatus = "RETIRED PHASED OUT";
-	private static final String retiredWithdrawnStatus = "RETIRED WITHDRAWN";
+
 	private static final String errorString = "ERROR";
 	private static final String matchString = "MATCH";
 	private static final String notCheckedString = "NOT CHECKED";	
-	private static final String errMsg1 = "CDE has been retired.";
-	private static final String errMsg2 = "Newer version of CDE exists: {%.1f}.";	
 	
 	public void init() {
 		question = new CCCQuestion();
@@ -36,12 +30,23 @@ public class ValidatorServiceTest {
 		deDetails = new DataElementDetails();
 	}
 
+	
+	/**
+	 * Replaces any given pattern identified with a provided replacement pattern
+	 * @param stringWithPattern
+	 * @param patternToReplace
+	 * @param replacement
+	 * @param expectedResult
+	 */
 	public void testReplacePattern(String stringWithPattern, String patternToReplace, String replacement,
 			String expectedResult) {
 		String replacedText = ValidatorService.replacePattern(stringWithPattern, patternToReplace, replacement);
 		assertEquals(expectedResult, replacedText);
 	}
 
+	/**
+	 * Testing '@@' to be replaced with ","
+	 */	
 	@Test
 	public void testReplacePatternAt() {
 		String at_str = "@@";
@@ -50,6 +55,9 @@ public class ValidatorServiceTest {
 				"Cancer Antigen 15-3 (CA15-3), Serum");
 	}
 	
+	/**
+	 * Testing '##' to be replaced with ";"
+	 */		
 	@Test
 	public void testReplacePatternHash() {
 		String hash_str = "##";
@@ -58,6 +66,9 @@ public class ValidatorServiceTest {
 				"Cancer Antigen 15-3 (CA15-3); Serum");
 	}	
 
+	/**
+	 * Testing concatenation of PV VMs into a string (allowableTextChoices)
+	 */			
 	@Test
 	public void testCreateAllowableTextChoices() {
 		String expectedResult = "PvValue1|PvValue2|PvValue3|PvValue4";
@@ -66,6 +77,9 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, allowableTextChoices);
 	}
 
+	/**
+	 * Testing replacement of Non breaking space with a whitespace
+	 */	
 	@Test
 	public void testCleanStringforNbsp() {
 		String expectedResult = "Patient Eligibility";
@@ -74,8 +88,22 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, cleanString);
 	}
 
+	/**
+	 * Testing a single error message assignment into the Question
+	 */		
 	@Test
-	public void testAssignQuestionErrorMessage() {
+	public void testAssignQuestionErrorMessage1() {
+		String expectedResult = "Error Message.";
+		String newMessage1 = "Error Message.";
+		String actualResult = ValidatorService.assignQuestionErrorMessage(null, newMessage1);
+		assertEquals(expectedResult, actualResult);
+	}
+	
+	/**
+	 * Testing error message appending when the question already has an error message
+	 */	
+	@Test
+	public void testAssignQuestionErrorMessage2() {
 		String expectedResult = "Error Message1.\nError Message2.\nError Message3.";
 		String newMessage1 = "Error Message1.";
 		String newMessage2 = "Error Message2.";
@@ -83,8 +111,22 @@ public class ValidatorServiceTest {
 		String actualResult = ValidatorService.assignQuestionErrorMessage(newMessage1, newMessage2);
 		actualResult = ValidatorService.assignQuestionErrorMessage(actualResult, newMessage3);
 		assertEquals(expectedResult, actualResult);
-	}
+	}	
 	
+	/**
+	 * Testing null error message assignment to the question
+	 */		
+	@Test
+	public void testAssignQuestionErrorMessageNull() {
+		String expectedResult = null;
+		String newMessage1 = null;
+		String actualResult = ValidatorService.assignQuestionErrorMessage(null, newMessage1);
+		assertEquals(expectedResult, actualResult);
+	}		
+	
+	/**
+	 * Testing rave length computing from 'xx characters' pattern
+	 */			
 	@Test
 	public void testComputeRaveLengthFromText() {
 		int expectedResult = 12;
@@ -92,6 +134,9 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}
 	
+	/**
+	 * Testing rave length computing from 'dddd.dd' pattern (multiple 'd's)
+	 */				
 	@Test
 	public void testComputeRaveLengthFromCharPattern() {
 		int expectedResult = 6;
@@ -99,6 +144,9 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}	
 	
+	/**
+	 * Testing rave length computing from '999.99' pattern (multiple '9's)
+	 */					
 	@Test
 	public void testComputeRaveLengthFromNumericPattern() {
 		int expectedResult = 5;
@@ -106,6 +154,9 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}		
 	
+	/**
+	 * Testing rave length computing from '$xx' pattern (alphanumeric data type)
+	 */						
 	@Test
 	public void testCompareDataTypeString1 () {
 		String expectedResult = matchString;
@@ -113,6 +164,9 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}
 	
+	/**
+	 * Testing rave length computing from '$xx' pattern (character data type)
+	 */							
 	@Test
 	public void testCompareDataTypeString2 () {
 		String expectedResult = matchString;
@@ -120,13 +174,19 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}
 	
+	/**
+	 * Testing data type comparison when ALS data type is only one or more spaces and no other text
+	 */									
 	@Test
 	public void testCompareDataTypeStringWithSpacesOnly () {
 		String expectedResult = errorString;
 		String actualResult = ValidatorService.compareDataType("  ", "JAVA.LANG.STRING");
 		assertEquals(expectedResult, actualResult);
 	}	
-	
+
+	/**
+	 * Testing data type comparison when ALS data type is null
+	 */	
 	@Test
 	public void testCompareDataTypeStringNullCheck () {
 		String expectedResult = errorString;
@@ -134,6 +194,9 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}	
 	
+	/**
+	 * Testing data type comparison for not checked ALS data type - example 1 (datetime)
+	 */		
 	@Test
 	public void testCompareDataTypeNotChecked1 () {
 		String expectedResult = notCheckedString;
@@ -141,6 +204,9 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}	
 	
+	/**
+	 * Testing data type comparison for not checked ALS data type - example 2 (String)
+	 */			
 	@Test
 	public void testCompareDataTypeNotChecked2 () {
 		String expectedResult = notCheckedString;
@@ -148,6 +214,9 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}		
 	
+	/**
+	 * Testing data type comparison for not checked ALS data type - example 3 (Empty String)
+	 */				
 	@Test
 	public void testCompareDataTypeNotCheckedDTNull () {
 		String expectedResult = notCheckedString;
@@ -155,6 +224,9 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}
 	
+	/**
+	 * Testing data type comparison for not checked ALS data type - example 4 (null String)
+	 */					
 	@Test
 	public void testCompareDataTypeNotCheckedDTEmpty () {
 		String expectedResult = notCheckedString;
@@ -162,6 +234,9 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}	
 
+	/**
+	 * Testing data type comparison for a known & checked ALS data type - example 1 (Date)
+	 */						
 	@Test
 	public void testCompareDataTypeDate1 () {
 		String expectedResult = matchString;
@@ -169,6 +244,9 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}				
 	
+	/**
+	 * Testing data type comparison for a known & checked ALS data type with a different date format- example 2 (Date)
+	 */							
 	@Test
 	public void testCompareDataTypeDate2 () {
 		String expectedResult = matchString;
@@ -176,6 +254,9 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}					
 
+	/**
+	 * Testing data type comparison for a known & checked ALS data type with a different date format- example 3 (Date)
+	 */								
 	@Test
 	public void testCompareDataTypeDate3 () {
 		String expectedResult = matchString;
@@ -183,6 +264,9 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}					
 	
+	/**
+	 * Testing data type comparison for a known & checked ALS data type with a different date format- example 4 (Date)
+	 */								
 	@Test
 	public void testCompareDataTypeDate4 () {
 		String expectedResult = matchString;
@@ -190,6 +274,9 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}						
 	
+	/**
+	 * Testing data type comparison for a known & checked ALS data type with a different date format- example 5 (Date)
+	 */								
 	@Test
 	public void testCompareDataTypeDate5 () {
 		String expectedResult = matchString;
@@ -197,6 +284,9 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}							
 	
+	/**
+	 * Testing data type comparison for a known & checked ALS data type with a different date format- example 6 (Date)
+	 */									
 	@Test
 	public void testCompareDataTypeDate6 () {
 		String expectedResult = matchString;
@@ -204,6 +294,9 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}								
 	
+	/**
+	 * Testing data type comparison for a known & checked ALS data type - example 1 (Time)
+	 */										
 	@Test
 	public void testCompareDataTypeTime1 () {
 		String expectedResult = matchString;
@@ -211,6 +304,9 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}									
 	
+	/**
+	 * Testing data type comparison for a known & checked ALS data type with a different time format - example 2 (Time)
+	 */											
 	@Test
 	public void testCompareDataTypeTime2 () {
 		String expectedResult = matchString;
@@ -218,6 +314,9 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}										
 	
+	/**
+	 * Testing data type comparison for a known & checked ALS data type with a different time format - example 3 (Time)
+	 */												
 	@Test
 	public void testCompareDataTypeTime3 () {
 		String expectedResult = matchString;
@@ -225,6 +324,9 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}
 	
+	/**
+	 * Testing data type comparison for a known & checked ALS data type - example 1 (Numeric)
+	 */												
 	@Test
 	public void testCompareDataTypeNumeric1 () {
 		String expectedResult = matchString;
@@ -232,54 +334,19 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}	
 	
+	/**
+	 * Testing data type comparison for a known & checked ALS data type - example 2 (Integer)
+	 */													
 	@Test
 	public void testCompareDataTypeNumeric2 () {
 		String expectedResult = matchString;
 		String actualResult = ValidatorService.compareDataType("5", "JAVA.LANG.INTEGER");
 		assertEquals(expectedResult, actualResult);
-	}		
-	
-	public void invokeCheckCdeRetiredStatus(String errMsg, String status) {
-		deDetails.setWorkflowStatus(status);
-		de.setDataElementDetails(deDetails);
-		cdeDetails.setDataElement(de);
-		CCCQuestion actualResult = ValidatorService.checkCdeRetired(cdeDetails, question);
-		assertEquals(errMsg, actualResult.getMessage());
-	}	
-		
-	@Test
-	public void testCheckCdeRetiredArchived () {
-		init();
-		invokeCheckCdeRetiredStatus(errMsg1, retiredArchivedStatus);
-	}	
-	
-	@Test
-	public void testCheckCdeRetiredPhasedOut () {
-		init();
-		invokeCheckCdeRetiredStatus(errMsg1, retiredPhasedOutStatus);
-	}		
-	
-	@Test
-	public void testCheckCdeRetiredWithdrawn () {
-		init();
-		invokeCheckCdeRetiredStatus(errMsg1, retiredWithdrawnStatus);
 	}
 	
-	@Test
-	public void testCheckCdeVersions() {
-		init();
-		Float latestVersion = new Float("5.0");
-		question.setCdeVersion("4.0");
-		OtherVersion otherVersion = new OtherVersion();
-		otherVersion.setVersion(latestVersion);
-		List<OtherVersion> otherVersions = new ArrayList<OtherVersion>();
-		otherVersions.add(otherVersion);
-		de.setOtherVersions(otherVersions);
-		cdeDetails.setDataElement(de);
-		CCCQuestion actualResult = ValidatorService.checkCdeVersions(cdeDetails, question);
-		assertEquals(String.format(errMsg2, latestVersion), actualResult.getMessage());
-	}
-	
+	/**
+	 * Testing a Non enumerated ALS control type - example 1 (Text)
+	 */														
 	@Test
 	public void testIsNonEnumeratedN1() {
 		Boolean expectedResult = true;
@@ -287,6 +354,9 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}	
 	
+	/**
+	 * Testing a Non enumerated ALS control type - example 2 (LongText)
+	 */															
 	@Test
 	public void testIsNonEnumeratedN2() {
 		Boolean expectedResult = true;
@@ -294,6 +364,9 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}		
 	
+	/**
+	 * Testing an Enumerated ALS control type - example 1 (DropDownList)
+	 */																
 	@Test
 	public void testIsNonEnumeratedE1() {
 		Boolean expectedResult = false;
@@ -301,6 +374,9 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}	
 	
+	/**
+	 * Testing an Enumerated ALS control type - example 2 (RadioButton)
+	 */																	
 	@Test
 	public void testIsNonEnumeratedE2() {
 		Boolean expectedResult = false;
@@ -308,6 +384,9 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}
 	
+	/**
+	 * Testing an Enumerated ALS control type - example 3 (Dynamic Searchlist)
+	 */												
 	@Test
 	public void testIsNonEnumeratedE3() {
 		Boolean expectedResult = false;
@@ -315,11 +394,14 @@ public class ValidatorServiceTest {
 		assertEquals(expectedResult, actualResult);
 	}	
 	
+	/**
+	 * Testing anb Enumerated ALS control type - example 4 (Checkbox)
+	 */												
 	@Test
 	public void testIsNonEnumeratedE4() {
 		Boolean expectedResult = false;
 		Boolean actualResult = ValidatorService.isNonEnumerated("CheckBox");
 		assertEquals(expectedResult, actualResult);
-	}	
+	}
 	
 }
