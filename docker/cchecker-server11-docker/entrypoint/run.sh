@@ -13,6 +13,8 @@ git pull
 
 echo "JAVA_HOME: " $JAVA_HOME
 echo "PATH: " $PATH
+echo "Checking JDK directory"
+ls -l /usr/lib/jvm/jdk-11/bin | grep java
 java -version
 echo "Checking this is JDK"
 $JAVA_HOME/bin/javac -version
