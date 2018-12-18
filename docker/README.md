@@ -35,3 +35,6 @@ docker-compose configuration for cchecker
 1. docker kill $(docker ps -q)
 2. docker rm $(docker ps -a -q)
 3. docker rmi $(docker images -q)
+
+## To create a server container with OpenJDK 11, remove all containers and images and run with docker-compose11.yml.
+docker-compose -f docker-compose11.yml up
