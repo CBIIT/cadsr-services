@@ -1,6 +1,6 @@
 package gov.nih.nci.cadsr.service.validator;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +12,7 @@ import gov.nih.nci.cadsr.service.model.cdeData.CdeDetails;
 import gov.nih.nci.cadsr.service.model.cdeData.dataElement.DataElement;
 import gov.nih.nci.cadsr.service.model.cdeData.dataElement.DataElementDetails;
 import gov.nih.nci.cadsr.service.model.cdeData.dataElement.OtherVersion;
+import gov.nih.nci.cadsr.service.model.cdeData.dataElement.ReferenceDocument;
 
 /**
  * Integration Tests for ValidateService
@@ -29,6 +30,7 @@ public class ValidatorServiceIT {
 	CdeDetails cdeDetails;
 	DataElement de;
 	DataElementDetails deDetails; 	
+	ReferenceDocument rd;
 
 	public void init() {
 		question = new CCCQuestion();
@@ -146,6 +148,90 @@ public class ValidatorServiceIT {
 		CCCQuestion actualResult = ValidatorService.checkCdeMaxLength(question, 5, 10, 10);
 		assertEquals (expectedMessage, actualResult.getMessage());
 	}
+	
+	/**
+	 * Setting up mock data for testing Rave Field Result
+	 */
+	public void setupRaveFieldResultData() {
+		List<ReferenceDocument> rdList = new ArrayList<ReferenceDocument>();
+		rdList.add(setupDocText("Test1", "Preferred Question Text"));
+		rdList.add(setupDocText("Test2", "Alternate Question Text"));
+		de.setQuestionTextReferenceDocuments(rdList);
+		cdeDetails.setDataElement(de);
+	}
 
+	/**
+	 * adding mock ReferenceDocument based on the inputs
+	 */	
+	public ReferenceDocument setupDocText(String docText, String docType) {
+		rd = new ReferenceDocument();
+		rd.setDocumentText(docText);
+		rd.setDocumentType(docType);
+		return rd;
+	}		
+	
+	/**
+	 * Testing the Rave Field Label Result deducing method - MATCH scenario
+	 */
+	
+	@Test
+	public void testSetRaveFieldLabelResultMatch() {
+		init();
+		setupRaveFieldResultData();
+		question.setRaveFieldLabel("Test2");
+		String expectedResult = "MATCH";
+		CCCQuestion actualResult = ValidatorService.setRaveFieldLabelResult(cdeDetails, question);
+		assertEquals(expectedResult, actualResult.getRaveFieldLabelResult());
+	}
+	
+	/**
+	 * Testing the Rave Field Label Result deducing method - NON-MATCH scenario
+	 */	
+	@Test
+	public void testSetRaveFieldLabelResultError() {
+		init();
+		setupRaveFieldResultData();
+		question.setRaveFieldLabel("Not-Test");
+		String expectedResult = "ERROR";
+		CCCQuestion actualResult = ValidatorService.setRaveFieldLabelResult(cdeDetails, question);
+		assertEquals(expectedResult, actualResult.getRaveFieldLabelResult());
+	}	
+	
+	/**
+	 * Testing the setting of CDE permitted choices which will be set into the question
+	 */		
+	@Test
+	public void testSetRaveFieldLabelResultCdePermChoices() {
+		init();
+		setupRaveFieldResultData();
+		String expectedResult = "Test1|Test2";
+		CCCQuestion actualResult = ValidatorService.setRaveFieldLabelResult(cdeDetails, question);
+		assertEquals(expectedResult, actualResult.getCdePermitQuestionTextChoices());
+	}
+
+	
+	/**
+	 * Control Type Result - MATCH 
+	 */
+	@Test
+	public void testSetRaveControlTypeResultMatch() {
+		init();
+		String expectedresult = "MATCH";
+		question.setRaveControlType("TEXT");
+		CCCQuestion actualResult = ValidatorService.setRaveControlTypeResult("N", "CHARACTER", "$12", question);
+		assertEquals(expectedresult, actualResult.getControlTypeResult());
+	}
+	
+	/**
+	 * Control Type Result - ERROR 
+	 */	
+	@Test
+	public void testSetRaveControlTypeResultError() {
+		init();
+		String expectedresult = "ERROR";
+		question.setRaveControlType("LONGTEXT");
+		CCCQuestion actualResult = ValidatorService.setRaveControlTypeResult("E", "NUMBER", "50", question);
+		assertEquals(expectedresult, actualResult.getControlTypeResult());
+	}	
 
 }
