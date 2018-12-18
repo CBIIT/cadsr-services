@@ -40,3 +40,16 @@ displayExceptions=true/false
 To call feed current form number:
 http://localhost:4805/rest/validateservice/feedvalidateformnumber/8519163A-ECB2-40C4-B229-5C13E0F4279B
 curl -X GET -i http://localhost:4805/rest/feedvalidateformnumber/8519163A-ECB2-40C4-B229-5C13E0F4279B
+
+
+Running Unit tests (Excludes integration tests):
+>mvn clean package
+
+	or
+	
+>mvn test	 
+
+
+Running Integration tests:
+
+>mvn integration-test
