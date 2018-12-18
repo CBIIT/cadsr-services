@@ -56,12 +56,12 @@ RAVE-ALS-10057-VS.xlsx
 
 6. To parse a file using a RESTful service select an existed ALS file saved on /local/content/cchecker, and run "curl" command.
 
-curl -d "filename=RAVE-ALS-10057-VS.xlsx" http://localhost:4801/rest/alsparserservice
+curl -d "filepath=RAVE-ALS-10057-VS.xlsx" http://localhost:4801/rest/alsparserservice
 
 7. To create the application jar file use:
-mvn package
+mvn clean package
 or to skip tests
-mvn package -DskipTests=true
+mvn clean package -DskipTests=true
 
 8.To run the application using jar file from the main project directory:
 java -jar target/cchecker-service-parser-0.0.1-SNAPSHOT.jar

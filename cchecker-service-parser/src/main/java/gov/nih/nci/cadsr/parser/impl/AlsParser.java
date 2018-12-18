@@ -189,11 +189,6 @@ public class AlsParser implements Parser{
 			}
 			alsError.setErrorSeverity(errorSeverity_fatal);
 			cccError.addAlsError(alsError);
-		} catch (InvalidFormatException ife) {
-			alsError = getErrorInstance();
-			alsError.setErrorDesc(ife.getMessage());
-			alsError.setErrorSeverity(errorSeverity_fatal);
-			cccError.addAlsError(alsError);
 		} catch (NullPointerException npe) {
 			alsError = getErrorInstance();
 			alsError.setErrorDesc(npe.getMessage());
