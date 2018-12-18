@@ -13,10 +13,9 @@ git pull
 
 echo "JAVA_HOME: " $JAVA_HOME
 echo "PATH: " $PATH
-echo "Checking JDK directory"
-ls -l /usr/lib/jvm/jdk-11/bin | grep java
+echo "Checking java version"
 java -version
-echo "Checking this is JDK"
+echo "Checking this is JDK javac present"
 $JAVA_HOME/bin/javac -version
 
 # buld and run the cchecker parser #
