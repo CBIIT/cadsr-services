@@ -3,7 +3,9 @@ package gov.nih.nci.cadsr.service.validator;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -209,7 +211,15 @@ public class ValidatorServiceIT {
 		assertEquals(expectedResult, actualResult.getCdePermitQuestionTextChoices());
 	}
 
-	
+	/*
+	 * The following Control Type checker result tests implement the below requirement.
+	 *  
+	 *  Compare Rave ControlType to caDSR Value Domain Type
+	If caDSR VD is non-enumerated, and the Rave ControlType is "Text", it is valid.  
+	If Value Domain is non-enumerated and ControlType is not "Text", then check the Rave Datatype. 
+	If Rave Datatype matches caDSR Value Domain datatype, then result is "Match" otherwise 
+	it's an error. (we will provide the team with a list of the mappings between the Rave Datatypes 
+	and caDSR datatypes ,the names are not the same). */ 	
 	/**
 	 * Control Type Result - MATCH 
 	 */
@@ -234,4 +244,73 @@ public class ValidatorServiceIT {
 		assertEquals(expectedresult, actualResult.getControlTypeResult());
 	}	
 
+	/* 
+	 * The following PV checker result tests implement the below requirement.
+	 *  
+	 * Compare to PV.ValueMeaning.longName and the matched PV.Value. 
+	 The UserDataString must match the PermissibleValues.ValueMeaning.LongName 
+	 for the matched CodedData PV Value OR it can be the same as the matched 
+	 PV Value (which means the UserDataString =  CodedData ). 
+	 It is also compared to all the ValueMeaning Alternate Names.
+	 Exceptions: If it does not match the PV Value MEaning or the PV for the CodedData, 
+	 or one of the ValueMeaning Alternate Names, "ERROR" */	
+	
+	/**
+	 * PV Checker result - MATCH
+	 */
+	@Test
+	public void testSetPvCheckerResultMatch() {
+		init();
+		String expectedResult = "MATCH";
+		question.getRaveCodedData().add("LA10610-6");
+		question.getRaveUserString().add("LA10610-6");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("LA10610-6");
+		pvVmList.add("Black or African American");
+		pvVmList.add("BLACK OR AFRICAN AMERICAN");
+		pvVmMap.put("LA10610-6", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}
+	
+	/**
+	 * PV Checker result - ERROR (NON-MATCH)
+	 */	
+	@Test
+	public void testSetPvCheckerResultError() {
+		init();
+		String expectedResult = "ERROR";
+		question.getRaveCodedData().add("F");
+		question.getRaveUserString().add("M");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("Female");
+		pvVmList.add("F");
+		pvVmMap.put("F", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}	
+
+	/**
+	 * Creating Allowable CDE values as a concatenated string, in case of a NON-MATCH scenario
+	 */	
+	@Test
+	public void testSetPvCheckerResultAllowableCdeValues() {
+		init();
+		String expectedResult = "No|Not a Serious Adverse Event|LA32-8|Exception|1 - No";
+		question.getRaveCodedData().add("No");
+		question.getRaveUserString().add("NO");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("No");
+		pvVmList.add("Not a Serious Adverse Event");
+		pvVmList.add("LA32-8");
+		pvVmList.add("Exception");
+		pvVmList.add("1 - No");				
+		pvVmMap.put("No", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question);
+		assertEquals(expectedResult, actualResult.getAllowableCdeTextChoices().get(0));
+	}	
+	
 }
