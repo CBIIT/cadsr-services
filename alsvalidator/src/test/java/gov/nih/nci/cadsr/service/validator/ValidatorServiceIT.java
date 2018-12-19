@@ -3,6 +3,7 @@ package gov.nih.nci.cadsr.service.validator;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -313,4 +314,83 @@ public class ValidatorServiceIT {
 		assertEquals(expectedResult, actualResult.getAllowableCdeTextChoices().get(0));
 	}	
 	
+	/*
+	 * The following tests verify the Coded Data Checker result implementing the below requirement.
+	 * 
+	 * Compare each CodedData value to all of the Value Domain's PermissibleValue.value
+		Exceptions: If it does not match one of the CDEs PV Value, "ERROR"
+	 * 
+	 * */
+	
+	
+	/**
+	 *  Test coded data checker result - Match
+	 */
+	@Test
+	public void testSetCodedDataCheckerResultMatch() {
+		init();
+		String expectedResult = "MATCH";
+		List codedDataList = Arrays.asList("Fresh Tissue", "Blood", "Bone Marrow", "Buccal Cell Sample");
+		question.setRaveCodedData(codedDataList);
+		List pvList = Arrays.asList("Fresh Tissue", "Frozen Tissue");
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question);
+		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
+	}
+	
+	/**
+	 *  Test coded data checker result - Error
+	 */	
+	@Test
+	public void testSetCodedDataCheckerResultError() {
+		init();
+		String expectedResult = "ERROR";
+		List codedDataList = Arrays.asList("Blood", "Bone Marrow", "Buccal Cell Sample", "Fresh Tissue");
+		question.setRaveCodedData(codedDataList);
+		List pvList = Arrays.asList("Frozen Tissue", "Formalin Fixed Tissue");
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question);
+		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
+	}	
+
+	/*The following tests verify the Data type checker result implementing the below requirement.
+	 * 
+	 * Compare caDSR Value Domain's Data Type to ALS.Fields.DataFormat. 
+	DataFormat value starting with $ equates to caDSR ALPHANUMERIC, CHARACTER, javal.lang.String, java.lang.Character, xsd.string. 
+	DataFormat value starting with a numeral (no $) equates to caDSR Integer, NUMBER, java.lang.Integer, xsd:integer. 
+	DataFormat value starting with dd equates to caDSR DATE, xsd:date; and to caDSR FormatName
+	DataFormat value starting with HH, hh, equates to caDSR TIME, xsd:time. 
+	*/
+	
+	/**
+	 *  Test Data Type checker result - Match
+	 */	
+	@Test
+	public void testCheckDataTypeCheckerResultMatch() {
+		init();
+		String expectedResult = "MATCH";
+		CCCQuestion actualResult = ValidatorService.checkDataTypeCheckerResult(question, "$12", "Character");
+		assertEquals (expectedResult, actualResult.getDatatypeCheckerResult());
+	}
+	
+	/**
+	 *  Test Data Type checker result - Non-Match
+	 */		
+	@Test
+	public void testCheckDataTypeCheckerResultError() {
+		init();
+		String expectedResult = "ERROR";
+		CCCQuestion actualResult = ValidatorService.checkDataTypeCheckerResult(question, "dd-mm-yyyy", "Time");
+		assertEquals (expectedResult, actualResult.getDatatypeCheckerResult());
+	}	
+	
+	/**
+	 *  Test Data Type checker result - Not Checked
+	 */			
+	@Test
+	public void testCheckDataTypeCheckerResultNotChecked() {
+		init();
+		String expectedResult = "NOT CHECKED";
+		CCCQuestion actualResult = ValidatorService.checkDataTypeCheckerResult(question, "dd-mm-yyyy", "DateTime");
+		assertEquals (expectedResult, actualResult.getDatatypeCheckerResult());
+	}
+
 }
