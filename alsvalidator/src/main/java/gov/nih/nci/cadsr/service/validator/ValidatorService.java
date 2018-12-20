@@ -543,20 +543,13 @@ public class ValidatorService {
 		errorVal.add(raveDataFormat);
 		errorVal.add(vdDisplayFormat);
 		Boolean result = false;
-		if (vdDisplayFormat!=null && vdDisplayFormat.trim().length() > 0) {
-			if (raveDataFormat!=null && raveDataFormat.trim().length() > 0) {
-					if (raveDataFormat.equals(vdDisplayFormat)) 
-						result = true;					
-					else 
-						result = false;
-			} else {
-				if (vdDisplayFormat!=null && vdDisplayFormat.trim().length() > 0)
-					result = false;
-				else
-					result = true;
-			} 
-		} else {
+		//if CDE VD has no data format (null or empty), we consider this validation is OK
+		if (org.apache.commons.lang3.StringUtils.isBlank(vdDisplayFormat)) {
 			result = true;
+		}
+		else //we compare VD data format with anything received from ALS including empty
+		{
+			result = vdDisplayFormat.equals(raveDataFormat);
 		}
 		
 		if (result) {
