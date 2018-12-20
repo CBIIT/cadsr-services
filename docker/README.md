@@ -3,7 +3,7 @@ docker-compose configuration for cchecker
 
 ## Requirements ##
 * Docker installed and running
-* docker-compose file suitable for your environment (default docker-compose.yml). Edit either docker-compose-dev.yml or docker-compose-prod.yml and replace apiUrl with correct server url.
+* Setup environment variables (cdetier, apiUrl, configuration). Default (dev, http://127.0.0.1:8080, dev)
 * Environment variable expected on the host box: $LANG with value "en_US.UTF-8"
 
 ## NOTE ##
