@@ -13,7 +13,7 @@ echo "installing node modules"
 npm install
 
 if [ $configuration ]; then 
-  sed "s#REPLACEME#$apiUrl#g" -i src/environments/environment.${configuration}.ts
+  sed "s#REPLACEME#$REST_API#g" -i src/environments/environment.${configuration}.ts
   sed "s/timestamp:.*/timestamp: '$timestamp',/g" -i src/environments/environment.${configuration}.ts  
   ng build -c=$configuration --output-path /var/www/html
 else

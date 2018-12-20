@@ -14,6 +14,5 @@ ADD conf/.htaccess /etc/httpd/conf.d
 ADD run.sh /usr/bin/
 RUN chmod 777 /usr/bin/run.sh
 RUN mkdir /run/apache2/
-
 EXPOSE 80
 ENTRYPOINT ["/usr/bin/run.sh"]

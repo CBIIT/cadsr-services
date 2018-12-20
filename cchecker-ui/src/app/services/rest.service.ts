@@ -8,10 +8,10 @@ import { environment } from './../../environments/environment';
 })
 
 export class RestService {
-  apiUrl:string;
+  REST_API:string;
 
   constructor(private http:HttpClient, private router:Router) {
-    this.apiUrl = environment.apiUrl;
+    this.REST_API = environment.REST_API;
   }
 
   // generate excel report //
@@ -28,7 +28,7 @@ export class RestService {
     const checkUom = formListData['checkUom'] ? 'true':'false';
     const checkCRF = formListData['checkStdCrfCde'] ? 'true':'false';
     const displayExceptions = formListData['mustDisplayException'] ? 'true':'false';
-    return this.http.post(`${this.apiUrl}/gateway/checkservice?checkCRF=${checkCRF}`,checkedItems,
+    return this.http.post(`${this.REST_API}/gateway/checkservice?checkCRF=${checkCRF}`,checkedItems,
     {
       withCredentials:true
     })
@@ -36,7 +36,7 @@ export class RestService {
 
   // upload file service //
   uploadAlsFile(file, name){
-    return this.http.post(`${this.apiUrl}/gateway/parseservice?owner=${name}`,file,
+    return this.http.post(`${this.REST_API}/gateway/parseservice?owner=${name}`,file,
     {
       observe:"events",
       reportProgress:true,
@@ -45,7 +45,7 @@ export class RestService {
 
   // gets validation status //
   validateFeedStatus() {
-    return this.http.get(`${this.apiUrl}/gateway/feedvalidatestatus`,
+    return this.http.get(`${this.REST_API}/gateway/feedvalidatestatus`,
     {
       observe:'events',
       reportProgress:true,
