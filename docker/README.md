@@ -3,7 +3,7 @@ docker-compose configuration for cchecker
 
 ## Requirements ##
 * Docker installed and running
-* Setup environment variables (cdetier, apiUrl, configuration). Default (dev, http://127.0.0.1:8080, dev)
+* Setup environment variables (cdetier, REST_API, configuration). Default (dev, http://127.0.0.1:8080, dev)
 * Environment variable expected on the host box: $LANG with value "en_US.UTF-8"
 
 ## NOTE ##
