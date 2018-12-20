@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import gov.nih.nci.cadsr.data.CCCQuestion;
@@ -35,7 +36,8 @@ public class ValidatorServiceIT {
 	DataElementDetails deDetails; 	
 	ReferenceDocument rd;
 
-	public void init() {
+	@Before
+	public void setup() {
 		question = new CCCQuestion();
 		cdeDetails = new CdeDetails();
 		de = new DataElement();
@@ -60,8 +62,7 @@ public class ValidatorServiceIT {
 	 * Testing for CDE RETIRED ARCHIVED status
 	 */	
 	@Test
-	public void testCheckCdeRetiredArchived () {
-		init();
+	public void testCheckCdeRetiredArchived () {		
 		invokeCheckCdeRetiredStatus(errMsg1, retiredArchivedStatus);
 	}	
 	
@@ -69,8 +70,7 @@ public class ValidatorServiceIT {
 	 * Testing for CDE RETIRED PHASED OUT status
 	 */	
 	@Test
-	public void testCheckCdeRetiredPhasedOut () {
-		init();
+	public void testCheckCdeRetiredPhasedOut () {		
 		invokeCheckCdeRetiredStatus(errMsg1, retiredPhasedOutStatus);
 	}		
 	
@@ -78,8 +78,7 @@ public class ValidatorServiceIT {
 	 * Testing for CDE RETIRED WITHDRAWN status
 	 */		
 	@Test
-	public void testCheckCdeRetiredWithdrawn () {
-		init();
+	public void testCheckCdeRetiredWithdrawn () {	
 		invokeCheckCdeRetiredStatus(errMsg1, retiredWithdrawnStatus);
 	}
 	
@@ -87,8 +86,7 @@ public class ValidatorServiceIT {
 	 * Testing comparison of CDE versions - where the ALS doesn't have the latest version of the CDE
 	 */				
 	@Test
-	public void testCheckCdeVersions1() {
-		init();
+	public void testCheckCdeVersions1() {		
 		Float latestVersion = new Float("5.0");
 		question.setCdeVersion("4.0");
 		OtherVersion otherVersion = new OtherVersion();
@@ -105,8 +103,7 @@ public class ValidatorServiceIT {
 	 * Testing comparison of CDE versions - where the ALS has the latest version of the CDE
 	 */	
 	@Test
-	public void testCheckCdeVersions2() {
-		init();
+	public void testCheckCdeVersions2() {		
 		Float latestVersion = new Float("1.0");
 		question.setCdeVersion("1.0");
 		OtherVersion otherVersion = new OtherVersion();
@@ -127,8 +124,7 @@ public class ValidatorServiceIT {
 	 * Testing checking of CDE max length - PV length is more than VD max length
 	 */		
 	@Test
-	public void testCheckCdeMaxLength1() {
-		init();
+	public void testCheckCdeMaxLength1() {		
 		List<Object> errorVal = new ArrayList<Object>();
 		errorVal.add(10);
 		errorVal.add(5);
@@ -145,8 +141,7 @@ public class ValidatorServiceIT {
 	 * Testing checking of CDE max length - PV length is within range of VD max length
 	 */		
 	@Test
-	public void testCheckCdeMaxLength2() {
-		init();
+	public void testCheckCdeMaxLength2() {		
 		String expectedMessage = null;
 		CCCQuestion actualResult = ValidatorService.checkCdeMaxLength(question, 5, 10, 10);
 		assertEquals (expectedMessage, actualResult.getMessage());
@@ -178,8 +173,7 @@ public class ValidatorServiceIT {
 	 */
 	
 	@Test
-	public void testSetRaveFieldLabelResultMatch() {
-		init();
+	public void testSetRaveFieldLabelResultMatch() {		
 		setupRaveFieldResultData();
 		question.setRaveFieldLabel("Test2");
 		String expectedResult = "MATCH";
@@ -191,8 +185,7 @@ public class ValidatorServiceIT {
 	 * Testing the Rave Field Label Result deducing method - NON-MATCH scenario
 	 */	
 	@Test
-	public void testSetRaveFieldLabelResultError() {
-		init();
+	public void testSetRaveFieldLabelResultError() {		
 		setupRaveFieldResultData();
 		question.setRaveFieldLabel("Not-Test");
 		String expectedResult = "ERROR";
@@ -204,8 +197,7 @@ public class ValidatorServiceIT {
 	 * Testing the setting of CDE permitted choices which will be set into the question
 	 */		
 	@Test
-	public void testSetRaveFieldLabelResultCdePermChoices() {
-		init();
+	public void testSetRaveFieldLabelResultCdePermChoices() {		
 		setupRaveFieldResultData();
 		String expectedResult = "Test1|Test2";
 		CCCQuestion actualResult = ValidatorService.setRaveFieldLabelResult(cdeDetails, question);
@@ -220,13 +212,13 @@ public class ValidatorServiceIT {
 	If Value Domain is non-enumerated and ControlType is not "Text", then check the Rave Datatype. 
 	If Rave Datatype matches caDSR Value Domain datatype, then result is "Match" otherwise 
 	it's an error. (we will provide the team with a list of the mappings between the Rave Datatypes 
-	and caDSR datatypes ,the names are not the same). */ 	
+	and caDSR datatypes ,the names are not the same). */ 
+	
 	/**
 	 * Control Type Result - MATCH 
 	 */
 	@Test
-	public void testSetRaveControlTypeResultMatch() {
-		init();
+	public void testSetRaveControlTypeResultMatch() {		
 		String expectedresult = "MATCH";
 		question.setRaveControlType("TEXT");
 		CCCQuestion actualResult = ValidatorService.setRaveControlTypeResult("N", "CHARACTER", "$12", question);
@@ -237,8 +229,7 @@ public class ValidatorServiceIT {
 	 * Control Type Result - ERROR 
 	 */	
 	@Test
-	public void testSetRaveControlTypeResultError() {
-		init();
+	public void testSetRaveControlTypeResultError() {		
 		String expectedresult = "ERROR";
 		question.setRaveControlType("LONGTEXT");
 		CCCQuestion actualResult = ValidatorService.setRaveControlTypeResult("E", "NUMBER", "50", question);
@@ -260,8 +251,7 @@ public class ValidatorServiceIT {
 	 * PV Checker result - MATCH
 	 */
 	@Test
-	public void testSetPvCheckerResultMatch() {
-		init();
+	public void testSetPvCheckerResultMatch() {		
 		String expectedResult = "MATCH";
 		question.getRaveCodedData().add("LA10610-6");
 		question.getRaveUserString().add("LA10610-6");
@@ -279,8 +269,7 @@ public class ValidatorServiceIT {
 	 * PV Checker result - ERROR (NON-MATCH)
 	 */	
 	@Test
-	public void testSetPvCheckerResultError() {
-		init();
+	public void testSetPvCheckerResultError() {		
 		String expectedResult = "ERROR";
 		question.getRaveCodedData().add("F");
 		question.getRaveUserString().add("M");
@@ -297,8 +286,7 @@ public class ValidatorServiceIT {
 	 * Creating Allowable CDE values as a concatenated string, in case of a NON-MATCH scenario
 	 */	
 	@Test
-	public void testSetPvCheckerResultAllowableCdeValues() {
-		init();
+	public void testSetPvCheckerResultAllowableCdeValues() {		
 		String expectedResult = "No|Not a Serious Adverse Event|LA32-8|Exception|1 - No";
 		question.getRaveCodedData().add("No");
 		question.getRaveUserString().add("NO");
@@ -327,8 +315,7 @@ public class ValidatorServiceIT {
 	 *  Test coded data checker result - Match
 	 */
 	@Test
-	public void testSetCodedDataCheckerResultMatch() {
-		init();
+	public void testSetCodedDataCheckerResultMatch() {		
 		String expectedResult = "MATCH";
 		List codedDataList = Arrays.asList("Fresh Tissue", "Blood", "Bone Marrow", "Buccal Cell Sample");
 		question.setRaveCodedData(codedDataList);
@@ -341,8 +328,7 @@ public class ValidatorServiceIT {
 	 *  Test coded data checker result - Error
 	 */	
 	@Test
-	public void testSetCodedDataCheckerResultError() {
-		init();
+	public void testSetCodedDataCheckerResultError() {		
 		String expectedResult = "ERROR";
 		List codedDataList = Arrays.asList("Blood", "Bone Marrow", "Buccal Cell Sample", "Fresh Tissue");
 		question.setRaveCodedData(codedDataList);
@@ -364,8 +350,7 @@ public class ValidatorServiceIT {
 	 *  Test Data Type checker result - Match
 	 */	
 	@Test
-	public void testCheckDataTypeCheckerResultMatch() {
-		init();
+	public void testCheckDataTypeCheckerResultMatch() {		
 		String expectedResult = "MATCH";
 		CCCQuestion actualResult = ValidatorService.checkDataTypeCheckerResult(question, "$12", "Character");
 		assertEquals (expectedResult, actualResult.getDatatypeCheckerResult());
@@ -376,7 +361,7 @@ public class ValidatorServiceIT {
 	 */		
 	@Test
 	public void testCheckDataTypeCheckerResultError() {
-		init();
+		
 		String expectedResult = "ERROR";
 		CCCQuestion actualResult = ValidatorService.checkDataTypeCheckerResult(question, "dd-mm-yyyy", "Time");
 		assertEquals (expectedResult, actualResult.getDatatypeCheckerResult());
@@ -386,11 +371,96 @@ public class ValidatorServiceIT {
 	 *  Test Data Type checker result - Not Checked
 	 */			
 	@Test
-	public void testCheckDataTypeCheckerResultNotChecked() {
-		init();
+	public void testCheckDataTypeCheckerResultNotChecked() {		
 		String expectedResult = "NOT CHECKED";
 		CCCQuestion actualResult = ValidatorService.checkDataTypeCheckerResult(question, "dd-mm-yyyy", "DateTime");
 		assertEquals (expectedResult, actualResult.getDatatypeCheckerResult());
+	}		
+
+	/*
+	 * The following tests verify the Length checker result implementing the below requirement.
+	 * 
+	 *  If caDSR VD maxlengthNumber does not match FixedUnit number of characters, 
+	display both Rave value and caDSR value and result  "WARNING" */	
+	
+	/**
+	 *  Test Length checker result - Match
+	 */				
+	@Test
+	public void testSetLengthCheckerResultMatch() {		
+		String expectedResult = "MATCH";
+		question.setRaveLength("10 Characters");
+		CCCQuestion actualResult = ValidatorService.setLengthCheckerResult(question, 10);
+		assertEquals(expectedResult, actualResult.getLengthCheckerResult());
 	}
+	
+	/**
+	 *  Test Length checker result - Non-match
+	 */				
+	@Test
+	public void testSetLengthCheckerResultWarning() {		
+		String expectedResult = "WARNING";
+		question.setRaveLength("12 Characters");
+		CCCQuestion actualResult = ValidatorService.setLengthCheckerResult(question, 5);
+		assertEquals(expectedResult, actualResult.getLengthCheckerResult());
+	}	
+	
+	
+	/*
+	 * The following tests verify the format checker result implementing the following requirement.
+	 * 
+	 * Comparing the ALS RAVE Data Format with caDSR Value Domain Display Format
+	 * */	
+	
+	/**
+	 *  Test Format checker result - Match
+	 */				
+	@Test
+	public void testSetFormatCheckerResultMatch() {		
+		String expectedResult = "MATCH";
+		CCCQuestion actualResult = ValidatorService.checkFormatCheckerResult(question, "dd-mm-yyyy", "dd-mm-yyyy");
+		assertEquals(expectedResult, actualResult.getFormatCheckerResult());
+	}	
+	
+	/**
+	 *  Test Format checker result - Non-match
+	 */				
+	@Test
+	public void testSetFormatCheckerResultWarning() {		
+		String expectedResult = "WARNING";
+		CCCQuestion actualResult = ValidatorService.checkFormatCheckerResult(question, "dd-mm-yyyy", "MON-DY-YEAR");
+		assertEquals(expectedResult, actualResult.getFormatCheckerResult());
+	}		
+	
+	/*
+	 * The following tests verify the UOM checker result implementing the following requirement.
+	 * 
+		If the Value Domain Unit of Measure in not null/blank, then check to see 
+		If there is a matching value in FixedUnit or CodedUnit.
+		If it does not match, then display the Rave UOM and the Value Domain UOM and result "WARNING".
+	 * */	
+	
+	/**
+	 *  Test UOM checker result - Match
+	 */				
+	@Test
+	public void testSetUomCheckerResultMatch() {		
+		String expectedResult = "MATCH";
+		question.setRaveUOM("m2");
+		CCCQuestion actualResult = ValidatorService.setUomCheckerResult(question, "m2");
+		assertEquals(expectedResult, actualResult.getUomCheckerResult());
+	}	
+	
+	/**
+	 *  Test UOM checker result - Non-match
+	 */				
+	@Test
+	public void testSetUomCheckerResultWarning() {		
+		String expectedResult = "WARNING";
+		question.setRaveUOM("ddd.dd");
+		CCCQuestion actualResult = ValidatorService.setUomCheckerResult(question, "m2");
+		assertEquals(expectedResult, actualResult.getUomCheckerResult());
+	}
+	
 
 }
