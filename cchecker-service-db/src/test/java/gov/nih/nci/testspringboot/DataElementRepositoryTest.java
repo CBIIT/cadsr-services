@@ -27,7 +27,7 @@ public class DataElementRepositoryTest {
 	        List<DataElements> dataElement = dataElemenRepository.findAll();
 	        assertNotNull(dataElement);
 	        assertTrue(!dataElement.isEmpty());
-	        System.out.println(dataElement.toString());
+	        //System.out.println(dataElement.toString());
 	    }
 
 }
