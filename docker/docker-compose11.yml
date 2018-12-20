@@ -20,7 +20,7 @@ services:
       app_net:
         ipv4_address: 172.16.239.11
     environment:
-      cdetier: dev
+      cdetier: $cdetier
       LANG: $LANG
       db_driver: $db_driver
       db_url: $db_url
