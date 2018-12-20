@@ -543,17 +543,22 @@ public class ValidatorService {
 		errorVal.add(raveDataFormat);
 		errorVal.add(vdDisplayFormat);
 		Boolean result = false;
-		if (raveDataFormat!=null && raveDataFormat.trim().length() > 0) {
-				if (raveDataFormat.equals(vdDisplayFormat)) 
-					result = true;					
-				else 
+		if (vdDisplayFormat!=null && vdDisplayFormat.trim().length() > 0) {
+			if (raveDataFormat!=null && raveDataFormat.trim().length() > 0) {
+					if (raveDataFormat.equals(vdDisplayFormat)) 
+						result = true;					
+					else 
+						result = false;
+			} else {
+				if (vdDisplayFormat!=null && vdDisplayFormat.trim().length() > 0)
 					result = false;
+				else
+					result = true;
+			} 
 		} else {
-			if (vdDisplayFormat!=null && vdDisplayFormat.trim().length() > 0)
-				result = false;
-			else
-				result = true;
+			result = true;
 		}
+		
 		if (result) {
 			question.setFormatCheckerResult(matchString);			
 		} else {
