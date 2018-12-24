@@ -79,7 +79,7 @@ public class GatewayBootController {
 	private static String URL_RETRIEVE_REPORT_FULL_FORMAT;
 	private static String URL_GEN_EXCEL_REPORT_ERROR_FORMAT;
 	private static String URL_FEED_VALIDATE_STATUS_FORMAT;
-	public final String MS_EXCEL_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+	public static final String MS_EXCEL_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
 	
 	static String UPLOADED_FOLDER;
