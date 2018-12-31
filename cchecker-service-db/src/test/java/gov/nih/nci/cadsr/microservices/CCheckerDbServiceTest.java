@@ -33,7 +33,7 @@ public class CCheckerDbServiceTest {
     @Autowired
     private MockMvc mvc;
     /**
-     * We assume CDE Public ID 10 is returned.
+     * We need to add more specific asserts in this test.
      * 
      * @throws Exception
      */
@@ -45,7 +45,9 @@ public class CCheckerDbServiceTest {
 				.andExpect(status().isOk())
 				.andExpect(content()
 				.contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-				.andExpect(jsonPath("$[0].cdeId").value(10));
+				.andExpect(jsonPath("$[0].cdeId").exists())
+				.andExpect(jsonPath("$[1].cdeId").exists())
+				.andExpect(jsonPath("$[2].cdeId").exists());
 	}
 
 }
