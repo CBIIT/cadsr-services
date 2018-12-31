@@ -92,7 +92,7 @@ public class ValidatorService {
 		} else {
 			
 			//Checking for retired CDEs 
-			question = checkCdeRetired(cdeDetails,question);
+			question = checkCdeRetired(cdeDetails.getDataElement().getDataElementDetails().getWorkflowStatus(),question);
 
 			//Checking for different versions of CDEs			
 			question = checkCdeVersions(cdeDetails,question);
@@ -112,6 +112,7 @@ public class ValidatorService {
 			int vdMaxLen = 0;
 			String allowableCdes = "";
 			
+			//Obtaining Value Domain's Max Length for comparison
 			if (cdeDetails.getValueDomain()!=null) {
 				if (cdeDetails.getValueDomain().getValueDomainDetails()!=null) {
 					if (cdeDetails.getValueDomain().getValueDomainDetails().getMaximumLength()!=null) {
@@ -119,16 +120,19 @@ public class ValidatorService {
 					}
 				}
 
+				// Obtaining all the permissible values for the CDE 
 				if (cdeDetails.getValueDomain().getPermissibleValues()!=null) {
 					for (PermissibleValuesModel pv : cdeDetails.getValueDomain().getPermissibleValues()) {
 						String pvVal = cleanStringforNbsp(pv.getValue());
 						pvList.add(pvVal);
 						pvVmList = new ArrayList<String>();
+						// Building a map with PV Alternate names list and PV value meanings list  
 						Map<String, List<String>> vmMap = buildValueMeaningMap (cdeDetails, pv.getVmIdseq()); 
 						pvVmList = vmMap.get(alternateNames_key);						
 						if (pv.getShortMeaning()!=null)
 							pvVmList.add(pv.getShortMeaning());
 						pvVmMap.put(pvVal, pvVmList);
+						// Building the allowable CDEs (concatenated text of all PVs for the CDE) string
 						if (allowableCdes.length() > 0)
 							allowableCdes = allowableCdes + "|"+pvVal;
 						else 
@@ -187,11 +191,11 @@ public class ValidatorService {
 	 * @param question
 	 * @return CCCQuestion
 	 */
-	protected static CCCQuestion checkCdeRetired(CdeDetails cdeDetails, CCCQuestion question) {
+	protected static CCCQuestion checkCdeRetired(String workflowStatus, CCCQuestion question) {
 		//Checking for retired CDEs 
-		if (cdeDetails.getDataElement()!=null && (retiredArchivedStatus.equalsIgnoreCase(cdeDetails.getDataElement().getDataElementDetails().getWorkflowStatus())
-				|| retiredPhasedOutStatus.equalsIgnoreCase(cdeDetails.getDataElement().getDataElementDetails().getWorkflowStatus())
-				|| retiredWithdrawnStatus.equalsIgnoreCase(cdeDetails.getDataElement().getDataElementDetails().getWorkflowStatus()))) {	
+		if (retiredArchivedStatus.equalsIgnoreCase(workflowStatus)
+				|| retiredPhasedOutStatus.equalsIgnoreCase(workflowStatus)
+				|| retiredWithdrawnStatus.equalsIgnoreCase(workflowStatus)) {
 			question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg2));
 			if (question.getQuestionCongruencyStatus()==null)
 				question.setQuestionCongruencyStatus(congStatus_warn);
@@ -217,7 +221,9 @@ public class ValidatorService {
 					latestVersion = otherVersion.getVersion();
 				}					
 			}
-							
+			
+			// If a RAVE ALS version of the CDE is older than the latest CDE version available, 
+			// then report a WARNING with an error message.
 			if (newerVersionExists) {
 				question.setMessage(assignQuestionErrorMessage(question.getMessage(),String.format(msg3, latestVersion)));
 				if (question.getQuestionCongruencyStatus()==null)
@@ -248,6 +254,8 @@ public class ValidatorService {
 				// Concatenating the entire list of AQTs and PQTs together 
 				if ("Preferred Question Text".equalsIgnoreCase(rd.getDocumentType()) || "Alternate Question Text".equalsIgnoreCase(rd.getDocumentType())) {
 					rdDocTextList.add(rdDocText = cleanStringforNbsp(rdDocText));
+					// Forming a concatenated string of Permitted Question Text Choices for the CDE
+					// obtained from the Preferred and Alternate Question Texts (Reference Document objects)
 					if (rdDocs.length() > 0)
 						rdDocs.append("|"+rdDocText);
 					else 
@@ -279,6 +287,9 @@ public class ValidatorService {
 			question.setCdeValueDomainType(vdType);
 			List<Object> errorVal = new ArrayList<Object>();
 			errorVal.add(question.getRaveControlType());
+			
+			// Setting the VD type into the error object as proper text
+			// for building the error message 
 			if (vdType!=null) {
 				if ("N".equalsIgnoreCase(vdType)) {
 					errorVal.add("Non-enumerated"); 
@@ -299,17 +310,20 @@ public class ValidatorService {
 			and caDSR datatypes ,the names are not the same). */ 
 			
 			if (question.getRaveControlType()!=null) {
+				// When RAVE control type is Non-Enumerated & VD type is N (Non-enumerated)
 				if (isNonEnumerated(question.getRaveControlType().toUpperCase()) && "N".equalsIgnoreCase(vdType)) {
 					question.setControlTypeResult(matchString);
 					if (!question.getRaveCodedData().isEmpty()) {
 						question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg5, question.getRaveCodedData())));
-					}						
+					}
+					// When RAVE control type is Enumerated & VD type is E (Enumerated)
 				} else if ((!isNonEnumerated(question.getRaveControlType().toUpperCase())) && "E".equalsIgnoreCase(vdType)) {
 								question.setControlTypeResult(matchString);
+					// When RAVE control type is Non-Enumerated but VD type is E (Enumerated)								
 				} else	if (isNonEnumerated(question.getRaveControlType().toUpperCase()) && "E".equalsIgnoreCase(vdType)) {
 					question.setControlTypeResult(errorString);						
 					question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg7, errorVal.toArray())));
-					question.setQuestionCongruencyStatus(congStatus_errors); 					
+					question.setQuestionCongruencyStatus(congStatus_errors); 	
 				} else {					
 					String result = compareDataType (raveDataFormat, vdDataType);
 					question.setControlTypeResult(result);
@@ -356,7 +370,9 @@ public class ValidatorService {
 		
 		if (userDataStringList!=null) {
 			for (String userDataString : userDataStringList) {
+				// Getting the Coded Data value for the corresponding User Data String from RAVE ALS
 				String pvValue = codedDataList.get(userDataStringList.indexOf(userDataString));
+				// Obtaining the PV value meanings list for comparison with User Data String
 				List<String> pvVmList = pvVmMap.get(pvValue);				
 				if (pvVmList!=null) {
 					if (pvVmList.contains(userDataString)) {
@@ -375,6 +391,7 @@ public class ValidatorService {
 				}
 			}
 			question.setPvResults(pvCheckerResultsList);
+			// Allowable CDE Text Choices built from the PV value meanings list
 			question.setAllowableCdeTextChoices(allowCdesList);
 			if (!isMatch) {
 				if((question.getMessage() != null) && (question.getMessage().indexOf(msg9) == -1))
@@ -402,8 +419,17 @@ public class ValidatorService {
 		/* Compare each CodedData value to all of the Value Domain's PermissibleValue.value
 			Exceptions: If it does not match one of the CDEs PV Value, "ERROR"
 		 */
+		/*
+		 * From the Req Presentation PPT (v9) - slide 24
+		 * 
+		 * Need to map Rave import rules for Coded Data to checker so that ”known” differences won’t be flagged as errors 
+			Replace commas with “@@”   Replace semicolons with “##”
+		 * 
+		 * */
 		if (!pvList.isEmpty()) {
 			for (String codedData : question.getRaveCodedData()) {
+				// Identifying and replacing the @@ and ## patterns
+				// with ',' and ';' respectively 
 				if (codedData!=null) {
 					if (codedData.indexOf(at_str) > -1)
 						codedData = replacePattern(codedData, at_str, comma_str);
@@ -436,8 +462,10 @@ public class ValidatorService {
 	protected static CCCQuestion checkDataTypeCheckerResult (CCCQuestion question, String raveDataFormat, String vdDataType) {
 		List<Object> errorVal = new ArrayList<Object>();
 		question.setCdeDataType(vdDataType);
+		// Adding RAVE Data Format and Value Domain Data Type to error object
 		errorVal.add(raveDataFormat);
-		errorVal.add(vdDataType);					
+		errorVal.add(vdDataType);
+		// Check against the known data types 
 		String result = compareDataType (raveDataFormat, vdDataType);
 		question.setDatatypeCheckerResult(result);
 		if (errorString.equals(result)) {
@@ -469,6 +497,9 @@ public class ValidatorService {
 			   If it does not match, then display the Rave UOM and the Value Domain UOM and result "WARNING".
 			 */
 			
+		// RAVE UOM = Fields.FixedUnit or 
+		// Fields.UnitDictionaryName>UnitDictionaryEntriesSheet>UnitDictionaryName(that matches 
+		// Fields.UnitDictionaryName).CodedUnit 	
 		if (unitOfMeasure!=null) {
 			if (question.getRaveUOM()!=null) {
 					if (question.getRaveUOM().equals(unitOfMeasure)) {
@@ -508,7 +539,8 @@ public class ValidatorService {
 		display both Rave value and caDSR value and result  "WARNING" */
 		
 		if (vdMaxLength!=null) {
-			if (raveLength!=null) {			
+			if (raveLength!=null) {
+				// Comparing RAVE length with the Vale Domain's Max Length
 				if (!(Float.valueOf(computeRaveLength(raveLength)) > Float.valueOf(vdMaxLength))) {
 					question.setLengthCheckerResult(matchString);
 				} else {
@@ -521,7 +553,7 @@ public class ValidatorService {
 				question.setLengthCheckerResult(warningString);
 				question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg14, errorVal.toArray())));
 				if (question.getQuestionCongruencyStatus()==null)
-					question.setQuestionCongruencyStatus(congStatus_warn);				
+					question.setQuestionCongruencyStatus(congStatus_warn);
 			}
 		} else {
 			question.setLengthCheckerResult(matchString);
@@ -597,14 +629,17 @@ public class ValidatorService {
 		int raveLengthInt = 0;
 		if (raveLength!=null && raveLength.trim().length() > 0 && !"%".equals(raveLength)) {
 			raveLength = raveLength.toLowerCase();
+			// Looking for "Characters" to ignore it for length computation using pattern matching
 			if (raveLength.indexOf(characters_string) > -1) {
 				Pattern pattern = Pattern.compile("\\d+");
 				Matcher matcher = pattern.matcher(raveLength);
 				while (matcher.find()) {					
 					raveLength = matcher.group();
 				}
+				// Looking for "dddd.." pattern to compute length
 			} else if (StringUtils.countOccurrencesOf(raveLength, patternHolderChar) > 1) {
 				raveLength = String.valueOf(StringUtils.countOccurrencesOf(raveLength, patternHolderChar));
+				// Looking for "9999.." pattern to compute length
 			} else if (StringUtils.countOccurrencesOf(raveLength, patternHolderNum) > 1) {
 				raveLength = String.valueOf(StringUtils.countOccurrencesOf(raveLength, patternHolderNum));
 			}	
@@ -628,6 +663,7 @@ public class ValidatorService {
 	 */
 	protected static String assignQuestionErrorMessage (String questionMessage, String newMessage) {
 		String errorMessage = null;
+		// Appending to the message if there is more than one error.
 		if (questionMessage!=null) 
 			errorMessage = questionMessage +"\n"+ newMessage;
 		else 
@@ -653,10 +689,12 @@ public class ValidatorService {
 						if (vm.getVmIdseq().equalsIgnoreCase(vmIdSeq)) {							
 							if (vm.getAlternateNames()!=null) {
 								for (AlternateNameUiModel altName : vm.getAlternateNames()) {
+									// Adding Value Meaning Alternate Names
 									altNameList.add(cleanStringforNbsp(altName.getName()));
 								}
 							} 
 							if (vm.getPvMeaning()!=null) {
+								// Adding PV Value Meanings
 								pvMeanList.add(cleanStringforNbsp(vm.getPvMeaning()));
 							}
 						}
@@ -729,6 +767,9 @@ public class ValidatorService {
 		if (raveDataFormat!=null && (raveDataFormat.trim().length() > 0)) {
 			if (vdDataType!=null) {
 				if (raveDataFormat.startsWith("$")) {
+					// Checking RAVE data format against all the known Character (String) data formats
+					// If not match, check with the other known data formats to check if it belongs there
+					// If yes, then it's an error otherwise it's an Not checked type
 					if (characterDataFormats.contains(vdDataType.toUpperCase())) 
 						result = true;
 					else if (dateDataFormats.contains(vdDataType.toUpperCase()) || timeDataFormats.contains(vdDataType.toUpperCase())
@@ -739,6 +780,7 @@ public class ValidatorService {
 				} else if (raveDataFormat.toUpperCase().startsWith("DD") || raveDataFormat.toUpperCase().startsWith("DY")  
 						|| raveDataFormat.toUpperCase().startsWith("MM") || raveDataFormat.toUpperCase().startsWith("MON") 
 						|| raveDataFormat.toUpperCase().startsWith("YY") || raveDataFormat.toUpperCase().startsWith("YYYY")) {
+					// Checking RAVE data format against all the known Date data formats
 					if (dateDataFormats.contains(vdDataType.toUpperCase())) 
 						result = true;
 					else if (characterDataFormats.contains(vdDataType.toUpperCase()) || timeDataFormats.contains(vdDataType.toUpperCase())
@@ -747,6 +789,7 @@ public class ValidatorService {
 					} else 
 						return notCheckedString;					
 				} else if (raveDataFormat.toUpperCase().startsWith("HH") || raveDataFormat.toUpperCase().startsWith("TIME")) {
+					// Checking RAVE data format against all the known Time data formats
 					if (timeDataFormats.contains(vdDataType.toUpperCase()))
 						result = true;
 					else if (characterDataFormats.contains(vdDataType.toUpperCase()) || dateDataFormats.contains(vdDataType.toUpperCase())
@@ -755,6 +798,7 @@ public class ValidatorService {
 					} else 
 						return notCheckedString;
 				} else if (NumberUtils.isNumber(raveDataFormat)) {
+					// Checking RAVE data format against all the known Numeric data formats
 					if (numericDataFormats.contains(vdDataType.toUpperCase()))
 						result = true;
 					else if (characterDataFormats.contains(vdDataType.toUpperCase()) || dateDataFormats.contains(vdDataType.toUpperCase())

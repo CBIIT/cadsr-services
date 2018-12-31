@@ -51,10 +51,7 @@ public class ValidatorServiceIT {
 	 * @param status
 	 */
 	public void invokeCheckCdeRetiredStatus(String errMsg, String status) {
-		deDetails.setWorkflowStatus(status);
-		de.setDataElementDetails(deDetails);
-		cdeDetails.setDataElement(de);
-		CCCQuestion actualResult = ValidatorService.checkCdeRetired(cdeDetails, question);
+		CCCQuestion actualResult = ValidatorService.checkCdeRetired(status, question);
 		assertEquals(errMsg, actualResult.getMessage());
 	}	
 		
