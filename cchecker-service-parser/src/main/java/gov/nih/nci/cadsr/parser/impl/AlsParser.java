@@ -92,13 +92,8 @@ public class AlsParser implements Parser{
 	private static String err_msg_5 = "Draft Form name of the form is empty";	
 	private static String err_msg_6 = "Form OID is empty.";
 	private static String err_msg_7 = "Field OID is empty.";
-	private static String err_msg_8 = "Field Ordinal is empty.";
 	private static String err_msg_9 = "Draft Field Name is empty.";	
-	private static String err_msg_10 = "Data Format is empty.";
-	private static String err_msg_11 = "Data Dictionary Name is empty.";
 	private static String err_msg_12 = "Control Type is empty.";
-	private static String err_msg_13 = "Pretext is empty.";
-	private static String err_msg_14 = "Fixed Unit is empty.";		
 	private static String err_msg_15 = "Data Dictionary Name is empty.";
 	private static String err_msg_16 = "Coded Data is empty.";
 	private static String err_msg_17 = "Ordinal is empty.";
@@ -123,18 +118,22 @@ public class AlsParser implements Parser{
 		alsData.setFilePath(INPUT_XLSX_FILE_PATH);
 		ALSError alsError;		
 		try {
+			    //Create a new Workbook out of the uploaded XLSX file 
 				Workbook workbook = WorkbookFactory.create(new File(INPUT_XLSX_FILE_PATH));
 				Sheet sheet = workbook.getSheet(crfDraftSheetName);
+				// Parse CRF Draft Sheet(Summary info) from the ALS file
 				if (sheet!=null) 
 					alsData = getCrfDraft(sheet, alsData, cccError);
 				else
 					{
+					// Create an error object that can be added to the error list
 						alsError = getErrorInstance();
 						alsError.setErrorDesc(errorSheetMissing+" - "+crfDraftSheetName);
 						alsError.setSheetName(crfDraftSheetName);
 						alsError.setErrorSeverity(errorSeverity_fatal);						
 						cccError.addAlsError(alsError); 
 					}
+				// Parse Forms sheet from the ALS file
 				sheet = workbook.getSheet(formsSheetName);
 				if (alsData.getCccError()!=null)
 					cccError = alsData.getCccError();
@@ -148,6 +147,7 @@ public class AlsParser implements Parser{
 					alsError.setErrorSeverity(errorSeverity_fatal);					
 					cccError.addAlsError(alsError); 
 				}					
+				// Parse Fields sheet from the ALS file
 				sheet = workbook.getSheet(fieldsSheetName);
 				if (alsData.getCccError()!=null)
 					cccError = alsData.getCccError();		
@@ -161,6 +161,7 @@ public class AlsParser implements Parser{
 					alsError.setErrorSeverity(errorSeverity_fatal);					
 					cccError.addAlsError(alsError); 
 				}										
+				// Parse Data Dictionary Entries sheet from the ALS file
 				sheet = workbook.getSheet(dataDictionarySheetName);
 				if (alsData.getCccError()!=null)
 					cccError = alsData.getCccError();	
@@ -174,6 +175,7 @@ public class AlsParser implements Parser{
 					alsError.setErrorSeverity(errorSeverity_warn);					
 					cccError.addAlsError(alsError); 
 				}
+				// Parse Unit Dictionary Entries sheet from the ALS file
 				sheet = workbook.getSheet(unitDictionarySheetName);
 				if (sheet!=null)
 					alsData = getUnitDictionaryEntries(sheet, alsData, cccError);
@@ -216,6 +218,10 @@ public class AlsParser implements Parser{
 			alsData.setReportDate(dateFormat.format(date));
 			Row newRow = sheet.getRow(crfDraftStartRow);
 			ALSCrfDraft crfDraft = getAlsCrfDraftInstance();
+			
+			// Parse out the following values from the CRFDraft sheet
+			// DraftName, ProjectName & PrimaryFormOID 
+			
 			if (newRow.getCell(cell_crfDraftName)!=null && !newRow.getCell(cell_crfDraftName).equals(""))
 				crfDraft.setDraftName(dataFormatter.formatCellValue(newRow.getCell(cell_crfDraftName)));
 			if (newRow.getCell(cell_crfDraftProjectName) == null || newRow.getCell(cell_crfDraftProjectName).equals("")) {
@@ -270,6 +276,10 @@ public class AlsParser implements Parser{
 			while (rowIterator.hasNext()) {
 				row = rowIterator.next();
 				ALSForm form = getAlsFormInstance();
+				
+				// Parse out the following values from the Forms sheet
+				// OID, Ordinal & DraftFormName
+				
 				if (row.getCell(cell_formOid) != null) {
 					form.setFormOid(dataFormatter.formatCellValue(row.getCell(cell_formOid)));
 					if (row.getCell(cell_formOrdinal) != null)	
@@ -338,6 +348,11 @@ public class AlsParser implements Parser{
 				String fieldOid = null;
 				String dataDictionaryName = null;
 				String unitDictionaryName = null;
+				
+				// Parse out the following values from the Fields sheet
+				// FormOID, FieldOID, Ordinal, DraftFieldName, DataFormat, DataDictionaryName,
+				// UnitDictionaryName, ControlType, PreText, FixedUnit & DefaultValue
+				
 				if (row.getCell(cell_field_formOid) != null) {
 					formOid = dataFormatter.formatCellValue(row.getCell(cell_field_formOid));					
 					field.setFormOid(formOid);
@@ -566,7 +581,7 @@ public class AlsParser implements Parser{
 		Map<String, ALSDataDictionaryEntry> ddeMap = new HashMap<String, ALSDataDictionaryEntry>();
 			ALSDataDictionaryEntry dde = new ALSDataDictionaryEntry();
 			ALSError alsError;
-			final String regex_space = "[\\p{Z}\\s]";//"'\u00A0', '\u2007', '\u202F'";
+			final String regex_space = "[\\p{Z}\\s]";// To identify and remove "'\u00A0', '\u2007', '\u202F'" characters
 			List<Integer> ordinal = new ArrayList<Integer>();
 			List<String> cd = new ArrayList<String>();
 			List<String> uds = new ArrayList<String>();
@@ -574,6 +589,10 @@ public class AlsParser implements Parser{
 			String ddName = "";
 			Iterator<Row> rowIterator = sheet.rowIterator();
 			Row row = rowIterator.next();
+			
+			// Parse out the following values from the Data Dictionary Entries sheet
+			// DataDictionaryName, CodedData & UserDataString 
+			
 			while (rowIterator.hasNext()) {
 				row = rowIterator.next();
 				if (row.getCell(cell_ddeDataDictionaryName) != null) {
@@ -692,6 +711,10 @@ public class AlsParser implements Parser{
 		ALSError alsError;			
 		Iterator<Row> rowIterator = sheet.rowIterator();
 		Row row = rowIterator.next();
+		
+		// Parse out the following values from the Unit Dictionary Entries sheet
+		// UnitDictionaryName, CodedUnit, Ordinal, ConstantA, ConstantB, ConstantC, ConstantK & UnitString 		
+		
 		while (rowIterator.hasNext()) {
 			row = rowIterator.next();
 			ude = getUnitDictionaryInstance();
