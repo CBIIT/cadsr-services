@@ -26,12 +26,11 @@ public class CCheckerExcelGenService {
 		return "CCheckerExcelGenService is running!\n";
 	}
 	public static void main(String[] args) throws Exception {
-
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		InputStream input = classLoader.getResourceAsStream("boot.properties");
-		//
 		Properties properties = new Properties();
-		properties.load(input);
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		try (InputStream input = classLoader.getResourceAsStream("boot.properties")) {
+			properties.load(input);
+		}
 		String propVal;
 		if ((propVal = properties.getProperty("CCHECKER_DB_SERVICE_URL_REPORT_ERROR_RETRIEVE")) != null) {
 			CCHECKER_DB_SERVICE_URL_REPORT_ERROR_RETRIEVE = propVal;

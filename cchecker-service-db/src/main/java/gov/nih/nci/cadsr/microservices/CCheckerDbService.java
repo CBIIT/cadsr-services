@@ -37,12 +37,11 @@ public class CCheckerDbService {
     static String UPLOADED_FOLDER;// ="/local/content/cchecker";//default
     static String CDEBROWSER_REST_GET_CDE;
 	public static void main(String[] args) throws Exception {
-
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		InputStream input = classLoader.getResourceAsStream("boot.properties");
-		//
 		Properties properties = new Properties();
-		properties.load(input);
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		try (InputStream input = classLoader.getResourceAsStream("boot.properties")) {
+			properties.load(input);
+		}
 		String propVal;
 		if ((propVal = properties.getProperty("UPLOADED_FOLDER")) != null)
 			UPLOADED_FOLDER = propVal;

@@ -3,8 +3,8 @@
  */
 package gov.nih.nci.cadsr.microservices;
 
-import java.io.InputStream;
-import java.util.Properties;
+//import java.io.InputStream;
+//import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,13 +25,12 @@ public class CCheckerParserService {
 		return "CCheckerParserService is running!\n";
 	}
 	public static void main(String[] args) throws Exception {
-
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		InputStream input = classLoader.getResourceAsStream("boot.properties");
-		//
-		Properties properties = new Properties();
-		properties.load(input);
-
+		//We do not have microservice specific properties
+//		Properties properties = new Properties();
+//		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+//		try (InputStream input = classLoader.getResourceAsStream("boot.properties")) {
+//			properties.load(input);
+//		}
 		SpringApplication.run(CCheckerParserService.class, args);
 	}
 }

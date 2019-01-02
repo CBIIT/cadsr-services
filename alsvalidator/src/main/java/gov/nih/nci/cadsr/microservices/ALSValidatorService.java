@@ -37,11 +37,11 @@ public class ALSValidatorService {
 	}
 
 	public static void main(String[] args) throws Exception {
-
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		InputStream input = classLoader.getResourceAsStream("boot.properties");
 		Properties properties = new Properties();
-		properties.load(input);
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		try (InputStream input = classLoader.getResourceAsStream("boot.properties")) {
+			properties.load(input);
+		}
 		CCHECKER_DB_SERVICE_URL_RETRIEVE = properties.getProperty("CCHECKER_DB_SERVICE_URL_RETRIEVE");
 		logger.info("CCHECKER_DB_SERVICE_URL_RETRIEVE: " + CCHECKER_DB_SERVICE_URL_RETRIEVE);
 		CDEBROWSER_REST_GET_CDE = properties.getProperty("CDEBROWSER_REST_GET_CDE");

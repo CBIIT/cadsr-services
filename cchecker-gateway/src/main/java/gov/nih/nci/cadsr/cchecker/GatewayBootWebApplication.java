@@ -46,13 +46,13 @@ public class GatewayBootWebApplication extends SpringBootServletInitializer {
 	@Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		InputStream input = classLoader.getResourceAsStream("cchecker-gateway.properties");
 		//
 		Properties properties = new Properties();
-		try {
+		try (InputStream input = classLoader.getResourceAsStream("cchecker-gateway.properties")) {
 			properties.load(input);
-		} catch (IOException e) {
-			logger.error("!!! Loaded CChecker Gateway properties load failure" + e);
+		} 
+		catch (IOException e) {
+			logger.error("!!! CChecker Gateway properties load failure: " + e);
 		    /**
 		     * If properties not found throws runtime exception
 		     */
