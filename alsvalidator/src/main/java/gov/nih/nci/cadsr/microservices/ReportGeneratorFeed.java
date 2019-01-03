@@ -63,6 +63,11 @@ public class ReportGeneratorFeed implements ReportOutput {
 	private static List<CategoryCde> categoryCdeList;
 	private static List<CategoryNrds> categoryNrdsList;
 	private static String noCdeMsg = "No CDE provided : {%s}.";
+	private static List<NrdsCde> nrdsCdeList = new ArrayList<NrdsCde>();
+	private static List<StandardCrfCde> standardCrfCdeList = new ArrayList<StandardCrfCde>();
+	private static int totalNrdsCong = 0;
+	private static int totalNrdsWarn = 0;
+	private static int totalNrdsError = 0;	
 	
 	static{
 		categoryCdeList = retrieveCdeCrfData();
@@ -87,6 +92,13 @@ public class ReportGeneratorFeed implements ReportOutput {
 		if (feedNumber == null) feedNumber = "0";
 		return feedNumber;
 	}
+	
+	
+	/**
+	 * @param alsData - Complete data from the RAVE ALS (XLSX) file uploaded
+	 * @param selForms - List of Forms selected by the user for performing congruency checking
+	 * @return Map<String, List<CdeFormInfo>>
+	 */
 	public Map<String, List<CdeFormInfo>> buildFormCdeList(ALSData alsData, List<String> selForms) {
 		String formOid = null;
 		Map<String, List<CdeFormInfo>> cdeFormMap = new HashMap<>();
@@ -106,7 +118,9 @@ public class ReportGeneratorFeed implements ReportOutput {
 				question.setFieldOrder(alsField.getOrdinal());
 				question.setRaveFormOId(alsField.getFormOid());
 				String draftFieldName = alsField.getDraftFieldName();
-				if (!"FORM_OID".equals(alsField.getFieldOid())) { //Skipping rows that do not have CDEs/questions to validate i.e., rows that have FORM_OID in FieldOid
+				
+				//Skipping rows that do not have CDEs/questions to validate i.e., rows that have FORM_OID in FieldOid
+				if (!"FORM_OID".equals(alsField.getFieldOid())) { 
 					if (draftFieldName!=null) {
 						if (draftFieldName.indexOf(publicid_prefix) > -1 && draftFieldName.indexOf(version_prefix) > -1) {
 							question = assignCdeIdVersionToQuestion (question, draftFieldName);
@@ -225,6 +239,8 @@ public class ReportGeneratorFeed implements ReportOutput {
 		cccReport.setRaveProtocolName(alsData.getCrfDraft().getProjectName());
 		cccReport.setRaveProtocolNumber(alsData.getCrfDraft().getPrimaryFormOid());
 		cccReport.setTotalFormsCount(alsData.getForms().size());
+		
+		// Flag to indicate if user chose to Check Standard CRFs or not; True = Yes
 		cccReport.setIsCheckStdCrfCdeChecked(checkStdCrfCde);
 		List<CCCForm> formsList = new ArrayList<CCCForm>();
 		CCCForm form = new CCCForm();
@@ -232,16 +248,11 @@ public class ReportGeneratorFeed implements ReportOutput {
 		int totalQuestCount = 0;
 		int totalFormsCongruent = 0;
 		int totalQuestWithoutCde = 0;
-		int totalNrdsCong = 0;
-		int totalNrdsWarn = 0;
-		int totalNrdsError = 0;
 		int countQuestChecked = 0;
 
 
 		List<CCCQuestion> questionsList = new ArrayList<CCCQuestion>();
 		List<CCCQuestion> congQuestionsList = new ArrayList<CCCQuestion>();
-		List<NrdsCde> nrdsCdeList = new ArrayList<NrdsCde>();
-		List<StandardCrfCde> standardCrfCdeList = new ArrayList<StandardCrfCde>();
 		List<NrdsCde> missingNrdsCdesList = new ArrayList<NrdsCde>();
 		List<StandardCrfCde> missingStdCrfCdeList = new ArrayList<StandardCrfCde>();
 		Map<String, ALSDataDictionaryEntry> ddeMap = alsData.getDataDictionaryEntries();
@@ -251,6 +262,8 @@ public class ReportGeneratorFeed implements ReportOutput {
 		
 		int feedFormNumber = 1;//this is to feed to UI
 		
+		// Running through the list of CDEs/Questions (Fields sheet) to identify & 
+		// assign them into forms that they belong to
 		for (ALSField alsField : alsData.getFields()) {
 			Boolean cdeServiceCall = true;
 			if (selForms.contains(alsField.getFormOid())) {
@@ -275,7 +288,9 @@ public class ReportGeneratorFeed implements ReportOutput {
 								logger.debug("Current form to feed map, session: " + sessionId + ", form: " + feedFormNumber);
 							}
 							form.setRaveFormOid(formOid);
+							// Total Questions for the form (incl. FORM_OID questions)
 							form.setCountTotalQuestions(totalQuestCount);
+							// Total number of questions that were checked, after ignoring FORM_OID questions
 							form.setTotalQuestionsChecked(countQuestChecked);
 							formsList.add(form);
 							totalQuestCount = 0;
@@ -292,15 +307,26 @@ public class ReportGeneratorFeed implements ReportOutput {
 					question.setFieldOrder(alsField.getOrdinal());
 					question.setRaveFormOId(alsField.getFormOid());
 					String draftFieldName = alsField.getDraftFieldName();
-					if (!"FORM_OID".equals(alsField.getFieldOid())) {//Skipping rows that do not have CDEs/questions to validate i.e., rows that have FORM_OID in FieldOid
+					
+					//Skipping rows that do not have CDEs/questions to validate i.e., rows that have FORM_OID in FieldOid
+					if (!"FORM_OID".equals(alsField.getFieldOid())) {
 						countQuestChecked++;
 					if (draftFieldName!=null) {
+						// Detecting the presence of CDE public ID in the format PIDxxxxxxx_Vx_x
 						if (draftFieldName.indexOf(publicid_prefix) > -1 && draftFieldName.indexOf(version_prefix) > -1) {
+							
+							// Splitting draftFieldName to extract CDE Public ID and Version
 							question = assignCdeIdVersionToQuestion (question, draftFieldName);
+							// Avoiding CDE details fetching in case the extracted Public ID and Version are not numbers
 							if (!NumberUtils.isNumber(question.getCdePublicId()) || !NumberUtils.isNumber(question.getCdeVersion()))
 								cdeServiceCall = false;
+							// Building Coded Data (PV list on caDSR) from the ALS Data Dictionary entries for the CDE 
 							question = buildCodedData(alsField, question, ddeMap);
+							
+							// Setting RAVE field values obtained from the RAVE ALS input file
 							question = setRaveFields (alsField, question);
+							
+							// Assign validation errors that occurred during Parsing, to the question message
 							Map<String, String> parseValidationError = pickFieldErrors(alsField, alsData.getCccError().getAlsErrors());
 							question = setParseErrorToQuestion (question, parseValidationError);
 							CdeDetails cdeDetails = null;
@@ -320,34 +346,10 @@ public class ReportGeneratorFeed implements ReportOutput {
 							}
 							// from a static table of NCI standard CRFs
 							CdeStdCrfData cdeCrfData = fetchCdeStandardCrfData(question.getCdePublicId(), question.getCdeVersion());
-							if (cdeCrfData!=null) {
-									if (checkStdCrfCde) {
-										question.setNciCategory(cdeCrfData.getNciCategory());
-									} else {
-										if (nrds_cde.equalsIgnoreCase(cdeCrfData.getNciCategory()))
-											question.setNciCategory(nrds_cde);
-									}
-								}
-							if (cdeCrfData!=null && cdeDetails.getDataElement()!=null)  {
-							if (nrds_cde.equalsIgnoreCase(question.getNciCategory())) {
-								nrdsCdeList.add(buildNrdsCde(question,
-										cdeDetails.getDataElement().getDataElementDetails().getLongName()));
-									if (congStatus_congruent.equals(question.getQuestionCongruencyStatus())) {
-										totalNrdsCong++;
-									} else if (congStatus_errors.equals(question.getQuestionCongruencyStatus())) {
-										totalNrdsError++;
-									} else if (congStatus_warn.equals(question.getQuestionCongruencyStatus())) {
-										totalNrdsWarn++;
-									}
-								}
-							else if ((mandatory_crf.equalsIgnoreCase(question.getNciCategory()))
-									|| (optional_crf.equalsIgnoreCase(question.getNciCategory()))
-									|| (conditional_crf.equalsIgnoreCase(question.getNciCategory()))) {
-								if (checkStdCrfCde) {
-										standardCrfCdeList.add(buildCrfCde(cdeCrfData, cdeDetails.getDataElement().getDataElementDetails().getLongName()));
-									} 
-								}
-							}
+							
+							// updating the NCI category to the question
+							question = updateNciCategory(checkStdCrfCde, cdeCrfData, question, cdeDetails);
+							
 							if (question.getQuestionCongruencyStatus() != null) {
 								if (congStatus_congruent.equals(question.getQuestionCongruencyStatus())) {
 									congQuestionsList.add(question);	
@@ -443,6 +445,51 @@ public class ReportGeneratorFeed implements ReportOutput {
 		return alsError;
 	}
 
+	
+	
+	/**
+	 * Checks and assigns NCI category [NRDS, Mandatory, Optional, Conditional] to the question, 
+	 * with the totals of the questions in each category
+	 * @param checkStdCrfCde
+	 * @param cdeCrfData
+	 * @param question
+	 * @param cdeDetails
+	 * @return CCCQuestion
+	 */
+	protected static CCCQuestion updateNciCategory (Boolean checkStdCrfCde, CdeStdCrfData cdeCrfData, CCCQuestion question, CdeDetails cdeDetails) {
+		if (cdeCrfData!=null) {
+			if (checkStdCrfCde) {
+				question.setNciCategory(cdeCrfData.getNciCategory());
+			} else {
+				if (nrds_cde.equalsIgnoreCase(cdeCrfData.getNciCategory()))
+					question.setNciCategory(nrds_cde);
+			}
+		}
+	if (cdeCrfData!=null && cdeDetails.getDataElement()!=null)  {
+	if (nrds_cde.equalsIgnoreCase(question.getNciCategory())) {
+		nrdsCdeList.add(buildNrdsCde(question,
+				cdeDetails.getDataElement().getDataElementDetails().getLongName()));
+			if (congStatus_congruent.equals(question.getQuestionCongruencyStatus())) {
+				totalNrdsCong++;
+			} else if (congStatus_errors.equals(question.getQuestionCongruencyStatus())) {
+				totalNrdsError++;
+			} else if (congStatus_warn.equals(question.getQuestionCongruencyStatus())) {
+				totalNrdsWarn++;
+			}
+		}
+	else if ((mandatory_crf.equalsIgnoreCase(question.getNciCategory()))
+			|| (optional_crf.equalsIgnoreCase(question.getNciCategory()))
+			|| (conditional_crf.equalsIgnoreCase(question.getNciCategory()))) {
+		if (checkStdCrfCde) {
+				standardCrfCdeList.add(buildCrfCde(cdeCrfData, cdeDetails.getDataElement().getDataElementDetails().getLongName()));
+			} 
+		}
+	}		
+		return question;
+	}
+	
+	
+	
 	/**
 	 * @param ALSField
 	 * @param List<ALSError>
