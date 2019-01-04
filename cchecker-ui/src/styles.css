@@ -8,7 +8,7 @@ body {
 }
 
 a {
-	color:#0054AD !important;
+	color:#07486e !important;
 }
 #container {
 	width: 1100px;
@@ -84,13 +84,15 @@ h2 {
 
 /* boostrap overrides */
 .btn.btn-primary {
-    font-size:14px;
+    font-size:13px;
     padding:5px 15px 5px 15px;
-    background-color:#337ab7;
+    background-color:#606a76;
+	border-width:0px;
+	font-weight:bold;
 }
 
 .btn.btn-primary:hover {
-    background-color:#337ab7;
+    background-color:#606a76;
 }
 
 form {
@@ -114,13 +116,13 @@ form input {
 }
 
 .nav-item a {
-    border:1px solid #0054AD !important;
+    border:1px solid #606a76 !important;
 	padding:10px;
-	color:#0054AD;
+	color:#07486e !important;
 }
 
 .nav-pills .nav-link.active, .nav-pills .show>.nav-link {
-    background-color: #0054AD !important;
+    background-color: #606a76 !important;
 }
 
 .nav-link.active {
@@ -141,5 +143,5 @@ table.dataTable tbody td {
 
 /* override bootstrap */
 .btn.btn-primary {
-    background-color: #0054AD !important;
+    background-color: #07486e  !important;
 }
