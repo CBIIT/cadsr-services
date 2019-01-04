@@ -330,7 +330,8 @@ public class ReportGeneratorFeed implements ReportOutput {
 							Map<String, String> parseValidationError = pickFieldErrors(alsField, alsData.getCccError().getAlsErrors());
 							question = setParseErrorToQuestion (question, parseValidationError);
 							CdeDetails cdeDetails = null;
-							//logger.debug("cdeServiceCall: " + cdeServiceCall);
+
+							// Flag to indicate CDE service needs to be invoked or not
 							if (cdeServiceCall) {
 								try {
 									//Service Call to retrieve CDE List
@@ -358,14 +359,19 @@ public class ReportGeneratorFeed implements ReportOutput {
 								}										
 							}
 						} else {
+							// increment the counter for Questions that are not associated with a CDE
+							// because the draftFieldName value was not of PIDxxxxxx_Vx_x format
 							totalQuestWithoutCde++;
 							if ("FORM_OID".equalsIgnoreCase(alsField.getFieldOid())) {
+								// Extracting form OID from defaultValue, if the Field OID = FORM_OID
 								if (alsField.getDefaultValue()!=null) {
+									// Form Public ID and Version is expected to be in the same format as CDE public ID [PIDxxxxxx_Vx_x]
 									if (alsField.getDefaultValue().indexOf(publicid_prefix) > -1 && alsField.getDefaultValue().indexOf(version_prefix) > -1) {
 										form = assignIdVersionToForm(form, alsField.getDefaultValue());
 									}
 								}
 							} else {
+								// When CDE public ID & Version are not present
 								question.setRaveFieldLabel(alsField.getPreText());
 								question.setQuestionCongruencyStatus(congStatus_warn);
 								question.setMessage(String.format(noCdeMsg, draftFieldName));
@@ -384,6 +390,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 				}
 			}
 		}
+		// After all the fields have been processed, the last form needs to be completed and added to the list of forms
 		form.setCountTotalQuestions(totalQuestCount);
 		form.setTotalQuestionsChecked(countQuestChecked);
 		form.setRaveFormOid(formOid);
@@ -393,7 +400,8 @@ public class ReportGeneratorFeed implements ReportOutput {
 		} else {
 			form.setCongruencyStatus(congStatus_congruent);
 		}
-		formsList.add(form);		
+		formsList.add(form);
+		// Setting the list of forms to the report
 		cccReport.setCccForms(formsList);
 		logger.info("getFinalReportData created formsList size: " + formsList.size());
 		if (formsList.size() == 0) {
@@ -731,6 +739,8 @@ public class ReportGeneratorFeed implements ReportOutput {
 		int condCrfWarn = 0;
 		int condCrfErr = 0;
 		
+		// If the Standard CRF CDEs are not included in congruency checking 
+		// based on user's choice then they're excluded from the summary count
 		if (report.getIsCheckStdCrfCdeChecked()) {
 			for (StandardCrfCde cde : report.getMissingStandardCrfCdeList()) {
 				if (mandatory_crf.equals(cde.getStdTemplateType())) 
@@ -780,6 +790,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 			}
 		}
 
+		// setting counters into the report
 		report.setCountQuestionsWithWarnings(countQuestWarn);
 		report.setCountQuestionsWithErrors(countQuestError);
 		report.setCountManCrfMissing(stdManMissingCount);
@@ -798,6 +809,9 @@ public class ReportGeneratorFeed implements ReportOutput {
 	}
 		
 	/**
+	 * This method makes a rest call to retrieve all the standard CRF CDEs from the caDSR database
+	 * It is called only once per instance of this class.
+	 * 
 	 * @return List of Standard CRF CDEs
 	 * 
 	 */	
@@ -825,6 +839,9 @@ public class ReportGeneratorFeed implements ReportOutput {
 	}
 	
 	/**
+	 * This method makes a rest call to retrieve all the NRDS CDEs from the caDSR database
+	 * It is called only once per instance of this class.
+	 * 
 	 * @return List of NRDS CDEs
 	 * 
 	 */		
