@@ -74,6 +74,14 @@ public class ExcelReportGenerator {
 		private static Integer[] shortColumnsforForm = {0,1,2,3,4,5,6,7,8,11,13,14,15,17,20,22,23,24,25,26,27,28,29,30,31,32,33,34};
 		private static Integer[] longColumnsforForm = { 9,10,12,16,18,19,21 };
 		private static String croppedStringText = "// CONTENT CROPPED TO 32,700 CHARACTERS. // \n ";
+		private static String[] rowHeaders = { "Rave Form OID", "caDSR Form ID", "Version", "Total Number Of Questions Checked",
+				"Field Order", "CDE Public ID", "CDE Version", "NCI Category", "Question Congruency Status", "Message",
+				"Rave Field Label", "Rave Field Label Result", "CDE Permitted Question Text Choices",
+				"Rave Control Type", "Control Type Checker Result", "CDE Value Domain Type", "Rave Coded Data", "Coded Data Result",
+				"Allowable CDE  Value", "Rave User String", "PV Result", "Allowable CDE  Value Meaning Text Choices",
+				"Rave Field Data Type", "Data Type Checker Result", "CDE Data Type", "Rave UOM", "UOM Checker Result", "CDE UOM",
+				"Rave Length", "Length Checker Result", "CDE Maximum Length", "Rave Display Format", "Format Checker Result",
+				"CDE Display Format" };
 
 		/**
 		 * @param
@@ -85,39 +93,21 @@ public class ExcelReportGenerator {
 			Row row;
 			XSSFWorkbook workbook = new XSSFWorkbook();
 			XSSFSheet sheet = workbook.createSheet("Summary");
-			Map<String, String> summaryLabels = new LinkedHashMap<String, String>();
-			summaryLabels.put(checkerReportOwnerLbl, cccReport.getReportOwner());
-			summaryLabels.put(raveProtocolNameLbl, cccReport.getRaveProtocolName());
-			summaryLabels.put(raveProtocolNumLbl, cccReport.getRaveProtocolNumber());
-			summaryLabels.put(reportDateLbl, cccReport.getReportDate());
-			summaryLabels.put(formCountLbl, String.valueOf(cccReport.getTotalFormsCount()));
-			summaryLabels.put(totalQuestCheckLbl, String.valueOf(cccReport.getCountQuestionsChecked()));
-			summaryLabels.put(totalQuestCongLbl, String.valueOf(cccReport.getCountCongruentQuestions()));			
-			summaryLabels.put(totalQuestWarnLbl, String.valueOf(cccReport.getCountQuestionsWithWarnings()));
-			summaryLabels.put(totalQuestErrorLbl, String.valueOf(cccReport.getCountQuestionsWithErrors()));
-			summaryLabels.put(totalunassociatedQuestLbl, String.valueOf(cccReport.getCountQuestionsWithoutCde()));
-			summaryLabels.put(reqQuestMissLbl, String.valueOf(cccReport.getCountNrdsMissing()));
-			summaryLabels.put(reqNrdsQuestCongLbl, String.valueOf(cccReport.getCountNrdsCongruent()));
-			summaryLabels.put(reqNrdsQuestWarnLbl, String.valueOf(cccReport.getCountNrdsWithWarnings()));
-			summaryLabels.put(reqNrdsQuestErrorLbl, String.valueOf(cccReport.getCountNrdsWithErrors()));
-			summaryLabels.put(nciStdManQuestLbl, String.valueOf(cccReport.getCountManCrfMissing()));
-			summaryLabels.put(nciStdManCongLbl, String.valueOf(cccReport.getCountManCrfCongruent()));
-			summaryLabels.put(nciStdManErrorLbl, String.valueOf(cccReport.getCountManCrfWithErrors()));
-			summaryLabels.put(nciStdManWarnLbl, String.valueOf(cccReport.getCountManCrfwWithWarnings()));
-			summaryLabels.put(nciStdCondQuestLbl, String.valueOf(cccReport.getCountCondCrfMissing()));
-			summaryLabels.put(nciStdCondCongLbl, String.valueOf(cccReport.getCountCondCrfCongruent()));
-			summaryLabels.put(nciStdCondErrorLbl, String.valueOf(cccReport.getCountCondCrfWithErrors()));
-			summaryLabels.put(nciStdCondWarnLbl, String.valueOf(cccReport.getCountCondCrfwWithWarnings()));
-			summaryLabels.put(nciStdOptQuestLbl, String.valueOf(cccReport.getCountOptCrfMissing()));
-			summaryLabels.put(nciStdOptCongLbl, String.valueOf(cccReport.getCountOptCrfCongruent()));
-			summaryLabels.put(nciStdOptErrorLbl, String.valueOf(cccReport.getCountOptCrfWithErrors()));
-			summaryLabels.put(nciStdOptWarnLbl, String.valueOf(cccReport.getCountOptCrfwWithWarnings()));		
 			
-			int rowNum = 0;			
+			// Adding labels for each value (row) displayed in the summary page of the report			
+			Map<String, String> summaryLabels = returnSummaryLabelsMap(cccReport);
+			
+			int rowNum = 0;
+			
+			// Setting a fixed column width for values in the Summary page (sheet)
 			sheet.setColumnWidth(idxSummaryLbl, widthFormColsLong);
+			
+			// Setting a fixed column width for labels in the Summary page (sheet)
 			sheet.setColumnWidth(idxSummaryVal, widthSummaryVal);	
 			
 			logger.debug("Creating excel");
+			
+			// Printing the Summary labels and their corresponding values next to them			
 			for (Map.Entry<String, String> label : summaryLabels.entrySet()) {
 				row = sheet.createRow(rowNum++);
 				int colNum = 0;
@@ -131,10 +121,14 @@ public class ExcelReportGenerator {
 			row = sheet.createRow(rowNum++);
 			row = sheet.createRow(rowNum++);
 			Cell newCell = row.createCell(0);
+			
+			// Printing the Report Summary [2nd half - Summary sheet] with forms' congruency status
 			newCell.setCellValue(summaryFormsHeader);
 			newCell = row.createCell(summaryFormsValidResultColNum);
 			newCell.setCellValue(summaryFormsValidResult);
-			List<CCCForm> forms = cccReport.getCccForms(); 
+			List<CCCForm> forms = cccReport.getCccForms();
+			
+			// Iterating through the forms list in the report to display their name and their congruency status
 			for (CCCForm form : forms) {
 				row = sheet.createRow(rowNum++);
 				int colNum = 0;
@@ -143,19 +137,13 @@ public class ExcelReportGenerator {
 				cell = row.createCell(summaryFormsValidResultColNum);
 				cell.setCellValue(form.getCongruencyStatus());
 			}
-			String[] rowHeaders = { "Rave Form OID", "caDSR Form ID", "Version", "Total Number Of Questions Checked",
-					"Field Order", "CDE Public ID", "CDE Version", "NCI Category", "Question Congruency Status", "Message",
-					"Rave Field Label", "Rave Field Label Result", "CDE Permitted Question Text Choices",
-					"Rave Control Type", "Control Type Checker Result", "CDE Value Domain Type", "Rave Coded Data", "Coded Data Result",
-					"Allowable CDE  Value", "Rave User String", "PV Result", "Allowable CDE  Value Meaning Text Choices",
-					"Rave Field Data Type", "Data Type Checker Result", "CDE Data Type", "Rave UOM", "UOM Checker Result", "CDE UOM",
-					"Rave Length", "Length Checker Result", "CDE Maximum Length", "Rave Display Format", "Format Checker Result",
-					"CDE Display Format" };
+			
+			// Iterating through the forms list to create sheets for each one
 			for (CCCForm cccForm : forms) {
 				if (cccForm.getCongruencyStatus()!=null) {
 					if (congStatus_Congruent.equalsIgnoreCase(cccForm.getCongruencyStatus())) {
 						continue;
-					} else {				
+					} else {
 				XSSFSheet sheet2 = workbook.createSheet(cccForm.getRaveFormOid());
 				// Setting width for columns that are expected to be Short
 				setColumnWidth(sheet2, shortColumnsforForm, widthFormColsShort);
@@ -188,42 +176,16 @@ public class ExcelReportGenerator {
 					int colNum2 = formStartColumn;
 					CCCQuestion question = cccForm.getQuestions().get(j);
 					row = sheet2.createRow(rowNum++);
-					newCell = row.createCell(colNum2++);
-					newCell.setCellValue(question.getFieldOrder());
-					newCell = row.createCell(colNum2++);
-					newCell.setCellValue(question.getCdePublicId());				
-					newCell = row.createCell(colNum2++);
-					newCell.setCellValue(question.getCdeVersion());
-					newCell = row.createCell(colNum2++);
-					newCell.setCellValue(question.getNciCategory());
-					newCell = row.createCell(colNum2++);
-					newCell.setCellValue(question.getQuestionCongruencyStatus());
-					newCell = row.createCell(colNum2++);
-					newCell.setCellStyle(cellStyle);
-					String message = question.getMessage();
-					// Checking for the length of the string for max limit before writing to cell
-					if (message!=null && message.length() > cell_max_limit){
-						message = croppedStringText+message.substring(0, cell_write_limit);
-					}
-					newCell.setCellValue(message);
-					newCell = row.createCell(colNum2++);
-					newCell.setCellValue(question.getRaveFieldLabel());
-					newCell = row.createCell(colNum2++);
-					newCell.setCellStyle(cellStyle);				
-					newCell.setCellValue(question.getRaveFieldLabelResult());
-					newCell = row.createCell(colNum2++);
-					newCell.setCellStyle(cellStyle);				
-					newCell.setCellValue(question.getCdePermitQuestionTextChoices());
-					newCell = row.createCell(colNum2++);
-					newCell.setCellValue(question.getRaveControlType());				
-					newCell = row.createCell(colNum2++);
-					newCell.setCellValue(question.getControlTypeResult());								
-					newCell = row.createCell(colNum2++);
-					newCell.setCellValue(question.getCdeValueDomainType());
+					// Printing columns before Coded data column					
+					Map<String, String> formFields1 = returnFormFieldsPart1(question);
+					row = returnFilledRow(formFields1, row, colNum2, cellStyle);
+					
 					List<String> raveCodedData = question.getRaveCodedData();
 					List<String> raveUserString = question.getRaveUserString();
 					List<String> codedDataResult = question.getCodedDataResult();
 					Row rowBeforeCD = row;
+					
+					// Nested loop processing for Coded data and User data string for a CDE
 					for (int m = 0; m < raveCodedData.size(); m++)	{
 						int colNum3 = codedDataColStart;
 						newCell = row.createCell(colNum3++);
@@ -274,30 +236,9 @@ public class ExcelReportGenerator {
 					int rowNumAfterCD = rowNum;
 					row = rowBeforeCD;
 					int newColNum = raveFieldDataTypeCol;
-					newCell = row.createCell(newColNum++);
-					newCell.setCellValue(question.getRaveFieldDataType());				
-					newCell = row.createCell(newColNum++);
-					newCell.setCellValue(question.getDatatypeCheckerResult());								
-					newCell = row.createCell(newColNum++);
-					newCell.setCellValue(question.getCdeDataType());
-					newCell = row.createCell(newColNum++);
-					newCell.setCellValue(question.getRaveUOM());
-					newCell = row.createCell(newColNum++);
-					newCell.setCellValue(question.getUomCheckerResult());																				
-					newCell = row.createCell(newColNum++);
-					newCell.setCellValue(question.getCdeUOM());																								
-					newCell = row.createCell(newColNum++);
-					newCell.setCellValue(question.getRaveLength());
-					newCell = row.createCell(newColNum++);
-					newCell.setCellValue(question.getLengthCheckerResult());
-					newCell = row.createCell(newColNum++);
-					newCell.setCellValue(question.getCdeMaxLength());				
-					newCell = row.createCell(newColNum++);
-					newCell.setCellValue(question.getRaveDisplayFormat());								
-					newCell = row.createCell(newColNum++);
-					newCell.setCellValue(question.getFormatCheckerResult());												
-					newCell = row.createCell(newColNum);
-					newCell.setCellValue(question.getCdeDisplayFormat());
+					// Printing columns after Coded data column
+					Map<String, String> formFields2 = returnFormFieldsPart2(question);					
+					row = returnFilledRow(formFields2, row, newColNum, null);
 					if (rowNumAfterCD > rowNum)
 						rowNum = rowNumAfterCD;
 					}
@@ -332,6 +273,116 @@ public class ExcelReportGenerator {
 				}
 			}
 		}
+		
+		
+		/**
+		 * Populate a map with the labels and their values, for Summary sheet (1st half)
+		 * @param cccReport
+		 * @return Map<String, String>
+		 */
+		public static Map<String, String> returnSummaryLabelsMap(CCCReport cccReport) {
+			Map<String, String> summaryLabels = new LinkedHashMap<String, String>();
+			summaryLabels.put(checkerReportOwnerLbl, cccReport.getReportOwner());
+			summaryLabels.put(raveProtocolNameLbl, cccReport.getRaveProtocolName());
+			summaryLabels.put(raveProtocolNumLbl, cccReport.getRaveProtocolNumber());
+			summaryLabels.put(reportDateLbl, cccReport.getReportDate());
+			summaryLabels.put(formCountLbl, String.valueOf(cccReport.getTotalFormsCount()));
+			summaryLabels.put(totalQuestCheckLbl, String.valueOf(cccReport.getCountQuestionsChecked()));
+			summaryLabels.put(totalQuestCongLbl, String.valueOf(cccReport.getCountCongruentQuestions()));			
+			summaryLabels.put(totalQuestWarnLbl, String.valueOf(cccReport.getCountQuestionsWithWarnings()));
+			summaryLabels.put(totalQuestErrorLbl, String.valueOf(cccReport.getCountQuestionsWithErrors()));
+			summaryLabels.put(totalunassociatedQuestLbl, String.valueOf(cccReport.getCountQuestionsWithoutCde()));
+			summaryLabels.put(reqQuestMissLbl, String.valueOf(cccReport.getCountNrdsMissing()));
+			summaryLabels.put(reqNrdsQuestCongLbl, String.valueOf(cccReport.getCountNrdsCongruent()));
+			summaryLabels.put(reqNrdsQuestWarnLbl, String.valueOf(cccReport.getCountNrdsWithWarnings()));
+			summaryLabels.put(reqNrdsQuestErrorLbl, String.valueOf(cccReport.getCountNrdsWithErrors()));
+			summaryLabels.put(nciStdManQuestLbl, String.valueOf(cccReport.getCountManCrfMissing()));
+			summaryLabels.put(nciStdManCongLbl, String.valueOf(cccReport.getCountManCrfCongruent()));
+			summaryLabels.put(nciStdManErrorLbl, String.valueOf(cccReport.getCountManCrfWithErrors()));
+			summaryLabels.put(nciStdManWarnLbl, String.valueOf(cccReport.getCountManCrfwWithWarnings()));
+			summaryLabels.put(nciStdCondQuestLbl, String.valueOf(cccReport.getCountCondCrfMissing()));
+			summaryLabels.put(nciStdCondCongLbl, String.valueOf(cccReport.getCountCondCrfCongruent()));
+			summaryLabels.put(nciStdCondErrorLbl, String.valueOf(cccReport.getCountCondCrfWithErrors()));
+			summaryLabels.put(nciStdCondWarnLbl, String.valueOf(cccReport.getCountCondCrfwWithWarnings()));
+			summaryLabels.put(nciStdOptQuestLbl, String.valueOf(cccReport.getCountOptCrfMissing()));
+			summaryLabels.put(nciStdOptCongLbl, String.valueOf(cccReport.getCountOptCrfCongruent()));
+			summaryLabels.put(nciStdOptErrorLbl, String.valueOf(cccReport.getCountOptCrfWithErrors()));
+			summaryLabels.put(nciStdOptWarnLbl, String.valueOf(cccReport.getCountOptCrfwWithWarnings()));			
+			return summaryLabels;
+		}
+		
+		
+		
+		/**
+		 * Populate a map with the report values before Coded data column, for individual forms
+		 * @param cccReport
+		 * @return Map<String, String>
+		 */
+		public static Map<String, String> returnFormFieldsPart1(CCCQuestion question) {
+			Map<String, String> formFields = new LinkedHashMap<String, String>();
+			formFields.put("Field Order", question.getFieldOrder());
+			formFields.put("CDE Public ID", question.getCdePublicId());
+			formFields.put("CDE Version", question.getCdeVersion());
+			formFields.put("NCI Category", question.getNciCategory());
+			formFields.put("Question Congruency Status", question.getQuestionCongruencyStatus());
+			String message = question.getMessage();
+			// Checking for the length of the string for max limit before writing to cell
+			if (message!=null && message.length() > cell_max_limit){
+				message = croppedStringText+message.substring(0, cell_write_limit);
+			}			
+			formFields.put("Message", message);
+			formFields.put("RAVE Field Label ", question.getRaveFieldLabel());
+			formFields.put("RAVE Field Label Result", question.getRaveFieldLabelResult());
+			formFields.put("CDE Permitted Question Text Choices", question.getCdePermitQuestionTextChoices());
+			formFields.put("RAVE Control Type", question.getRaveControlType());				
+			formFields.put("RAVE Control Type Result", question.getControlTypeResult());								
+			formFields.put("CDE Value Domain Type", question.getCdeValueDomainType());
+			return formFields;
+			}		
+		
+		/**
+		 * Populate a map with the report values after Coded data column, for individual forms
+		 * @param cccReport
+		 * @return Map<String, String>
+		 */		
+		public static Map<String, String> returnFormFieldsPart2(CCCQuestion question) {
+			Map<String, String> formFields = new LinkedHashMap<String, String>();
+			formFields.put("RAVE Field Data Type", question.getRaveFieldDataType());				
+			formFields.put("Data Type Checker Result", question.getDatatypeCheckerResult());								
+			formFields.put("CDE Data Type", question.getCdeDataType());
+			formFields.put("RAVE UOM", question.getRaveUOM());
+			formFields.put("UOM Checker Result", question.getUomCheckerResult());
+			formFields.put("CDE UOM", question.getCdeUOM());
+			formFields.put("RAVE Length", question.getRaveLength());
+			formFields.put("Length Checker Result", question.getLengthCheckerResult());
+			formFields.put("CDE Max Length", String.valueOf(question.getCdeMaxLength()));
+			formFields.put("RAVE Display Format", question.getRaveDisplayFormat());
+			formFields.put("Format Checker Result", question.getFormatCheckerResult());
+			formFields.put("CDE Display Format", question.getCdeDisplayFormat());
+			return formFields;
+			}				
+		
+		
+		/**
+		 * Fills up a row with the form fields, in the appropriate columns
+		 * @param formFields
+		 * @param row
+		 * @param colNum
+		 * @param cellStyle
+		 * @return Row
+		 */
+		public static Row returnFilledRow (Map<String, String> formFields, Row row, int colNum, CellStyle cellStyle) {
+			Cell newCell;
+			// Iterating through the Map of report fields to print them into the excel sheet
+			for (Map.Entry<String, String> formField : formFields.entrySet()) {						
+				newCell = row.createCell(colNum++);
+				newCell.setCellValue(formField.getValue());
+				if (cellStyle!=null)
+					newCell.setCellStyle(cellStyle);
+			}
+			return row;
+		}
+		
 		
 		
 		/**
