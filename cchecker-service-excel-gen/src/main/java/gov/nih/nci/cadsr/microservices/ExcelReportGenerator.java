@@ -179,61 +179,12 @@ public class ExcelReportGenerator {
 					// Printing columns before Coded data column					
 					Map<String, String> formFields1 = returnFormFieldsPart1(question);
 					row = returnFilledRow(formFields1, row, colNum2, cellStyle);
-					
-					List<String> raveCodedData = question.getRaveCodedData();
-					List<String> raveUserString = question.getRaveUserString();
-					List<String> codedDataResult = question.getCodedDataResult();
 					Row rowBeforeCD = row;
 					
 					// Nested loop processing for Coded data and User data string for a CDE
-					for (int m = 0; m < raveCodedData.size(); m++)	{
-						int colNum3 = codedDataColStart;
-						newCell = row.createCell(colNum3++);
-						newCell.setCellValue(raveCodedData.get(m));					
-						newCell = row.createCell(colNum3++);
-						if (codedDataResult.isEmpty())
-							newCell.setCellValue("Cell empty");
-						else	
-							newCell.setCellValue(codedDataResult.get(m)); 
-						newCell = row.createCell(colNum3++);
-						if (m != 0) {
-								newCell.setCellValue(""); 
-							} else {
-								String allowableCdeVal = question.getAllowableCdeValue();
-								// Checking for the length of the string for max limit before writing to cell								
-								if (allowableCdeVal!=null && allowableCdeVal.length() > cell_max_limit){
-									allowableCdeVal = croppedStringText+allowableCdeVal.substring(0, cell_write_limit);
-								}
-								newCell.setCellValue(allowableCdeVal);
-							} 
-							
-							
-						newCell = row.createCell(colNum3++);
-						newCell.setCellValue(raveUserString.get(m));
-						newCell = row.createCell(colNum3++);
-						if (question.getPvResults()!=null && !question.getPvResults().isEmpty()) {
-							newCell.setCellValue(question.getPvResults().get(m)); 
-						} else {
-							newCell.setCellValue("");
-						}
-						newCell = row.createCell(colNum3++);
-						newCell.setCellStyle(cellStyle);
-						// Adding Allowable CDE text choices (in case of not match)
-						if (question.getAllowableCdeTextChoices() != null && !question.getAllowableCdeTextChoices().isEmpty()) {
-						String allowabeCdeTextChoices = question.getAllowableCdeTextChoices().get(m);
-						// Checking for the length of the string for max limit before writing to cell						
-							if (allowabeCdeTextChoices!=null && allowabeCdeTextChoices.length() > cell_max_limit){
-								allowabeCdeTextChoices = croppedStringText+allowabeCdeTextChoices.substring(0, cell_write_limit);
-							}
-							newCell.setCellValue(allowabeCdeTextChoices);
-						} else {
-							newCell.setCellValue("");
-						}						
-						colNum2 = colNum3;
-						if (m != raveCodedData.size()-1)
-							row = sheet2.createRow(rowNum++);
-					} 
-					int rowNumAfterCD = rowNum;
+					Map<String, Integer> rowAndColNumbers = prepareCodedDataResultsforReport(question, row, cellStyle, rowNum, sheet2);
+					int rowNumAfterCD = rowAndColNumbers.get("RowNum");
+					colNum2 = rowAndColNumbers.get("ColNum");
 					row = rowBeforeCD;
 					int newColNum = raveFieldDataTypeCol;
 					// Printing columns after Coded data column
@@ -382,6 +333,75 @@ public class ExcelReportGenerator {
 			}
 			return row;
 		}
+		
+		/**
+		 * Print Coded data, User data string and Coded data result (PV checker result) in the report 
+		 * @param question
+		 * @param row
+		 * @param cellStyle
+		 * @param rowNum
+		 * @param sheet
+		 * @return Map<String, Integer>
+		 */
+		public static Map<String, Integer> prepareCodedDataResultsforReport(CCCQuestion question, Row row, CellStyle cellStyle, int rowNum, XSSFSheet sheet) {
+			Cell newCell;
+			Map<String, Integer> colNumbers = new LinkedHashMap<String, Integer>();
+			List<String> raveCodedData = question.getRaveCodedData();
+			List<String> raveUserString = question.getRaveUserString();
+			List<String> codedDataResult = question.getCodedDataResult();
+			int colNum = 0;
+			
+			// Nested loop processing for Coded data and User data string for a CDE
+			for (int m = 0; m < raveCodedData.size(); m++)	{
+				colNum = codedDataColStart;
+				newCell = row.createCell(colNum++);
+				newCell.setCellValue(raveCodedData.get(m));					
+				newCell = row.createCell(colNum++);
+				if (codedDataResult.isEmpty())
+					newCell.setCellValue("Cell empty");
+				else	
+					newCell.setCellValue(codedDataResult.get(m)); 
+				newCell = row.createCell(colNum++);
+				if (m != 0) {
+						newCell.setCellValue(""); 
+					} else {
+						String allowableCdeVal = question.getAllowableCdeValue();
+						// Checking for the length of the string for max limit before writing to cell								
+						if (allowableCdeVal!=null && allowableCdeVal.length() > cell_max_limit){
+							allowableCdeVal = croppedStringText+allowableCdeVal.substring(0, cell_write_limit);
+						}
+						newCell.setCellValue(allowableCdeVal);
+					} 
+				newCell = row.createCell(colNum++);
+				newCell.setCellValue(raveUserString.get(m));
+				newCell = row.createCell(colNum++);
+				if (question.getPvResults()!=null && !question.getPvResults().isEmpty()) {
+					newCell.setCellValue(question.getPvResults().get(m)); 
+				} else {
+					newCell.setCellValue("");
+				}
+				newCell = row.createCell(colNum++);
+				newCell.setCellStyle(cellStyle);
+				// Adding Allowable CDE text choices (in case of not match)
+				if (question.getAllowableCdeTextChoices() != null && !question.getAllowableCdeTextChoices().isEmpty()) {
+				String allowabeCdeTextChoices = question.getAllowableCdeTextChoices().get(m);
+				// Checking for the length of the string for max limit before writing to cell						
+					if (allowabeCdeTextChoices!=null && allowabeCdeTextChoices.length() > cell_max_limit){
+						allowabeCdeTextChoices = croppedStringText+allowabeCdeTextChoices.substring(0, cell_write_limit);
+					}
+					newCell.setCellValue(allowabeCdeTextChoices);
+				} else {
+					newCell.setCellValue("");
+				}						
+				if (m != raveCodedData.size()-1)
+					row = sheet.createRow(rowNum++);
+			}
+			colNumbers.put("ColNum", colNum);
+			colNumbers.put("RowNum", rowNum);
+			return colNumbers;
+		}
+		
+		
 		
 		
 		
