@@ -10,11 +10,17 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.poi.ss.usermodel.Hyperlink;
+import org.apache.poi.common.usermodel.HyperlinkType;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import gov.nih.nci.cadsr.data.CCCForm;
 import gov.nih.nci.cadsr.data.CCCQuestion;
@@ -91,8 +97,17 @@ public class ExcelReportGenerator {
 		public static void writeExcel(String OUTPUT_XLSX_FILE_PATH, CCCReport cccReport) throws IOException, InvalidFormatException, NullPointerException {
 
 			Row row;
-			XSSFWorkbook workbook = new XSSFWorkbook();
-			XSSFSheet sheet = workbook.createSheet("Summary");
+			Workbook workbook = new XSSFWorkbook();
+			Sheet sheet = workbook.createSheet("Summary");
+			CreationHelper createHelper = workbook.getCreationHelper();
+			
+			//cell style for hyperlinks
+            //by default hyperlinks are blue and underlined
+            CellStyle hlink_style = workbook.createCellStyle();
+            Font hlink_font = workbook.createFont();
+            hlink_font.setUnderline(Font.U_SINGLE);
+            hlink_font.setColor(IndexedColors.BLACK.getIndex());
+            hlink_style.setFont(hlink_font);			
 			
 			// Adding labels for each value (row) displayed in the summary page of the report			
 			Map<String, String> summaryLabels = returnSummaryLabelsMap(cccReport);
@@ -126,14 +141,19 @@ public class ExcelReportGenerator {
 			newCell.setCellValue(summaryFormsHeader);
 			newCell = row.createCell(summaryFormsValidResultColNum);
 			newCell.setCellValue(summaryFormsValidResult);
-			List<CCCForm> forms = cccReport.getCccForms();
-			
+			List<CCCForm> forms = cccReport.getCccForms();			
 			// Iterating through the forms list in the report to display their name and their congruency status
 			for (CCCForm form : forms) {
 				row = sheet.createRow(rowNum++);
 				int colNum = 0;
 				Cell cell = row.createCell(colNum++);
 				cell.setCellValue(form.getRaveFormOid());
+				//Creating the link for Form to open the corresponding sheet
+				Hyperlink link = createHelper.createHyperlink(HyperlinkType.DOCUMENT);
+				String linkText = "'"+form.getRaveFormOid()+"'!E1";//"'Target Sheet'!A1"
+				link.setAddress(linkText);
+				cell.setHyperlink(link);
+				cell.setCellStyle(hlink_style);				
 				cell = row.createCell(summaryFormsValidResultColNum);
 				cell.setCellValue(form.getCongruencyStatus());
 			}
@@ -144,7 +164,7 @@ public class ExcelReportGenerator {
 					if (congStatus_Congruent.equalsIgnoreCase(cccForm.getCongruencyStatus())) {
 						continue;
 					} else {
-				XSSFSheet sheet2 = workbook.createSheet(cccForm.getRaveFormOid());
+				Sheet sheet2 = workbook.createSheet(cccForm.getRaveFormOid());
 				// Setting width for columns that are expected to be Short
 				setColumnWidth(sheet2, shortColumnsforForm, widthFormColsShort);
 				// Setting width for columns that are expected to be Long
@@ -343,7 +363,7 @@ public class ExcelReportGenerator {
 		 * @param sheet
 		 * @return Map<String, Integer>
 		 */
-		public static Map<String, Integer> prepareCodedDataResultsforReport(CCCQuestion question, Row row, CellStyle cellStyle, int rowNum, XSSFSheet sheet) {
+		public static Map<String, Integer> prepareCodedDataResultsforReport(CCCQuestion question, Row row, CellStyle cellStyle, int rowNum, Sheet sheet) {
 			Cell newCell;
 			Map<String, Integer> colNumbers = new LinkedHashMap<String, Integer>();
 			List<String> raveCodedData = question.getRaveCodedData();
@@ -411,10 +431,10 @@ public class ExcelReportGenerator {
 		 * @param nrdsCdeList
 		 * @return XSSFWorkbook
 		 */
-		public static XSSFWorkbook buildNrdsTab (XSSFWorkbook workbook, List<NrdsCde> nrdsCdeList) {
+		public static Workbook buildNrdsTab (Workbook workbook, List<NrdsCde> nrdsCdeList) {
 			Row row;
 			final String[] nrdsRowHeaders = { "Rave Form OID", "RAVE Field Order", "RAVE Field Label", "CDE ID Version", "CDE Name", "Result", "Message"};
-			XSSFSheet sheet = workbook.createSheet(matching_nrds_cdes_tab_name);
+			Sheet sheet = workbook.createSheet(matching_nrds_cdes_tab_name);
 			int rowNum = 0;
 			row = sheet.createRow(rowNum++);
 			Cell newCell = row.createCell(0);
@@ -460,14 +480,14 @@ public class ExcelReportGenerator {
 		 * @param missingNrdsCdeList
 		 * @return XSSFWorkbook
 		 */
-		public static XSSFWorkbook buildMissingNrdsCdesTab (XSSFWorkbook workbook, List<NrdsCde> missingNrdsCdeList) {
+		public static Workbook buildMissingNrdsCdesTab (Workbook workbook, List<NrdsCde> missingNrdsCdeList) {
 			Row row;
 			final int idxOfCdeId = 0;//0-based
 			final int widthOfCdeId = 8*256;//in characters
 			final int idxOfCdeName = 1;
 			final int widthOfCdeName = 100*256;
 			final String[] nrdsRowHeaders = { "CDE ID Version", "CDE Name"};
-			XSSFSheet sheet = workbook.createSheet(nrds_missing_cde_tab_name);
+			Sheet sheet = workbook.createSheet(nrds_missing_cde_tab_name);
 			sheet.setColumnWidth(idxOfCdeId, widthOfCdeId);
 			sheet.setColumnWidth(idxOfCdeName, widthOfCdeName);
 			int rowNum = 0;
@@ -505,7 +525,7 @@ public class ExcelReportGenerator {
 		 * @param stdCrfCdeList
 		 * @return XSSFWorkbook
 		 */
-		public static XSSFWorkbook buildStdCrfMissingTabs (XSSFWorkbook workbook, List<StandardCrfCde> stdCrfCdeList) {
+		public static Workbook buildStdCrfMissingTabs (Workbook workbook, List<StandardCrfCde> stdCrfCdeList) {
 			final String[] templateTypes = {"Mandatory", "Optional", "Conditional"};
 			final String[] tabNames = {"Standard CRF Mandatory Missing", "Standard CRF Optional Missing", "Standard CRF Conditional Missing"};
 			int crfTabsCount = 3; // 3 categories of standard CRF CDEs		
@@ -522,7 +542,7 @@ public class ExcelReportGenerator {
 		 * @param category
 		 * @return XSSFSheet
 		 */
-		private static XSSFSheet buildCrfTab (XSSFSheet sheet, List<StandardCrfCde> stdCrfCdeList, String category) {
+		private static Sheet buildCrfTab (Sheet sheet, List<StandardCrfCde> stdCrfCdeList, String category) {
 			Row row;
 			final String[] crfRowHeaders = { "CDE IDVersion", "CDE Name", "Template Name", "CRF ID Version"};
 			final int idxOfCdeId = 0;//0-based
@@ -577,7 +597,7 @@ public class ExcelReportGenerator {
 		 * @param colWidth
 		 * @return XSSFSheet
 		 */
-		private static XSSFSheet setColumnWidth (XSSFSheet sheet, Integer[] columns, int colWidth) {
+		private static Sheet setColumnWidth (Sheet sheet, Integer[] columns, int colWidth) {
 			for (Integer colIndx : columns) {
 				sheet.setColumnWidth(colIndx, colWidth);
 			}
