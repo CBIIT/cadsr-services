@@ -16,6 +16,7 @@ services:
     build: ./cchecker-server-docker
     ports:
      - "8080:8080"
+     - "8082:8082"
     networks:
       app_net:
         ipv4_address: 172.16.239.11

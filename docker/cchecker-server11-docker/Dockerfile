@@ -16,12 +16,12 @@ ENV PATH=/opt/apache-maven/bin:$PATH
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk
 
 WORKDIR /var/local
-RUN mkdir -p /local/content/cchecker
+RUN mkdir -p /local/content/cchecker /logs
 
 COPY entrypoint/run.sh /usr/bin/
 COPY crondelete /etc/cron.d/crondelete
 RUN chmod 0644 /etc/cron.d/crondelete
 RUN crontab /etc/cron.d/crondelete
 
-EXPOSE 1551 8080 4801
+EXPOSE 8080 8082 
 ENTRYPOINT "/usr/bin/run.sh"
