@@ -25,7 +25,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 @Configuration
 @ConfigurationProperties(prefix = "spring.datasource")
 public class EmbeddedTomcatDBConfig {
-	private static final Logger logger = LoggerFactory.getLogger(CCheckerDbService.class);
+	private static final Logger logger = LoggerFactory.getLogger(EmbeddedTomcatDBConfig.class);
 
 	@Autowired
 	DataSource dataSource;
