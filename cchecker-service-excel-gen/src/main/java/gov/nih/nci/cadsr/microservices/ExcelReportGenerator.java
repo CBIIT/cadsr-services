@@ -31,8 +31,8 @@ import gov.nih.nci.cadsr.data.StandardCrfCde;
 public class ExcelReportGenerator {
 
 		private static final Logger logger = LoggerFactory.getLogger(ExcelReportGenerator.class);
-		private static String formHeader_1 = "View of Expanded Results for ";
-		private static String formHeader_2 = " form";	
+		private static String formHeader_1 = "VIEW OF EXPANDED RESULTS for ";
+		private static String formHeader_2 = " form";
 		private static String summaryFormsHeader = "Report Summary - Click on Form Name to expand results";
 		private static String summaryFormsValidResult = "Validation Result";
 		private static int summaryFormsValidResultColNum = 1;
@@ -72,6 +72,9 @@ public class ExcelReportGenerator {
 		private static String congStatus_Congruent = "CONGRUENT";
 		private static int cell_max_limit = 32767;
 		private static int cell_write_limit = 32700;
+		private static short headerLblFontSize = 280;
+		private static short headerLblFontSize2 = 240;
+		private static String headerFontName = "Calibri";
 		private static final int idxSummaryLbl = 0;
 		private static final int idxSummaryVal = 1;
 		private static final int widthSummaryVal = 12800;
@@ -107,7 +110,23 @@ public class ExcelReportGenerator {
             Font hlink_font = workbook.createFont();
             hlink_font.setUnderline(Font.U_SINGLE);
             hlink_font.setColor(IndexedColors.BLACK.getIndex());
-            hlink_style.setFont(hlink_font);			
+            hlink_style.setFont(hlink_font);
+            
+            // Bold headers
+            CellStyle header_lbl_style = workbook.createCellStyle();
+            Font header_lbl_font = workbook.createFont();
+            header_lbl_font.setBold(true);
+            header_lbl_font.setFontName(headerFontName);
+            header_lbl_font.setFontHeight(headerLblFontSize);
+            header_lbl_style.setFont(header_lbl_font);
+            
+            CellStyle header_lbl_style_2 = workbook.createCellStyle();
+            Font header_lbl_font_2 = workbook.createFont();
+            header_lbl_font_2.setBold(true);
+            header_lbl_font_2.setFontName(headerFontName);
+            header_lbl_font_2.setFontHeight(headerLblFontSize2);
+            header_lbl_style_2.setFont(header_lbl_font_2); 
+            
 			
 			// Adding labels for each value (row) displayed in the summary page of the report			
 			Map<String, String> summaryLabels = returnSummaryLabelsMap(cccReport);
@@ -130,8 +149,14 @@ public class ExcelReportGenerator {
 					row = sheet.createRow(rowNum++);
 				Cell cell = row.createCell(colNum++);
 				cell.setCellValue((String) label.getKey());
+				if (checkerReportOwnerLbl.equals(label.getKey()) || raveProtocolNameLbl.equals(label.getKey()) 
+						|| raveProtocolNumLbl.equals(label.getKey()) || reportDateLbl.equals(label.getKey()))
+						cell.setCellStyle(header_lbl_style);
 				cell = row.createCell(colNum++);
 				cell.setCellValue((String) label.getValue());
+				if (checkerReportOwnerLbl.equals(label.getKey()) || raveProtocolNameLbl.equals(label.getKey()) 
+						|| raveProtocolNumLbl.equals(label.getKey()) || reportDateLbl.equals(label.getKey()))
+					cell.setCellStyle(header_lbl_style);
 			}
 			row = sheet.createRow(rowNum++);
 			row = sheet.createRow(rowNum++);
@@ -139,9 +164,11 @@ public class ExcelReportGenerator {
 			
 			// Printing the Report Summary [2nd half - Summary sheet] with forms' congruency status
 			newCell.setCellValue(summaryFormsHeader);
+			newCell.setCellStyle(header_lbl_style_2);
 			newCell = row.createCell(summaryFormsValidResultColNum);
 			newCell.setCellValue(summaryFormsValidResult);
-			List<CCCForm> forms = cccReport.getCccForms();			
+			newCell.setCellStyle(header_lbl_style_2);			
+			List<CCCForm> forms = cccReport.getCccForms();
 			// Iterating through the forms list in the report to display their name and their congruency status
 			for (CCCForm form : forms) {
 				row = sheet.createRow(rowNum++);
@@ -173,12 +200,14 @@ public class ExcelReportGenerator {
 				row = sheet2.createRow(rowNum++);
 				newCell = row.createCell(0);
 				newCell.setCellValue(formHeader_1 + cccForm.getRaveFormOid() + formHeader_2);
+				newCell.setCellStyle(header_lbl_style_2);
 				row = sheet2.createRow(rowNum++);
 				int colNum = 0;
 				// Print row headers in the form sheet
 				for (String rowHeader : rowHeaders) {
 					newCell = row.createCell(colNum++);
 					newCell.setCellValue(rowHeader);
+					newCell.setCellStyle(header_lbl_style_2);
 				}
 				colNum = 0;
 				row = sheet2.createRow(rowNum++);
@@ -216,10 +245,10 @@ public class ExcelReportGenerator {
 				   }
 			    }
 			}
-			buildNrdsTab(workbook, cccReport.getNrdsCdeList());
-			buildMissingNrdsCdesTab(workbook, cccReport.getMissingNrdsCdeList());
+			buildNrdsTab(workbook, cccReport.getNrdsCdeList(), header_lbl_style, header_lbl_style_2);
+			buildMissingNrdsCdesTab(workbook, cccReport.getMissingNrdsCdeList(), header_lbl_style, header_lbl_style_2);
 			if (cccReport.getIsCheckStdCrfCdeChecked()) {
-				buildStdCrfMissingTabs(workbook, cccReport.getMissingStandardCrfCdeList());
+				buildStdCrfMissingTabs(workbook, cccReport.getMissingStandardCrfCdeList(), header_lbl_style, header_lbl_style_2);
 			}			
 			FileOutputStream outputStream = null;
 			try {
@@ -431,7 +460,7 @@ public class ExcelReportGenerator {
 		 * @param nrdsCdeList
 		 * @return XSSFWorkbook
 		 */
-		public static Workbook buildNrdsTab (Workbook workbook, List<NrdsCde> nrdsCdeList) {
+		public static Workbook buildNrdsTab (Workbook workbook, List<NrdsCde> nrdsCdeList, CellStyle headerStyle, CellStyle headerStyle2) {
 			Row row;
 			final String[] nrdsRowHeaders = { "Rave Form OID", "RAVE Field Order", "RAVE Field Label", "CDE ID Version", "CDE Name", "Result", "Message"};
 			Sheet sheet = workbook.createSheet(matching_nrds_cdes_tab_name);
@@ -439,6 +468,7 @@ public class ExcelReportGenerator {
 			row = sheet.createRow(rowNum++);
 			Cell newCell = row.createCell(0);
 			newCell.setCellValue(matching_nrds_cdes_header);
+			newCell.setCellStyle(headerStyle);
 			row = sheet.createRow(rowNum++);
 			row = sheet.createRow(rowNum++);
 			int colNum = 0;
@@ -446,6 +476,7 @@ public class ExcelReportGenerator {
 			for (String rowHeader : nrdsRowHeaders) {
 				newCell = row.createCell(colNum++);
 				newCell.setCellValue(rowHeader);
+				newCell.setCellStyle(headerStyle2);				
 			}
 			CellStyle cellStyle = workbook.createCellStyle();
 	        cellStyle.setWrapText(true);
@@ -480,7 +511,7 @@ public class ExcelReportGenerator {
 		 * @param missingNrdsCdeList
 		 * @return XSSFWorkbook
 		 */
-		public static Workbook buildMissingNrdsCdesTab (Workbook workbook, List<NrdsCde> missingNrdsCdeList) {
+		public static Workbook buildMissingNrdsCdesTab (Workbook workbook, List<NrdsCde> missingNrdsCdeList, CellStyle headerStyle, CellStyle headerStyle2) {
 			Row row;
 			final int idxOfCdeId = 0;//0-based
 			final int widthOfCdeId = 8*256;//in characters
@@ -494,6 +525,7 @@ public class ExcelReportGenerator {
 			row = sheet.createRow(rowNum++);
 			Cell newCell = row.createCell(0);
 			newCell.setCellValue(nrds_missing_cde_header);
+			newCell.setCellStyle(headerStyle);
 			row = sheet.createRow(rowNum++);
 			row = sheet.createRow(rowNum++);
 			int colNum = 0;
@@ -501,6 +533,7 @@ public class ExcelReportGenerator {
 			for (String rowHeader : nrdsRowHeaders) {
 				newCell = row.createCell(colNum++);
 				newCell.setCellValue(rowHeader);
+				newCell.setCellStyle(headerStyle2);				
 			}
 			CellStyle cellStyle = workbook.createCellStyle();
 	        cellStyle.setWrapText(true);
@@ -525,12 +558,12 @@ public class ExcelReportGenerator {
 		 * @param stdCrfCdeList
 		 * @return XSSFWorkbook
 		 */
-		public static Workbook buildStdCrfMissingTabs (Workbook workbook, List<StandardCrfCde> stdCrfCdeList) {
+		public static Workbook buildStdCrfMissingTabs (Workbook workbook, List<StandardCrfCde> stdCrfCdeList, CellStyle headerStyle, CellStyle headerStyle2) {
 			final String[] templateTypes = {"Mandatory", "Optional", "Conditional"};
 			final String[] tabNames = {"Standard CRF Mandatory Missing", "Standard CRF Optional Missing", "Standard CRF Conditional Missing"};
 			int crfTabsCount = 3; // 3 categories of standard CRF CDEs		
 			for (int i = 0; i < crfTabsCount; i++ )
-				buildCrfTab(workbook.createSheet(tabNames[i]), stdCrfCdeList, templateTypes[i]);	
+				buildCrfTab(workbook.createSheet(tabNames[i]), stdCrfCdeList, templateTypes[i], headerStyle, headerStyle2);	
 	 		return workbook;		
 		}	
 		
@@ -542,7 +575,7 @@ public class ExcelReportGenerator {
 		 * @param category
 		 * @return XSSFSheet
 		 */
-		private static Sheet buildCrfTab (Sheet sheet, List<StandardCrfCde> stdCrfCdeList, String category) {
+		private static Sheet buildCrfTab (Sheet sheet, List<StandardCrfCde> stdCrfCdeList, String category, CellStyle headerStyle, CellStyle headerStyle2) {
 			Row row;
 			final String[] crfRowHeaders = { "CDE IDVersion", "CDE Name", "Template Name", "CRF ID Version"};
 			final int idxOfCdeId = 0;//0-based
@@ -562,12 +595,14 @@ public class ExcelReportGenerator {
 			row = sheet.createRow(rowNum++);
 			Cell newCell = row.createCell(0);
 			newCell.setCellValue("CDEs in Standard Template \""+category+"\" Modules Not Used");
+			newCell.setCellStyle(headerStyle);
 			row = sheet.createRow(rowNum++);
 			row = sheet.createRow(rowNum++);
 			// Print row headers in the CRF sheets
 			for (String rowHeader : crfRowHeaders) {
 				newCell = row.createCell(colNum++);
 				newCell.setCellValue(rowHeader);
+				newCell.setCellStyle(headerStyle2);				
 			}
 			
 			colNum = 0;
