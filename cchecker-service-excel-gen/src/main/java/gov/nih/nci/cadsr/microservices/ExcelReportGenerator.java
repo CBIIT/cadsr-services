@@ -31,59 +31,58 @@ import gov.nih.nci.cadsr.data.StandardCrfCde;
 public class ExcelReportGenerator {
 
 		private static final Logger logger = LoggerFactory.getLogger(ExcelReportGenerator.class);
-		private static String formHeader_1 = "VIEW OF EXPANDED RESULTS for ";
-		private static String formHeader_2 = " form";
-		private static String summaryFormsHeader = "Report Summary - Click on Form Name to expand results";
-		private static String summaryFormsValidResult = "Validation Result";
-		private static int summaryFormsValidResultColNum = 1;
-		private static String checkerReportOwnerLbl = "CDE Congruency Checker Report for ";
-		private static String raveProtocolNameLbl = "Rave Protocol name ";
-		private static String raveProtocolNumLbl = "Rave Protocol number ";
-		private static String reportDateLbl = "Date Validated ";
-		private static String formCountLbl = "# Forms in protocol ";
-		private static String totalQuestCongLbl = "# Total Questions Congruent ";
-		private static String totalQuestCheckLbl = "# Total Questions Checked ";
-		private static String totalQuestWarnLbl = "# Total Questions with Warnings ";
-		private static String totalQuestErrorLbl = "# Total Questions with Errors ";
-		private static String totalunassociatedQuestLbl = "# Total Questions without associated CDE ";
-		private static String reqQuestMissLbl = "# Required NRDS Questions missing ";
-		private static String reqNrdsQuestCongLbl = "# Required NRDS Questions Congruent ";
-		private static String reqNrdsQuestWarnLbl = "# Required NRDS Questions With Warnings ";
-		private static String reqNrdsQuestErrorLbl = "# Required NRDS Questions With Errors ";
-		private static String nciStdManQuestLbl = "# NCI Standard Template Mandatory Modules Questions missing from Protocol ";
-		private static String nciStdManCongLbl = "# NCI Standard Template Mandatory Modules Questions Congruent ";
-		private static String nciStdManErrorLbl = "# NCI Standard Template Mandatory Modules Questions With Errors ";
-		private static String nciStdManWarnLbl = "# NCI Standard Template Mandatory Modules Questions With Warnings ";	
-		private static String nciStdCondQuestLbl = "# NCI Standard Template Conditional Modules Questions missing from Protocol ";
-		private static String nciStdCondCongLbl = "# NCI Standard Template Conditional Modules Questions Congruent ";
-		private static String nciStdCondErrorLbl = "# NCI Standard Template Conditional Modules Questions With Errors ";
-		private static String nciStdCondWarnLbl = "# NCI Standard Template Conditional Modules Questions With Warnings ";	
-		private static String nciStdOptQuestLbl = "# NCI Standard Template Optional Modules Questions missing from Protocol ";
-		private static String nciStdOptCongLbl = "# NCI Standard Template Optional Modules Questions Congruent ";
-		private static String nciStdOptErrorLbl = "# NCI Standard Template Optional Modules Questions With Errors ";
-		private static String nciStdOptWarnLbl = "# NCI Standard Template Optional Modules Questions With Warnings ";		
-		private static int formStartColumn = 4;	
-		private static int raveFieldDataTypeCol = 22;
-		private static int codedDataColStart = 16;
-		private static String matching_nrds_cdes_tab_name = "NRDS CDEs in ALS";
-		private static String nrds_missing_cde_tab_name = "NRDS CDEs missing";
-		private static String nrds_missing_cde_header = "NRDS CDEs missing from the ALS file";
-		private static String matching_nrds_cdes_header = "NRDS CDEs included in Protocol Forms with Warnings or Errors";
-		private static String congStatus_Congruent = "CONGRUENT";
-		private static int cell_max_limit = 32767;
-		private static int cell_write_limit = 32700;
-		private static short headerLblFontSize = 280;
-		private static short headerLblFontSize2 = 240;
-		private static String headerFontName = "Calibri";
+		private static final String formHeader = "VIEW OF EXPANDED RESULTS for %s form";
+		private static final String summaryFormsHeader = "Report Summary - Click on Form Name to expand results";
+		private static final String summaryFormsValidResult = "Validation Result";
+		private static final int summaryFormsValidResultColNum = 1;
+		private static final String checkerReportOwnerLbl = "CDE Congruency Checker Report for";
+		private static final String raveProtocolNameLbl = "Rave Protocol name ";
+		private static final String raveProtocolNumLbl = "Rave Protocol number ";
+		private static final String reportDateLbl = "Date Validated ";
+		private static final String formCountLbl = "# Forms in protocol ";
+		private static final String totalQuestCongLbl = "# Total Questions Congruent ";
+		private static final String totalQuestCheckLbl = "# Total Questions Checked ";
+		private static final String totalQuestWarnLbl = "# Total Questions with Warnings ";
+		private static final String totalQuestErrorLbl = "# Total Questions with Errors ";
+		private static final String totalunassociatedQuestLbl = "# Total Questions without associated CDE ";
+		private static final String reqQuestMissLbl = "# Required NRDS Questions missing ";
+		private static final String reqNrdsQuestCongLbl = "# Required NRDS Questions Congruent ";
+		private static final String reqNrdsQuestWarnLbl = "# Required NRDS Questions With Warnings ";
+		private static final String reqNrdsQuestErrorLbl = "# Required NRDS Questions With Errors ";
+		private static final String nciStdManQuestLbl = "# NCI Standard Template Mandatory Modules Questions missing from Protocol ";
+		private static final String nciStdManCongLbl = "# NCI Standard Template Mandatory Modules Questions Congruent ";
+		private static final String nciStdManErrorLbl = "# NCI Standard Template Mandatory Modules Questions With Errors ";
+		private static final String nciStdManWarnLbl = "# NCI Standard Template Mandatory Modules Questions With Warnings ";	
+		private static final String nciStdCondQuestLbl = "# NCI Standard Template Conditional Modules Questions missing from Protocol ";
+		private static final String nciStdCondCongLbl = "# NCI Standard Template Conditional Modules Questions Congruent ";
+		private static final String nciStdCondErrorLbl = "# NCI Standard Template Conditional Modules Questions With Errors ";
+		private static final String nciStdCondWarnLbl = "# NCI Standard Template Conditional Modules Questions With Warnings ";	
+		private static final String nciStdOptQuestLbl = "# NCI Standard Template Optional Modules Questions missing from Protocol ";
+		private static final String nciStdOptCongLbl = "# NCI Standard Template Optional Modules Questions Congruent ";
+		private static final String nciStdOptErrorLbl = "# NCI Standard Template Optional Modules Questions With Errors ";
+		private static final String nciStdOptWarnLbl = "# NCI Standard Template Optional Modules Questions With Warnings ";		
+		private static final int formStartColumn = 4;	
+		private static final int raveFieldDataTypeCol = 22;
+		private static final int codedDataColStart = 16;
+		private static final String matching_nrds_cdes_tab_name = "NRDS CDEs in ALS";
+		private static final String nrds_missing_cde_tab_name = "NRDS CDEs missing";
+		private static final String nrds_missing_cde_header = "NRDS CDEs missing from the ALS file";
+		private static final String matching_nrds_cdes_header = "NRDS CDEs included in Protocol Forms with Warnings or Errors";
+		private static final String congStatus_Congruent = "CONGRUENT";
+		private static final int cell_max_limit = 32767;
+		private static final int cell_write_limit = 32700;
+		private static final short headerLblFontSize = 280;
+		private static final short headerLblFontSize2 = 240;
+		private static final String headerFontName = "Calibri";
 		private static final int idxSummaryLbl = 0;
 		private static final int idxSummaryVal = 1;
 		private static final int widthSummaryVal = 12800;
 		private static final int widthFormColsShort = 5120;
 		private static final int widthFormColsLong = 25600;			
-		private static Integer[] shortColumnsforForm = {0,1,2,3,4,5,6,7,8,11,13,14,15,17,20,22,23,24,25,26,27,28,29,30,31,32,33,34};
-		private static Integer[] longColumnsforForm = { 9,10,12,16,18,19,21 };
-		private static String croppedStringText = "// CONTENT CROPPED TO 32,700 CHARACTERS. // \n ";
-		private static String[] rowHeaders = { "Rave Form OID", "caDSR Form ID", "Version", "Total Number Of Questions Checked",
+		private static final Integer[] shortColumnsforForm = {0,1,2,3,4,5,6,7,8,11,13,14,15,17,20,22,23,24,25,26,27,28,29,30,31,32,33,34};
+		private static final Integer[] longColumnsforForm = { 9,10,12,16,18,19,21 };
+		private static final String croppedStringText = "// CONTENT CROPPED TO 32,700 CHARACTERS. // \n ";
+		private static final String[] rowHeaders = { "Rave Form OID", "caDSR Form ID", "Version", "Total Number Of Questions Checked",
 				"Field Order", "CDE Public ID", "CDE Version", "NCI Category", "Question Congruency Status", "Message",
 				"Rave Field Label", "Rave Field Label Result", "CDE Permitted Question Text Choices",
 				"Rave Control Type", "Control Type Checker Result", "CDE Value Domain Type", "Rave Coded Data", "Coded Data Result",
@@ -91,6 +90,12 @@ public class ExcelReportGenerator {
 				"Rave Field Data Type", "Data Type Checker Result", "CDE Data Type", "Rave UOM", "UOM Checker Result", "CDE UOM",
 				"Rave Length", "Length Checker Result", "CDE Maximum Length", "Rave Display Format", "Format Checker Result",
 				"CDE Display Format" };
+		private static final String[] templateTypes = {"Mandatory", "Optional", "Conditional"};
+		private static final String[] tabNames = {"Std CRF Mandatory Missing", "Std CRF Optional Missing", "Std CRF Conditional Missing"};
+		private static final String cdeStdCrfMissingmsg = "CDEs in Standard Template \"%s\" Modules Not Used";
+		private static final String[] crfRowHeaders = { "CDE IDVersion", "CDE Name", "Template Name", "CRF ID Version"};
+		private static final String[] nrdsRowHeaders = { "Rave Form OID", "RAVE Field Order", "RAVE Field Label", "CDE ID Version", "CDE Name", "Result", "Message"};
+		
 
 		/**
 		 * @param
@@ -199,7 +204,7 @@ public class ExcelReportGenerator {
 				rowNum = 0;
 				row = sheet2.createRow(rowNum++);
 				newCell = row.createCell(0);
-				newCell.setCellValue(formHeader_1 + cccForm.getRaveFormOid() + formHeader_2);
+				newCell.setCellValue(String.format(formHeader, cccForm.getRaveFormOid()));
 				newCell.setCellStyle(header_lbl_style_2);
 				row = sheet2.createRow(rowNum++);
 				int colNum = 0;
@@ -462,8 +467,29 @@ public class ExcelReportGenerator {
 		 */
 		public static Workbook buildNrdsTab (Workbook workbook, List<NrdsCde> nrdsCdeList, CellStyle headerStyle, CellStyle headerStyle2) {
 			Row row;
-			final String[] nrdsRowHeaders = { "Rave Form OID", "RAVE Field Order", "RAVE Field Label", "CDE ID Version", "CDE Name", "Result", "Message"};
 			Sheet sheet = workbook.createSheet(matching_nrds_cdes_tab_name);
+			// Setting fixed column widths for cells
+			final int idxOfRaveFormId = 0;//0-based
+			final int widthOfRaveFormId = 36*256;//in characters
+			final int idxOfRaveFieldOrder = 1;//0-based
+			final int widthOfRaveFieldOrder = 4*256;
+			final int idxOfFieldLbl = 2;
+			final int widthOfFieldLbl = 48*256;
+			final int idxOfCdeId = 3;
+			final int widthOfCdeId = 12*256;//in characters
+			final int idxOfCdeName = 4;
+			final int widthOfCdeName = 48*256;//in characters
+			final int idxOfResult = 5;
+			final int widthOfResult = 36*256;//in characters
+			final int idxOfMsg = 6;
+			final int widthOfMsg = 100*256;//in characters			
+			sheet.setColumnWidth(idxOfRaveFormId, widthOfRaveFormId);
+			sheet.setColumnWidth(idxOfRaveFieldOrder, widthOfRaveFieldOrder);
+			sheet.setColumnWidth(idxOfFieldLbl, widthOfFieldLbl);
+			sheet.setColumnWidth(idxOfCdeId, widthOfCdeId);
+			sheet.setColumnWidth(idxOfCdeName, widthOfCdeName);
+			sheet.setColumnWidth(idxOfResult, widthOfResult);
+			sheet.setColumnWidth(idxOfMsg, widthOfMsg);			
 			int rowNum = 0;
 			row = sheet.createRow(rowNum++);
 			Cell newCell = row.createCell(0);
@@ -512,15 +538,23 @@ public class ExcelReportGenerator {
 		 * @return XSSFWorkbook
 		 */
 		public static Workbook buildMissingNrdsCdesTab (Workbook workbook, List<NrdsCde> missingNrdsCdeList, CellStyle headerStyle, CellStyle headerStyle2) {
-			Row row;
-			final int idxOfCdeId = 0;//0-based
-			final int widthOfCdeId = 8*256;//in characters
-			final int idxOfCdeName = 1;
-			final int widthOfCdeName = 100*256;
-			final String[] nrdsRowHeaders = { "CDE ID Version", "CDE Name"};
+			final String[] nrdsRowHeaders = crfRowHeaders;
 			Sheet sheet = workbook.createSheet(nrds_missing_cde_tab_name);
+			Row row;
+			
+			// Setting fixed column widths for cells			
+			final int idxOfCdeId = 0;//0-based
+			final int widthOfCdeId = 12*256;//in characters
+			final int idxOfCdeName = 1;//0-based
+			final int widthOfCdeName = 48*256;
+			final int idxOfFormName = 2;
+			final int widthOfFormName = 100*256;
+			final int idxOfFormId = 3;
+			final int widthOfFormId = 20*256;//in characters
 			sheet.setColumnWidth(idxOfCdeId, widthOfCdeId);
 			sheet.setColumnWidth(idxOfCdeName, widthOfCdeName);
+			sheet.setColumnWidth(idxOfFormName, widthOfFormName);
+			sheet.setColumnWidth(idxOfFormId, widthOfFormId);
 			int rowNum = 0;
 			row = sheet.createRow(rowNum++);
 			Cell newCell = row.createCell(0);
@@ -559,8 +593,6 @@ public class ExcelReportGenerator {
 		 * @return XSSFWorkbook
 		 */
 		public static Workbook buildStdCrfMissingTabs (Workbook workbook, List<StandardCrfCde> stdCrfCdeList, CellStyle headerStyle, CellStyle headerStyle2) {
-			final String[] templateTypes = {"Mandatory", "Optional", "Conditional"};
-			final String[] tabNames = {"Standard CRF Mandatory Missing", "Standard CRF Optional Missing", "Standard CRF Conditional Missing"};
 			int crfTabsCount = 3; // 3 categories of standard CRF CDEs		
 			for (int i = 0; i < crfTabsCount; i++ )
 				buildCrfTab(workbook.createSheet(tabNames[i]), stdCrfCdeList, templateTypes[i], headerStyle, headerStyle2);	
@@ -577,7 +609,7 @@ public class ExcelReportGenerator {
 		 */
 		private static Sheet buildCrfTab (Sheet sheet, List<StandardCrfCde> stdCrfCdeList, String category, CellStyle headerStyle, CellStyle headerStyle2) {
 			Row row;
-			final String[] crfRowHeaders = { "CDE IDVersion", "CDE Name", "Template Name", "CRF ID Version"};
+			// Setting fixed column widths for cells
 			final int idxOfCdeId = 0;//0-based
 			final int widthOfCdeId = 12*256;//in characters
 			final int idxOfCdeName = 1;//0-based
@@ -594,7 +626,7 @@ public class ExcelReportGenerator {
 			int rowNum = 0;
 			row = sheet.createRow(rowNum++);
 			Cell newCell = row.createCell(0);
-			newCell.setCellValue("CDEs in Standard Template \""+category+"\" Modules Not Used");
+			newCell.setCellValue(String.format(cdeStdCrfMissingmsg, category));
 			newCell.setCellStyle(headerStyle);
 			row = sheet.createRow(rowNum++);
 			row = sheet.createRow(rowNum++);
