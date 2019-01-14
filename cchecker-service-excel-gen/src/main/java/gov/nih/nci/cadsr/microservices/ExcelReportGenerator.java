@@ -95,7 +95,30 @@ public class ExcelReportGenerator {
 		private static final String cdeStdCrfMissingmsg = "CDEs in Standard Template \"%s\" Modules Not Used";
 		private static final String[] crfRowHeaders = { "CDE IDVersion", "CDE Name", "Template Name", "CRF ID Version"};
 		private static final String[] nrdsRowHeaders = { "Rave Form OID", "RAVE Field Order", "RAVE Field Label", "CDE ID Version", "CDE Name", "Result", "Message"};
-		
+		private static final String fieldOrderLbl = "Field Order";
+		private static final String cdeIdLbl = "CDE Public ID";
+		private static final String cdeVersion = "CDE Version";
+		private static final String nciCategoryLbl = "NCI Category";
+		private static final String questionCongStatusLbl = "Question Congruency Status";
+		private static final String msgLbl = "Message";
+		private static final String raveFieldLbl = "RAVE Field Label";
+		private static final String raveFieldLblResult = "RAVE Field Label Result";
+		private static final String cdePermittedQuestChoicesLbl = "CDE Permitted Question Text Choices";
+		private static final String controlTypeLbl = "RAVE Control Type";
+		private static final String controlTypeResultLbl = "RAVE Control Type Result";
+		private static final String cdeVDTypeLbl = "CDE Value Domain Type";
+		private static final String raveFieldDataTypeLbl = "RAVE Field Data Type"; 
+		private static final String dataTypeCheckerResultLbl = "Data Type Checker Result";
+		private static final String cdeDataTypeLbl = "CDE Data Type";
+		private static final String raveUomLbl = "RAVE UOM";
+		private static final String raveUomCheckerResultLbl = "UOM Checker Result";
+		private static final String cdeUomLbl = "CDE UOM";
+		private static final String raveLengthLbl = "RAVE Length";
+		private static final String lengthCheckerResultLbl = "Length Checker Result";
+		private static final String cdeMaxLengthLbl = "CDE Max Length";
+		private static final String raveDisplayFormatLbl = "RAVE Display Format";
+		private static final String formatCheckerResultLbl = "Format Checker Result";
+		private static final String cdeDisplayFormatLbl = "CDE Display Format";		
 
 		/**
 		 * @param
@@ -324,24 +347,24 @@ public class ExcelReportGenerator {
 		 * @return Map<String, String>
 		 */
 		public static Map<String, String> returnFormFieldsPart1(CCCQuestion question) {
-			Map<String, String> formFields = new LinkedHashMap<String, String>();
-			formFields.put("Field Order", question.getFieldOrder());
-			formFields.put("CDE Public ID", question.getCdePublicId());
-			formFields.put("CDE Version", question.getCdeVersion());
-			formFields.put("NCI Category", question.getNciCategory());
-			formFields.put("Question Congruency Status", question.getQuestionCongruencyStatus());
+			Map<String, String> formFields = new LinkedHashMap<String, String>();			
+			formFields.put(fieldOrderLbl, question.getFieldOrder());
+			formFields.put(cdeIdLbl, question.getCdePublicId());
+			formFields.put(cdeVersion, question.getCdeVersion());
+			formFields.put(nciCategoryLbl, question.getNciCategory());
+			formFields.put(questionCongStatusLbl, question.getQuestionCongruencyStatus());
 			String message = question.getMessage();
 			// Checking for the length of the string for max limit before writing to cell
 			if (message!=null && message.length() > cell_max_limit){
 				message = croppedStringText+message.substring(0, cell_write_limit);
 			}			
-			formFields.put("Message", message);
-			formFields.put("RAVE Field Label ", question.getRaveFieldLabel());
-			formFields.put("RAVE Field Label Result", question.getRaveFieldLabelResult());
-			formFields.put("CDE Permitted Question Text Choices", question.getCdePermitQuestionTextChoices());
-			formFields.put("RAVE Control Type", question.getRaveControlType());				
-			formFields.put("RAVE Control Type Result", question.getControlTypeResult());								
-			formFields.put("CDE Value Domain Type", question.getCdeValueDomainType());
+			formFields.put(msgLbl, message);
+			formFields.put(raveFieldLbl, question.getRaveFieldLabel());
+			formFields.put(raveFieldLblResult, question.getRaveFieldLabelResult());
+			formFields.put(cdePermittedQuestChoicesLbl, question.getCdePermitQuestionTextChoices());
+			formFields.put(controlTypeLbl, question.getRaveControlType());				
+			formFields.put(controlTypeResultLbl, question.getControlTypeResult());								
+			formFields.put(cdeVDTypeLbl, question.getCdeValueDomainType());
 			return formFields;
 			}		
 		
@@ -352,18 +375,18 @@ public class ExcelReportGenerator {
 		 */		
 		public static Map<String, String> returnFormFieldsPart2(CCCQuestion question) {
 			Map<String, String> formFields = new LinkedHashMap<String, String>();
-			formFields.put("RAVE Field Data Type", question.getRaveFieldDataType());				
-			formFields.put("Data Type Checker Result", question.getDatatypeCheckerResult());								
-			formFields.put("CDE Data Type", question.getCdeDataType());
-			formFields.put("RAVE UOM", question.getRaveUOM());
-			formFields.put("UOM Checker Result", question.getUomCheckerResult());
-			formFields.put("CDE UOM", question.getCdeUOM());
-			formFields.put("RAVE Length", question.getRaveLength());
-			formFields.put("Length Checker Result", question.getLengthCheckerResult());
-			formFields.put("CDE Max Length", String.valueOf(question.getCdeMaxLength()));
-			formFields.put("RAVE Display Format", question.getRaveDisplayFormat());
-			formFields.put("Format Checker Result", question.getFormatCheckerResult());
-			formFields.put("CDE Display Format", question.getCdeDisplayFormat());
+			formFields.put(raveFieldDataTypeLbl, question.getRaveFieldDataType());
+			formFields.put(dataTypeCheckerResultLbl, question.getDatatypeCheckerResult());								
+			formFields.put(cdeDataTypeLbl, question.getCdeDataType());
+			formFields.put(raveUomLbl, question.getRaveUOM());
+			formFields.put(raveUomCheckerResultLbl, question.getUomCheckerResult());
+			formFields.put(cdeUomLbl, question.getCdeUOM());
+			formFields.put(raveLengthLbl, question.getRaveLength());
+			formFields.put(lengthCheckerResultLbl, question.getLengthCheckerResult());
+			formFields.put(cdeMaxLengthLbl, String.valueOf(question.getCdeMaxLength()));
+			formFields.put(raveDisplayFormatLbl, question.getRaveDisplayFormat());
+			formFields.put(formatCheckerResultLbl, question.getFormatCheckerResult());
+			formFields.put(cdeDisplayFormatLbl, question.getCdeDisplayFormat());
 			return formFields;
 			}				
 		
@@ -489,7 +512,7 @@ public class ExcelReportGenerator {
 			sheet.setColumnWidth(idxOfCdeId, widthOfCdeId);
 			sheet.setColumnWidth(idxOfCdeName, widthOfCdeName);
 			sheet.setColumnWidth(idxOfResult, widthOfResult);
-			sheet.setColumnWidth(idxOfMsg, widthOfMsg);			
+			sheet.setColumnWidth(idxOfMsg, widthOfMsg);
 			int rowNum = 0;
 			row = sheet.createRow(rowNum++);
 			Cell newCell = row.createCell(0);
