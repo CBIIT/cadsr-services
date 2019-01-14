@@ -160,6 +160,7 @@ public class ValidatorService {
 			// Not Checking for UOM, based on Customer's feedback
 			//question = setUomCheckerResult (question, cdeDetails.getValueDomain().getValueDomainDetails().getUnitOfMeasure());
 			question.setCdeUOM(cdeDetails.getValueDomain().getValueDomainDetails().getUnitOfMeasure());
+			question.setUomCheckerResult(notCheckedString);
 					
 			// Comparing RAVE Length (FixedUnit) with the caDSR Value Domain Max length - RAVE Length Checker result
 			question = setLengthCheckerResult (question, cdeDetails.getValueDomain().getValueDomainDetails().getMaximumLength());
@@ -169,7 +170,10 @@ public class ValidatorService {
 				question = checkCdeMaxLength (question, pvMaxLen, vdMaxLen, computeRaveLength(question.getRaveLength()));
 			
 			//Comparing the ALS RAVE Data Format with caDSR Value Domain Display Format
-			question = checkFormatCheckerResult (question, field.getDataFormat(), cdeDetails.getValueDomain().getValueDomainDetails().getDisplayFormat());
+			// Not Checking for Format, based on Customer's feedback
+			//question = checkFormatCheckerResult (question, field.getDataFormat(), cdeDetails.getValueDomain().getValueDomainDetails().getDisplayFormat());
+			question.setFormatCheckerResult(notCheckedString);
+			question.setCdeDisplayFormat(cdeDetails.getValueDomain().getValueDomainDetails().getDisplayFormat());			
 
 			// Setting Question Congruency Status to Congruent if it's not WARNINGS or ERRORS
 			if (question.getQuestionCongruencyStatus() == null)
