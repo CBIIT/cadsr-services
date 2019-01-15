@@ -165,9 +165,11 @@ public class ValidatorService {
 			// Comparing RAVE Length (FixedUnit) with the caDSR Value Domain Max length - RAVE Length Checker result
 			question = setLengthCheckerResult (question, cdeDetails.getValueDomain().getValueDomainDetails().getMaximumLength());
 			
+			// Removing this validation after discussing with the team, as it doesn't serve a significant purpose
 			// Comparing RAVE Length (FixedUnit) with the caDSR PVs Max length
-			if (vdMaxLen != 0)
-				question = checkCdeMaxLength (question, pvMaxLen, vdMaxLen, computeRaveLength(question.getRaveLength()));
+			/*if (vdMaxLen != 0)
+				question = checkCdeMaxLength (question, pvMaxLen, vdMaxLen, computeRaveLength(question.getRaveLength()));*/ 
+			question.setCdeMaxLength(vdMaxLen);
 			
 			//Comparing the ALS RAVE Data Format with caDSR Value Domain Display Format
 			// Not Checking for Format, based on Customer's feedback
