@@ -207,7 +207,7 @@ public class ExcelReportGenerator {
 				Hyperlink link = createHelper.createHyperlink(HyperlinkType.DOCUMENT);
 				String worksheetName = form.getRaveFormOid();
 				if (worksheetName.length() > 31) {//Excel limits 31 character on worksheet name length
-					worksheetName = worksheetName.substring(0, 32);
+					worksheetName = worksheetName.substring(0, 31);
 				}
 				String linkText = "'"+worksheetName+"'!E1";//"'Target Sheet'!A1"
 				link.setAddress(linkText);
