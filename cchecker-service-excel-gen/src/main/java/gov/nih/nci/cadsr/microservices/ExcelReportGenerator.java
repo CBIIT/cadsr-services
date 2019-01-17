@@ -203,16 +203,18 @@ public class ExcelReportGenerator {
 				int colNum = 0;
 				Cell cell = row.createCell(colNum++);
 				cell.setCellValue(form.getRaveFormOid());
+				if (!congStatus_Congruent.equalsIgnoreCase(form.getCongruencyStatus())) {				
 				//Creating the link for Form to open the corresponding sheet
 				Hyperlink link = createHelper.createHyperlink(HyperlinkType.DOCUMENT);
 				String worksheetName = form.getRaveFormOid();
-				if (worksheetName.length() > 31) {//Excel limits 31 character on worksheet name length
-					worksheetName = worksheetName.substring(0, 31);
+					if (worksheetName.length() > 31) {//Excel limits 31 character on worksheet name length
+						worksheetName = worksheetName.substring(0, 31);
+					}
+					String linkText = "'"+worksheetName+"'!E1";//"'Target Sheet'!A1"
+					link.setAddress(linkText);
+					cell.setHyperlink(link);
+					cell.setCellStyle(hlink_style);
 				}
-				String linkText = "'"+worksheetName+"'!E1";//"'Target Sheet'!A1"
-				link.setAddress(linkText);
-				cell.setHyperlink(link);
-				cell.setCellStyle(hlink_style);				
 				cell = row.createCell(summaryFormsValidResultColNum);
 				cell.setCellValue(form.getCongruencyStatus());
 			}

@@ -47,7 +47,7 @@ public class ValidatorService {
 	private static final String msg6 = "Question Text in input file does not match available CDE question text(s) - %s.";
 	private static final String msg7 = "Control Type {%s} isn't compatible with the corresponding mapping for Value domain type {%s}.";
 	private static final String msg8 = "Missing Control Type in the ALS input data.";
-	private static final String msg9 = "Additional PVs in Valid Value list.";
+	private static final String msg9 = "Rave User String matches with neither PV Value nor VM Long Name nor VM Alternate Name.";
 	private static final String msg10 = "The Coded data {%s} for the question do not belong to the corresponding Value domain.";
 	private static final String msg11 = "Data type {%s} from ALS input data doesn't match with the corresponding Value Domain's data type {%s}.";
 	private static final String msg12 = "Unit of Measure {%s} from ALS input data doesn't match with the corresponding Value Domain's UOM {%s}.";
