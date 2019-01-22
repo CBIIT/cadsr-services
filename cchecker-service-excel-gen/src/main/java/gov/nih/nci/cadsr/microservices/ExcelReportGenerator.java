@@ -126,7 +126,10 @@ public class ExcelReportGenerator {
 		private static final String cdeDisplayFormatLbl = "CDE Display Format";
 		private static Map<String, String> formOidSheetNamesMap;
 		private static Set<String> formOids;
-		private static Map<String, Integer> formOidDupes;		
+		private static Map<String, Integer> formOidDupes;
+		private static final int truncSheetNumSingleDigit = 3;
+		private static final int truncSheetNumDoubleDigit = 4;
+		private static final int truncSheetNumTripleDigit = 5;
 		
 
 		/**
@@ -733,6 +736,7 @@ public class ExcelReportGenerator {
 				if (worksheetName.length() > 31) {//Excel limits 31 character on worksheet name length
 					worksheetName = worksheetName.substring(0, 31);
 				}
+				// count for the duplicates of truncated form sheet name
 				int count = 0;
 				// Checking the presence of the worksheet to identify duplicates
 				if (formOids.contains(worksheetName)) {
@@ -741,8 +745,18 @@ public class ExcelReportGenerator {
 						count = formOidDupes.get(worksheetName);
 					} 
 					String longWorksheetName = worksheetName;
-					// Truncating the last 3 characters of the worksheet name to append "(n)" where 'n' is the count 
-					worksheetName = worksheetName.substring(0, worksheetName.length()-3) + "("+(++count)+")";
+					int truncLength = 0;
+					// Determining the length of truncation based on the number of duplicates for a form name
+					// when they go into double or triple digits - highly unlikely scenario yet not impossible 
+					if (count < 9) {
+						truncLength = truncSheetNumSingleDigit;
+					} else if (count == 9 || count > 9) {
+						truncLength = truncSheetNumDoubleDigit;
+					} else if (count == 99 || count > 99) {
+						truncLength = truncSheetNumTripleDigit;
+					}
+					// Truncating the last set of characters of the worksheet name to append "(n)" where 'n' is the count					
+					worksheetName = worksheetName.substring(0, worksheetName.length() - truncLength) + "("+(++count)+")";					
 					formOidDupes.put(longWorksheetName, count);
 				}
 				// Add the worksheet name to the Set for the first time
