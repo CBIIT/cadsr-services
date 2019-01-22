@@ -5,23 +5,28 @@ package gov.nih.nci.cadsr.microservices;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.apache.poi.ss.usermodel.Hyperlink;
+import java.util.Set;
+
 import org.apache.poi.common.usermodel.HyperlinkType;
-import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Hyperlink;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import gov.nih.nci.cadsr.data.CCCForm;
 import gov.nih.nci.cadsr.data.CCCQuestion;
 import gov.nih.nci.cadsr.data.CCCReport;
@@ -118,7 +123,11 @@ public class ExcelReportGenerator {
 		private static final String cdeMaxLengthLbl = "CDE Max Length";
 		private static final String raveDisplayFormatLbl = "RAVE Display Format";
 		private static final String formatCheckerResultLbl = "Format Checker Result";
-		private static final String cdeDisplayFormatLbl = "CDE Display Format";		
+		private static final String cdeDisplayFormatLbl = "CDE Display Format";
+		private static Map<String, String> formOidSheetNamesMap;
+		private static Set<String> formOids;
+		private static Map<String, Integer> formOidDupes;		
+		
 
 		/**
 		 * @param
@@ -131,6 +140,9 @@ public class ExcelReportGenerator {
 			Workbook workbook = new XSSFWorkbook();
 			Sheet sheet = workbook.createSheet("Summary");
 			CreationHelper createHelper = workbook.getCreationHelper();
+			formOidSheetNamesMap = new HashMap<String, String>();
+			formOids = new HashSet<String>();
+			formOidDupes = new HashMap<String, Integer>();			
 			
 			//cell style for hyperlinks
             //by default hyperlinks are blue and underlined
@@ -196,25 +208,25 @@ public class ExcelReportGenerator {
 			newCell = row.createCell(summaryFormsValidResultColNum);
 			newCell.setCellValue(summaryFormsValidResult);
 			newCell.setCellStyle(header_lbl_style_2);			
-			List<CCCForm> forms = cccReport.getCccForms();
+			List<CCCForm> forms = cccReport.getCccForms();			
 			// Iterating through the forms list in the report to display their name and their congruency status
 			for (CCCForm form : forms) {
 				row = sheet.createRow(rowNum++);
 				int colNum = 0;
 				Cell cell = row.createCell(colNum++);
 				cell.setCellValue(form.getRaveFormOid());
-				if (!congStatus_Congruent.equalsIgnoreCase(form.getCongruencyStatus())) {				
+				String worksheetName = form.getRaveFormOid();				
+				if (!congStatus_Congruent.equalsIgnoreCase(form.getCongruencyStatus())) {
 				//Creating the link for Form to open the corresponding sheet
 				Hyperlink link = createHelper.createHyperlink(HyperlinkType.DOCUMENT);
-				String worksheetName = form.getRaveFormOid();
-					if (worksheetName.length() > 31) {//Excel limits 31 character on worksheet name length
-						worksheetName = worksheetName.substring(0, 31);
-					}
-					String linkText = "'"+worksheetName+"'!E1";//"'Target Sheet'!A1"
-					link.setAddress(linkText);
-					cell.setHyperlink(link);
-					cell.setCellStyle(hlink_style);
+				// Obtaining a cropped version of the form name in case it's longer than 31
+				worksheetName = cropFormNameForExcel(worksheetName);
+				String linkText = "'"+worksheetName+"'!E1";//"'Target Sheet'!A1"
+				link.setAddress(linkText);
+				cell.setHyperlink(link);
+				cell.setCellStyle(hlink_style);
 				}
+				formOidSheetNamesMap.put(form.getRaveFormOid(), worksheetName);
 				cell = row.createCell(summaryFormsValidResultColNum);
 				cell.setCellValue(form.getCongruencyStatus());
 			}
@@ -225,7 +237,8 @@ public class ExcelReportGenerator {
 					if (congStatus_Congruent.equalsIgnoreCase(cccForm.getCongruencyStatus())) {
 						continue;
 					} else {
-				Sheet sheet2 = workbook.createSheet(cccForm.getRaveFormOid());
+				String sheetName = formOidSheetNamesMap.get(cccForm.getRaveFormOid());
+				Sheet sheet2 = workbook.createSheet(sheetName);
 				// Setting width for columns that are expected to be Short
 				setColumnWidth(sheet2, shortColumnsforForm, widthFormColsShort);
 				// Setting width for columns that are expected to be Long
@@ -699,5 +712,44 @@ public class ExcelReportGenerator {
 			}
 			return sheet;	
 		}
+		
+		
+		/**
+		 * Checks and crops the worksheetname to less than 31 for accommodating 
+		 * the 31 character limit for names of worksheets allowed by excel 
+		 * 
+		 * If a duplicate worksheetname is found, then the last 3 characters 
+		 * of the worksheetname are truncated and appended with "(n)" to 
+		 * indicate the number of times the worksheet name is duplicated 
+		 * because of the excel limit truncation of the worksheet name 
+		 * 
+		 * @param sheet
+		 * @param columns
+		 * @param colWidth
+		 * @return XSSFSheet
+		 */		
+		private static String cropFormNameForExcel (String worksheetName) {
+			// Checking and cropping the form OID if it's more than 31 characters long
+				if (worksheetName.length() > 31) {//Excel limits 31 character on worksheet name length
+					worksheetName = worksheetName.substring(0, 31);
+				}
+				int count = 0;
+				// Checking the presence of the worksheet to identify duplicates
+				if (formOids.contains(worksheetName)) {
+					// Get the count of how many times the duplicate formOID is present 
+					if (formOidDupes.containsKey(worksheetName)) {
+						count = formOidDupes.get(worksheetName);
+					} 
+					String longWorksheetName = worksheetName;
+					// Truncating the last 3 characters of the worksheet name to append "(n)" where 'n' is the count 
+					worksheetName = worksheetName.substring(0, worksheetName.length()-3) + "("+(++count)+")";
+					formOidDupes.put(longWorksheetName, count);
+				}
+				// Add the worksheet name to the Set for the first time
+				else {
+					formOids.add(worksheetName);				
+				}
+			return worksheetName;
+		}		
 		
 }

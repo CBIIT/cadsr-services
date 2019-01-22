@@ -65,9 +65,9 @@ public class ReportGeneratorFeed implements ReportOutput {
 	private static String noCdeMsg = "No CDE provided : {%s}.";
 	private static List<NrdsCde> nrdsCdeList;
 	private static List<StandardCrfCde> standardCrfCdeList;
-	private static int totalNrdsCong = 0;
-	private static int totalNrdsWarn = 0;
-	private static int totalNrdsError = 0;	
+	private static int totalNrdsCong;
+	private static int totalNrdsWarn;
+	private static int totalNrdsError;	
 	
 	static{
 		categoryCdeList = retrieveCdeCrfData();
@@ -249,6 +249,9 @@ public class ReportGeneratorFeed implements ReportOutput {
 		int totalFormsCongruent = 0;
 		int totalQuestWithoutCde = 0;
 		int countQuestChecked = 0;
+		totalNrdsCong = 0;
+		totalNrdsWarn = 0;
+		totalNrdsError = 0;		
 
 		nrdsCdeList = new ArrayList<NrdsCde>();
 		standardCrfCdeList = new ArrayList<StandardCrfCde>();
