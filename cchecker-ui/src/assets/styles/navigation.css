@@ -2,7 +2,7 @@
 #topnavigation {
 	margin-top:10px;
 	background-color:#E3E3E3;	
-	border:.05em solid #606a76;
+	border:1px solid #606a76;
 	text-transform:uppercase;
 
 }
@@ -68,8 +68,8 @@
 
 #main #navigation ul li {
 	background-color: #E3E3E3;
-    border-width: 0px .05em 0px .05em !important;
-	border-color:#606a76 !important;
+    border-width: 0px 1px 0px 1px !important;
+	border-color:#020202 !important;
 	border-style:solid !important;
 
 }
@@ -86,13 +86,13 @@
 	border-style: solid;
 	border-color: #fff;
 	border-top: 1px solid #c5c3c3 !important;
-	border-bottom: .05em solid #606a76 !important;
+	border-bottom: 1px solid #606a76 !important;
 
 }
 
 #main #navigation ul li:first-child {
 
-	border-top: .05em solid #606a76 !important;
+	border-top: 1px solid #606a76 !important;
 	border-bottom: 1px solid #c5c3c3 !important;
 
 }
