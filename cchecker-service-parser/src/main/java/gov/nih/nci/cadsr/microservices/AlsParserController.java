@@ -6,6 +6,7 @@ package gov.nih.nci.cadsr.microservices;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,10 @@ public class AlsParserController {
 	public final String strNoFilePath = "Server problems Parser component no file information received";
 	//TODO consider sSpring singleton bean usage
 	private static final Parser alsParser = new AlsParser();
+	
+	@Autowired
+	AlsPostProcessor alsPostProcessor;
+	
 	@PostMapping("/rest/alsparserservice")
 	//@ResponseBody
 	public ResponseEntity<ALSData>parseAls(@RequestParam("filepath") String filePath) {
@@ -42,6 +47,7 @@ public class AlsParserController {
 		try {
 			//TODO we do not need filename here consider to remove the second parameter, but keep the class member and a setter method.
 			ALSData alsData = alsParser.parse(filePath);
+			alsPostProcessor.postProcess(alsData);
 			HttpHeaders httpHeaders = new HttpHeaders();
 			httpHeaders.add("Content-Type", "application/json");	
 

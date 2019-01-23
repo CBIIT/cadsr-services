@@ -43,7 +43,7 @@ public class AlsParser implements Parser{
 	private static DataFormatter dataFormatter = new DataFormatter();
 	private static String reportDateFormat = "MM/dd/yyyy";
 	private static String crfDraftSheetName = "CRFDraft";
-	private static String formsSheetName = "Forms";
+	public static final String formsSheetName = "Forms";
 	private static String fieldsSheetName = "Fields";
 	private static String dataDictionarySheetName = "DataDictionaryEntries";
 	private static String unitDictionarySheetName = "UnitDictionaryEntries";	
@@ -79,9 +79,9 @@ public class AlsParser implements Parser{
 	private static int cell_udConstantC = 5;	
 	private static int cell_udConstantK = 6;
 	private static int cell_udUnitString = 7;
-	private static String errorSeverity_fatal = "FATAL";
-	private static String errorSeverity_error = "ERROR";
-	private static String errorSeverity_warn = "WARNING";
+	public static final String errorSeverity_fatal = "FATAL";
+	public static final String errorSeverity_error = "ERROR";
+	public static final String errorSeverity_warn = "WARNING";
 	private static List<String> controlTypes = Arrays.asList("CheckBox","DateTime","DropDownList","Dynamic SearchList","Text","FileUpload", "File Upload","LongText","RadioButton","SearchList"); 
 
 	
@@ -103,7 +103,9 @@ public class AlsParser implements Parser{
 	private static String err_msg_21 = "Question doesn't contain a CDE public id and version";	
 	private static String err_msg_22 = "This is an unknown control type.";		
 	private static String err_msg_23 = "CDE public id and version should be numeric.";	
-	private static String err_msg_24 = "Ordinal should be numeric.";	
+	private static String err_msg_24 = "Ordinal should be numeric.";
+	public final static String err_msg_25 = "FORM OID duplicated: %s.";
+	public final static String err_msg_26 = "Draft Field Name duplicated: %s.";
 	private static String publicid_prefix = "PID";
 	private static String version_prefix = "_V";	
 
