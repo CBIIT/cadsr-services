@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -39,10 +40,8 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -57,7 +56,6 @@ import gov.nih.nci.cadsr.data.CCCForm;
 import gov.nih.nci.cadsr.data.CCCReport;
 import gov.nih.nci.cadsr.data.FormsUiData;
 import gov.nih.nci.cadsr.data.ValidateParamWrapper;
-import gov.nih.nci.cadsr.service.FormService;
 
 @Controller
 //@RestController
@@ -99,7 +97,14 @@ public class GatewayBootController {
 	}
 
 	private final static Logger logger = LoggerFactory.getLogger(GatewayBootController.class);
-
+	
+	@Autowired
+    private ServiceParser serviceParser;
+	@Autowired
+    private ServiceDb serviceDb;
+	@Autowired
+	private FormService formService;
+	
 	protected Cookie generateCookie() {
 		Cookie cookie = new Cookie(sessionCookieName, generateIdseq());
 		// cookie.setMaxAge(24 * 60 * 60); // (24 hours in seconds)
@@ -328,15 +333,15 @@ public class GatewayBootController {
 	// @ResponseBody
 	public ResponseEntity<?> parseService(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(name = "owner", defaultValue = "guest") String reportOwner,
-			@RequestParam("file") MultipartFile uploadfile) {
+			@RequestParam(name = "file", required=true) MultipartFile file) {
 		logger.debug("uploadFile started");
 
 		// upload file
-		if (uploadfile.isEmpty()) {
+		if (file.isEmpty()) {
 			String errorMessage = "Please submit a file!";
 			return buildErrorResponse(errorMessage, HttpStatus.BAD_REQUEST);
 		}
-		String orgFileName = uploadfile.getOriginalFilename();
+		String orgFileName = file.getOriginalFilename();
 		logger.info("ALS file upload request: " + orgFileName);
 
 		Path pathSavedFile;
@@ -344,10 +349,10 @@ public class GatewayBootController {
 		Cookie cookie = generateCookie();
 		String idseq = cookie.getValue();
 		try {
-			pathSavedFile = saveUploadedFile(uploadfile, idseq + EXCEL_FILE_EXT);
+			pathSavedFile = saveUploadedFile(file, idseq + EXCEL_FILE_EXT);
 		} 
 		catch (IOException e) {
-			String errorMessage = "Error saving uploaded file: " + uploadfile.getName() + ' ' + e;
+			String errorMessage = "Error saving uploaded file: " + file.getName() + ' ' + e;
 			return buildErrorResponse(errorMessage, HttpStatus.SERVICE_UNAVAILABLE);
 		}
 
@@ -355,10 +360,10 @@ public class GatewayBootController {
 		logger.info("Successfully uploaded - " + orgFileName + " saved as " + saveAbsPath);
 
 		// call parser
-		ALSDataWrapper wrapper = submitPostRequestParser(saveAbsPath);
+		ALSDataWrapper wrapper = serviceParser.submitPostRequestParser(saveAbsPath,CCHECKER_PARSER_URL);
 		HttpStatus parserStatusCode = wrapper.getStatusCode();
 		if (!HttpStatus.OK.equals(parserStatusCode)) {
-			String errorMessage = "Error on parsing file: " + uploadfile.getOriginalFilename();
+			String errorMessage = "Error on parsing file: " + file.getOriginalFilename();
 			return buildErrorResponse(errorMessage, parserStatusCode);
 		}
 
@@ -384,7 +389,7 @@ public class GatewayBootController {
 				+ ", FILE_NAME: " + alsData.getFileName() + ", idseq: " + idseq);
 
 		// save ALSData DB into in a container
-		 StringResponseWrapper saveResponse = submitPostRequestSaveAls(alsData, idseq);
+		 StringResponseWrapper saveResponse = serviceDb.submitPostRequestSaveAls(alsData, idseq, CCHECKER_DB_SERVICE_URL_CREATE);
 		 HttpStatus responseStatusCode = saveResponse.getStatusCode();
 		 if (! HttpStatus.OK.equals(responseStatusCode)) {
 			 String errorMessage = "Error on saving ALS file: " + orgFileName + ", owner: " + reportOwner + ", idseq: " + idseq;
@@ -395,7 +400,7 @@ public class GatewayBootController {
 		 }
 		//
 		// build result from parser data
-		FormsUiData formUiData = FormService.buildFormsUiData(alsData);
+		FormsUiData formUiData = formService.collectFormsUiData(alsData);
 
 		// set session cookie
 		logger.debug("set new Cookie value: " + idseq);
