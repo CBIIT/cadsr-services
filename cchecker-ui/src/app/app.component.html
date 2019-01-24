@@ -1,22 +1,19 @@
-<div id="container">
-
   <!-- Header -->
-  <div id="header">
-    <ul>
-        <li id="logo">
-          <img src="../assets/images/nci_logo.svg" alt="National Cancer Institute">
-        </li>
-        <!-- <li id="title"><h2>Congruency Checker</h2></li>
-        <li id="links">
-          <ul>
-              <li><a [routerLink]="['/']">Home</a></li>
-              <li><a [href]="formBuilderUrl" target="blank">Form Builder</a></li>
-              <li><a [href]="cdeBrowserUrl" target="blank">CDE Browser</a></li>
-              <li><a [routerLink]="['/']">Help</a></li>
-            </ul>
-        </li> -->
-    </ul>
+  <header>
+    <div>
+          <img src="../assets/images/nci-logo-full.__v1.svg" alt="National Cancer Institute">
+    </div>
+  </header>
+<div id="utility-bar">
+  <div class="cLinks">
+    <i><a target="_blank" href="https://www.cancer.gov/about-cancer?cid=cgovnav_aboutcancer_cbiit.cancer.gov">about cancer</a></i>
+    <i><a target="_blank" href="https://www.cancer.gov/types?cid=cgov_cancertypes_cbiit.cancer.gov">cancer types</a></i>
+    <i><a target="_blank" href="https://www.cancer.gov/research?cid=cgov_research_cbiit.cancer.gov">research</a></i>
+    <i><a target="_blank" href="https://www.cancer.gov/grants-training?cid=cgov_grantstraining_cbiit.cancer.gov">grants & training</a></i>
+    <i><a target="_blank" href="https://www.cancer.gov/news-events?cid=cgov_newsandevents_cbiit.cancer.gov">news & events</a></i>
+    <i><a target="_blank" href="https://www.cancer.gov/about-nci?cid=cgov_aboutnci_cbiit.cancer.gov">about nci</a></i>
   </div>
+</div>
   <div id="topnavigation">
         <ul>
           <li id="links">
@@ -31,6 +28,8 @@
   </div>
   <!-- End Header -->
 
+<div id="content">
+<div id="container">
   <!-- Main content -->
   <div id="main">
     <div id="navigation">
@@ -45,8 +44,11 @@
   <!-- End of Main content -->
 
 
+
+</div>
+</div>
   <!-- Footer -->
-  <div id="footer">
+  <footer>
       <p>
         <a href="http://www.dhhs.gov/" target="_blank">Department of Health and Human Services</a>  |   <a href="http://www.nih.gov/" target="_blank">National Institutes of Health</a>  |   <a href="http://www.cancer.gov/" target="_blank">National Cancer Institute</a>  |  <a href="http://www.usa.gov/" target="_blank">USA.gov</a>
       </p>
@@ -56,8 +58,5 @@
       <p>
         Build Time: {{timestamp}}
       </p>    
-  </div>
+  </footer>
   <!-- End Footer -->
-
-</div>
-
