@@ -130,8 +130,16 @@ public class ExcelReportGenerator {
 		private static final int truncSheetNumSingleDigit = 3;
 		private static final int truncSheetNumDoubleDigit = 4;
 		private static final int truncSheetNumTripleDigit = 5;
+		private static final String backToSummary = "Click here to go back to Summary sheet.";
+		private static CellStyle hlink_style;
+		private static CellStyle header_lbl_style;
+		private static CellStyle header_lbl_style_2;
+		private static Font hlink_font;
+		private static Font header_lbl_font;
+		private static Font header_lbl_font_2;
+		private static final String summaryLbl = "Summary";
+		private static CreationHelper createHelper;
 		
-
 		/**
 		 * @param
 		 * @return Implementation for Writing the final output report object into an excel (as a feasibility check)
@@ -141,35 +149,34 @@ public class ExcelReportGenerator {
 
 			Row row;
 			Workbook workbook = new XSSFWorkbook();
-			Sheet sheet = workbook.createSheet("Summary");
-			CreationHelper createHelper = workbook.getCreationHelper();
+			Sheet sheet = workbook.createSheet(summaryLbl);
+			createHelper = workbook.getCreationHelper();
 			formOidSheetNamesMap = new HashMap<String, String>();
 			formOids = new HashSet<String>();
-			formOidDupes = new HashMap<String, Integer>();			
+			formOidDupes = new HashMap<String, Integer>();            
 			
 			//cell style for hyperlinks
             //by default hyperlinks are blue and underlined
-            CellStyle hlink_style = workbook.createCellStyle();
-            Font hlink_font = workbook.createFont();
+            hlink_style = workbook.createCellStyle();
+            hlink_font = workbook.createFont();
             hlink_font.setUnderline(Font.U_SINGLE);
             hlink_font.setColor(IndexedColors.BLACK.getIndex());
             hlink_style.setFont(hlink_font);
             
             // Bold headers
-            CellStyle header_lbl_style = workbook.createCellStyle();
-            Font header_lbl_font = workbook.createFont();
+            header_lbl_style = workbook.createCellStyle();
+            header_lbl_font = workbook.createFont();
             header_lbl_font.setBold(true);
             header_lbl_font.setFontName(headerFontName);
             header_lbl_font.setFontHeight(headerLblFontSize);
             header_lbl_style.setFont(header_lbl_font);
             
-            CellStyle header_lbl_style_2 = workbook.createCellStyle();
-            Font header_lbl_font_2 = workbook.createFont();
+            header_lbl_style_2 = workbook.createCellStyle();
+            header_lbl_font_2 = workbook.createFont();
             header_lbl_font_2.setBold(true);
             header_lbl_font_2.setFontName(headerFontName);
             header_lbl_font_2.setFontHeight(headerLblFontSize2);
-            header_lbl_style_2.setFont(header_lbl_font_2); 
-            
+            header_lbl_style_2.setFont(header_lbl_font_2);
 			
 			// Adding labels for each value (row) displayed in the summary page of the report			
 			Map<String, String> summaryLabels = returnSummaryLabelsMap(cccReport);
@@ -220,14 +227,14 @@ public class ExcelReportGenerator {
 				cell.setCellValue(form.getRaveFormOid());
 				String worksheetName = form.getRaveFormOid();				
 				if (!congStatus_Congruent.equalsIgnoreCase(form.getCongruencyStatus())) {
-				//Creating the link for Form to open the corresponding sheet
-				Hyperlink link = createHelper.createHyperlink(HyperlinkType.DOCUMENT);
-				// Obtaining a cropped version of the form name in case it's longer than 31
-				worksheetName = cropFormNameForExcel(worksheetName);
-				String linkText = "'"+worksheetName+"'!E1";//"'Target Sheet'!A1"
-				link.setAddress(linkText);
-				cell.setHyperlink(link);
-				cell.setCellStyle(hlink_style);
+					//Creating the link for another sheet in the document					
+					Hyperlink newlink = createHelper.createHyperlink(HyperlinkType.DOCUMENT);
+					// Obtaining a cropped version of the form name in case it's longer than 31
+					worksheetName = cropFormNameForExcel(worksheetName);
+					String linkText = "'"+worksheetName+"'!E1";//"'Target Sheet'!A1"
+					newlink.setAddress(linkText);
+					cell.setHyperlink(newlink);
+					cell.setCellStyle(hlink_style);
 				}
 				formOidSheetNamesMap.put(form.getRaveFormOid(), worksheetName);
 				cell = row.createCell(summaryFormsValidResultColNum);
@@ -250,7 +257,10 @@ public class ExcelReportGenerator {
 				row = sheet2.createRow(rowNum++);
 				newCell = row.createCell(0);
 				newCell.setCellValue(String.format(formHeader, cccForm.getRaveFormOid()));
-				newCell.setCellStyle(header_lbl_style_2);
+				newCell.setCellStyle(header_lbl_style_2);				
+				newCell = row.createCell(6);
+				newCell.setCellValue(backToSummary);				
+				embedBackToSummaryLink(newCell);
 				row = sheet2.createRow(rowNum++);
 				int colNum = 0;
 				// Print row headers in the form sheet
@@ -295,10 +305,10 @@ public class ExcelReportGenerator {
 				   }
 			    }
 			}
-			buildNrdsTab(workbook, cccReport.getNrdsCdeList(), header_lbl_style, header_lbl_style_2);
-			buildMissingNrdsCdesTab(workbook, cccReport.getMissingNrdsCdeList(), header_lbl_style, header_lbl_style_2);
+			buildNrdsTab(workbook, cccReport.getNrdsCdeList());
+			buildMissingNrdsCdesTab(workbook, cccReport.getMissingNrdsCdeList());
 			if (cccReport.getIsCheckStdCrfCdeChecked()) {
-				buildStdCrfMissingTabs(workbook, cccReport.getMissingStandardCrfCdeList(), header_lbl_style, header_lbl_style_2);
+				buildStdCrfMissingTabs(workbook, cccReport.getMissingStandardCrfCdeList());
 			}			
 			FileOutputStream outputStream = null;
 			try {
@@ -510,7 +520,7 @@ public class ExcelReportGenerator {
 		 * @param nrdsCdeList
 		 * @return XSSFWorkbook
 		 */
-		public static Workbook buildNrdsTab (Workbook workbook, List<NrdsCde> nrdsCdeList, CellStyle headerStyle, CellStyle headerStyle2) {
+		public static Workbook buildNrdsTab (Workbook workbook, List<NrdsCde> nrdsCdeList) {
 			Row row;
 			Sheet sheet = workbook.createSheet(matching_nrds_cdes_tab_name);
 			// Setting fixed column widths for cells
@@ -539,7 +549,10 @@ public class ExcelReportGenerator {
 			row = sheet.createRow(rowNum++);
 			Cell newCell = row.createCell(0);
 			newCell.setCellValue(matching_nrds_cdes_header);
-			newCell.setCellStyle(headerStyle);
+			newCell.setCellStyle(header_lbl_style);
+			newCell = row.createCell(4);
+			newCell.setCellValue(backToSummary);				
+			embedBackToSummaryLink(newCell);
 			row = sheet.createRow(rowNum++);
 			row = sheet.createRow(rowNum++);
 			int colNum = 0;
@@ -547,7 +560,7 @@ public class ExcelReportGenerator {
 			for (String rowHeader : nrdsRowHeaders) {
 				newCell = row.createCell(colNum++);
 				newCell.setCellValue(rowHeader);
-				newCell.setCellStyle(headerStyle2);				
+				newCell.setCellStyle(header_lbl_style_2);				
 			}
 			CellStyle cellStyle = workbook.createCellStyle();
 	        cellStyle.setWrapText(true);
@@ -582,7 +595,7 @@ public class ExcelReportGenerator {
 		 * @param missingNrdsCdeList
 		 * @return XSSFWorkbook
 		 */
-		public static Workbook buildMissingNrdsCdesTab (Workbook workbook, List<NrdsCde> missingNrdsCdeList, CellStyle headerStyle, CellStyle headerStyle2) {
+		public static Workbook buildMissingNrdsCdesTab (Workbook workbook, List<NrdsCde> missingNrdsCdeList) {
 			final String[] nrdsRowHeaders = crfRowHeaders;
 			Sheet sheet = workbook.createSheet(nrds_missing_cde_tab_name);
 			Row row;
@@ -604,7 +617,10 @@ public class ExcelReportGenerator {
 			row = sheet.createRow(rowNum++);
 			Cell newCell = row.createCell(0);
 			newCell.setCellValue(nrds_missing_cde_header);
-			newCell.setCellStyle(headerStyle);
+			newCell.setCellStyle(header_lbl_style);
+			newCell = row.createCell(3);
+			newCell.setCellValue(backToSummary);				
+			embedBackToSummaryLink(newCell);
 			row = sheet.createRow(rowNum++);
 			row = sheet.createRow(rowNum++);
 			int colNum = 0;
@@ -612,7 +628,7 @@ public class ExcelReportGenerator {
 			for (String rowHeader : nrdsRowHeaders) {
 				newCell = row.createCell(colNum++);
 				newCell.setCellValue(rowHeader);
-				newCell.setCellStyle(headerStyle2);				
+				newCell.setCellStyle(header_lbl_style_2);				
 			}
 			CellStyle cellStyle = workbook.createCellStyle();
 	        cellStyle.setWrapText(true);
@@ -637,10 +653,10 @@ public class ExcelReportGenerator {
 		 * @param stdCrfCdeList
 		 * @return XSSFWorkbook
 		 */
-		public static Workbook buildStdCrfMissingTabs (Workbook workbook, List<StandardCrfCde> stdCrfCdeList, CellStyle headerStyle, CellStyle headerStyle2) {
+		public static Workbook buildStdCrfMissingTabs (Workbook workbook, List<StandardCrfCde> stdCrfCdeList) {
 			int crfTabsCount = 3; // 3 categories of standard CRF CDEs		
 			for (int i = 0; i < crfTabsCount; i++ )
-				buildCrfTab(workbook.createSheet(tabNames[i]), stdCrfCdeList, templateTypes[i], headerStyle, headerStyle2);	
+				buildCrfTab(workbook.createSheet(tabNames[i]), stdCrfCdeList, templateTypes[i]);	
 	 		return workbook;		
 		}	
 		
@@ -652,7 +668,7 @@ public class ExcelReportGenerator {
 		 * @param category
 		 * @return XSSFSheet
 		 */
-		private static Sheet buildCrfTab (Sheet sheet, List<StandardCrfCde> stdCrfCdeList, String category, CellStyle headerStyle, CellStyle headerStyle2) {
+		private static Sheet buildCrfTab (Sheet sheet, List<StandardCrfCde> stdCrfCdeList, String category) {
 			Row row;
 			// Setting fixed column widths for cells
 			final int idxOfCdeId = 0;//0-based
@@ -672,14 +688,17 @@ public class ExcelReportGenerator {
 			row = sheet.createRow(rowNum++);
 			Cell newCell = row.createCell(0);
 			newCell.setCellValue(String.format(cdeStdCrfMissingmsg, category));
-			newCell.setCellStyle(headerStyle);
+			newCell.setCellStyle(header_lbl_style);
+			newCell = row.createCell(3);
+			newCell.setCellValue(backToSummary);				
+			embedBackToSummaryLink(newCell);			
 			row = sheet.createRow(rowNum++);
 			row = sheet.createRow(rowNum++);
 			// Print row headers in the CRF sheets
 			for (String rowHeader : crfRowHeaders) {
 				newCell = row.createCell(colNum++);
 				newCell.setCellValue(rowHeader);
-				newCell.setCellStyle(headerStyle2);				
+				newCell.setCellStyle(header_lbl_style_2);				
 			}
 			
 			colNum = 0;
@@ -765,5 +784,20 @@ public class ExcelReportGenerator {
 				}
 			return worksheetName;
 		}		
+		
+
+		/**
+		 * Creates a hyperlink to the Summary Sheet in the final report
+		 * 
+		 * @param newCell
+		 */
+		private static void embedBackToSummaryLink(Cell newCell) {
+			Hyperlink summarylink = createHelper.createHyperlink(HyperlinkType.DOCUMENT);
+			newCell.setCellValue(backToSummary);				
+			String linkText = "'"+summaryLbl+"'!A1";//"'Target Sheet'!A1"
+			summarylink.setAddress(linkText);
+			newCell.setHyperlink(summarylink);
+			newCell.setCellStyle(hlink_style);
+		}
 		
 }
