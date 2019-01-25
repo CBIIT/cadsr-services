@@ -101,11 +101,11 @@ public class AlsParser implements Parser{
 	private static String err_msg_19 = "Specify is empty.";
 	private static String err_msg_20 = "Unit Dictionary Name is empty.";
 	private static String err_msg_21 = "Question doesn't contain a CDE public id and version";	
-	private static String err_msg_22 = "This is an unknown control type.";		
+	private static String err_msg_22 = "%s is an unknown control type.";		
 	private static String err_msg_23 = "CDE public id and version should be numeric.";	
 	private static String err_msg_24 = "Ordinal should be numeric.";
 	public final static String err_msg_25 = "FORM OID duplicated: %s.";
-	public final static String err_msg_26 = "Draft Field Name duplicated: %s.";
+	public final static String err_msg_26 = "Draft Form Name duplicated: %s.";
 	private static String publicid_prefix = "PID";
 	private static String version_prefix = "_V";	
 
@@ -509,7 +509,7 @@ public class AlsParser implements Parser{
 						field.setControlType(controlType);
 							if (!controlTypes.contains(controlType)) {
 								alsError = getErrorInstance();
-								alsError.setErrorDesc(err_msg_22);
+								alsError.setErrorDesc(String.format(err_msg_22, controlType));
 								alsError.setSheetName(sheet.getSheetName());
 								alsError.setRowNumber(row.getRowNum());
 								alsError.setColNumber(cell_fieldControlType);
@@ -521,8 +521,8 @@ public class AlsParser implements Parser{
 									alsError.setDataDictionaryName(dataDictionaryName);
 								if (unitDictionaryName!=null)
 									alsError.setUnitDictionaryName(unitDictionaryName);								
-								alsError.setErrorSeverity(errorSeverity_warn);
-								alsData.getCccError().addAlsError(alsError);				
+								alsError.setErrorSeverity(errorSeverity_error);
+								cccError.addAlsError(alsError);			
 							}
 						}
 					else
