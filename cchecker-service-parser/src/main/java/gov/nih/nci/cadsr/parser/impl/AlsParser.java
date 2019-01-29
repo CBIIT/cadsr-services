@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.poi.ooxml.POIXMLException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -107,7 +108,9 @@ public class AlsParser implements Parser{
 	public final static String err_msg_25 = "FORM OID duplicated: %s.";
 	public final static String err_msg_26 = "Draft Form Name duplicated: %s.";
 	private static String publicid_prefix = "PID";
-	private static String version_prefix = "_V";	
+	private static String version_prefix = "_V";
+	private static String invalidHdrSign = "Invalid header signature";
+	private static String invalidFileUploadMsg = "Invalid file format, please check if the uploaded file is in Excel XLSX format.";
 
 	/**
 	 * Parsing an ALS input file into data objects for validating against the
@@ -184,10 +187,11 @@ public class AlsParser implements Parser{
 				
 				workbook.close();
 		} catch (IOException ioe) {
+			// Any non-office document formats
 			alsError = getErrorInstance();
-			if (ioe.getMessage().indexOf("Invalid header signature") > -1) {
+			if (ioe.getMessage().indexOf(invalidHdrSign) > -1) {
 				logger.debug(ioe.getMessage());
-				alsError.setErrorDesc("Invalid file format, please check if the uploaded file is in Excel XLSX format.");
+				alsError.setErrorDesc(invalidFileUploadMsg);
 			} else {
 				alsError.setErrorDesc(ioe.getMessage());				
 			}
@@ -196,6 +200,12 @@ public class AlsParser implements Parser{
 		} catch (NullPointerException npe) {
 			alsError = getErrorInstance();
 			alsError.setErrorDesc(npe.getMessage());
+			alsError.setErrorSeverity(errorSeverity_fatal);
+			cccError.addAlsError(alsError);
+		} catch (POIXMLException poixe) {
+			// Office documents other than Excel (XLSX)
+			alsError = getErrorInstance();
+			alsError.setErrorDesc(invalidFileUploadMsg);
 			alsError.setErrorSeverity(errorSeverity_fatal);
 			cccError.addAlsError(alsError);
 		}
