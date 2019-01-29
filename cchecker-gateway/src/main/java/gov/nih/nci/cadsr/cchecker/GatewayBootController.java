@@ -43,6 +43,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
@@ -338,7 +339,7 @@ public class GatewayBootController {
 
 		// upload file
 		if (file.isEmpty()) {
-			String errorMessage = "Please submit a file!";
+			String errorMessage = "Please submit a non-empty file!";
 			return buildErrorResponse(errorMessage, HttpStatus.BAD_REQUEST);
 		}
 		String orgFileName = file.getOriginalFilename();
@@ -352,64 +353,70 @@ public class GatewayBootController {
 			pathSavedFile = saveUploadedFile(file, idseq + EXCEL_FILE_EXT);
 		} 
 		catch (IOException e) {
-			String errorMessage = "Error saving uploaded file: " + file.getName() + ' ' + e;
+			String errorMessage = "Unexpected error in saving uploaded file: " + file.getName() + ". Details:" + e;
 			return buildErrorResponse(errorMessage, HttpStatus.SERVICE_UNAVAILABLE);
 		}
 
 		String saveAbsPath = pathSavedFile.toFile().getAbsolutePath();
 		logger.info("Successfully uploaded - " + orgFileName + " saved as " + saveAbsPath);
-
-		// call parser
-		ALSDataWrapper wrapper = serviceParser.submitPostRequestParser(saveAbsPath,CCHECKER_PARSER_URL);
-		HttpStatus parserStatusCode = wrapper.getStatusCode();
-		if (!HttpStatus.OK.equals(parserStatusCode)) {
-			String errorMessage = "Error on parsing file: " + file.getOriginalFilename();
-			return buildErrorResponse(errorMessage, parserStatusCode);
-		}
-
-		ALSData alsData = wrapper.getAlsData();
-		// check for fatal errors
-		CCCError cccError = alsData.getCccError();
-		List<ALSError> parserErrorList;
-		if (cccError != null) {
-			parserErrorList = cccError.getAlsErrors();
-			if ((parserErrorList != null) && (!parserErrorList.isEmpty())) {
-				ALSError alsError = parserErrorList.get(0);
-				if (FATAL_ERROR_STATUS.equals(alsError.getErrorSeverity())) {
-					String errorMessage = "Error in uploaded file: " + alsError.getErrorDesc();
-					return buildErrorResponse(errorMessage, HttpStatus.BAD_REQUEST);
+		//catch REST client exception
+		try {
+			// call parser
+			ALSDataWrapper wrapper = serviceParser.submitPostRequestParser(saveAbsPath,CCHECKER_PARSER_URL);
+			HttpStatus parserStatusCode = wrapper.getStatusCode();
+			if (!HttpStatus.OK.equals(parserStatusCode)) {
+				String errorMessage = "Error on parsing file: " + file.getOriginalFilename();
+				return buildErrorResponse(errorMessage, parserStatusCode);
+			}
+	
+			ALSData alsData = wrapper.getAlsData();
+			// check for fatal errors
+			CCCError cccError = alsData.getCccError();
+			List<ALSError> parserErrorList;
+			if (cccError != null) {
+				parserErrorList = cccError.getAlsErrors();
+				if ((parserErrorList != null) && (!parserErrorList.isEmpty())) {
+					ALSError alsError = parserErrorList.get(0);
+					if (FATAL_ERROR_STATUS.equals(alsError.getErrorSeverity())) {
+						String errorMessage = "Error in uploaded file: " + alsError.getErrorDesc();
+						return buildErrorResponse(errorMessage, HttpStatus.BAD_REQUEST);
+					}
 				}
 			}
+	
+			// set file name and owner
+			alsData.setFileName(orgFileName);
+			alsData.setReportOwner(reportOwner);
+			logger.debug("...after ALS parser before sending save alsData request. REPORT_OWNER: " + alsData.getReportOwner()
+					+ ", FILE_NAME: " + alsData.getFileName() + ", idseq: " + idseq);
+	
+			// save ALSData DB into in a container
+			 StringResponseWrapper saveResponse = serviceDb.submitPostRequestSaveAls(alsData, idseq, CCHECKER_DB_SERVICE_URL_CREATE);
+			 HttpStatus responseStatusCode = saveResponse.getStatusCode();
+			 if (! HttpStatus.OK.equals(responseStatusCode)) {
+				 String errorMessage = "Error on saving ALS file: " + orgFileName + ", owner: " + reportOwner + ", idseq: " + idseq;
+				 return buildErrorResponse(errorMessage, parserStatusCode);
+			 }
+			 else {
+				 logger.info("Saved ALS file: " + orgFileName + ", idseq: " + idseq + ", owner: " + reportOwner);
+			 }
+			//
+			// build result from parser data
+			FormsUiData formUiData = formService.collectFormsUiData(alsData);
+	
+			// set session cookie
+			logger.debug("set new Cookie value: " + idseq);
+			response.addCookie(cookie);
+	
+			// If decided always return json type, put Content-Type to annotations
+			// then
+			HttpHeaders httpHeaders = createHttpOkHeaders();
+			return new ResponseEntity<FormsUiData>(formUiData, httpHeaders, HttpStatus.OK);
 		}
-
-		// set file name and owner
-		alsData.setFileName(orgFileName);
-		alsData.setReportOwner(reportOwner);
-		logger.debug("...after ALS parser before sending save alsData request. REPORT_OWNER: " + alsData.getReportOwner()
-				+ ", FILE_NAME: " + alsData.getFileName() + ", idseq: " + idseq);
-
-		// save ALSData DB into in a container
-		 StringResponseWrapper saveResponse = serviceDb.submitPostRequestSaveAls(alsData, idseq, CCHECKER_DB_SERVICE_URL_CREATE);
-		 HttpStatus responseStatusCode = saveResponse.getStatusCode();
-		 if (! HttpStatus.OK.equals(responseStatusCode)) {
-			 String errorMessage = "Error on saving ALS file: " + orgFileName + ", owner: " + reportOwner + ", idseq: " + idseq;
-			 return buildErrorResponse(errorMessage, parserStatusCode);
-		 }
-		 else {
-			 logger.info("Saved ALS file: " + orgFileName + ", idseq: " + idseq + ", owner: " + reportOwner);
-		 }
-		//
-		// build result from parser data
-		FormsUiData formUiData = formService.collectFormsUiData(alsData);
-
-		// set session cookie
-		logger.debug("set new Cookie value: " + idseq);
-		response.addCookie(cookie);
-
-		// If decided always return json type, put Content-Type to annotations
-		// then
-		HttpHeaders httpHeaders = createHttpOkHeaders();
-		return new ResponseEntity<FormsUiData>(formUiData, httpHeaders, HttpStatus.OK);
+		catch (RestClientException re) {
+			 String errorMessage = "Unexpected error on file: " + orgFileName + ", owner: " + reportOwner + ", session: " + idseq + ". Details: " + re.getMessage();
+			 return buildErrorResponse(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 	/**
 	 * 
@@ -445,24 +452,30 @@ public class GatewayBootController {
 		HttpStatus errorCode =  HttpStatus.BAD_REQUEST;
 
 		//call Validator service
-		CCCReport cccReport = sendPostRequestValidator(formNames, sessionCookieValue, checkUOM, checkCRF, displayExceptions);
-		
-		if (cccReport == null) {
-			//We never expect validate request failure. It shall always send a report.
-			logger.error("sendPostRequestValidator error on " + sessionCookieValue);
-			return buildErrorResponse("Session data is not found based on: " + sessionCookieValue, HttpStatus.INTERNAL_SERVER_ERROR);
+		try {
+			CCCReport cccReport = sendPostRequestValidator(formNames, sessionCookieValue, checkUOM, checkCRF, displayExceptions);
+			
+			if (cccReport == null) {
+				//We never expect validate request failure. It shall always send a report.
+				logger.error("sendPostRequestValidator error on " + sessionCookieValue);
+				return buildErrorResponse("Session data is not found based on: " + sessionCookieValue, HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+			
+			StringResponseWrapper saveResponse = submitPostRequestSaveReportError(cccReport, sessionCookieValue);
+			HttpStatus statusCode = saveResponse.getStatusCode();
+			if (HttpStatus.OK.equals(statusCode)) {
+				HttpHeaders httpHeaders = createHttpOkHeaders();
+				return new ResponseEntity<CCCReport>(cccReport, httpHeaders, HttpStatus.OK);
+			}
+			else {
+				logger.error("submitPostRequestSaveReportError received statusCode: " + statusCode);
+				errorCode = statusCode;//This can be user error or server error
+				return buildErrorResponse("Unexpected error on validate for session: " + sessionCookieValue, errorCode);
+			}
 		}
-		
-		StringResponseWrapper saveResponse = submitPostRequestSaveReportError(cccReport, sessionCookieValue);
-		HttpStatus statusCode = saveResponse.getStatusCode();
-		if (HttpStatus.OK.equals(statusCode)) {
-			HttpHeaders httpHeaders = createHttpOkHeaders();
-			return new ResponseEntity<CCCReport>(cccReport, httpHeaders, HttpStatus.OK);
-		}
-		else {
-			logger.error("submitPostRequestSaveReportError received statusCode: " + statusCode);
-			errorCode = statusCode;//This can be user error or server error
-			return buildErrorResponse("Error on validation for : " + sessionCookieValue, errorCode);
+		catch (RestClientException re) {
+			 String errorMessage = "Unexpected error on validate for session: " + sessionCookieValue + ". Details: " + re.getMessage();
+			 return buildErrorResponse(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
@@ -499,19 +512,28 @@ public class GatewayBootController {
 				response.getOutputStream());
 		} 
 		else {
-			RestTemplate restTemplate = new RestTemplate();
-			String urlStr = String.format(URL_GEN_EXCEL_REPORT_ERROR_FORMAT, sessionCookieValue);
-			logger.debug("...retrieveData: " + urlStr);
-			response.setHeader("Content-Type", MS_EXCEL_MIME_TYPE);
-			response.setHeader("Content-Disposition", "attachment; filename=" + fileExcelReportPrefix + sessionCookieValue + EXCEL_FILE_EXT);
-			response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
-			response.setStatus(HttpServletResponse.SC_OK);
-
-			restTemplate.execute(urlStr, HttpMethod.GET, (ClientHttpRequest requestCallback) -> {
-			}, responseExtractor -> {
-				IOUtils.copy(responseExtractor.getBody(), response.getOutputStream());
-				return null;
-			});
+			try {
+				RestTemplate restTemplate = new RestTemplate();
+				String urlStr = String.format(URL_GEN_EXCEL_REPORT_ERROR_FORMAT, sessionCookieValue);
+				logger.debug("...retrieveData: " + urlStr);
+				response.setHeader("Content-Type", MS_EXCEL_MIME_TYPE);
+				response.setHeader("Content-Disposition", "attachment; filename=" + fileExcelReportPrefix + sessionCookieValue + EXCEL_FILE_EXT);
+				response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
+				response.setStatus(HttpServletResponse.SC_OK);
+	
+				restTemplate.execute(urlStr, HttpMethod.GET, (ClientHttpRequest requestCallback) -> {
+				}, responseExtractor -> {
+					IOUtils.copy(responseExtractor.getBody(), response.getOutputStream());
+					return null;
+				});
+			}
+			catch (RestClientException re) {
+				response.setHeader("Content-Type", "text/plain");
+				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				//origin ?
+				String errorMessage = "Unexpected error on generate Excel: session: " + sessionCookieValue + ". Details: " + re.getMessage();
+				IOUtils.copy(new ByteArrayInputStream(errorMessage.getBytes()), response.getOutputStream());
+			}
 		}
 		response.flushBuffer();
 	}
@@ -581,20 +603,18 @@ public class GatewayBootController {
 
 	/**
 	 * 
-	 * @param errorMessage
-	 * @param httpStatus
+	 * @param errorMessage String not null
+	 * @param httpStatus HttpStatus not null
 	 * @return ResponseEntity
 	 */
 	protected static ResponseEntity<String> buildErrorResponse(String errorMessage, HttpStatus httpStatus) {
-		// TODO what context type shall be returned on an error - ? Now
-		// text/plain
+		// context type on an error text/plain
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.add("Content-Type", "text/plain");
 		// We have configured springframework CrossOrigin so we do not need this
-		// header
-		// assignAccessControlHeader(httpHeaders);
+		//assignAccessControlHeader(httpHeaders);
 		logger.error(errorMessage);
-		return new ResponseEntity<String>(errorMessage, httpHeaders, httpStatus);
+		return new ResponseEntity<String>(errorMessage + " with response status: " + httpStatus, httpHeaders, httpStatus);
 	}
 
 	/**
@@ -635,7 +655,7 @@ public class GatewayBootController {
 		return bis;
 	}
 	
-	protected void assignAccessControlHeader(HttpHeaders httpHeaders) {
+	protected static void assignAccessControlHeader(HttpHeaders httpHeaders) {
 		httpHeaders.setAccessControlAllowOrigin(ACCESS_CONTROL_ALLOW_ORIGIN);
 	}
 
