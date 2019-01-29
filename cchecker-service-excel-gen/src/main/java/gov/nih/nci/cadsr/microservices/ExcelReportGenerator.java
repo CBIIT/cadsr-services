@@ -215,6 +215,8 @@ public class ExcelReportGenerator {
 
 			// Print the top header labels in Bold - Report for, Rave Protocol
 			// Name, Number & Date
+			boolean isCheckStdCrfCdeChecked = cccReport.getIsCheckStdCrfCdeChecked() != null ? 
+					cccReport.getIsCheckStdCrfCdeChecked() : false;//this is to avoid NullPointerException
 			if (checkerReportOwnerLbl.equals(lblKey) || raveProtocolNameLbl.equals(lblKey)
 					|| raveProtocolNumLbl.equals(lblKey) || reportDateLbl.equals(lblKey)) {
 				cell.setCellValue((String) lblKey);
@@ -228,17 +230,17 @@ public class ExcelReportGenerator {
 				linkToSheet(cell, (String) lblKey, matching_nrds_cdes_tab_name);
 			} else if ((nciStdCondCongLbl.equals(lblKey) || nciStdCondErrorLbl.equals(lblKey)
 					|| nciStdCondQuestLbl.equals(lblKey) || nciStdCondWarnLbl.equals(lblKey))
-					&& cccReport.getIsCheckStdCrfCdeChecked()) {
+					&& isCheckStdCrfCdeChecked) {
 				// Link to the Standard CRF Conditional CDEs sheet (provided check CDE flag is checked)
 				linkToSheet(cell, (String) lblKey, stdCrfCondMiss_tab_name);
 			} else if ((nciStdOptCongLbl.equals(lblKey) || nciStdOptErrorLbl.equals(lblKey)
 					|| nciStdOptQuestLbl.equals(lblKey) || nciStdOptWarnLbl.equals(lblKey))
-					&& cccReport.getIsCheckStdCrfCdeChecked()) {
+					&& isCheckStdCrfCdeChecked) {
 				// Link to the Standard CRF Optional CDEs sheet (provided check CDE flag is checked)
 				linkToSheet(cell, (String) lblKey, stdCrfOptMiss_tab_name);
 			} else if ((nciStdManCongLbl.equals(lblKey) || nciStdManErrorLbl.equals(lblKey)
 					|| nciStdManQuestLbl.equals(lblKey) || nciStdManWarnLbl.equals(lblKey))
-					&& cccReport.getIsCheckStdCrfCdeChecked()) {
+					&& isCheckStdCrfCdeChecked) {
 				// Link to the Standard CRF Mandatory CDEs sheet (provided check CDE flag is checked)				
 				linkToSheet(cell, (String) lblKey, stdCrfManMiss_tab_name);
 			} else {
@@ -355,7 +357,9 @@ public class ExcelReportGenerator {
 		}
 		buildNrdsTab(workbook, cccReport.getNrdsCdeList());
 		buildMissingNrdsCdesTab(workbook, cccReport.getMissingNrdsCdeList());
-		if (cccReport.getIsCheckStdCrfCdeChecked()) {
+		boolean isCheckStdCrfCdeChecked = cccReport.getIsCheckStdCrfCdeChecked() != null ? 
+				cccReport.getIsCheckStdCrfCdeChecked() : false;//this is to avoid NullPointerException
+		if (isCheckStdCrfCdeChecked) {
 			buildStdCrfMissingTabs(workbook, cccReport.getMissingStandardCrfCdeList());
 		}
 		FileOutputStream outputStream = null;
