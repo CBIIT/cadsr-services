@@ -28,7 +28,7 @@ export class AlsUploadFormComponent implements OnInit {
   };
   
   // user clicked submit validate form fields are valid and upload //
-  submitForm(error_name, error_file) {
+  submitForm(error_name, error_file, event) {
     this.errorMessage = null;
     this.uploadProgress = 0;
     this.submitted = true; // set for form validation //
@@ -52,11 +52,11 @@ export class AlsUploadFormComponent implements OnInit {
       error => { 
         this.errorMessage = 'Cannot communicate with the server'
         this.uploadProgress = 0;
-        if (event.target['response']=='') {
+        if (error.error=='') {
           this.errorMessage = 'Cannot communicate with the server'
         }
         else {
-          this.errorMessage = event.target['response']; 
+          this.errorMessage = error.error;
         }
       },
       () => {
