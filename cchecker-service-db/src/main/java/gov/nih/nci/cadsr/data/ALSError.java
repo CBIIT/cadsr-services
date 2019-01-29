@@ -9,6 +9,7 @@ String errorDesc;
 String sheetName;
 int rowNumber;
 int colNumber;
+String colIdx;
 String formOid;
 String fieldOid;
 String dataDictionaryName;
@@ -69,6 +70,12 @@ public int getColNumber() {
 }
 public void setColNumber(int colNumber) {
 	this.colNumber = colNumber;
+}
+public String getColIdx() {
+	return colIdx;
+}
+public void setColIdx(String colIdx) {
+	this.colIdx = colIdx;
 }
 public String getCellValue() {
 	return cellValue;
