@@ -13,12 +13,14 @@ import { FormListsortPipe } from './form-listsort.pipe';
 import { DataTablesModule } from 'angular-datatables';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ReportFilterPipe } from './report-filter.pipe';
+import { ContactComponent } from './contact/contact.component';
 
 const APP_ROUTES: Routes = [
   // Default empty path
   { path: '', component: AlsUploadFormComponent },
   { path: 'forms', component: AlsFormListComponent },
-  { path: 'report', component: AlsReportComponent }
+  { path: 'report', component: AlsReportComponent },
+  { path: 'contact-us', component: ContactComponent }
 ];
 
 @NgModule({
@@ -30,7 +32,8 @@ const APP_ROUTES: Routes = [
     FormListsortPipe,
     NavigationComponent,
     ProgressBarComponent,
-    ReportFilterPipe
+    ReportFilterPipe,
+    ContactComponent
   ],
   imports: [
     BrowserModule,
