@@ -532,6 +532,7 @@ public class GatewayBootController {
 				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				//origin ?
 				String errorMessage = "Unexpected error on generate Excel: session: " + sessionCookieValue + ". Details: " + re.getMessage();
+				logger.error(errorMessage + ", exception: " + re.getClass().getName());
 				IOUtils.copy(new ByteArrayInputStream(errorMessage.getBytes()), response.getOutputStream());
 			}
 		}
