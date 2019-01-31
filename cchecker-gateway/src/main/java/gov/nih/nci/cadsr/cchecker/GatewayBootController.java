@@ -200,7 +200,13 @@ public class GatewayBootController {
 	 * @return ALSData
 	 */
 	protected String retrieveFeedValidate(String idseq) {
-		return retrieveData(idseq, URL_FEED_VALIDATE_STATUS_FORMAT, String.class);
+		try {
+			return retrieveData(idseq, URL_FEED_VALIDATE_STATUS_FORMAT, String.class);
+		}
+		catch (Exception e) {
+			logger.error("retrieveFeedValidate error: " + e) ;
+			return "0";//we do not want to send an exception on feed to UI
+		}
 	}
 	/**
 	 * 
