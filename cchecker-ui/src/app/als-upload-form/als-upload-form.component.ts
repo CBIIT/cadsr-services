@@ -52,7 +52,7 @@ export class AlsUploadFormComponent implements OnInit {
       error => { 
         this.errorMessage = 'Cannot communicate with the server'
         this.uploadProgress = 0;
-        if (error.error=='') {
+        if (error.error=='' || typeof(error.error)=='object') {
           this.errorMessage = 'Cannot communicate with the server'
         }
         else {
