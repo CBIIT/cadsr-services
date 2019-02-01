@@ -9,6 +9,9 @@ import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -63,6 +66,7 @@ public class GatewayBootControllerTest {
 
 	@Autowired
 	WebApplicationContext wContext;
+	
 	@Before
 	public void setup() {
 	}
@@ -118,21 +122,50 @@ public class GatewayBootControllerTest {
 		//assertEquals(response.getStatus(), HttpStatus.OK.value());
 
 	}
-	
+	@Test
+	public void parseServiceResponse() throws Exception {
+		//read the data
+		byte[] allBytes = loadFile("RAVE-ALS-10057-VS.xlsx");
+		
+		// Mock Request
+		MockMultipartFile excelFile = new MockMultipartFile("file", "RAVE-ALS-10057-VS.xlsx", 
+			GatewayBootController.MS_EXCEL_MIME_TYPE,
+			allBytes);
+		//FormsUiData formsUiData = loadJson("allForms.json");
+		ALSDataWrapper alsDataWrapper = new ALSDataWrapper();
+		alsDataWrapper.setStatusCode(HttpStatus.OK);
+		ALSData alsData = new ALSData();
+		ALSForm alsForm = createTestALSForm();
+		alsData.getForms().add(alsForm);
+		String formUiDataJsonExpected = createTestFormUiDataJson(alsData);
+		
+		alsDataWrapper.setAlsData(alsData);
+		StringResponseWrapper stringResponseWrapper = new StringResponseWrapper();
+		//TODO create response data
+		stringResponseWrapper.setStatusCode(HttpStatus.OK);
+		
+		given(this.serviceParser.submitPostRequestParser(Mockito.any(), Mockito.any())).willReturn(alsDataWrapper);
+		given(this.serviceDb.submitPostRequestSaveAls(Mockito.any(ALSData.class), Mockito.any(), Mockito.any())).willReturn(stringResponseWrapper);
+
+		this.mockMvc.perform(multipart("/parseservice").file(excelFile))
+			.andExpect(content().json(formUiDataJsonExpected)).andExpect(status().isOk());
+	}	
 	public static ALSForm createTestALSForm() {
 		ALSForm alsForm = new ALSForm();
 		alsForm.setDraftFormName("draftFormName 1");
 		alsForm.setFormOid("OID-1");
 		return alsForm;
 	}
-	
-	public byte[] createFileContent(byte[] data, String boundary, String contentType, String fileName) {
-		String start = "--" + boundary + "\r\n Content-Disposition: form-data; name=\"file\"; filename=\"" + fileName
-				+ "\"\r\n" + "Content-type: " + contentType + "\r\n\r\n";
-		;
-
-		String end = "\r\n--" + boundary + "--"; // correction suggested @butfly
-		return ArrayUtils.addAll(start.getBytes(), ArrayUtils.addAll(data, end.getBytes()));
+	/**
+	 * 
+	 * @param alsData not null, has one form
+	 * @return json string
+	 */
+	protected String createTestFormUiDataJson(ALSData alsData) {
+		String jsonStrFormat = "{\"formsList\":[{\"isValid\":true,\"errors\":[],"
+				+ "\"formName\":\"%s\",\"questionsCount\":0}],"
+				+ "\"checkUom\":null,\"checkStdCrfCde\":null,\"mustDisplayException\":null}";
+		return String.format(jsonStrFormat, alsData.getForms().get(0).getDraftFormName());
 	}
 	
 	/**
