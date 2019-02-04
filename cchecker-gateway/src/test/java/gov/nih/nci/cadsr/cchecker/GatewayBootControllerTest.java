@@ -3,13 +3,8 @@
  */
 package gov.nih.nci.cadsr.cchecker;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.CALLS_REAL_METHODS;
-import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -20,9 +15,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.apache.commons.lang3.ArrayUtils;
+import org.hamcrest.core.StringContains;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -33,12 +29,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.util.ResourceUtils;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -67,8 +64,17 @@ public class GatewayBootControllerTest {
 	@Autowired
 	WebApplicationContext wContext;
 	
+	private static final String UNEXPECTED_ERROR = "Unexpected error";
+	private static final String ERROR_ON_PARSING_FILE = "Error on parsing file";
+	
+	private static MockMultipartFile excelFile;
+	@BeforeClass
+	public static void setUpClass() throws IOException {
+		excelFile = buildMultipartFile("RAVE-ALS-10057-VS.xlsx");
+	}
 	@Before
 	public void setup() {
+		
 	}
 	@After
 	public void cleanup() {
@@ -93,13 +99,7 @@ public class GatewayBootControllerTest {
 	}
 	@Test
 	public void shouldSaveUploadedFile() throws Exception {
-		//read the data
-		byte[] allBytes = loadFile("RAVE-ALS-10057-VS.xlsx");
-		
-		// Mock Request
-		MockMultipartFile excelFile = new MockMultipartFile("file", "RAVE-ALS-10057-VS.xlsx", 
-			GatewayBootController.MS_EXCEL_MIME_TYPE,
-			allBytes);
+
 		//FormsUiData formsUiData = loadJson("allForms.json");
 		ALSDataWrapper alsDataWrapper = new ALSDataWrapper();
 		alsDataWrapper.setStatusCode(HttpStatus.OK);
@@ -124,13 +124,6 @@ public class GatewayBootControllerTest {
 	}
 	@Test
 	public void parseServiceResponse() throws Exception {
-		//read the data
-		byte[] allBytes = loadFile("RAVE-ALS-10057-VS.xlsx");
-		
-		// Mock Request
-		MockMultipartFile excelFile = new MockMultipartFile("file", "RAVE-ALS-10057-VS.xlsx", 
-			GatewayBootController.MS_EXCEL_MIME_TYPE,
-			allBytes);
 		//FormsUiData formsUiData = loadJson("allForms.json");
 		ALSDataWrapper alsDataWrapper = new ALSDataWrapper();
 		alsDataWrapper.setStatusCode(HttpStatus.OK);
@@ -148,8 +141,81 @@ public class GatewayBootControllerTest {
 		given(this.serviceDb.submitPostRequestSaveAls(Mockito.any(ALSData.class), Mockito.any(), Mockito.any())).willReturn(stringResponseWrapper);
 
 		this.mockMvc.perform(multipart("/parseservice").file(excelFile))
-			.andExpect(content().json(formUiDataJsonExpected)).andExpect(status().isOk());
-	}	
+			.andExpect(content().json(formUiDataJsonExpected))
+			.andExpect(MockMvcResultMatchers.jsonPath("$.formsList[0].formName").value(alsForm.getDraftFormName()))
+			.andExpect(status().isOk());
+	}
+	@Test
+	public void parseServiceResponseParserDown() throws Exception {			
+		given(this.serviceParser.submitPostRequestParser(Mockito.any(), Mockito.any())).willThrow(new RestClientException("Test Exception"));
+
+		this.mockMvc.perform(multipart("/parseservice").file(excelFile))
+			.andExpect(content().string(new StringContains(UNEXPECTED_ERROR)))
+			.andExpect(status().is5xxServerError());
+	}
+	@Test
+	public void parseServiceResponseDBDown() throws Exception {
+		ALSDataWrapper alsDataWrapper = new ALSDataWrapper();
+		alsDataWrapper.setStatusCode(HttpStatus.OK);
+		ALSData alsData = new ALSData();
+		ALSForm alsForm = createTestALSForm();
+		alsData.getForms().add(alsForm);
+		
+		alsDataWrapper.setAlsData(alsData);
+		StringResponseWrapper stringResponseWrapper = new StringResponseWrapper();
+
+		stringResponseWrapper.setStatusCode(HttpStatus.OK);
+		
+		given(this.serviceParser.submitPostRequestParser(Mockito.any(), Mockito.any())).willReturn(alsDataWrapper);
+
+		given(this.serviceDb.submitPostRequestSaveAls(Mockito.any(ALSData.class), Mockito.any(), Mockito.any())).willThrow(new RestClientException("Test Exception"));
+
+		this.mockMvc.perform(multipart("/parseservice").file(excelFile))
+			.andExpect(content().string(new StringContains(UNEXPECTED_ERROR)))
+			.andExpect(status().is5xxServerError());
+	}
+	@Test
+	public void parseServiceResponseParserError400() throws Exception {
+		ALSDataWrapper alsDataWrapper = new ALSDataWrapper();
+		alsDataWrapper.setStatusCode(HttpStatus.BAD_REQUEST);
+		
+		StringResponseWrapper stringResponseWrapper = new StringResponseWrapper();
+
+		stringResponseWrapper.setStatusCode(HttpStatus.OK);
+		
+		given(this.serviceParser.submitPostRequestParser(Mockito.any(), Mockito.any())).willReturn(alsDataWrapper);
+
+		this.mockMvc.perform(multipart("/parseservice").file(excelFile))
+			.andExpect(content().string(new StringContains(ERROR_ON_PARSING_FILE)))
+			.andExpect(status().is4xxClientError());
+	}
+	@Test
+	public void parseServiceResponseParserError503() throws Exception {
+		ALSDataWrapper alsDataWrapper = new ALSDataWrapper();
+		alsDataWrapper.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		
+		StringResponseWrapper stringResponseWrapper = new StringResponseWrapper();
+
+		stringResponseWrapper.setStatusCode(HttpStatus.OK);
+		
+		given(this.serviceParser.submitPostRequestParser(Mockito.any(), Mockito.any())).willReturn(alsDataWrapper);
+
+		this.mockMvc.perform(multipart("/parseservice").file(excelFile))
+			.andExpect(content().string(new StringContains(ERROR_ON_PARSING_FILE)))
+			.andExpect(status().isInternalServerError());
+	}
+	
+	private static MockMultipartFile buildMultipartFile(String fileName) throws IOException {
+		//read the data
+		byte[] allBytes = loadFile("RAVE-ALS-10057-VS.xlsx");
+		
+		// Mock Request
+		MockMultipartFile excelFile = new MockMultipartFile("file", "RAVE-ALS-10057-VS.xlsx", 
+			GatewayBootController.MS_EXCEL_MIME_TYPE,
+			allBytes);
+		return excelFile;
+	}
+	
 	public static ALSForm createTestALSForm() {
 		ALSForm alsForm = new ALSForm();
 		alsForm.setDraftFormName("draftFormName 1");
