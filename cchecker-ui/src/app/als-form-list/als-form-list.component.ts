@@ -53,7 +53,15 @@ export class AlsFormListComponent implements OnInit {
         },
         error => {
           this.formListService.setValidationStatus(false);
-          this.errorMessage = error;
+
+          this.errorMessage = 'Cannot communicate with the server'
+          if (error.error=='' || typeof(error.error)=='object') {
+            this.errorMessage = 'Cannot communicate with the server'
+          }
+          else {
+            this.errorMessage = error.error;
+          }
+
           this.validating = false;
         },
         () => {
@@ -79,10 +87,12 @@ export class AlsFormListComponent implements OnInit {
         }
       },
       error => {
-        console.log("ERROR")
+          this.validating = false;
+          this.formListService.setValidationStatus(false);
       },
       () => {
-        console.log("FINISHED")
+          this.validating = false;
+          this.formListService.setValidationStatus(false);
       }
     )
   };

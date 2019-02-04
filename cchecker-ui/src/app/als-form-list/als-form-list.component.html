@@ -7,7 +7,7 @@
 </div>
 
 <div class="alert alert-danger" role="alert" *ngIf="errorMessage">
-  {{errorMessage.message}}
+  {{errorMessage}}
 </div>
 
 <ng-container *ngIf="(formListData |  async)?.formsList.length">
