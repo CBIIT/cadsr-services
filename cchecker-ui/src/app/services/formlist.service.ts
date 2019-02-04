@@ -22,6 +22,12 @@ export class FormListService {
     return this.formListData.asObservable();
   };
 
+  // gets validation status //
+  getValidationStatus = () => {
+    const isValidating = this.getSessionDataItem('isValidating');
+    return isValidating;
+  };
+
   // gets checked items as observable //
   getCheckedItems = () => {
     if (!this.loadedFromFile) {
@@ -94,6 +100,9 @@ export class FormListService {
     this.setSessionDataItem('formListData',fld);
   };
 
+  // sets validation status //
+  setValidationStatus = (status) => {
+    this.setSessionDataItem('isValidating',status);
+  };
 
 }
-

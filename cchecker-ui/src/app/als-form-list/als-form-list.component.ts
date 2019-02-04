@@ -29,6 +29,10 @@ export class AlsFormListComponent implements OnInit {
     this.formListData = this.formListService.getFormListData(); // get form data as observable //
     this.validating = false;
     this.validItemsLength = Object.assign([],this.formListData.source['value']['formsList'].filter((r) => r.isValid ).map((e) => e.formName)).length; // get valid item value //
+    if (this.formListService.getValidationStatus()) {
+      this.validating = true;
+      this.getFeedService();
+    };
   };
 
   // check forms (validate) and go to report page //
@@ -42,38 +46,45 @@ export class AlsFormListComponent implements OnInit {
 
     // run check forms //
     this.checkFormsService = 
+      this.formListService.setValidationStatus(true);
       this.restService.checkForms(checkedItems,formListData).subscribe(
         data => {
           this.reportService.setReportData(data)
         },
         error => {
+          this.formListService.setValidationStatus(false);
           this.errorMessage = error;
           this.validating = false;
         },
         () => {
           this.validating = false;
+          this.formListService.setValidationStatus(false);
           this.router.navigateByUrl('/report')
         })
 
-    // runs feed progress service //
-    this.feedService = 
-      this.restService.validateFeedStatus().subscribe(
-        e => {
-          if (e.type === HttpEventType.DownloadProgress) {
-            let currentForm = e['partialText'].split('\n\n').filter(val => val!='' && val != 'data:').pop();
-            if (currentForm) {
-              this.formValidationStatus = currentForm.replace('data:','');
-            }
+        this.getFeedService();
+  };
 
+  // runs feed progress service //
+  getFeedService = () => {
+  this.feedService = 
+    this.restService.validateFeedStatus().subscribe(
+      e => {
+        if (e.type === HttpEventType.DownloadProgress) {
+          let currentForm = e['partialText'].split('\n\n').filter(val => val!='' && val != 'data:').pop();
+          if (currentForm) {
+            this.formValidationStatus = currentForm.replace('data:','');
           }
-        },
-        error => {
-          console.log("ERROR")
-        },
-        () => {
-          console.log("FINISHED")
+
         }
-      )           
+      },
+      error => {
+        console.log("ERROR")
+      },
+      () => {
+        console.log("FINISHED")
+      }
+    )
   };
 
   // gets current form for validation progress message //
@@ -101,5 +112,8 @@ export class AlsFormListComponent implements OnInit {
   setFormListOptionCheckbox = (event):void => this.formListService.setFormListOptionCheckbox(event);
 
   ngOnDestroy() {
+    if (this.feedService) { 
+      this.feedService.unsubscribe();
+    };
   }
 };
