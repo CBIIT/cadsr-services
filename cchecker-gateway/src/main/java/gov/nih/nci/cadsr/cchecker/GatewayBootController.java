@@ -858,7 +858,7 @@ public class GatewayBootController {
 				} 
 				catch (Exception e) {
 					logger.error("Error in feedvalidatestatus " + idseq + ", " + e);
-					e.printStackTrace();
+					//e.printStackTrace();
 					emitter.completeWithError(e);
 					return;
 				}
