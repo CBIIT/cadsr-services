@@ -24,6 +24,7 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
   statusMessage:String;
   tabChanges:Subscription;
   tabName:String;
+  isGenerating:Boolean;
 
   @ViewChild(NgbTabset)
     tabs: NgbTabset;
@@ -47,6 +48,8 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // generates excel file after button is clicked //
   generateExcel = () => {
+    this.isGenerating = true;
+    this.reportService.setExcelGenStatus(true);
     this.errorMessage = null;
     this.statusMessage = null;
     this.restService.generateExcel().subscribe(
@@ -58,10 +61,16 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
         this.statusMessage = `${filename} downloaded succesfully.`
       }, 
       error => {
+        this.isGenerating = false;
+        this.reportService.setExcelGenStatus(false);        
         this.errorMessage = 'Unexpected error, please contact Application Support (<a href="mailto:NCIAppSupport@nih.gov">NCIAppSupport@nih.gov</a>)';
         const reader: FileReader = new FileReader();  
         reader.readAsText(error.error)
         reader.onloadend = (error):void => this.errorMessage = reader.result;
+      },
+      () => {
+        this.isGenerating = false;
+        this.reportService.setExcelGenStatus(false);
       });
 
       
@@ -69,6 +78,9 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
   };
 
   ngOnInit() { 
+    // set generating status to true or false //
+    this.isGenerating = this.reportService.getExcelGenStatus();
+
     // get reportData //
     this.reportService.getReportData().subscribe(data=> this.reportData = data).unsubscribe();
 

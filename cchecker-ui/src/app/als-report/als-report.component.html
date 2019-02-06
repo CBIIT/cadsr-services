@@ -16,8 +16,11 @@
 <form #f="ngForm">
 
    <div>
+      <div *ngIf="isGenerating">
+         <app-progress-bar [statusMessage]="'Generating Excel Report'" [type]="'busy'" [percentage]="100"></app-progress-bar><br />
+      </div>      
       <span class="reportHeader">
-      <button class="btn btn-primary" (click)="generateExcel()" *ngIf="reportData['cccForms'].length">Generate Excel</button>
+      <button class="btn btn-primary" [disabled]="isGenerating" (click)="generateExcel()" *ngIf="reportData['cccForms'].length">Generate Excel</button>
       </span>
       <span class="reportHeader">
          <label for="raveFormOid">Rave Form</label>

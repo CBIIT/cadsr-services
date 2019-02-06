@@ -18,7 +18,13 @@ export class ReportService {
       };
     };
     return this.reportData.asObservable();
-  }
+  };
+
+  // gets status of excel generating //
+  getExcelGenStatus = () => {
+    const isGenerating = this.getSessionDataItem('isGenerating');
+    return isGenerating;
+  };
 
   // gets session data for report //
   getSessionDataItem = item => JSON.parse(sessionStorage.getItem(item));
@@ -31,6 +37,11 @@ export class ReportService {
     this.loadedFromButton = true;
     this.reportData.next(data);
     this.setSessionDataItem('reportData',data);
-  }
+  };
+
+  // sets excel generation status //
+  setExcelGenStatus = (isGenerating) => {
+    this.setSessionDataItem('isGenerating',isGenerating);
+  };
 }
 
