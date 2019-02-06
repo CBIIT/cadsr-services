@@ -341,7 +341,7 @@ public class AlsParser implements Parser {
 						field.getDataDictionaryName(), field.getUnitDictionaryName());
 			} else {
 				if ((!controlTypes.contains(controlType)) && (!controlType.isEmpty())) {
-					cccError = addParsingValidationMsg(cccError, controlType_str, fieldsSheetName, row.getRowNum() + 1,cell_fieldControlType, errorSeverity_error, err_msg_22,
+					cccError = addParsingValidationMsg(cccError, controlType, fieldsSheetName, row.getRowNum() + 1,cell_fieldControlType, errorSeverity_error, err_msg_22,
 							field.getFormOid(), field.getFieldOid(), field.getDataDictionaryName(), field.getUnitDictionaryName());
 				}
 			}
