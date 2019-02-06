@@ -49,12 +49,11 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
   // generates excel file after button is clicked //
   generateExcel = () => {
     this.isGenerating = true;
-    this.reportService.setExcelGenStatus(true);
     this.errorMessage = null;
     this.statusMessage = null;
+    var that = this;
     this.restService.generateExcel().subscribe(
       data => {
-     
         const filename = data.headers.get('Content-Disposition').replace('attachment; filename=','')
         var blob = new Blob([data.body], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
         saveAs(blob, filename);
@@ -62,15 +61,13 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
       }, 
       error => {
         this.isGenerating = false;
-        this.reportService.setExcelGenStatus(false);        
         this.errorMessage = 'Unexpected error, please contact Application Support (<a href="mailto:NCIAppSupport@nih.gov">NCIAppSupport@nih.gov</a>)';
         const reader: FileReader = new FileReader();  
         reader.readAsText(error.error)
         reader.onloadend = (error):void => this.errorMessage = reader.result;
       },
       () => {
-        this.isGenerating = false;
-        this.reportService.setExcelGenStatus(false);
+        that.isGenerating = false;
       });
 
       
@@ -78,9 +75,6 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
   };
 
   ngOnInit() { 
-    // set generating status to true or false //
-    this.isGenerating = this.reportService.getExcelGenStatus();
-
     // get reportData //
     this.reportService.getReportData().subscribe(data=> this.reportData = data).unsubscribe();
 
