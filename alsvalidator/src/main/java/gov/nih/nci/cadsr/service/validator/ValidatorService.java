@@ -545,12 +545,7 @@ public class ValidatorService {
 		display both Rave value and caDSR value and result  "WARNING" */
 		
 		if (vdMaxLength!=null) {
-			if (raveLength==null || raveLength.isEmpty()) {
-				question.setLengthCheckerResult(warningString);
-				question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg14, errorVal.toArray())));
-				if (question.getQuestionCongruencyStatus()==null)
-					question.setQuestionCongruencyStatus(congStatus_warn);
-			} else {
+			if (raveLength!=null) {
 				// Comparing RAVE length with the Value Domain's Max Length
 				if (!(Float.valueOf(computeRaveLength(raveLength)) > Float.valueOf(vdMaxLength))) {
 					question.setLengthCheckerResult(matchString);
@@ -560,6 +555,11 @@ public class ValidatorService {
 					if (question.getQuestionCongruencyStatus()==null)
 						question.setQuestionCongruencyStatus(congStatus_warn);
 				}
+			} else {
+				question.setLengthCheckerResult(warningString);
+				question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg14, errorVal.toArray())));
+				if (question.getQuestionCongruencyStatus()==null)
+					question.setQuestionCongruencyStatus(congStatus_warn);
 			}
 		} else {
 			question.setLengthCheckerResult(matchString);
