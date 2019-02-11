@@ -92,6 +92,8 @@ public class GatewayBootController {
 	
 	static final int timeBetweenFeeds = 2000;
 	static final int maxFeedRequests = 300;
+	static final String SESSION_NOT_VALID = "Session is not found or not valid: ";
+	static final String SESSION_DATA_NOT_FOUND = "Session data is not found based on: ";
 
 	{
 		loadProperties();
@@ -106,7 +108,10 @@ public class GatewayBootController {
 	@Autowired
 	private FormService formService;
 	
-	protected Cookie generateCookie() {
+	@Autowired
+	private ServiceValidator serviceValidator;
+	
+	protected static Cookie generateCookie() {
 		Cookie cookie = new Cookie(sessionCookieName, generateIdseq());
 		// cookie.setMaxAge(24 * 60 * 60); // (24 hours in seconds)
 		cookie.setMaxAge(-1); // negative value means that the cookie is not
@@ -120,7 +125,7 @@ public class GatewayBootController {
 	 * 
 	 * @return UUID for IDSEQ
 	 */
-	protected String generateIdseq() {
+	protected static String generateIdseq() {
 		return java.util.UUID.randomUUID().toString().toUpperCase();
 	}
 
@@ -226,27 +231,7 @@ public class GatewayBootController {
 		}
 		return data;
 	}
-	protected StringResponseWrapper submitPostRequestValidateForms(ALSData alsData, String idseq) {
-		return submitPostRequestCreateGeneric(alsData, idseq, CCHECKER_DB_SERVICE_URL_CREATE);
-	}
-	/**
-	 * 
-	 * @param alsData
-	 * @param idseq
-	 * @return StringResponseWrapper
-	 */
-	protected StringResponseWrapper submitPostRequestSaveAls(ALSData alsData, String idseq) {
-		return submitPostRequestCreateGeneric(alsData, idseq, CCHECKER_DB_SERVICE_URL_CREATE);
-	}
-	/**
-	 * 
-	 * @param CCCReport
-	 * @param idseq
-	 * @return StringResponseWrapper
-	 */
-	protected StringResponseWrapper submitPostRequestSaveReportError(CCCReport data, String idseq) {
-		return submitPostRequestCreateGeneric(data, idseq, CCHECKER_DB_SERVICE_URL_CREATE_REPORT_ERROR);
-	}
+
 	/**
 	 * This is a placeholder. Not implemented.
 	 * 
@@ -260,11 +245,12 @@ public class GatewayBootController {
 	}
 	/**
 	 * 
-	 * @param CCCReport
-	 * @param idseq
+	 * @param T data generic type not null
+	 * @param String idseq not null
+	 * @param String URL string not null
 	 * @return StringResponseWrapper
 	 */
-	protected <T>StringResponseWrapper submitPostRequestCreateGeneric(T data, String idseq, String createRequestUrlStr) {
+	protected static <T>StringResponseWrapper submitPostRequestCreateGeneric(T data, String idseq, String createRequestUrlStr) {
 		RestTemplate restTemplate = new RestTemplate();
 
 		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(createRequestUrlStr);
@@ -289,44 +275,6 @@ public class GatewayBootController {
 			logger.error(createRequestUrlStr + " sent an error: " + statusCode);
 		}
 		return wrapper;
-	}
-	
-	protected CCCReport sendPostRequestValidator(List<String> selForms, String idseq, boolean checkUom, boolean checkCrf, boolean displayExceptions) {
-		RestTemplate restTemplate = new RestTemplate();
-		ValidateParamWrapper wrapper = new ValidateParamWrapper();
-		wrapper.setSelForms(selForms);
-		wrapper.setCheckUom(checkUom);
-		wrapper.setCheckCrf(checkCrf);
-		wrapper.setDisplayExceptions(displayExceptions);
-		CCCReport cccReport = null;
-		
-		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(CCHECKER_VALIDATE_SERVICE_URL);
-		builder.queryParam(sessionCookieName, idseq);
-		
-		HttpEntity<ValidateParamWrapper> requestData = new HttpEntity<>(wrapper);
-		ResponseEntity<CCCReport> responseEntity = restTemplate.postForEntity(builder.build().encode().toUri(),
-				requestData, CCCReport.class);
-
-		HttpStatus statusCode = responseEntity.getStatusCode();
-
-		if (statusCode == HttpStatus.OK) {
-			logger.debug(CCHECKER_VALIDATE_SERVICE_URL + " OK result received on validate: " + idseq);
-			cccReport = (CCCReport) responseEntity.getBody();
-			String fileNameOrg = cccReport.getFileName();
-			logger.debug("Original file name of report: " + fileNameOrg);
-			if (StringUtils.isBlank(fileNameOrg)) {
-				cccReport.setFileName("Unknown");
-			}
-			List<CCCForm> forms = cccReport.getCccForms();
-			if ((forms == null) || (forms.isEmpty())) {
-				logger.error("!!!Red flag!!! forms are empty for report: "+ idseq);
-			}
-		} 
-		else {
-			logger.error("submitPostRequestValidator received an error on  an error: " + idseq + ", HTTP response code: " + statusCode);
-		}
-		
-		return cccReport;
 	}
 	
 	/**
@@ -447,7 +395,7 @@ public class GatewayBootController {
 		String sessionCookieValue = null;
 		
 		if ((cookie == null) || (StringUtils.isBlank((sessionCookieValue = cookie.getValue()))) || (!ParameterValidator.validateIdSeq(sessionCookieValue))) {
-			return buildErrorResponse("Session is not found or not valid: " + sessionCookieValue, HttpStatus.BAD_REQUEST);
+			return buildErrorResponse(SESSION_NOT_VALID + sessionCookieValue, HttpStatus.BAD_REQUEST);
 		}
 
 		logger.debug("checkService session cookie: " + sessionCookieValue);
@@ -459,15 +407,15 @@ public class GatewayBootController {
 
 		//call Validator service
 		try {
-			CCCReport cccReport = sendPostRequestValidator(formNames, sessionCookieValue, checkUOM, checkCRF, displayExceptions);
+			CCCReport cccReport = serviceValidator.sendPostRequestValidator(formNames, sessionCookieValue, checkUOM, checkCRF, displayExceptions);
 			
 			if (cccReport == null) {
 				//We never expect validate request failure. It shall always send a report.
 				logger.error("sendPostRequestValidator error on " + sessionCookieValue);
-				return buildErrorResponse("Session data is not found based on: " + sessionCookieValue, HttpStatus.INTERNAL_SERVER_ERROR);
+				return buildErrorResponse(SESSION_DATA_NOT_FOUND + sessionCookieValue, HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 			
-			StringResponseWrapper saveResponse = submitPostRequestSaveReportError(cccReport, sessionCookieValue);
+			StringResponseWrapper saveResponse = serviceDb.submitPostRequestSaveReportError(cccReport, sessionCookieValue, CCHECKER_DB_SERVICE_URL_CREATE_REPORT_ERROR);
 			HttpStatus statusCode = saveResponse.getStatusCode();
 			if (HttpStatus.OK.equals(statusCode)) {
 				HttpHeaders httpHeaders = createHttpOkHeaders();

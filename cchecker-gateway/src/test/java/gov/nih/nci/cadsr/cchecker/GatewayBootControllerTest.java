@@ -4,7 +4,9 @@
 package gov.nih.nci.cadsr.cchecker;
 
 import static org.mockito.BDDMockito.given;
+import org.mockito.ArgumentMatchers;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -15,6 +17,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import javax.servlet.http.Cookie;
+
+import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
 import org.junit.After;
 import org.junit.Before;
@@ -33,6 +38,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.client.RestClientException;
@@ -44,6 +50,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.ALSForm;
+import gov.nih.nci.cadsr.data.CCCReport;
 import gov.nih.nci.cadsr.data.FormsUiData;
 
 //FIXME add more tests
@@ -60,7 +67,9 @@ public class GatewayBootControllerTest {
 	ServiceParser serviceParser;
 	@MockBean
 	ServiceDb serviceDb;
-
+	@MockBean
+	ServiceValidator serviceValidator;
+	
 	@Autowired
 	WebApplicationContext wContext;
 	
@@ -72,9 +81,12 @@ public class GatewayBootControllerTest {
 	public static void setUpClass() throws IOException {
 		excelFile = buildMultipartFile("RAVE-ALS-10057-VS.xlsx");
 	}
+
+	private static Cookie cookie = GatewayBootController.generateCookie();
+	
 	@Before
 	public void setup() {
-		
+
 	}
 	@After
 	public void cleanup() {
@@ -233,7 +245,6 @@ public class GatewayBootControllerTest {
 				+ "\"checkUom\":null,\"checkStdCrfCde\":null,\"mustDisplayException\":null}";
 		return String.format(jsonStrFormat, alsData.getForms().get(0).getDraftFormName());
 	}
-	
 	/**
 	 * Load file from classpath.
 	 * 
@@ -262,7 +273,73 @@ public class GatewayBootControllerTest {
 		FormsUiData alsFormList = mapper.readValue(file, FormsUiData.class);
 		return alsFormList;
 	}
-
+	
+	@Test
+	public void validateServiceResponseValidatorDown() throws Exception {
+		given(this.serviceValidator.sendPostRequestValidator(Mockito.any(), Mockito.any(), Mockito.eq(false), Mockito.eq(false), Mockito.eq(false))).willThrow(new RestClientException("Test Exception"));
+		this.mockMvc.perform(post("/checkservice").contentType("application/json")
+				.content(createFormNameList())
+				.cookie(cookie))
+			.andExpect(content().string(new StringContains(UNEXPECTED_ERROR)))
+			.andExpect(status().is5xxServerError());
+	}	
+	@Test
+	public void validateServiceResponseNoCookie() throws Exception {
+		given(this.serviceValidator.sendPostRequestValidator(Mockito.any(), Mockito.any(), Mockito.eq(false), Mockito.eq(false), Mockito.eq(false))).willThrow(new RestClientException("Test Exception"));
+		this.mockMvc.perform(post("/checkservice").contentType("application/json")
+				.content(createFormNameList())
+				)
+			.andExpect(content().string(new StringContains(GatewayBootController.SESSION_NOT_VALID)))
+			.andExpect(status().is4xxClientError());
+	}
+	@Test
+	public void validateServiceResponseNullFromValidator() throws Exception {
+		given(this.serviceValidator.sendPostRequestValidator(Mockito.any(), Mockito.any(), Mockito.eq(false), Mockito.eq(false), Mockito.eq(false))).willReturn(null);
+		Cookie cookie = GatewayBootController.generateCookie();
+		System.out.println("cookie: " + cookie);
+		this.mockMvc.perform(post("/checkservice").contentType("application/json")
+				.content(createFormNameList())
+				.cookie(cookie))
+			.andExpect(content().string(new StringContains(GatewayBootController.SESSION_DATA_NOT_FOUND)))
+			.andExpect(status().is5xxServerError());
+	}
+	@Test
+	public void validateServiceResponseOKFromValidator() throws Exception {
+		StringResponseWrapper stringResponseWrapper = new StringResponseWrapper();
+		stringResponseWrapper.setStatusCode(HttpStatus.OK);
+		CCCReport cccReport = createTestCCCReport("testOwner", "testProtocol");
+		//DB returns OK
+		given(this.serviceDb.submitPostRequestSaveReportError(Mockito.any(CCCReport.class), Mockito.any(), Mockito.any())).willReturn(stringResponseWrapper);
+		given(this.serviceValidator.sendPostRequestValidator(Mockito.any(), Mockito.any(), Mockito.eq(false), Mockito.eq(false), Mockito.eq(false))).willReturn(cccReport);
+		//TODO use jsonPath instead of string
+		ResultMatcher msg = MockMvcResultMatchers.content().string(cccReportExampleJson());
+		this.mockMvc.perform(post("/checkservice").contentType("application/json")
+				.content(createFormNameList())
+				.cookie(cookie))
+			.andExpect(msg)
+//			.andExpect(msg2)
+			.andExpect(status().isOk());
+	}
+	protected String createFormNameList() {
+		return "[\"BCH\",\"BCR\"]";
+	}
+	protected CCCReport createTestCCCReport(String reportOwner, String raveProtocolName) {
+		CCCReport cccReport = new CCCReport();
+		cccReport.setReportOwner(reportOwner);
+		cccReport.setRaveProtocolName(raveProtocolName);
+		return cccReport;
+	}
+	protected String cccReportExampleJson() {
+		return "{\"reportOwner\":\"testOwner\",\"reportDate\":null,\"fileName\":null,\"raveProtocolName\":\"testProtocol\","
+				+ "\"raveProtocolNumber\":null,\"totalFormsCount\":0,\"totalFormsCong\":0,\"countQuestionsChecked\":0,"
+				+ "\"countCongruentQuestions\":0,\"countQuestionsWithWarnings\":0,\"countQuestionsWithErrors\":0,"
+				+ "\"countQuestionsWithoutCde\":0,\"countManCrfCongruent\":0,\"countManCrfMissing\":0,\"countManCrfwWithWarnings\":0,"
+				+ "\"countManCrfWithErrors\":0,\"countOptCrfCongruent\":0,\"countOptCrfMissing\":0,\"countOptCrfwWithWarnings\":0,"
+				+ "\"countOptCrfWithErrors\":0,\"countCondCrfCongruent\":0,\"countCondCrfMissing\":0,\"countCondCrfwWithWarnings\":0,"
+				+ "\"countCondCrfWithErrors\":0,\"countNrdsCongruent\":0,\"countNrdsMissing\":0,\"countNrdsWithWarnings\":0,"
+				+ "\"countNrdsWithErrors\":0,\"cccForms\":[],\"nrdsCdeList\":[],\"missingNrdsCdeList\":[],\"missingStandardCrfCdeList\":[],"
+				+ "\"isCheckStdCrfCdeChecked\":null,\"cccError\":{\"alsErrors\":[],\"raveProtocolName\":null,\"raveProtocolNumber\":null}}";
+	}
 	// inner class, generic extension filter
 	public class GenericExtFilter implements FilenameFilter {
 
