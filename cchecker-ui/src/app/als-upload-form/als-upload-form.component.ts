@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { RestService } from '../services/rest.service';
 import { HttpEventType }  from '@angular/common/http';
 import { FormListService } from '../services/formlist.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-als-upload-form',
@@ -16,6 +17,7 @@ export class AlsUploadFormComponent implements OnInit {
   uploadProgress:Number=0;
   alsFile:FormData;
   name:String;
+  isValidating:Boolean;
 
   constructor(private router:Router, private restService:RestService, private formListService:FormListService) { 
   }
@@ -65,6 +67,11 @@ export class AlsUploadFormComponent implements OnInit {
   };
 
   ngOnInit() {  
+    this.isValidating = false;
+    if (this.formListService.getValidationStatus()) {
+      this.isValidating = true;
+    };
+    console.log(this.isValidating)
   }
 
 }
