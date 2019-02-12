@@ -336,17 +336,6 @@ public class AlsParser implements Parser {
 			field.setDataFormat(row.getCell(cell_fieldDataFormat) != null ? dataFormatter.formatCellValue(row.getCell(cell_fieldDataFormat)) : null);
 			String controlType = row.getCell(cell_fieldControlType) != null ? dataFormatter.formatCellValue(row.getCell(cell_fieldControlType)) : null;
 			field.setControlType(controlType);
-			if (field.getControlType() == null) {
-				cccError = addParsingValidationMsg(cccError, controlType_str, fieldsSheetName, row.getRowNum() + 1,
-						cell_fieldControlType, errorSeverity_error, err_msg_empty,
-						field.getFormOid(), field.getFieldOid(), 
-						field.getDataDictionaryName(), field.getUnitDictionaryName());
-			} else {
-				if (!controlTypes.contains(controlType)) {
-					cccError = addParsingValidationMsg(cccError, controlType, fieldsSheetName, row.getRowNum() + 1,cell_fieldControlType, errorSeverity_error, err_msg_22,
-							field.getFormOid(), field.getFieldOid(), field.getDataDictionaryName(), field.getUnitDictionaryName());
-				}
-			}
 			field.setPreText(row.getCell(cell_fieldPreText) != null ? stripHtml(dataFormatter.formatCellValue((row.getCell(cell_fieldPreText)))) : null);
 			field.setFixedUnit(row.getCell(cell_fieldFixedUnit) != null ? dataFormatter.formatCellValue(row.getCell(cell_fieldFixedUnit)) : null);
 			for (ALSForm form : alsData.getForms()) {
