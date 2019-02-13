@@ -471,7 +471,10 @@ public class ExcelReportGenerator {
 		formFields.put(cdeUomLbl, question.getCdeUOM());
 		formFields.put(raveLengthLbl, question.getRaveLength());
 		formFields.put(lengthCheckerResultLbl, question.getLengthCheckerResult());
-		formFields.put(cdeMaxLengthLbl, String.valueOf(question.getCdeMaxLength()));
+		if (question.getCdeMaxLength()!=null)
+			formFields.put(cdeMaxLengthLbl, (question.getCdeMaxLength()).toString());
+		else 
+			formFields.put(cdeMaxLengthLbl, "");
 		formFields.put(raveDisplayFormatLbl, question.getRaveDisplayFormat());
 		formFields.put(formatCheckerResultLbl, question.getFormatCheckerResult());
 		formFields.put(cdeDisplayFormatLbl, question.getCdeDisplayFormat());

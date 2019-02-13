@@ -36,7 +36,7 @@ String uomCheckerResult;
 String cdeUOM;
 String raveLength;
 String lengthCheckerResult;
-int cdeMaxLength;
+Integer cdeMaxLength = null;
 String raveDisplayFormat;
 String formatCheckerResult;	
 String cdeDisplayFormat;
@@ -204,10 +204,10 @@ public String getLengthCheckerResult() {
 public void setLengthCheckerResult(String lengthCheckerResult) {
 	this.lengthCheckerResult = lengthCheckerResult;
 }
-public int getCdeMaxLength() {
+public Integer getCdeMaxLength() {
 	return cdeMaxLength;
 }
-public void setCdeMaxLength(int cdeMaxLength) {
+public void setCdeMaxLength(Integer cdeMaxLength) {
 	this.cdeMaxLength = cdeMaxLength;
 }
 public String getRaveDisplayFormat() {
