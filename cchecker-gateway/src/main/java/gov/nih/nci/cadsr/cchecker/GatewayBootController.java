@@ -8,6 +8,7 @@ import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -53,10 +54,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.ALSError;
 import gov.nih.nci.cadsr.data.CCCError;
-import gov.nih.nci.cadsr.data.CCCForm;
 import gov.nih.nci.cadsr.data.CCCReport;
 import gov.nih.nci.cadsr.data.FormsUiData;
-import gov.nih.nci.cadsr.data.ValidateParamWrapper;
 
 @Controller
 //@RestController
@@ -79,7 +78,7 @@ public class GatewayBootController {
 	private static String URL_GEN_EXCEL_REPORT_ERROR_FORMAT;
 	private static String URL_FEED_VALIDATE_STATUS_FORMAT;
 	public static final String MS_EXCEL_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-
+	public static final String TEXT_PLAIN_MIME_TYPE = "text/plain";
 	
 	static String UPLOADED_FOLDER;
 	static String ACCESS_CONTROL_ALLOW_ORIGIN;
@@ -94,6 +93,8 @@ public class GatewayBootController {
 	static final int maxFeedRequests = 300;
 	static final String SESSION_NOT_VALID = "Session is not found or not valid: ";
 	static final String SESSION_DATA_NOT_FOUND = "Session data is not found based on: ";
+	static final String VALIDATE_SERVICE_URL_STR = "validateservice";
+	static final String RETRIEVE_ERROR_REPORT_URL_STR = "retrievereporterror";
 
 	{
 		loadProperties();
@@ -432,6 +433,70 @@ public class GatewayBootController {
 			 return buildErrorResponse(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+	/**
+	 * 
+	 * @param request
+	 * @param response
+	 * @param checkUOM
+	 * @param checkCRF
+	 * @param displayExceptions
+	 * @param requestEntity not null and not empty
+	 * @return ResponseEntity
+	 */
+	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
+	@PostMapping("/validateservice")
+	public ResponseEntity<?> validateService(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam(name = "checkUOM", required = false, defaultValue = "false") boolean checkUOM,
+			@RequestParam(name = "checkCRF", required = false, defaultValue = "false") boolean checkCRF,
+			@RequestParam(name = "displayExceptions", required = false, defaultValue = "false") boolean displayExceptions,
+			RequestEntity<List<String>> requestEntity) {
+		//logger.debug("request received validateService");
+		// check for session cookie
+		Cookie cookie = retrieveCookie(request);
+		String sessionCookieValue = null;
+
+		if ((cookie == null) || (StringUtils.isBlank((sessionCookieValue = cookie.getValue()))) || (!ParameterValidator.validateIdSeq(sessionCookieValue))) {
+			return buildErrorResponse(SESSION_NOT_VALID + sessionCookieValue, HttpStatus.BAD_REQUEST);
+		}
+
+		logger.debug("validateService session cookie: " + sessionCookieValue);
+		
+		List<String> formNames = requestEntity.getBody();
+		logger.debug("Selected forms received: " + formNames);
+
+		HttpStatus errorCode =  HttpStatus.BAD_REQUEST;
+
+		//call Validator service
+		try {
+			CCCReport cccReport = serviceValidator.sendPostRequestValidator(formNames, sessionCookieValue, checkUOM, checkCRF, displayExceptions);
+			
+			if (cccReport == null) {
+				//We never expect validate request failure. It shall always send a report.
+				logger.error("sendPostRequestValidator error on " + sessionCookieValue);
+				return buildErrorResponse(SESSION_DATA_NOT_FOUND + sessionCookieValue, HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+			
+			StringResponseWrapper saveResponse = serviceDb.submitPostRequestSaveReportError(cccReport, sessionCookieValue, CCHECKER_DB_SERVICE_URL_CREATE_REPORT_ERROR);
+			HttpStatus statusCode = saveResponse.getStatusCode();
+			if (HttpStatus.OK.equals(statusCode)) {
+				URI url = requestEntity.getUrl();
+				String path = String.format("%s://%s:%d%s",url.getScheme(),  url.getHost(), url.getPort(), url.getPath());
+				String location = path.replace(VALIDATE_SERVICE_URL_STR, RETRIEVE_ERROR_REPORT_URL_STR) + '/'+ sessionCookieValue;
+				//logger.debug("Report error Location header value: " + location);	
+				HttpHeaders httpHeaders = createHttpValidateHeaders(TEXT_PLAIN_MIME_TYPE, location);
+				return new ResponseEntity<String>(location, httpHeaders, HttpStatus.CREATED);
+			}
+			else {
+				logger.error("submitPostRequestSaveReportError received statusCode: " + statusCode);
+				errorCode = statusCode;//This can be user error or server error
+				return buildErrorResponse("Unexpected error on validate for session: " + sessionCookieValue, errorCode);
+			}
+		}
+		catch (RestClientException re) {
+			 String errorMessage = "Unexpected error on validate for session: " + sessionCookieValue + ". Details: " + re.getMessage();
+			 return buildErrorResponse(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 	
 	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
 	@GetMapping("/retrievereporterror/{idseq}")
@@ -460,7 +525,7 @@ public class GatewayBootController {
 		Cookie cookie = retrieveCookie(request);
 		String sessionCookieValue = null;
 		if ((cookie == null) || (StringUtils.isBlank((sessionCookieValue = cookie.getValue()))) || (!ParameterValidator.validateIdSeq(sessionCookieValue))) {
-			response.setHeader("Content-Type", "text/plain");
+			response.setHeader("Content-Type", TEXT_PLAIN_MIME_TYPE);
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			IOUtils.copy(new ByteArrayInputStream(("Session Cookie is not found or not valid: " + sessionCookieValue).getBytes()),
 				response.getOutputStream());
@@ -482,7 +547,7 @@ public class GatewayBootController {
 				});
 			}
 			catch (RestClientException re) {
-				response.setHeader("Content-Type", "text/plain");
+				response.setHeader("Content-Type", TEXT_PLAIN_MIME_TYPE);
 				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				//origin ?
 				String errorMessage = "Unexpected error on generate Excel: session: " + sessionCookieValue + ". Details: " + re.getMessage();
@@ -498,7 +563,7 @@ public class GatewayBootController {
 	public void retrieveExcelReportError(HttpServletRequest request, HttpServletResponse response, 
 			@PathVariable("idseq") String idseq) throws Exception {
 		if  (!ParameterValidator.validateIdSeq(idseq)) {
-			response.setHeader("Content-Type", "text/plain");
+			response.setHeader("Content-Type", TEXT_PLAIN_MIME_TYPE);
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			IOUtils.copy(new ByteArrayInputStream(("Report ID is not valid: " + idseq + '\n').getBytes()),
 				response.getOutputStream());
@@ -515,7 +580,7 @@ public class GatewayBootController {
 				IOUtils.copy(openFileAsInputStream(filePath), response.getOutputStream());
 			}
 			else {
-				response.setHeader("Content-Type", "text/plain");
+				response.setHeader("Content-Type", TEXT_PLAIN_MIME_TYPE);
 				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 				IOUtils.copy(new ByteArrayInputStream(("Report with ID is not found: " + idseq + '\n').getBytes()),
 					response.getOutputStream());
@@ -565,7 +630,7 @@ public class GatewayBootController {
 	protected static ResponseEntity<String> buildErrorResponse(String errorMessage, HttpStatus httpStatus) {
 		// context type on an error text/plain
 		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.add("Content-Type", "text/plain");
+		httpHeaders.add("Content-Type", TEXT_PLAIN_MIME_TYPE);
 		// We have configured springframework CrossOrigin so we do not need this
 		//assignAccessControlHeader(httpHeaders);
 		logger.error(errorMessage);
@@ -622,7 +687,15 @@ public class GatewayBootController {
 		// httpHeaders.setAccessControlAllowOrigin(ACCESS_CONTROL_ALLOW_ORIGIN);
 		return httpHeaders;
 	}
-
+	protected HttpHeaders createHttpValidateHeaders(String contextTypeSting, String locationHeaderString) {
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.add("Content-Type", contextTypeSting);
+		httpHeaders.add("Location", locationHeaderString);
+		// We have configured springframework CrossOrigin so we do not need this
+		// header
+		// httpHeaders.setAccessControlAllowOrigin(ACCESS_CONTROL_ALLOW_ORIGIN);
+		return httpHeaders;
+	}
 	/**
 	 * The properties are taken from the boot service.
 	 */

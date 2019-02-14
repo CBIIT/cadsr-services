@@ -317,9 +317,41 @@ public class GatewayBootControllerTest {
 				.content(createFormNameList())
 				.cookie(cookie))
 			.andExpect(msg)
-//			.andExpect(msg2)
 			.andExpect(status().isOk());
 	}
+	@Test
+	public void validateServiceDBRestException() throws Exception {
+		StringResponseWrapper stringResponseWrapper = new StringResponseWrapper();
+		stringResponseWrapper.setStatusCode(HttpStatus.OK);
+		CCCReport cccReport = createTestCCCReport("testOwner", "testProtocol");
+		//DB returns OK
+		given(this.serviceDb.submitPostRequestSaveReportError(Mockito.any(CCCReport.class), Mockito.any(), Mockito.any())).willThrow(new RestClientException("Test DB Exception"));
+		given(this.serviceValidator.sendPostRequestValidator(Mockito.any(), Mockito.any(), Mockito.eq(false), Mockito.eq(false), Mockito.eq(false))).willReturn(cccReport);
+		//TODO use jsonPath instead of string
+		ResultMatcher msg = MockMvcResultMatchers.content().string(cccReportExampleJson());
+		this.mockMvc.perform(post("/checkservice").contentType("application/json")
+				.content(createFormNameList())
+				.cookie(cookie))
+		.andExpect(content().string(new StringContains(UNEXPECTED_ERROR)))
+		.andExpect(status().is5xxServerError());
+	}
+	@Test
+	public void validateServiceDBError() throws Exception {
+		StringResponseWrapper stringResponseWrapper = new StringResponseWrapper();
+		stringResponseWrapper.setStatusCode(HttpStatus.OK);
+		CCCReport cccReport = createTestCCCReport("testOwner", "testProtocol");
+		//DB returns OK
+		given(this.serviceDb.submitPostRequestSaveReportError(Mockito.any(CCCReport.class), Mockito.any(), Mockito.any())).willThrow(new RestClientException("Test DB Exception"));
+		given(this.serviceValidator.sendPostRequestValidator(Mockito.any(), Mockito.any(), Mockito.eq(false), Mockito.eq(false), Mockito.eq(false))).willReturn(cccReport);
+		//TODO use jsonPath instead of string
+		ResultMatcher msg = MockMvcResultMatchers.content().string(cccReportExampleJson());
+		this.mockMvc.perform(post("/checkservice").contentType("application/json")
+				.content(createFormNameList())
+				.cookie(cookie))
+		.andExpect(content().string(new StringContains(UNEXPECTED_ERROR)))
+		.andExpect(status().is5xxServerError());
+	}
+	
 	protected String createFormNameList() {
 		return "[\"BCH\",\"BCR\"]";
 	}

@@ -46,6 +46,15 @@ Other request parameters which are all "false" by default:
 checkUOM=true/false
 checkCRF=true/false
 displayExceptions=true/false
+
+Service "/gateway/validateservice" works the same as "checkservice", but returns HTTP response code 201 (Created) with "Location" header to the report, 
+and does not send the report itself.
+URI in Location header is to call 'retrievereporterror' service (below).
+Example:
+curl -v --cookie "_cchecker=45635A0C-6B3D-4BFB-ADA4-FC28DC557B2E" -X POST \
+-H "Content-Type: application/json" --data "@/local/content/cchecker/formnamelist.json" http://localhost:8080/gateway/validateservice
+Location header:
+http://localhost:8080/gateway/retrievereporterror/45635A0C-6B3D-4BFB-ADA4-FC28DC557B2E
 ********
 The next call shall open Save as dialog for a report previously generated:
 curl -v --cookie "_cchecker=0BCAEE78-9916-4ADA-B7CD-CE5854AFDD82" http://localhost:8080/gateway/genexcelreporterror
