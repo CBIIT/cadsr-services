@@ -71,7 +71,6 @@ export class AlsUploadFormComponent implements OnInit {
     if (this.formListService.getValidationStatus()) {
       this.isValidating = true;
     };
-    console.log(this.isValidating)
   }
 
 }

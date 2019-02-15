@@ -23,14 +23,25 @@ export class RestService {
   }
   );
 
+  // gets report data from location //
+  getReportFromLocation = (location) => {
+    return this.http.get(location,
+    {
+      withCredentials:true
+    });
+  };
+
   // validation service //
   checkForms(checkedItems,formListData){
     const checkUom = formListData['checkUom'] ? 'true':'false';
     const checkCRF = formListData['checkStdCrfCde'] ? 'true':'false';
     const displayExceptions = formListData['mustDisplayException'] ? 'true':'false';
-    return this.http.post(`${this.REST_API}/gateway/checkservice?checkCRF=${checkCRF}`,checkedItems,
+    // return this.http.post(`${this.REST_API}/gateway/checkservice?checkCRF=${checkCRF}`,checkedItems,
+    return this.http.post(`${this.REST_API}/gateway/validateservice?checkCRF=${checkCRF}`,checkedItems,
     {
-      withCredentials:true
+      withCredentials:true,
+      responseType: 'text'
+
     })
   } ; 
 

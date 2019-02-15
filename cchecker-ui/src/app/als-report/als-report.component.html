@@ -1,7 +1,7 @@
 <h2>
    ALS Report
 </h2>
-<div class="alert alert-danger" role="alert" *ngIf="!reportData['cccForms'].length">
+<div class="alert alert-danger" role="alert" *ngIf="loaded && !reportData.cccForms.length">
    Please select forms and try again.
 </div>
 
@@ -12,7 +12,6 @@
    {{statusMessage}}
 </div>
 
-
 <form #f="ngForm">
 
    <div>
@@ -22,7 +21,7 @@
       <span class="reportHeader">
       <button class="btn btn-primary" [disabled]="isGenerating" (click)="generateExcel()" *ngIf="reportData['cccForms'].length">Generate Excel</button>
       </span>
-      <span class="reportHeader">
+      <span class="reportHeader" [hidden]="!reportData.cccForms.length">
          <label for="raveFormOid">Rave Form</label>
          <select name="raveForm" id="raveFormOid" ngModel (change)="changeForm(f.value.raveForm,0)"  #localRaveOid>
          <option value="" disabled>Select a form</option>
@@ -33,10 +32,10 @@
       </span>
    </div>
    <br />
-   <ngb-tabset type="pills" ([ngModel])="tabs" #tabs *ngIf="reportData['cccForms'].length">
-   <ngb-tab title="Summary">
+   <ngb-tabset type="pills" ([ngModel])="tabs" #tabs>
+   <ngb-tab title="Summary" *ngIf="reportData.cccForms.length">
       <ng-template ngbTabContent>
-         <table datatable [dtOptions]="dtSummaryOptions" class="display compact" *ngIf="reportData as r">
+         <table datatable [dtOptions]="dtSummaryOptions" class="display compact" [hidden]="!reportData.cccForms.length" *ngIf="reportData as r">
          <thead>
             <tr>
                <th>CDE Congruency Checker Report for {{r.reportOwner}}</th>
@@ -149,10 +148,10 @@
          </tbody>
          </table>
          <br />
-        <div class="tableHeader">
+        <div class="tableHeader" [hidden]="!reportData.cccForms.length">
             Report Summary - Click on Form Name to expand results
         </div>
-        <table datatable [dtOptions]="dtSummaryOptions" class="display compact" *ngIf="reportData as r">
+        <table datatable [dtOptions]="dtSummaryOptions" class="display compact" *ngIf="reportData as r" [hidden]="!reportData.cccForms.length">
             <thead>
                 <tr>
                     <th>Form</th>
@@ -168,7 +167,7 @@
         </table>  
       </ng-template>
    </ngb-tab>
-   <ngb-tab>
+   <ngb-tab *ngIf="reportData.cccForms.length">
        <ng-template ngbTabTitle>NRDS CDEs in ALS</ng-template>
        <ng-template ngbTabContent>
          <div class="tableHeader">NRDS CDEs included in Protocol Forms with Warnings or Errors</div>
@@ -188,7 +187,7 @@
         </table>        
        </ng-template>
    </ngb-tab>
-   <ngb-tab>
+   <ngb-tab *ngIf="reportData.cccForms.length">
        <ng-template ngbTabTitle>NRDS CDEs Missing</ng-template>
        <ng-template ngbTabContent>
          <div class="tableHeader">NRDS CDEs missing from the ALS file</div>

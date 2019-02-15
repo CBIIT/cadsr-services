@@ -49,7 +49,7 @@ export class AlsFormListComponent implements OnInit {
       this.formListService.setValidationStatus(true);
       this.restService.checkForms(checkedItems,formListData).subscribe(
         data => {
-          this.reportService.setReportData(data)
+          this.reportService.setReportLocation(data);
         },
         error => {
           this.formListService.setValidationStatus(false);

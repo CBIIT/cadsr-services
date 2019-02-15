@@ -25,6 +25,7 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
   tabChanges:Subscription;
   tabName:String;
   isGenerating:Boolean;
+  loaded:Boolean;
 
   @ViewChild(NgbTabset)
     tabs: NgbTabset;
@@ -76,7 +77,19 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit() { 
     // get reportData //
-    this.reportService.getReportData().subscribe(data=> this.reportData = data).unsubscribe();
+    this.reportData = {'cccForms':[]};
+    this.restService.getReportFromLocation(this.reportService.getReportLocation()).subscribe(
+      data => {
+        this.reportData = data;
+        this.loaded = true;
+      },
+      error => {
+        this.loaded = true;
+      },
+      () => {
+
+      }
+    );
 
     // all options for data tables //
     const baseDtOptions = { ordering:false, paging:false, searching:false, info:false } // base datatable options //
