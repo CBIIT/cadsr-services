@@ -12,6 +12,10 @@
    {{statusMessage}}
 </div>
 
+<div *ngIf="!loaded">
+   <app-progress-bar [statusMessage]="'Loading Report'" [type]="'busy'" [percentage]="100"></app-progress-bar>
+</div>
+
 <form #f="ngForm">
 
    <div>

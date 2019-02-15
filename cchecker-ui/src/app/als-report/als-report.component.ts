@@ -87,7 +87,7 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
         this.loaded = true;
       },
       () => {
-
+        this.loaded = true;
       }
     );
 
