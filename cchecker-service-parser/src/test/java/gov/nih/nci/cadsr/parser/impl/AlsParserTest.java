@@ -5,7 +5,9 @@ package gov.nih.nci.cadsr.parser.impl;
 
 import static org.junit.Assert.*;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -16,6 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import gov.nih.nci.cadsr.data.ALSData;
+import gov.nih.nci.cadsr.data.ALSDataDictionaryEntry;
 import gov.nih.nci.cadsr.data.ALSField;
 import gov.nih.nci.cadsr.data.ALSForm;
 import gov.nih.nci.cadsr.data.CCCError;
@@ -30,6 +33,7 @@ public class AlsParserTest {
 	private static int cell_zero = 0;
 	private static int cell_one = 1;
 	private static int cell_two = 2;
+	private static int cell_three = 3;	
 	private static int cell_four = 4;
 	private static int cell_seven = 7;	
 	private static int cell_eight = 8;
@@ -119,6 +123,48 @@ public class AlsParserTest {
 	    cell = row.createCell(cell_twenty);
 	    cell.setCellValue("PID3292959_V1_0"); // Default Value
 	}	
+	
+	
+	/**
+	 * Creates a Sheet named Data Dictionary Entry in the Excel
+	 * @throws IOException
+	 */	
+	public void createDDESheetInExcel () throws IOException {
+	    sheet = workbook.createSheet("DataDictionaryEntries");
+	    row = sheet.createRow(0);
+	    row = sheet.createRow(1);
+	    cell = row.createCell(cell_zero);
+	    cell.setCellValue("Adverse Event Outcome"); // DataDictionaryName
+	    cell = row.createCell(cell_one);
+	    cell.setCellValue("1"); // CodedData
+	    cell = row.createCell(cell_two);
+	    cell.setCellValue("1"); // Ordinal
+	    cell = row.createCell(cell_three);
+	    cell.setCellValue("Recovered"); // UserDataString
+	    cell = row.createCell(cell_four);
+	    cell.setCellValue("FALSE"); // Specify
+	}	
+	
+	
+	/**
+	 * Creates a ALS Data Dictionary Entry object
+	 */		
+	@SuppressWarnings({ "unchecked" })
+	public ALSDataDictionaryEntry createTestDataToVerify() {
+		ALSDataDictionaryEntry ddeExpected = new ALSDataDictionaryEntry();
+		ddeExpected.setDataDictionaryName("Adverse Event Outcome");
+		List<Integer> ordinalNum = new ArrayList<Integer>();
+		ordinalNum.add(1); // Adding a number for Ordinal		
+		List<String> cd = new ArrayList<String>();
+		cd.add("1"); // Adding a String - Coded Data
+		List<String> userString = new ArrayList<String>();
+		userString.add("Recovered");
+		ddeExpected.setOrdinal(ordinalNum);
+		ddeExpected.setCodedData(cd);
+		ddeExpected.setUserDataString(userString);	
+		return ddeExpected;
+	}
+	
 	
 	/**
 	 * HTML stripping from a string using JSOUP (3rd party lib) 
@@ -345,8 +391,78 @@ public class AlsParserTest {
 		actuals[9] = field.getFixedUnit();
 		actuals[10] = field.getDefaultValue();
 		assertArrayEquals(expecteds, actuals);
-	}			
+	}
 	
+	
+	
+	/**
+	 * Testing retrieval of Data Dictionary Entries - Dictionary Name
+	 * @throws IOException
+	 */
+	@Test
+	public void testGetDataDictionaryEntries_DictionaryName() throws IOException {
+		createDDESheetInExcel();
+		Map<String, ALSDataDictionaryEntry> ddeMap = (AlsParser.getDataDictionaryEntries(sheet, alsData, new CCCError())).getDataDictionaryEntries();
+		ALSDataDictionaryEntry ddeExpected  = createTestDataToVerify();
+		ALSDataDictionaryEntry ddeActual = null;
+		for (String ddName : ddeMap.keySet()) {
+			ddeActual = new ALSDataDictionaryEntry();
+			 ddeActual = ddeMap.get(ddName);
+			}
+		assertEquals(ddeExpected.getDataDictionaryName(), ddeActual.getDataDictionaryName());
+	}
+	
+	/**
+	 * Testing retrieval of Data Dictionary Entries - User Data String
+	 * @throws IOException
+	 */	
+	@Test
+	public void testGetDataDictionaryEntries_UserString() throws IOException {
+		createDDESheetInExcel();
+		Map<String, ALSDataDictionaryEntry> ddeMap = (AlsParser.getDataDictionaryEntries(sheet, alsData, new CCCError())).getDataDictionaryEntries();
+		ALSDataDictionaryEntry ddeExpected  = createTestDataToVerify();
+		ALSDataDictionaryEntry ddeActual = null;
+		for (String ddName : ddeMap.keySet()) {
+			ddeActual = new ALSDataDictionaryEntry();
+			 ddeActual = ddeMap.get(ddName);
+			}
+		assertEquals(ddeExpected.getUserDataString(), ddeActual.getUserDataString());
+	}
+		
+	/**
+	 * Testing retrieval of Data Dictionary Entries - Coded Data
+	 * @throws IOException
+	 */	
+	@Test
+	public void testGetDataDictionaryEntries_CodedData() throws IOException {
+		createDDESheetInExcel();
+		Map<String, ALSDataDictionaryEntry> ddeMap = (AlsParser.getDataDictionaryEntries(sheet, alsData, new CCCError())).getDataDictionaryEntries();
+		ALSDataDictionaryEntry ddeExpected  = createTestDataToVerify();
+		ALSDataDictionaryEntry ddeActual = null;
+		for (String ddName : ddeMap.keySet()) {
+			ddeActual = new ALSDataDictionaryEntry();
+			 ddeActual = ddeMap.get(ddName);
+			}
+		assertArrayEquals(ddeExpected.getCodedData().toArray(), ddeActual.getCodedData().toArray());
+	}
+	
+	/**
+	 * Testing retrieval of Data Dictionary Entries - Error with Dictionary Name
+	 * @throws IOException
+	 */
+	@Test
+	public void testGetDataDictionaryEntries_DictionaryName_Error() throws IOException {
+		createDDESheetInExcel();
+		Map<String, ALSDataDictionaryEntry> ddeMap = (AlsParser.getDataDictionaryEntries(sheet, alsData, new CCCError())).getDataDictionaryEntries();
+		ALSDataDictionaryEntry ddeExpected  = createTestDataToVerify();
+		ddeExpected.setDataDictionaryName(null);
+		ALSDataDictionaryEntry ddeActual = null;
+		for (String ddName : ddeMap.keySet()) {
+			ddeActual = new ALSDataDictionaryEntry();
+			 ddeActual = ddeMap.get(ddName);
+			}
+		assertNotEquals(ddeExpected.getDataDictionaryName(), ddeActual.getDataDictionaryName());
+	}	
 	
 	
 }
