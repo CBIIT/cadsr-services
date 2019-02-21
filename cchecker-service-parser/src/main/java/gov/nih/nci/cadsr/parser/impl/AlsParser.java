@@ -473,14 +473,14 @@ public class AlsParser implements Parser {
 		while (rowIterator.hasNext()) {
 			row = rowIterator.next();
 			ude = getUnitDictionaryInstance();
-			ude.setUnitDictionaryName(row.getCell(cell_udName) != null ? dataFormatter.formatCellValue(row.getCell(cell_udName)) : "");
-			ude.setCodedUnit(row.getCell(cell_udCodedUnit) != null ? dataFormatter.formatCellValue(row.getCell(cell_udCodedUnit)) : "");
+			ude.setUnitDictionaryName(row.getCell(cell_udName) != null ? dataFormatter.formatCellValue(row.getCell(cell_udName)) : null);
+			ude.setCodedUnit(row.getCell(cell_udCodedUnit) != null ? dataFormatter.formatCellValue(row.getCell(cell_udCodedUnit)) : null);
 			ude.setOrdinal(row.getCell(cell_udOrdinal) != null ? Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_udOrdinal))) : 0);
 			ude.setConstantA(row.getCell(cell_udConstantA) != null ? Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_udConstantA))) : 0);
-			ude.setConstantA(row.getCell(cell_udConstantB) != null ? Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_udConstantB))) : 0);
-			ude.setConstantA(row.getCell(cell_udConstantC) != null ? Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_udConstantC))) : 0);
-			ude.setConstantA(row.getCell(cell_udConstantK) != null ? Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_udConstantK))) : 0);
-			ude.setUnitString(row.getCell(cell_udUnitString) != null ? dataFormatter.formatCellValue(row.getCell(cell_udUnitString)) : "");
+			ude.setConstantB(row.getCell(cell_udConstantB) != null ? Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_udConstantB))) : 0);
+			ude.setConstantC(row.getCell(cell_udConstantC) != null ? Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_udConstantC))) : 0);
+			ude.setConstantK(row.getCell(cell_udConstantK) != null ? Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_udConstantK))) : 0);
+			ude.setUnitString(row.getCell(cell_udUnitString) != null ? dataFormatter.formatCellValue(row.getCell(cell_udUnitString)) : null);
 			if (ude.getUnitDictionaryName().isEmpty() ||  ude.getCodedUnit().isEmpty() || ude.getUnitString().isEmpty()) {
 				cccError = addParsingValidationMsg(cccError, unitDictionary_str, unitDictionarySheetName, row.getRowNum() + 1, cell_udName, errorSeverity_warn, err_msg_empty,
 						null, null, null, null);
