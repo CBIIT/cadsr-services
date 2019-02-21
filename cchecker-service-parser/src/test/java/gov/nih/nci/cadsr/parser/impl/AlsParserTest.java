@@ -21,6 +21,7 @@ import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.ALSDataDictionaryEntry;
 import gov.nih.nci.cadsr.data.ALSField;
 import gov.nih.nci.cadsr.data.ALSForm;
+import gov.nih.nci.cadsr.data.ALSUnitDictionaryEntry;
 import gov.nih.nci.cadsr.data.CCCError;
 
 public class AlsParserTest {
@@ -35,6 +36,8 @@ public class AlsParserTest {
 	private static int cell_two = 2;
 	private static int cell_three = 3;	
 	private static int cell_four = 4;
+	private static int cell_five = 5;
+	private static int cell_six = 6;	
 	private static int cell_seven = 7;	
 	private static int cell_eight = 8;
 	private static int cell_nine = 9;		
@@ -126,7 +129,7 @@ public class AlsParserTest {
 	
 	
 	/**
-	 * Creates a Sheet named Data Dictionary Entry in the Excel
+	 * Creates a Sheet named Data Dictionary Entries in the Excel
 	 * @throws IOException
 	 */	
 	public void createDDESheetInExcel () throws IOException {
@@ -150,7 +153,7 @@ public class AlsParserTest {
 	 * Creates a ALS Data Dictionary Entry object
 	 */		
 	@SuppressWarnings({ "unchecked" })
-	public ALSDataDictionaryEntry createTestDataToVerify() {
+	public ALSDataDictionaryEntry createDDETestDataToVerify() {
 		ALSDataDictionaryEntry ddeExpected = new ALSDataDictionaryEntry();
 		ddeExpected.setDataDictionaryName("Adverse Event Outcome");
 		List<Integer> ordinalNum = new ArrayList<Integer>();
@@ -164,6 +167,32 @@ public class AlsParserTest {
 		ddeExpected.setUserDataString(userString);	
 		return ddeExpected;
 	}
+	
+	/**
+	 * Creates a Sheet named Unit Dictionary Entries in the Excel
+	 * @throws IOException
+	 */	
+	public void createUDESheetInExcel () throws IOException {
+	    sheet = workbook.createSheet("UnitDictionaryEntries");
+	    row = sheet.createRow(0);
+	    row = sheet.createRow(1);
+	    cell = row.createCell(cell_zero);
+	    cell.setCellValue("TimeZone"); // UnitDictionaryName
+	    cell = row.createCell(cell_one);
+	    cell.setCellValue("EST"); // CodedUnit
+	    cell = row.createCell(cell_two);
+	    cell.setCellValue("1"); // Ordinal
+	    cell = row.createCell(cell_three);
+	    cell.setCellValue("1"); // ConstantA
+	    cell = row.createCell(cell_four);
+	    cell.setCellValue("0"); // ConstantB
+	    cell = row.createCell(cell_five);
+	    cell.setCellValue("0"); // ConstantC
+	    cell = row.createCell(cell_six);
+	    cell.setCellValue("0"); // ConstantK
+	    cell = row.createCell(cell_seven);	    
+	    cell.setCellValue("DST"); // UnitString
+	}	
 	
 	
 	/**
@@ -393,8 +422,7 @@ public class AlsParserTest {
 		assertArrayEquals(expecteds, actuals);
 	}
 	
-	
-	
+		
 	/**
 	 * Testing retrieval of Data Dictionary Entries - Dictionary Name
 	 * @throws IOException
@@ -403,7 +431,7 @@ public class AlsParserTest {
 	public void testGetDataDictionaryEntries_DictionaryName() throws IOException {
 		createDDESheetInExcel();
 		Map<String, ALSDataDictionaryEntry> ddeMap = (AlsParser.getDataDictionaryEntries(sheet, alsData, new CCCError())).getDataDictionaryEntries();
-		ALSDataDictionaryEntry ddeExpected  = createTestDataToVerify();
+		ALSDataDictionaryEntry ddeExpected  = createDDETestDataToVerify();
 		ALSDataDictionaryEntry ddeActual = null;
 		for (String ddName : ddeMap.keySet()) {
 			ddeActual = new ALSDataDictionaryEntry();
@@ -420,7 +448,7 @@ public class AlsParserTest {
 	public void testGetDataDictionaryEntries_UserString() throws IOException {
 		createDDESheetInExcel();
 		Map<String, ALSDataDictionaryEntry> ddeMap = (AlsParser.getDataDictionaryEntries(sheet, alsData, new CCCError())).getDataDictionaryEntries();
-		ALSDataDictionaryEntry ddeExpected  = createTestDataToVerify();
+		ALSDataDictionaryEntry ddeExpected  = createDDETestDataToVerify();
 		ALSDataDictionaryEntry ddeActual = null;
 		for (String ddName : ddeMap.keySet()) {
 			ddeActual = new ALSDataDictionaryEntry();
@@ -437,7 +465,7 @@ public class AlsParserTest {
 	public void testGetDataDictionaryEntries_CodedData() throws IOException {
 		createDDESheetInExcel();
 		Map<String, ALSDataDictionaryEntry> ddeMap = (AlsParser.getDataDictionaryEntries(sheet, alsData, new CCCError())).getDataDictionaryEntries();
-		ALSDataDictionaryEntry ddeExpected  = createTestDataToVerify();
+		ALSDataDictionaryEntry ddeExpected  = createDDETestDataToVerify();
 		ALSDataDictionaryEntry ddeActual = null;
 		for (String ddName : ddeMap.keySet()) {
 			ddeActual = new ALSDataDictionaryEntry();
@@ -454,7 +482,7 @@ public class AlsParserTest {
 	public void testGetDataDictionaryEntries_DictionaryName_Error() throws IOException {
 		createDDESheetInExcel();
 		Map<String, ALSDataDictionaryEntry> ddeMap = (AlsParser.getDataDictionaryEntries(sheet, alsData, new CCCError())).getDataDictionaryEntries();
-		ALSDataDictionaryEntry ddeExpected  = createTestDataToVerify();
+		ALSDataDictionaryEntry ddeExpected  = createDDETestDataToVerify();
 		ddeExpected.setDataDictionaryName(null);
 		ALSDataDictionaryEntry ddeActual = null;
 		for (String ddName : ddeMap.keySet()) {
@@ -463,6 +491,67 @@ public class AlsParserTest {
 			}
 		assertNotEquals(ddeExpected.getDataDictionaryName(), ddeActual.getDataDictionaryName());
 	}	
+
 	
+	/**
+	 * Testing retrieval of Unit Dictionary Entries - Dictionary Name
+	 * @throws IOException
+	 */
+	@Test
+	public void testGetUnitDictionaryEntries_DictionaryName() throws IOException {
+		createUDESheetInExcel();
+		List<ALSUnitDictionaryEntry> udeList = (AlsParser.getUnitDictionaryEntries (sheet, alsData, new CCCError())).getUnitDictionaryEntries();
+		ALSUnitDictionaryEntry udeExpected  = new ALSUnitDictionaryEntry();
+		udeExpected.setUnitDictionaryName("TimeZone");
+		ALSUnitDictionaryEntry udeActual = udeList.get(0);
+		assertEquals(udeExpected.getUnitDictionaryName(), udeActual.getUnitDictionaryName());
+	}
+	
+	/**
+	 * Testing retrieval of Unit Dictionary Entries - Coded Unit
+	 * @throws IOException
+	 */
+	@Test
+	public void testGetUnitDictionaryEntries_CodedUnit() throws IOException {
+		createUDESheetInExcel();
+		List<ALSUnitDictionaryEntry> udeList = (AlsParser.getUnitDictionaryEntries (sheet, alsData, new CCCError())).getUnitDictionaryEntries();
+		ALSUnitDictionaryEntry udeExpected  = new ALSUnitDictionaryEntry();
+		udeExpected.setCodedUnit("EST");
+		ALSUnitDictionaryEntry udeActual = udeList.get(0);
+		assertEquals(udeExpected.getCodedUnit(), udeActual.getCodedUnit());
+	}	
+	
+	
+	/**
+	 * Testing retrieval of Unit Dictionary Entries - Constants
+	 * @throws IOException
+	 */
+	@Test
+	public void testGetUnitDictionaryEntries_Constants() throws IOException {
+		createUDESheetInExcel();
+		Integer[] udeExpected  = {1, 0, 0, 0};
+		List<ALSUnitDictionaryEntry> udeList = (AlsParser.getUnitDictionaryEntries (sheet, alsData, new CCCError())).getUnitDictionaryEntries();
+		Integer[] udeActual  = new Integer[4];
+		udeActual[0] = udeList.get(0).getConstantA();
+		udeActual[1] = udeList.get(0).getConstantB();
+		udeActual[2] = udeList.get(0).getConstantC();
+		udeActual[3] = udeList.get(0).getConstantK();
+		assertArrayEquals(udeExpected, udeActual);
+	}
+	
+	
+	/**
+	 * Testing retrieval of Unit Dictionary Entries - Unit String
+	 * @throws IOException
+	 */
+	@Test
+	public void testGetUnitDictionaryEntries_UnitString() throws IOException {
+		createUDESheetInExcel();
+		List<ALSUnitDictionaryEntry> udeList = (AlsParser.getUnitDictionaryEntries (sheet, alsData, new CCCError())).getUnitDictionaryEntries();
+		ALSUnitDictionaryEntry udeExpected  = new ALSUnitDictionaryEntry();
+		udeExpected.setUnitString("DST");
+		ALSUnitDictionaryEntry udeActual = udeList.get(0);
+		assertEquals(udeExpected.getUnitString(), udeActual.getUnitString());
+	}		
 	
 }
