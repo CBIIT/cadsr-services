@@ -475,6 +475,7 @@ public class AlsParser implements Parser {
 			ude = getUnitDictionaryInstance();
 			ude.setUnitDictionaryName(row.getCell(cell_udName) != null ? dataFormatter.formatCellValue(row.getCell(cell_udName)) : null);
 			ude.setCodedUnit(row.getCell(cell_udCodedUnit) != null ? dataFormatter.formatCellValue(row.getCell(cell_udCodedUnit)) : null);
+			// TODO : Handle Runtime exceptions with Integer.parseInt
 			ude.setOrdinal(row.getCell(cell_udOrdinal) != null ? Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_udOrdinal))) : 0);
 			ude.setConstantA(row.getCell(cell_udConstantA) != null ? Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_udConstantA))) : 0);
 			ude.setConstantB(row.getCell(cell_udConstantB) != null ? Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_udConstantB))) : 0);

@@ -637,6 +637,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 		nrds.setCdeIdVersion(question.getCdePublicId() + "v" + question.getCdeVersion());
 		nrds.setCdeName(cdeName);
 		nrds.setRaveFieldLabel(question.getRaveFieldLabel());
+		// TODO : Handle Runtime exceptions with Integer.parseInt
 		nrds.setRaveFieldOrder(Integer.parseInt(question.getFieldOrder()));
 		nrds.setResult(question.getQuestionCongruencyStatus());
 		nrds.setMessage(question.getMessage());

@@ -653,6 +653,7 @@ public class ValidatorService {
 			raveLength = "0";
 		}
 		try {
+			// TODO : Handle Runtime exceptions with Integer.parseInt
 			raveLengthInt = Integer.parseInt(raveLength.trim());
 		} catch (NumberFormatException nfe) {
 			logger.debug("Error in computing Rave Length from Field Unit: "+raveLength+" :: "+nfe.getMessage());
