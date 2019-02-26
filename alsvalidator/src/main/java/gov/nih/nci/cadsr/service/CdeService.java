@@ -42,7 +42,7 @@ public class CdeService {
 	}
 
 	private static boolean checkLinkParameters(String publicId, String versionNumber) {
-		if ((NumberUtils.isNumber(versionNumber)) && (NumberUtils.isDigits(publicId))) {
+		if ((NumberUtils.isCreatable(versionNumber)) && (NumberUtils.isDigits(publicId))) {
 			return true;
 		}
 		else

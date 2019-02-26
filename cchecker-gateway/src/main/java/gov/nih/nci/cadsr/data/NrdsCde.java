@@ -6,7 +6,7 @@ package gov.nih.nci.cadsr.data;
 public class NrdsCde {	
 
 String raveFormOid;
-int raveFieldOrder;
+String raveFieldOrder;
 String raveFieldLabel;
 String cdeIdVersion;
 String cdeName;
@@ -19,10 +19,10 @@ public String getRaveFormOid() {
 public void setRaveFormOid(String raveFormOid) {
 	this.raveFormOid = raveFormOid;
 }
-public int getRaveFieldOrder() {
+public String getRaveFieldOrder() {
 	return raveFieldOrder;
 }
-public void setRaveFieldOrder(int raveFieldOrder) {
+public void setRaveFieldOrder(String raveFieldOrder) {
 	this.raveFieldOrder = raveFieldOrder;
 }
 public String getRaveFieldLabel() {

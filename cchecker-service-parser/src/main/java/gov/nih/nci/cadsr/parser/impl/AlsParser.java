@@ -277,7 +277,6 @@ public class AlsParser implements Parser {
 	 *         parsed out of the ALS input file
 	 * 
 	 */
-	@SuppressWarnings("deprecation")
 	protected static ALSData getFields(Sheet sheet, ALSData alsData, CCCError cccError) throws NullPointerException {
 		List<ALSField> fields = new ArrayList<ALSField>();
 		ALSField field;
@@ -303,8 +302,8 @@ public class AlsParser implements Parser {
 				if (field.getDefaultValue() != null) {
 					String[] splitFormId = extractIdVersion(field.getDefaultValue());
 					// Split form oid and version
-					if (NumberUtils.isNumber(splitFormId[0]) && NumberUtils.isNumber(splitFormId[1])
-							&& NumberUtils.isNumber(splitFormId[2])) {
+					if (NumberUtils.isCreatable(splitFormId[0]) && NumberUtils.isCreatable(splitFormId[1])
+							&& NumberUtils.isCreatable(splitFormId[2])) {
 							field.setFormPublicId(splitFormId[0]);
 							field.setVersion(splitFormId[1] + "." + splitFormId[2]);
 					}
@@ -326,8 +325,8 @@ public class AlsParser implements Parser {
 				} else {
 						String[] splitCdeIdVersion = extractIdVersion(field.getDraftFieldName());
 						// Split cde public ID and version
-						if (!(NumberUtils.isNumber(splitCdeIdVersion[0]) && NumberUtils.isNumber(splitCdeIdVersion[1])
-								&& NumberUtils.isNumber(splitCdeIdVersion[2]))) {
+						if (!(NumberUtils.isCreatable(splitCdeIdVersion[0]) && NumberUtils.isCreatable(splitCdeIdVersion[1])
+								&& NumberUtils.isCreatable(splitCdeIdVersion[2]))) {
 								cccError = addParsingValidationMsg(cccError, draftFieldName_str, fieldsSheetName, row.getRowNum() + 1, cell_draftFieldName, errorSeverity_error, err_msg_23, 
 									field.getFormOid(), field.getFieldOid(), field.getDataDictionaryName(), field.getUnitDictionaryName());
 							}
@@ -476,11 +475,11 @@ public class AlsParser implements Parser {
 			ude.setUnitDictionaryName(row.getCell(cell_udName) != null ? dataFormatter.formatCellValue(row.getCell(cell_udName)) : null);
 			ude.setCodedUnit(row.getCell(cell_udCodedUnit) != null ? dataFormatter.formatCellValue(row.getCell(cell_udCodedUnit)) : null);
 			// TODO : Handle Runtime exceptions with Integer.parseInt
-			ude.setOrdinal(row.getCell(cell_udOrdinal) != null ? Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_udOrdinal))) : 0);
-			ude.setConstantA(row.getCell(cell_udConstantA) != null ? Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_udConstantA))) : 0);
-			ude.setConstantB(row.getCell(cell_udConstantB) != null ? Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_udConstantB))) : 0);
-			ude.setConstantC(row.getCell(cell_udConstantC) != null ? Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_udConstantC))) : 0);
-			ude.setConstantK(row.getCell(cell_udConstantK) != null ? Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_udConstantK))) : 0);
+			ude.setOrdinal(row.getCell(cell_udOrdinal) != null ? dataFormatter.formatCellValue(row.getCell(cell_udOrdinal)) : null);
+			ude.setConstantA(row.getCell(cell_udConstantA) != null ? dataFormatter.formatCellValue(row.getCell(cell_udConstantA)) : null);
+			ude.setConstantB(row.getCell(cell_udConstantB) != null ? dataFormatter.formatCellValue(row.getCell(cell_udConstantB)) : null);
+			ude.setConstantC(row.getCell(cell_udConstantC) != null ? dataFormatter.formatCellValue(row.getCell(cell_udConstantC)) : null);
+			ude.setConstantK(row.getCell(cell_udConstantK) != null ? dataFormatter.formatCellValue(row.getCell(cell_udConstantK)) : null);
 			ude.setUnitString(row.getCell(cell_udUnitString) != null ? dataFormatter.formatCellValue(row.getCell(cell_udUnitString)) : null);
 			if (ude.getUnitDictionaryName().isEmpty() ||  ude.getCodedUnit().isEmpty() || ude.getUnitString().isEmpty()) {
 				cccError = addParsingValidationMsg(cccError, unitDictionary_str, unitDictionarySheetName, row.getRowNum() + 1, cell_udName, errorSeverity_warn, err_msg_empty,

@@ -529,9 +529,9 @@ public class AlsParserTest {
 	@Test
 	public void testGetUnitDictionaryEntries_Constants() throws IOException {
 		createUDESheetInExcel();
-		Integer[] udeExpected  = {1, 0, 0, 0};
+		String[] udeExpected  = {"1", "0", "0", "0"};
 		List<ALSUnitDictionaryEntry> udeList = (AlsParser.getUnitDictionaryEntries (sheet, alsData, new CCCError())).getUnitDictionaryEntries();
-		Integer[] udeActual  = new Integer[4];
+		String[] udeActual  = new String[4];
 		udeActual[0] = udeList.get(0).getConstantA();
 		udeActual[1] = udeList.get(0).getConstantB();
 		udeActual[2] = udeList.get(0).getConstantC();

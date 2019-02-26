@@ -119,7 +119,7 @@ public class GenerateReport implements ReportOutput {
 					if (draftFieldName!=null) {
 						if (draftFieldName.indexOf(publicid_prefix) > -1 && draftFieldName.indexOf(version_prefix) > -1) {
 							question = assignCdeIdVersionToQuestion (question, draftFieldName);
-							if (!NumberUtils.isNumber(question.getCdePublicId()) || !NumberUtils.isNumber(question.getCdeVersion()))
+							if (!NumberUtils.isCreatable(question.getCdePublicId()) || !NumberUtils.isCreatable(question.getCdeVersion()))
 								cdeServiceCall = false;
 							question = buildCodedData(alsField, question, ddeMap);
 							question = setRaveFields (alsField, question);
@@ -309,7 +309,7 @@ public class GenerateReport implements ReportOutput {
 	 */
 	protected static CdeStdCrfData fetchCdeStandardCrfData(String cdePublicId, String cdeVersion) {
 		CdeStdCrfData cdeCrfData = null;
-		if (NumberUtils.isNumber(cdePublicId) && NumberUtils.isNumber(cdeVersion)) {
+		if (NumberUtils.isCreatable(cdePublicId) && NumberUtils.isCreatable(cdeVersion)) {
 			for (CategoryCde cde : categoryCdeList) {
 				if (cde.getCdeId() == Float.valueOf(cdePublicId) && cde.getDeVersion() == Float.valueOf(cdeVersion)) {
 					cdeCrfData = new CdeStdCrfData();
@@ -347,7 +347,7 @@ public class GenerateReport implements ReportOutput {
 		nrds.setCdeIdVersion(question.getCdePublicId() + "v" + question.getCdeVersion());
 		nrds.setCdeName(cdeName);
 		nrds.setRaveFieldLabel(question.getRaveFieldLabel());
-		nrds.setRaveFieldOrder(Integer.parseInt(question.getFieldOrder()));
+		nrds.setRaveFieldOrder(question.getFieldOrder());
 		nrds.setResult(question.getQuestionCongruencyStatus());
 		nrds.setMessage(question.getMessage());
 		return nrds;

@@ -7,11 +7,11 @@ public class ALSUnitDictionaryEntry {
 	
 String unitDictionaryName;
 String codedUnit;
-int ordinal;
-int constantA;
-int constantB;
-int constantC;
-int constantK;
+String ordinal;
+String constantA;
+String constantB;
+String constantC;
+String constantK;
 String unitString;
 
 public String getUnitDictionaryName() {
@@ -26,34 +26,34 @@ public String getCodedUnit() {
 public void setCodedUnit(String codedUnit) {
 	this.codedUnit = codedUnit;
 }
-public int getOrdinal() {
+public String getOrdinal() {
 	return ordinal;
 }
-public void setOrdinal(int ordinal) {
+public void setOrdinal(String ordinal) {
 	this.ordinal = ordinal;
 }
-public int getConstantA() {
+public String getConstantA() {
 	return constantA;
 }
-public void setConstantA(int constantA) {
+public void setConstantA(String constantA) {
 	this.constantA = constantA;
 }
-public int getConstantB() {
+public String getConstantB() {
 	return constantB;
 }
-public void setConstantB(int constantB) {
+public void setConstantB(String constantB) {
 	this.constantB = constantB;
 }
-public int getConstantC() {
+public String getConstantC() {
 	return constantC;
 }
-public void setConstantC(int constantC) {
+public void setConstantC(String constantC) {
 	this.constantC = constantC;
 }
-public int getConstantK() {
+public String getConstantK() {
 	return constantK;
 }
-public void setConstantK(int constantK) {
+public void setConstantK(String constantK) {
 	this.constantK = constantK;
 }
 public String getUnitString() {

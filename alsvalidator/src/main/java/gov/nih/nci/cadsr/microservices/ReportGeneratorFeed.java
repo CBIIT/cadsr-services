@@ -124,7 +124,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 					if (draftFieldName!=null) {
 						if (draftFieldName.indexOf(publicid_prefix) > -1 && draftFieldName.indexOf(version_prefix) > -1) {
 							question = assignCdeIdVersionToQuestion (question, draftFieldName);
-							if (!NumberUtils.isNumber(question.getCdePublicId()) || !NumberUtils.isNumber(question.getCdeVersion()))
+							if (!NumberUtils.isCreatable(question.getCdePublicId()) || !NumberUtils.isCreatable(question.getCdeVersion()))
 								continue;//Not CDE data
 							//logger.debug("formOid: " + formOid + ", question.getCdePublicId(): " + question.getCdePublicId() + ", question.getCdeVersion(): " + question.getCdeVersion());
 							CdeFormInfo cdeFormInfo = new CdeFormInfo(question.getCdePublicId(), question.getCdeVersion());
@@ -322,7 +322,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 							// Splitting draftFieldName to extract CDE Public ID and Version
 							question = assignCdeIdVersionToQuestion (question, draftFieldName);
 							// Avoiding CDE details fetching in case the extracted Public ID and Version are not numbers
-							if (!NumberUtils.isNumber(question.getCdePublicId()) || !NumberUtils.isNumber(question.getCdeVersion()))
+							if (!NumberUtils.isCreatable(question.getCdePublicId()) || !NumberUtils.isCreatable(question.getCdeVersion()))
 								cdeServiceCall = false;
 							// Building Coded Data (PV list on caDSR) from the ALS Data Dictionary entries for the CDE 
 							question = buildCodedData(alsField, question, ddeMap);
@@ -594,7 +594,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 	 */
 	protected static CdeStdCrfData fetchCdeStandardCrfData(String cdePublicId, String cdeVersion) {
 		CdeStdCrfData cdeCrfData = null;
-		if (NumberUtils.isNumber(cdePublicId) && NumberUtils.isNumber(cdeVersion)) {
+		if (NumberUtils.isCreatable(cdePublicId) && NumberUtils.isCreatable(cdeVersion)) {
 			String moduleType = null;
 			for (CategoryCde cde : categoryCdeList) {
 				if (cde.getCdeId() == Float.valueOf(cdePublicId) && cde.getDeVersion() == Float.valueOf(cdeVersion)) {
@@ -637,8 +637,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 		nrds.setCdeIdVersion(question.getCdePublicId() + "v" + question.getCdeVersion());
 		nrds.setCdeName(cdeName);
 		nrds.setRaveFieldLabel(question.getRaveFieldLabel());
-		// TODO : Handle Runtime exceptions with Integer.parseInt
-		nrds.setRaveFieldOrder(Integer.parseInt(question.getFieldOrder()));
+		nrds.setRaveFieldOrder(question.getFieldOrder());
 		nrds.setResult(question.getQuestionCongruencyStatus());
 		nrds.setMessage(question.getMessage());
 		return nrds;
@@ -986,7 +985,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 		String version = (idVersion.substring(idVersion.indexOf(version_prefix) + 2, idVersion.length()));
 		id = id.trim();
 		String[] versionTokens = version.split("\\_");
-		if (NumberUtils.isNumber(id) && NumberUtils.isNumber(versionTokens[0]) && NumberUtils.isNumber(versionTokens[1])) {
+		if (NumberUtils.isCreatable(id) && NumberUtils.isCreatable(versionTokens[0]) && NumberUtils.isCreatable(versionTokens[1])) {
 			version = versionTokens[0] + "." + versionTokens[1];
 			form.setFormPublicId(id.trim());
 			form.setFormVersion(version);

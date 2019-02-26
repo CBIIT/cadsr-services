@@ -804,7 +804,7 @@ public class ValidatorService {
 						result = false;
 					} else 
 						return notCheckedString;
-				} else if (NumberUtils.isNumber(raveDataFormat)) {
+				} else if (NumberUtils.isCreatable(raveDataFormat)) {
 					// Checking RAVE data format against all the known Numeric data formats
 					if (numericDataFormats.contains(vdDataType.toUpperCase()))
 						result = true;
