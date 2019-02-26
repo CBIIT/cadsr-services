@@ -350,10 +350,10 @@ public class AlsParserTest {
 	 */	
 	@Test
 	public void testGetForms_Ordinals() throws IOException {
-		int[] expecteds = {1, 2, 3};
+		String[] expecteds = {"1", "2", "3"};
 		createFormsSheetInExcel();
 		List<ALSForm> formsList = AlsParser.getForms(sheet, alsData, new CCCError()).getForms();
-		int[] actuals = new int[3];
+		String[] actuals = new String[3];
 		for (int i = 0; i < formsList.size(); i++) {
 			actuals[i] = formsList.get(i).getOrdinal();
 		}

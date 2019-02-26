@@ -9,7 +9,7 @@ import java.util.List;
 public class ALSForm {
 	
 String formOid;
-int ordinal;
+String ordinal;
 String draftFormName;
 
 
@@ -21,10 +21,10 @@ public String getFormOid() {
 public void setFormOid(String formOid) {
 	this.formOid = formOid;
 }
-public int getOrdinal() {
+public String getOrdinal() {
 	return ordinal;
 }
-public void setOrdinal(int ordinal) {
+public void setOrdinal(String ordinal) {
 	this.ordinal = ordinal;
 }
 public String getDraftFormName() {

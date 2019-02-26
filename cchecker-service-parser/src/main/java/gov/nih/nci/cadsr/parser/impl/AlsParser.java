@@ -244,14 +244,14 @@ public class AlsParser implements Parser {
 			// OID, Ordinal & DraftFormName
 
 			form.setFormOid(row.getCell(cell_formOid) != null ? dataFormatter.formatCellValue(row.getCell(cell_formOid)) : null);
-			form.setOrdinal(row.getCell(cell_formOrdinal) != null ? Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_formOrdinal))) : 0);
+			form.setOrdinal(row.getCell(cell_formOrdinal) != null ? dataFormatter.formatCellValue(row.getCell(cell_formOrdinal)) : null);
 			form.setDraftFormName(row.getCell(cell_formDraftName) != null ? dataFormatter.formatCellValue(row.getCell(cell_formDraftName)) : null);			
 			Map<String, Integer> errFieldNames = new HashMap<String, Integer>();			
 			if (form.getFormOid() == null) 
 				errFieldNames.put(formOId_name, cell_formOid);
 			if (form.getDraftFormName() == null)
 				errFieldNames.put(draftFormName, cell_formDraftName);
-			if (form.getOrdinal() == 0)
+			if (form.getOrdinal() == null)
 				errFieldNames.put(ordinal_str, cell_formOrdinal);
 			for (String fieldName : errFieldNames.keySet()) {
 				cccError = addParsingValidationMsg(cccError, fieldName, formsSheetName, row.getRowNum() + 1,
@@ -474,7 +474,6 @@ public class AlsParser implements Parser {
 			ude = getUnitDictionaryInstance();
 			ude.setUnitDictionaryName(row.getCell(cell_udName) != null ? dataFormatter.formatCellValue(row.getCell(cell_udName)) : null);
 			ude.setCodedUnit(row.getCell(cell_udCodedUnit) != null ? dataFormatter.formatCellValue(row.getCell(cell_udCodedUnit)) : null);
-			// TODO : Handle Runtime exceptions with Integer.parseInt
 			ude.setOrdinal(row.getCell(cell_udOrdinal) != null ? dataFormatter.formatCellValue(row.getCell(cell_udOrdinal)) : null);
 			ude.setConstantA(row.getCell(cell_udConstantA) != null ? dataFormatter.formatCellValue(row.getCell(cell_udConstantA)) : null);
 			ude.setConstantB(row.getCell(cell_udConstantB) != null ? dataFormatter.formatCellValue(row.getCell(cell_udConstantB)) : null);
