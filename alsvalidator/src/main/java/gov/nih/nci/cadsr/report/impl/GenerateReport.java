@@ -347,6 +347,8 @@ public class GenerateReport implements ReportOutput {
 		nrds.setCdeIdVersion(question.getCdePublicId() + "v" + question.getCdeVersion());
 		nrds.setCdeName(cdeName);
 		nrds.setRaveFieldLabel(question.getRaveFieldLabel());
+		// This class GenerateReport is not used anymore and is being kept for educational purposes
+		// but the below change to field order was done to avoid any compilation errors.
 		nrds.setRaveFieldOrder(question.getFieldOrder());
 		nrds.setResult(question.getQuestionCongruencyStatus());
 		nrds.setMessage(question.getMessage());

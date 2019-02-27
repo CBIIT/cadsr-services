@@ -156,8 +156,8 @@ public class AlsParserTest {
 	public ALSDataDictionaryEntry createDDETestDataToVerify() {
 		ALSDataDictionaryEntry ddeExpected = new ALSDataDictionaryEntry();
 		ddeExpected.setDataDictionaryName("Adverse Event Outcome");
-		List<Integer> ordinalNum = new ArrayList<Integer>();
-		ordinalNum.add(1); // Adding a number for Ordinal		
+		List<String> ordinalNum = new ArrayList<String>();
+		ordinalNum.add("1"); // Adding a number for Ordinal		
 		List<String> cd = new ArrayList<String>();
 		cd.add("1"); // Adding a String - Coded Data
 		List<String> userString = new ArrayList<String>();

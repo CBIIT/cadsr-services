@@ -364,7 +364,7 @@ public class AlsParser implements Parser {
 		final String regex_space = "[\\p{Z}\\s]";// To identify and remove
 													// "'\u00A0', '\u2007',
 													// '\u202F'" characters
-		List<Integer> ordinal = new ArrayList<Integer>();
+		List<String> ordinal = new ArrayList<String>();
 		List<String> cd = new ArrayList<String>();
 		List<String> uds = new ArrayList<String>();
 		List<Boolean> specify = new ArrayList<Boolean>();
@@ -392,7 +392,7 @@ public class AlsParser implements Parser {
 					ddName = dataFormatter.formatCellValue(row.getCell(cell_ddeDataDictionaryName));
 					dde = new ALSDataDictionaryEntry();
 					dde.setDataDictionaryName(ddName);
-					ordinal = new ArrayList<Integer>();
+					ordinal = new ArrayList<String>();
 					cd = new ArrayList<String>();
 					uds = new ArrayList<String>();
 					specify = new ArrayList<Boolean>();
@@ -405,7 +405,7 @@ public class AlsParser implements Parser {
 							null, null, ddName, null);
 				}
 				if (row.getCell(cell_ddeOrdinal) != null)
-					ordinal.add(Integer.parseInt(dataFormatter.formatCellValue(row.getCell(cell_ddeOrdinal))));
+					ordinal.add(dataFormatter.formatCellValue(row.getCell(cell_ddeOrdinal)));
 				else {
 					cccError = addParsingValidationMsg(cccError, ordinal_str, dataDictionarySheetName, row.getRowNum() + 1,
 							cell_ddeOrdinal, errorSeverity_warn, err_msg_17, null, null, ddName, null);
