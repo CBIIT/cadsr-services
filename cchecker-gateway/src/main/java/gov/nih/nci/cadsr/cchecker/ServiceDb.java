@@ -4,7 +4,6 @@
 package gov.nih.nci.cadsr.cchecker;
 
 import gov.nih.nci.cadsr.data.ALSData;
-import gov.nih.nci.cadsr.data.CCCReport;
 
 public interface ServiceDb {
 	StringResponseWrapper submitPostRequestSaveAls(ALSData alsData, String idSeq, String urlStr);
