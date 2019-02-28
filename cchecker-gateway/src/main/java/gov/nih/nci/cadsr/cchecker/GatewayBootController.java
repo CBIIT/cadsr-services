@@ -437,6 +437,78 @@ public class GatewayBootController {
 			 return buildErrorResponse(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+	/**
+	 * 
+	 * @param request
+	 * @param response
+	 * @param checkUOM
+	 * @param checkCRF
+	 * @param displayExceptions
+	 * @param requestEntity not null and not empty
+	 * @return ResponseEntity
+	 */
+	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
+	@PostMapping("/validateflowservice")
+	public ResponseEntity<?> validateFlowService(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam(name = "checkUOM", required = false, defaultValue = "false") boolean checkUOM,
+			@RequestParam(name = "checkCRF", required = false, defaultValue = "false") boolean checkCRF,
+			@RequestParam(name = "displayExceptions", required = false, defaultValue = "false") boolean displayExceptions,
+			@RequestParam(name = "sessionid", required = true) String sessionid,
+			RequestEntity<List<String>> requestEntity) {
+		//logger.debug("request received validateService");
+		//check for session cookie
+		Cookie cookie = retrieveCookie(request);
+		String sessionCookieValue = null;
+
+		if ((cookie == null) || (StringUtils.isBlank((sessionCookieValue = cookie.getValue()))) || (!ParameterValidator.validateIdSeq(sessionCookieValue))) {
+			return buildErrorResponse(SESSION_NOT_VALID + sessionCookieValue, HttpStatus.BAD_REQUEST);
+		}
+		logger.debug("validateService session cookie: " + sessionCookieValue);
+		
+		//sessionid parameter to validate
+		if (!ParameterValidator.validateIdSeq(sessionid)) {
+			logger.error("validateService sessionid invalid: " + sessionid);
+			return buildErrorResponse(SESSION_NOT_VALID + sessionid, HttpStatus.BAD_REQUEST);
+		}
+		
+		//sessionid parameter is validated, and we will use it from now on.
+		logger.debug("validateService session information provided in sessionid: " + sessionid);
+		
+		List<String> formNames = requestEntity.getBody();
+		logger.debug("Selected forms received: " + formNames);
+
+		HttpStatus errorCode =  HttpStatus.BAD_REQUEST;
+
+		//call Validator service
+		try {
+			StringResponseWrapper stringResponseWrapper = serviceValidator.sendPostRequestValidator(formNames, sessionid, checkUOM, checkCRF, displayExceptions);
+			
+			if (stringResponseWrapper == null) {
+				//We never expect validate request failure. It shall always send a report.
+				logger.error("sendPostRequestValidator error on " + sessionid);
+				return buildErrorResponse(SESSION_DATA_NOT_FOUND + sessionid, HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+			HttpStatus statusCode = stringResponseWrapper.getStatusCode();
+			if (HttpStatus.OK.equals(statusCode)) {
+				URI url = requestEntity.getUrl();
+				String path = String.format("%s://%s:%d%s",url.getScheme(),  url.getHost(), url.getPort(), url.getPath());
+				String location = path.replace(VALIDATE_SERVICE_URL_STR, RETRIEVE_ERROR_REPORT_URL_STR) + '/'+ sessionid;
+				//logger.debug("Report error Location header value: " + location);	
+				HttpHeaders httpHeaders = createHttpValidateHeaders(TEXT_PLAIN_MIME_TYPE, location);
+				return new ResponseEntity<String>(location, httpHeaders, HttpStatus.CREATED);
+			}
+			else {
+				logger.error("sendPostRequestValidator error response: " + stringResponseWrapper);
+				errorCode = stringResponseWrapper.getStatusCode();//This can be user error or server error
+				String detailsStr = StringUtils.isNotBlank(stringResponseWrapper.getResponseData()) ? ". Details: " + stringResponseWrapper.getResponseData() : "";
+				return buildErrorResponse("Unexpected error on validate for session: " + sessionid + detailsStr, errorCode);
+			}
+		}
+		catch (RestClientException re) {
+			 String errorMessage = "Unexpected error on validate for session: " + sessionid + ". Details: " + re.getMessage();
+			 return buildErrorResponse(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 	
 	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
 	@GetMapping("/retrievereporterror/{idseq}")
