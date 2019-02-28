@@ -572,6 +572,45 @@ public class GatewayBootController {
 	}
 	
 	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
+	@GetMapping("/genexcelcheckreport/{idseq}")
+	public void genExcelCheckReport(HttpServletRequest request, HttpServletResponse response,  @PathVariable("idseq") String idseq) throws IOException {
+		Cookie cookie = retrieveCookie(request);
+		String sessionCookieValue = null;
+		if ((cookie == null) || (!ParameterValidator.validateIdSeq(sessionCookieValue)) || (!ParameterValidator.validateIdSeq(idseq))) {
+			response.setHeader("Content-Type", TEXT_PLAIN_MIME_TYPE);
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			IOUtils.copy(new ByteArrayInputStream(("Sessionis not found or not valid, cookie: " + sessionCookieValue + ", sessionid: " + idseq).getBytes()),
+				response.getOutputStream());
+		} 
+		else {
+			try {
+				RestTemplate restTemplate = new RestTemplate();
+				String urlStr = String.format(URL_GEN_EXCEL_REPORT_ERROR_FORMAT, idseq);
+				logger.debug("...retrieveData: " + urlStr);
+				response.setHeader("Content-Type", MS_EXCEL_MIME_TYPE);
+				response.setHeader("Content-Disposition", "attachment; filename=" + fileExcelReportPrefix + idseq + EXCEL_FILE_EXT);
+				response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
+				response.setStatus(HttpServletResponse.SC_OK);
+	
+				restTemplate.execute(urlStr, HttpMethod.GET, (ClientHttpRequest requestCallback) -> {
+				}, responseExtractor -> {
+					IOUtils.copy(responseExtractor.getBody(), response.getOutputStream());
+					return null;
+				});
+			}
+			catch (RestClientException re) {
+				response.setHeader("Content-Type", TEXT_PLAIN_MIME_TYPE);
+				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				//origin ?
+				String errorMessage = "Unexpected error on generate Excel for session: " + idseq + ". Details: " + re.getMessage();
+				logger.error(errorMessage + ", exception: " + re.getClass().getName() + re);
+				IOUtils.copy(new ByteArrayInputStream(errorMessage.getBytes()), response.getOutputStream());
+			}
+		}
+		response.flushBuffer();
+	}
+	
+	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
 	@GetMapping("/retrieveexcelreporterror/{idseq}")
 	public void retrieveExcelReportError(HttpServletRequest request, HttpServletResponse response, 
 			@PathVariable("idseq") String idseq) throws Exception {
