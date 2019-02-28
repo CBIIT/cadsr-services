@@ -358,6 +358,7 @@ public class GatewayBootController {
 			//
 			// build result from parser data
 			FormsUiData formUiData = formService.collectFormsUiData(alsData);
+			formUiData.setSessionid(idseq);
 	
 			// set session cookie
 			logger.debug("set new Cookie value: " + idseq);

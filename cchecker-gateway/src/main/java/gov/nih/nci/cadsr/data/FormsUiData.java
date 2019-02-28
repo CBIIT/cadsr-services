@@ -8,15 +8,22 @@ import java.util.List;
 
 public class FormsUiData {
 
-	List<FormDisplay> formsList = new ArrayList<FormDisplay>();
-	Boolean checkUom;
-	Boolean checkStdCrfCde;
-	Boolean mustDisplayException;
+	private List<FormDisplay> formsList = new ArrayList<FormDisplay>();
+	private String sessionid;
+	private Boolean checkUom;
+	private Boolean checkStdCrfCde;
+	private Boolean mustDisplayException;
 	public List<FormDisplay> getFormsList() {
 		return formsList;
 	}
 	public void setFormsList(List<FormDisplay> formsList) {
 		this.formsList = formsList;
+	}
+	public String getSessionid() {
+		return sessionid;
+	}
+	public void setSessionid(String sessionid) {
+		this.sessionid = sessionid;
 	}
 	public Boolean getCheckUom() {
 		return checkUom;
@@ -35,6 +42,11 @@ public class FormsUiData {
 	}
 	public void setMustDisplayException(Boolean mustDisplayException) {
 		this.mustDisplayException = mustDisplayException;
+	}
+	@Override
+	public String toString() {
+		return "FormsUiData [formsList=" + formsList + ", sessionid=" + sessionid + ", checkUom=" + checkUom
+				+ ", checkStdCrfCde=" + checkStdCrfCde + ", mustDisplayException=" + mustDisplayException + "]";
 	}
 	
 }
