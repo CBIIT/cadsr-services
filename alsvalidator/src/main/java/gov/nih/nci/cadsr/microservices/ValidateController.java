@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-
 import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.ALSError;
 import gov.nih.nci.cadsr.data.ALSForm;
@@ -37,10 +36,14 @@ import gov.nih.nci.cadsr.data.ValidateParamWrapper;
 public class ValidateController {
 	private final static Logger logger = LoggerFactory.getLogger(ValidateController.class);
 	private static String CCHECKER_DB_SERVICE_URL_RETRIEVE = ValidateService.CCHECKER_DB_SERVICE_URL_RETRIEVE;
+	private static String CCHECKER_DB_SERVICE_URL_CREATE_REPORT_ERROR = ValidateService.CCHECKER_DB_SERVICE_URL_CREATE_REPORT_ERROR;
+	
 	@Autowired
 	private CdeServiceDetails cdeServiceDetails;//
 	@Autowired
 	private ReportGeneratorFeed reportGeneratorFeed;//
+	@Autowired
+    private ServiceDb serviceDb;
 	
 	@CrossOrigin
 	@GetMapping("/rest/feedvalidateformnumber/{idseq}")
@@ -51,7 +54,7 @@ public class ValidateController {
 		return new ResponseEntity<String>(formUndervalidation, HttpStatus.OK);
 	}
 	@PostMapping("/rest/validateservice")
-	public ResponseEntity<CCCReport> validateService(HttpServletRequest request, HttpServletResponse response,
+	public ResponseEntity<String> validateService(HttpServletRequest request, HttpServletResponse response,
 		@RequestParam(name="_cchecker", required=true) String idseq, 
 		RequestEntity<ValidateParamWrapper> requestEntity) {
 
@@ -104,9 +107,32 @@ public class ValidateController {
 			errorsReport.setCccError(cccError);
 			logger.error(strMsg);
 		}
-		HttpHeaders httpHeaders = createHttpOkHeaders();
-		return new ResponseEntity<CCCReport>(errorsReport, httpHeaders, HttpStatus.OK);
-	}	
+		StringResponseWrapper storeResponse = storeReportError(errorsReport, idseq, CCHECKER_DB_SERVICE_URL_CREATE_REPORT_ERROR);
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.add("Content-Type", "text/plain");
+		return new ResponseEntity<String>(storeResponse.getResponseData(), httpHeaders, storeResponse.getStatusCode());
+	}
+	/**
+	 * 
+	 * @param cccReport not null
+	 * @param sessionCookieValue not null
+	 * @param url not null
+	 * @return StringResponseWrapper
+	 */
+	protected StringResponseWrapper storeReportError(CCCReport cccReport, String sessionCookieValue, String url) {
+		StringResponseWrapper saveResponse;
+		try {			
+			saveResponse = serviceDb.submitPostRequestSaveReportError(cccReport, sessionCookieValue, CCHECKER_DB_SERVICE_URL_CREATE_REPORT_ERROR);
+		}
+		catch (RestClientException re) {
+			String responseErrorStr = "Unexpected error on store report for session: " + sessionCookieValue + ". Details: " + re;
+			logger.error(responseErrorStr);
+			saveResponse = new StringResponseWrapper();
+			saveResponse.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+			saveResponse.setResponseData(responseErrorStr);
+		}
+		return saveResponse;
+	}
 	/**
 	 * 
 	 * @param idseq saved previously in DB not null

@@ -384,66 +384,6 @@ public class GatewayBootController {
 	 * @return ResponseEntity
 	 */
 	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
-	@PostMapping("/checkservice")
-	public ResponseEntity<?> checkService(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam(name = "checkUOM", required = false, defaultValue = "false") boolean checkUOM,
-			@RequestParam(name = "checkCRF", required = false, defaultValue = "false") boolean checkCRF,
-			@RequestParam(name = "displayExceptions", required = false, defaultValue = "false") boolean displayExceptions,
-			RequestEntity<List<String>> requestEntity) {
-		logger.debug("request received checkService");
-		// check for session cookie
-		Cookie cookie = retrieveCookie(request);
-		String sessionCookieValue = null;
-		
-		if ((cookie == null) || (StringUtils.isBlank((sessionCookieValue = cookie.getValue()))) || (!ParameterValidator.validateIdSeq(sessionCookieValue))) {
-			return buildErrorResponse(SESSION_NOT_VALID + sessionCookieValue, HttpStatus.BAD_REQUEST);
-		}
-
-		logger.debug("checkService session cookie: " + sessionCookieValue);
-		
-		List<String> formNames = requestEntity.getBody();
-		logger.debug("Selected forms received: " + formNames);
-
-		HttpStatus errorCode =  HttpStatus.BAD_REQUEST;
-
-		//call Validator service
-		try {
-			CCCReport cccReport = serviceValidator.sendPostRequestValidator(formNames, sessionCookieValue, checkUOM, checkCRF, displayExceptions);
-			
-			if (cccReport == null) {
-				//We never expect validate request failure. It shall always send a report.
-				logger.error("sendPostRequestValidator error on " + sessionCookieValue);
-				return buildErrorResponse(SESSION_DATA_NOT_FOUND + sessionCookieValue, HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-			
-			StringResponseWrapper saveResponse = serviceDb.submitPostRequestSaveReportError(cccReport, sessionCookieValue, CCHECKER_DB_SERVICE_URL_CREATE_REPORT_ERROR);
-			HttpStatus statusCode = saveResponse.getStatusCode();
-			if (HttpStatus.OK.equals(statusCode)) {
-				HttpHeaders httpHeaders = createHttpOkHeaders();
-				return new ResponseEntity<CCCReport>(cccReport, httpHeaders, HttpStatus.OK);
-			}
-			else {
-				logger.error("submitPostRequestSaveReportError received statusCode: " + statusCode);
-				errorCode = statusCode;//This can be user error or server error
-				return buildErrorResponse("Unexpected error on validate for session: " + sessionCookieValue, errorCode);
-			}
-		}
-		catch (RestClientException re) {
-			 String errorMessage = "Unexpected error on validate for session: " + sessionCookieValue + ". Details: " + re.getMessage();
-			 return buildErrorResponse(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
-	/**
-	 * 
-	 * @param request
-	 * @param response
-	 * @param checkUOM
-	 * @param checkCRF
-	 * @param displayExceptions
-	 * @param requestEntity not null and not empty
-	 * @return ResponseEntity
-	 */
-	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
 	@PostMapping("/validateservice")
 	public ResponseEntity<?> validateService(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(name = "checkUOM", required = false, defaultValue = "false") boolean checkUOM,
@@ -468,16 +408,14 @@ public class GatewayBootController {
 
 		//call Validator service
 		try {
-			CCCReport cccReport = serviceValidator.sendPostRequestValidator(formNames, sessionCookieValue, checkUOM, checkCRF, displayExceptions);
+			StringResponseWrapper stringResponseWrapper = serviceValidator.sendPostRequestValidator(formNames, sessionCookieValue, checkUOM, checkCRF, displayExceptions);
 			
-			if (cccReport == null) {
+			if (stringResponseWrapper == null) {
 				//We never expect validate request failure. It shall always send a report.
 				logger.error("sendPostRequestValidator error on " + sessionCookieValue);
 				return buildErrorResponse(SESSION_DATA_NOT_FOUND + sessionCookieValue, HttpStatus.INTERNAL_SERVER_ERROR);
 			}
-			
-			StringResponseWrapper saveResponse = serviceDb.submitPostRequestSaveReportError(cccReport, sessionCookieValue, CCHECKER_DB_SERVICE_URL_CREATE_REPORT_ERROR);
-			HttpStatus statusCode = saveResponse.getStatusCode();
+			HttpStatus statusCode = stringResponseWrapper.getStatusCode();
 			if (HttpStatus.OK.equals(statusCode)) {
 				URI url = requestEntity.getUrl();
 				String path = String.format("%s://%s:%d%s",url.getScheme(),  url.getHost(), url.getPort(), url.getPath());
@@ -487,9 +425,10 @@ public class GatewayBootController {
 				return new ResponseEntity<String>(location, httpHeaders, HttpStatus.CREATED);
 			}
 			else {
-				logger.error("submitPostRequestSaveReportError received statusCode: " + statusCode);
-				errorCode = statusCode;//This can be user error or server error
-				return buildErrorResponse("Unexpected error on validate for session: " + sessionCookieValue, errorCode);
+				logger.error("sendPostRequestValidator error response: " + stringResponseWrapper);
+				errorCode = stringResponseWrapper.getStatusCode();//This can be user error or server error
+				String detailsStr = StringUtils.isNotBlank(stringResponseWrapper.getResponseData()) ? ". Details: " + stringResponseWrapper.getResponseData() : "";
+				return buildErrorResponse("Unexpected error on validate for session: " + sessionCookieValue + detailsStr, errorCode);
 			}
 		}
 		catch (RestClientException re) {

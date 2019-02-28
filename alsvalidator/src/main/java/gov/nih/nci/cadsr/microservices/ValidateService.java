@@ -31,6 +31,7 @@ public class ValidateService {
 	public static final String CDE_TIER_PROD_SHIFT = "";//we do not need -prod
 	public static final String CDE_TIER_DEFAULT = "dev";
 	public static final String CDE_TIER_URL_PLACEHOLDER = "@@cdetier@@";
+	static String CCHECKER_DB_SERVICE_URL_CREATE_REPORT_ERROR;
 	
 	public static String getCDEBROWSER_REST_GET_CDE() {
 		return CDEBROWSER_REST_GET_CDE;
@@ -49,6 +50,8 @@ public class ValidateService {
 		properties.load(input);
 		CCHECKER_DB_SERVICE_URL_RETRIEVE = properties.getProperty("CCHECKER_DB_SERVICE_URL_RETRIEVE");
 		logger.info("CCHECKER_DB_SERVICE_URL_RETRIEVE: " + CCHECKER_DB_SERVICE_URL_RETRIEVE);
+		CCHECKER_DB_SERVICE_URL_CREATE_REPORT_ERROR = properties.getProperty("CCHECKER_DB_SERVICE_URL_CREATE_REPORT_ERROR");
+		logger.info("CCHECKER_DB_SERVICE_URL_CREATE_REPORT_ERROR: " + CCHECKER_DB_SERVICE_URL_CREATE_REPORT_ERROR);
 		
 		CDEBROWSER_CDE_TIER = System.getenv(CDE_TIER_ENV);
 		if (CDEBROWSER_CDE_TIER == null) {
