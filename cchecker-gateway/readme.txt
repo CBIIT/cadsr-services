@@ -72,9 +72,9 @@ or 400 - wrong ID format
 or 404 - not found
 **********
 Feed Validation status
-/testfeedvalidatestatus/{session-cookie idseq}
+/feedcheckstatus/{sessionid}
 Example:
-http://localhost:8080/gateway/feedvalidatestatus/A9D4DF89-7680-48F5-8E0E-7094567944D1
+curl -v --cookie "_cchecker=005BE648-0924-491B-AF22-C02AEF415FB8" http://localhost:8080/gateway/feedcheckstatus/A9D4DF89-7680-48F5-8E0E-7094567944D1
 return SSE with current form number
 
 

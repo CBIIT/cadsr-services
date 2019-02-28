@@ -445,11 +445,12 @@ public class GatewayBootController {
 	 * @param checkCRF
 	 * @param displayExceptions
 	 * @param requestEntity not null and not empty
+	 * @param sessionid String not null and not empty
 	 * @return ResponseEntity
 	 */
 	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
-	@PostMapping("/validateflowservice")
-	public ResponseEntity<?> validateFlowService(HttpServletRequest request, HttpServletResponse response,
+	@PostMapping("/checkservice")
+	public ResponseEntity<?> checkService(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(name = "checkUOM", required = false, defaultValue = "false") boolean checkUOM,
 			@RequestParam(name = "checkCRF", required = false, defaultValue = "false") boolean checkCRF,
 			@RequestParam(name = "displayExceptions", required = false, defaultValue = "false") boolean displayExceptions,
@@ -463,16 +464,16 @@ public class GatewayBootController {
 		if ((cookie == null) || (StringUtils.isBlank((sessionCookieValue = cookie.getValue()))) || (!ParameterValidator.validateIdSeq(sessionCookieValue))) {
 			return buildErrorResponse(SESSION_NOT_VALID + sessionCookieValue, HttpStatus.BAD_REQUEST);
 		}
-		logger.debug("validateService session cookie: " + sessionCookieValue);
+		logger.debug("checkservice session cookie: " + sessionCookieValue);
 		
 		//sessionid parameter to validate
 		if (!ParameterValidator.validateIdSeq(sessionid)) {
-			logger.error("validateService sessionid invalid: " + sessionid);
+			logger.error("checkservice sessionid invalid: " + sessionid);
 			return buildErrorResponse(SESSION_NOT_VALID + sessionid, HttpStatus.BAD_REQUEST);
 		}
 		
 		//sessionid parameter is validated, and we will use it from now on.
-		logger.debug("validateService session information provided in sessionid: " + sessionid);
+		logger.debug("checkservice session information provided in sessionid: " + sessionid);
 		
 		List<String> formNames = requestEntity.getBody();
 		logger.debug("Selected forms received: " + formNames);
@@ -799,35 +800,53 @@ public class GatewayBootController {
 	 * @return SseEmitter
 	 */
 	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
-	@GetMapping("/testfeedvalidatestatus/{idseq}")
-	public ResponseBodyEmitter feedStatus(@PathVariable("idseq") String idseq) {
-		logger.debug("feedStatus called with idseq: " + idseq);
+	@GetMapping("/feedcheckstatus/{idseq}")
+	public ResponseBodyEmitter feedCheckStatus(HttpServletRequest request, @PathVariable("idseq") String idseq) {
+		logger.debug("feedcheckstatus called with session: " + idseq);
 
-		final SseEmitter emitter = new SseEmitter();
-		if  (!ParameterValidator.validateIdSeq(idseq)) {
-			logger.error("feedstatus wrong parameter format: " + idseq);
+		Cookie cookie = retrieveCookie(request);
+
+		if ((cookie == null) || (!ParameterValidator.validateIdSeq(cookie.getValue()))) {
+			logger.debug("feedcheckstatus session cookie is not found");
 			return null;
 		}
 
+		final SseEmitter emitter = new SseEmitter();
+
 		ExecutorService service = Executors.newSingleThreadExecutor();
 		service.execute(() -> {
-			String res = "-1";//we expect to receive a form number
+			String resPre = "-1";//we expect to receive a form number
+			String res;
+			try {
+				Thread.sleep(timeBetweenFeeds*2);//delay to give validator some time to start
+			} catch (Exception e1) {
+				// Do nothing
+			}
 			//TODO make loop run until we got "0"
 			for (int i = 0; i < maxFeedRequests; i++) {//let's restrict not to risk endless cycle
 				try {
 					res = retrieveFeedValidate(idseq);
+					if (logger.isDebugEnabled()) {
+						if (! StringUtils.equals(res, resPre))  {//reduce amount of logs
+							logger.debug("feedcheckstatus current form for session " + idseq + ", " + res);
+							resPre = res;
+						}
+					}
 					if (!("0".equals(res))) {
 							emitter.send(res, MediaType.TEXT_PLAIN);
 							Thread.sleep(timeBetweenFeeds);
 					}
+					else if (("0".equals(res)) && (i < 1)) {//it looks like this request goes to validator sooner than the form validate
+						Thread.sleep(timeBetweenFeeds);
+					}
 					else {
-						logger.info("feedvalidatestatus is over: " + idseq);
+						logger.info("feedcheckstatus is over: " + idseq);
 						break;
 					}
 				} 
 				catch (Exception e) {
-					logger.error("Error in feedvalidatestatus " + e);
-					e.printStackTrace();
+					logger.error("Error in feedcheckstatus " + idseq + ", " + e);
+					//e.printStackTrace();
 					emitter.completeWithError(e);
 					return;
 				}
@@ -845,7 +864,7 @@ public class GatewayBootController {
 	 */
 	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
 	@GetMapping("/feedvalidatestatus")
-	public ResponseBodyEmitter feedStatusByCookie(HttpServletRequest request, HttpServletResponse response) {
+	public ResponseBodyEmitter feedStatusByCookie(HttpServletRequest request) {
 
 		Cookie cookie = retrieveCookie(request);
 		final String idseq;
