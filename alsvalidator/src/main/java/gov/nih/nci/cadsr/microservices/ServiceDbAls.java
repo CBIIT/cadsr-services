@@ -5,17 +5,23 @@ package gov.nih.nci.cadsr.microservices;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
 import gov.nih.nci.cadsr.data.CCCReport;
 @Service
 public class ServiceDbAls implements ServiceDb {
 	private static final Logger logger = LoggerFactory.getLogger(ServiceDbAls.class.getName());
 	static final String sessionCookieName = "_cchecker";
+
+	@Autowired
+	private RestTemplate restTemplate;
+	
 	@Override
 	public StringResponseWrapper submitPostRequestSaveReportError(CCCReport data, String idseq, String urlStr) {
 		return submitPostRequestCreateGeneric(data, idseq, urlStr);
@@ -28,9 +34,7 @@ public class ServiceDbAls implements ServiceDb {
 	 * @param String URL string not null
 	 * @return StringResponseWrapper
 	 */
-	protected static <T>StringResponseWrapper submitPostRequestCreateGeneric(T data, String idseq, String createRequestUrlStr) {
-		RestTemplate restTemplate = new RestTemplate();
-
+	protected <T>StringResponseWrapper submitPostRequestCreateGeneric(T data, String idseq, String createRequestUrlStr) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(createRequestUrlStr);
 
 		builder.queryParam(sessionCookieName, idseq);

@@ -12,10 +12,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication(scanBasePackages = { "gov.nih.nci.cadsr.microservices"})
 @RestController
@@ -35,6 +37,11 @@ public class ValidateService {
 	
 	public static String getCDEBROWSER_REST_GET_CDE() {
 		return CDEBROWSER_REST_GET_CDE;
+	}
+	@Primary
+	@Bean
+	public RestTemplate restTemplate() {
+		return new RestTemplate();
 	}
 	
 	@RequestMapping("/")

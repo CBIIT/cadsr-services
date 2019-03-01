@@ -44,6 +44,8 @@ public class ValidateController {
 	private ReportGeneratorFeed reportGeneratorFeed;//
 	@Autowired
     private ServiceDb serviceDb;
+	@Autowired
+	private RestTemplate restTemplate;
 	
 	@CrossOrigin
 	@GetMapping("/rest/feedvalidateformnumber/{idseq}")
@@ -150,8 +152,6 @@ public class ValidateController {
 	protected <T> T retrieveData(String idseq, String retrieveUrlStr, Class<T> clazz) {
 		T data = null;
 		if (idseq != null) {
-			RestTemplate restTemplate = new RestTemplate();
-
 			String urlStr = String.format(retrieveUrlStr, idseq);
 			logger.debug("...retrieveData: " + urlStr);
 

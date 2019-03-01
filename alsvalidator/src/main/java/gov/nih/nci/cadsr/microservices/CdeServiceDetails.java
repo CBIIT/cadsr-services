@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -16,9 +17,10 @@ import gov.nih.nci.cadsr.service.model.cdeData.CdeDetails;
 @Service
 public class CdeServiceDetails {
 
-	private final static Logger logger = LoggerFactory.getLogger(ValidateController.class);
+	private final static Logger logger = LoggerFactory.getLogger(CdeServiceDetails.class);
 	private static final String CDEBROWSER_REST_GET_CDE = ValidateService.getCDEBROWSER_REST_GET_CDE();
-
+	@Autowired
+	private RestTemplate restTemplate;
 	/**
 	 * retrieve CDE by calling cde details restful service
 	 * 
@@ -36,7 +38,6 @@ public class CdeServiceDetails {
 //				+ publicId + ":" + versionNumber + 
 //			" -  " + Thread.currentThread().getName());
 		String cdeBrowserRestApiUrl = String.format(CDEBROWSER_REST_GET_CDE, publicId, versionNumber);
-		RestTemplate restTemplate = new RestTemplate();
 		cdeDetails = restTemplate.getForObject(cdeBrowserRestApiUrl, CdeDetails.class);
 		return CompletableFuture.completedFuture(cdeDetails);
 	}
