@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2019 Leidos Biomedical Research, Inc. - All rights reserved.
+ * Copyright (C) 2019 FNLCR - All rights reserved.
  */
 package gov.nih.nci.cadsr.microservices;
 
@@ -59,5 +59,8 @@ public class ServiceDbAls implements ServiceDb {
 			logger.error(createRequestUrlStr + " sent an error: " + wrapper);
 		}
 		return wrapper;
+	}
+	public void setRestTemplate(RestTemplate restTemplate) {
+		this.restTemplate = restTemplate;
 	}
 }
