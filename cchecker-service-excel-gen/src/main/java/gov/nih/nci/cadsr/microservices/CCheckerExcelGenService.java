@@ -11,8 +11,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication(scanBasePackages = {"gov.nih.nci.cadsr.microservices"})
 @RestController
@@ -25,6 +28,13 @@ public class CCheckerExcelGenService {
 	String home() {
 		return "CCheckerExcelGenService is running!\n";
 	}
+	
+	@Primary
+	@Bean
+	public RestTemplate restTemplate() {
+		return new RestTemplate();
+	}
+	
 	public static void main(String[] args) throws Exception {
 		Properties properties = new Properties();
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();

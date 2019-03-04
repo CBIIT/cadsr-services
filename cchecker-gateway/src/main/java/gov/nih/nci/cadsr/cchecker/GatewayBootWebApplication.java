@@ -17,7 +17,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Primary;
+import org.springframework.web.client.RestTemplate;
 
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
@@ -43,6 +46,13 @@ public class GatewayBootWebApplication extends SpringBootServletInitializer {
 	static String UPLOADED_FOLDER;
 	static String ACCESS_CONTROL_ALLOW_ORIGIN_HEADER = "Access-Control-Allow-Origin";
 	static String ACCESS_CONTROL_ALLOW_ORIGIN;
+	
+	@Primary
+	@Bean
+	public RestTemplate restTemplate() {
+		return new RestTemplate();
+	}
+	
 	@Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();

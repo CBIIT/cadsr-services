@@ -5,6 +5,7 @@ package gov.nih.nci.cadsr.cchecker;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +17,10 @@ import gov.nih.nci.cadsr.data.ALSData;
 @Service
 public class ServiceParserAls implements ServiceParser {
 	private static final Logger logger = LoggerFactory.getLogger(ServiceParserAls.class.getName());
+	@Autowired
+	private RestTemplate restTemplate;
 	@Override
 	public ALSDataWrapper submitPostRequestParser(String filePath, String urlString) {
-		RestTemplate restTemplate = new RestTemplate();
-
 		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(urlString);
 
 		// add some String

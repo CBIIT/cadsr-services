@@ -112,6 +112,9 @@ public class GatewayBootController {
 	@Autowired
 	private ServiceValidator serviceValidator;
 	
+	@Autowired
+	private RestTemplate restTemplate;
+	
 	protected static Cookie generateCookie() {
 		Cookie cookie = new Cookie(sessionCookieName, generateIdseq());
 		// cookie.setMaxAge(24 * 60 * 60); // (24 hours in seconds)
@@ -137,8 +140,6 @@ public class GatewayBootController {
 	 * @return ALSDataWrapper
 	 */
 	protected ALSDataWrapper submitPostRequestParser(String filePath) {
-		RestTemplate restTemplate = new RestTemplate();
-
 		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(CCHECKER_PARSER_URL);
 
 		// add some String
@@ -223,8 +224,6 @@ public class GatewayBootController {
 	protected <T> T retrieveData(String idseq, String retrieveUrlStr, Class<T> clazz) {
 		T data = null;
 		if (idseq != null) {
-			RestTemplate restTemplate = new RestTemplate();
-
 			String urlStr = String.format(retrieveUrlStr, idseq);
 			//logger.debug("...retrieveData from URL: " + urlStr);
 
@@ -242,7 +241,7 @@ public class GatewayBootController {
 	 */
 	protected StringResponseWrapper submitPostRequestSaveReportFull(Object reportFullData, String idseq) {
 		//FIXME use a real Report Full Class
-		return submitPostRequestCreateGeneric(reportFullData, idseq, CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL);
+		return submitPostRequestCreateGeneric(reportFullData, idseq, CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL, restTemplate);
 	}
 	/**
 	 * 
@@ -251,9 +250,9 @@ public class GatewayBootController {
 	 * @param String URL string not null
 	 * @return StringResponseWrapper
 	 */
-	protected static <T>StringResponseWrapper submitPostRequestCreateGeneric(T data, String idseq, String createRequestUrlStr) {
-		RestTemplate restTemplate = new RestTemplate();
-
+	protected static <T>StringResponseWrapper submitPostRequestCreateGeneric(T data, String idseq, 
+			String createRequestUrlStr,
+			RestTemplate restTemplate) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(createRequestUrlStr);
 
 		// add some String
@@ -545,7 +544,6 @@ public class GatewayBootController {
 		} 
 		else {
 			try {
-				RestTemplate restTemplate = new RestTemplate();
 				String urlStr = String.format(URL_GEN_EXCEL_REPORT_ERROR_FORMAT, sessionCookieValue);
 				logger.debug("...retrieveData: " + urlStr);
 				response.setHeader("Content-Type", MS_EXCEL_MIME_TYPE);
@@ -584,7 +582,6 @@ public class GatewayBootController {
 		} 
 		else {
 			try {
-				RestTemplate restTemplate = new RestTemplate();
 				String urlStr = String.format(URL_GEN_EXCEL_REPORT_ERROR_FORMAT, idseq);
 				logger.debug("...retrieveData: " + urlStr);
 				response.setHeader("Content-Type", MS_EXCEL_MIME_TYPE);

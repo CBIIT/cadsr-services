@@ -16,6 +16,7 @@ import java.nio.file.StandardOpenOption;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -40,7 +41,9 @@ public class ExcelGenController {
 	public static final String fileExtension = ".xlsx";
 	public final String strError = "No report information received";
 	public final String MS_EXCEL_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-
+	@Autowired
+	private RestTemplate restTemplate;
+	
 	@GetMapping(value = "/rest/generatereporterror")
 	public ResponseEntity<?>generateReportErrorExcel(@RequestParam(name="_cchecker", required=true) String idseq) {
 		logger.debug("generateReportExcel: " + idseq);
@@ -150,8 +153,6 @@ public class ExcelGenController {
 	protected <T> T retrieveData(String idseq, String retrieveUrlStr, Class<T> clazz) {
 		T data = null;
 		if (idseq != null) {
-			RestTemplate restTemplate = new RestTemplate();
-
 			String urlStr = String.format(retrieveUrlStr, idseq);
 			logger.debug("...retrieveData: " + urlStr);
 

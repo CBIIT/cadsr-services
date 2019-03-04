@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,11 +20,12 @@ import gov.nih.nci.cadsr.data.ValidateParamWrapper;
 @Service
 public class ServiceValidatorAls implements ServiceValidator {
 	private static final Logger logger = LoggerFactory.getLogger(ServiceValidatorAls.class.getName());
-
+	@Autowired
+	private RestTemplate restTemplate;
+	
 	@Override
 	public StringResponseWrapper sendPostRequestValidator(List<String> selForms, String idseq, boolean checkUom, boolean checkCrf,
 			boolean displayExceptions) {
-		RestTemplate restTemplate = new RestTemplate();
 		ValidateParamWrapper wrapper = new ValidateParamWrapper();
 		wrapper.setSelForms(selForms);
 		wrapper.setCheckUom(checkUom);
