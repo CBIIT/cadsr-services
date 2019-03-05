@@ -1,10 +1,12 @@
 import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy,ElementRef  } from '@angular/core';
 import { ReportService } from '../services/report.service';
 import { NgbTabset } from '../../../node_modules/@ng-bootstrap/ng-bootstrap';
+import { Observable } from 'rxjs';
 import { RestService } from '../services/rest.service';
 import { HttpClient } from '../../../node_modules/@angular/common/http';
 import { saveAs }  from 'file-saver'
 import { Subscription } from '../../../node_modules/rxjs';
+import { FormListService } from '../services/formlist.service';
 @Component({
   selector: 'app-als-report',
   templateUrl: './als-report.component.html',
@@ -18,6 +20,7 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
   dtNrdsOptionsMissing:Object;
   dtSummaryOptions:Object;
   errorMessage:String;  
+  formListData:Observable<Object>;
   raveForm:Object;
   reportData:Object;
   showFormTab:Boolean=false;
@@ -30,7 +33,7 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(NgbTabset)
     tabs: NgbTabset;
 
-  constructor(private reportService:ReportService, private restService:RestService,private http:HttpClient) { 
+  constructor(private reportService:ReportService, private restService:RestService,private http:HttpClient,private formListService:FormListService) { 
   }
 
   // switch tab when selecting form from dropdown //
@@ -53,7 +56,7 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
     this.errorMessage = null;
     this.statusMessage = null;
     var that = this;
-    this.restService.generateExcel().subscribe(
+    this.restService.generateExcel(this.formListData.source['value'].sessionid).subscribe(
       data => {
         const filename = data.headers.get('Content-Disposition').replace('attachment; filename=','')
         var blob = new Blob([data.body], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
@@ -90,6 +93,8 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
         this.loaded = true;
       }
     );
+    this.formListData = this.formListService.getFormListData(); // get form data as observable //
+
 
     // all options for data tables //
     const baseDtOptions = { ordering:false, paging:false, searching:false, info:false } // base datatable options //

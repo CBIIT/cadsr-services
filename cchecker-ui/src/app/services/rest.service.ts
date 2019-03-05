@@ -15,7 +15,7 @@ export class RestService {
   }
 
   // generate excel report //
-  generateExcel = () => this.http.get(`${this.REST_API}/gateway/genexcelreporterror`,
+  generateExcel = (sessionid) => this.http.get(`${this.REST_API}/gateway/genexcelreporterror/${sessionid}`,
   {
     observe:'response',
     responseType: "blob",
