@@ -47,7 +47,7 @@ export class AlsFormListComponent implements OnInit {
     // run check forms //
     this.checkFormsService = 
       this.formListService.setValidationStatus(true);
-      this.restService.checkForms(checkedItems,formListData).subscribe(
+      this.restService.checkForms(checkedItems,formListData,this.formListData.source['value'].sessionid).subscribe(
         data => {
           this.reportService.setReportLocation(data);
         },
@@ -76,7 +76,7 @@ export class AlsFormListComponent implements OnInit {
   // runs feed progress service //
   getFeedService = () => {
   this.feedService = 
-    this.restService.validateFeedStatus().subscribe(
+    this.restService.validateFeedStatus(this.formListData.source['value'].sessionid).subscribe(
       e => {
         if (e.type === HttpEventType.DownloadProgress) {
           let currentForm = e['partialText'].split('\n\n').filter(val => val!='' && val != 'data:').pop();
