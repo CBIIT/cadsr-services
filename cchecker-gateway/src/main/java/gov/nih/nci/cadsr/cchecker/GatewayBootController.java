@@ -94,6 +94,7 @@ public class GatewayBootController {
 	static final String SESSION_NOT_VALID = "Session is not found or not valid: ";
 	static final String SESSION_DATA_NOT_FOUND = "Session data is not found based on: ";
 	static final String VALIDATE_SERVICE_URL_STR = "validateservice";
+	static final String CHECK_SERVICE_URL_STR = "checkservice";
 	static final String RETRIEVE_ERROR_REPORT_URL_STR = "retrievereporterror";
 
 	{
@@ -492,7 +493,7 @@ public class GatewayBootController {
 			if (HttpStatus.OK.equals(statusCode)) {
 				URI url = requestEntity.getUrl();
 				String path = String.format("%s://%s:%d%s",url.getScheme(),  url.getHost(), url.getPort(), url.getPath());
-				String location = path.replace(VALIDATE_SERVICE_URL_STR, RETRIEVE_ERROR_REPORT_URL_STR) + '/'+ sessionid;
+				String location = path.replace(CHECK_SERVICE_URL_STR, RETRIEVE_ERROR_REPORT_URL_STR) + '/'+ sessionid;
 				//logger.debug("Report error Location header value: " + location);	
 				HttpHeaders httpHeaders = createHttpValidateHeaders(TEXT_PLAIN_MIME_TYPE, location);
 				return new ResponseEntity<String>(location, httpHeaders, HttpStatus.CREATED);
