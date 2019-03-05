@@ -63,8 +63,6 @@ public class ReportGeneratorFeed implements ReportOutput {
 	private static List<CategoryCde> categoryCdeList;
 	private static List<CategoryNrds> categoryNrdsList;
 	private static String noCdeMsg = "No CDE provided : {%s}.";
-	private static List<NrdsCde> nrdsCdeList;
-	private static List<StandardCrfCde> standardCrfCdeList;
 	private static int totalNrdsCong;
 	private static int totalNrdsWarn;
 	private static int totalNrdsError;	
@@ -253,8 +251,8 @@ public class ReportGeneratorFeed implements ReportOutput {
 		totalNrdsWarn = 0;
 		totalNrdsError = 0;		
 
-		nrdsCdeList = new ArrayList<NrdsCde>();
-		standardCrfCdeList = new ArrayList<StandardCrfCde>();
+		List<NrdsCde> nrdsCdeList = new ArrayList<NrdsCde>();
+		List<StandardCrfCde> standardCrfCdeList = new ArrayList<StandardCrfCde>();
 		List<CCCQuestion> questionsList = new ArrayList<CCCQuestion>();
 		List<CCCQuestion> congQuestionsList = new ArrayList<CCCQuestion>();
 		List<NrdsCde> missingNrdsCdesList = new ArrayList<NrdsCde>();
@@ -353,7 +351,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 							CdeStdCrfData cdeCrfData = fetchCdeStandardCrfData(question.getCdePublicId(), question.getCdeVersion());
 							
 							// updating the NCI category to the question
-							question = updateNciCategory(checkStdCrfCde, cdeCrfData, question, cdeDetails);
+							question = updateNciCategory(checkStdCrfCde, cdeCrfData, question, cdeDetails, nrdsCdeList, standardCrfCdeList);
 							
 							if (question.getQuestionCongruencyStatus() != null) {
 								if (congStatus_congruent.equals(question.getQuestionCongruencyStatus())) {
@@ -468,7 +466,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 	 * @param cdeDetails
 	 * @return CCCQuestion
 	 */
-	protected static CCCQuestion updateNciCategory (Boolean checkStdCrfCde, CdeStdCrfData cdeCrfData, CCCQuestion question, CdeDetails cdeDetails) {
+	protected static CCCQuestion updateNciCategory (Boolean checkStdCrfCde, CdeStdCrfData cdeCrfData, CCCQuestion question, CdeDetails cdeDetails, List<NrdsCde> nrdsCdeList, List<StandardCrfCde> standardCrfCdeList) {
 		if (cdeCrfData!=null) {
 			if (checkStdCrfCde) {
 				question.setNciCategory(cdeCrfData.getNciCategory());
@@ -707,7 +705,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 		return missing;
 	}
 	
-	protected static List<CategoryCde> createMissingCategoryCdeList(List<StandardCrfCde> standardCrfCdeList) {
+	protected static List<CategoryCde> createMissingCategoryCdeList(List<StandardCrfCde> standardCrfCdeList) {		
 		List<CategoryCde> missing = new ArrayList<>();
 		for (CategoryCde categoryCde : categoryCdeList ) {
 			missing.add(categoryCde);
