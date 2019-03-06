@@ -39,7 +39,6 @@ import gov.nih.nci.cadsr.parser.Parser;
 public class AlsParser implements Parser {
 
 	private static final Logger logger = LoggerFactory.getLogger(AlsParser.class);
-	private static DataFormatter dataFormatter = new DataFormatter();
 	private static String reportDateFormat = "MM/dd/yyyy";
 	private static String crfDraftSheetName = "CRFDraft";
 	public static final String formsSheetName = "Forms";
@@ -201,7 +200,7 @@ public class AlsParser implements Parser {
 		alsData.setReportDate(dateFormat.format(date));
 		Row row = sheet.getRow(crfDraftStartRow);
 		ALSCrfDraft crfDraft = getAlsCrfDraftInstance();
-
+		DataFormatter dataFormatter = new DataFormatter();
 		// Parse out the following values from the CRFDraft sheet
 		// DraftName, ProjectName & PrimaryFormOID
 		crfDraft.setDraftName(row.getCell(cell_crfDraftName) != null ? dataFormatter.formatCellValue(row.getCell(cell_crfDraftName)) : null);
@@ -234,6 +233,7 @@ public class AlsParser implements Parser {
 	 */
 	protected static ALSData getForms(Sheet sheet, ALSData alsData, CCCError cccError) throws IOException {
 		List<ALSForm> forms = new ArrayList<ALSForm>();
+		DataFormatter dataFormatter = new DataFormatter();
 		Iterator<Row> rowIterator = sheet.rowIterator();
 		Row row = rowIterator.next();
 		while (rowIterator.hasNext()) {
@@ -278,6 +278,7 @@ public class AlsParser implements Parser {
 	 * 
 	 */
 	protected static ALSData getFields(Sheet sheet, ALSData alsData, CCCError cccError) throws NullPointerException {
+		DataFormatter dataFormatter = new DataFormatter();
 		List<ALSField> fields = new ArrayList<ALSField>();
 		ALSField field;
 		Iterator<Row> rowIterator = sheet.rowIterator();
@@ -359,6 +360,7 @@ public class AlsParser implements Parser {
 	 */
 	protected static ALSData getDataDictionaryEntries(Sheet sheet, ALSData alsData, CCCError cccError)
 			throws NullPointerException {
+		DataFormatter dataFormatter = new DataFormatter();
 		Map<String, ALSDataDictionaryEntry> ddeMap = new HashMap<String, ALSDataDictionaryEntry>();
 		ALSDataDictionaryEntry dde = new ALSDataDictionaryEntry();
 		final String regex_space = "[\\p{Z}\\s]";// To identify and remove
@@ -460,6 +462,7 @@ public class AlsParser implements Parser {
 	 */
 	protected static ALSData getUnitDictionaryEntries(Sheet sheet, ALSData alsData, CCCError cccError)
 			throws NullPointerException {
+		DataFormatter dataFormatter = new DataFormatter();
 		List<ALSUnitDictionaryEntry> udeList = new ArrayList<ALSUnitDictionaryEntry>();
 		ALSUnitDictionaryEntry ude;
 		Iterator<Row> rowIterator = sheet.rowIterator();
