@@ -540,7 +540,7 @@ public class GatewayBootController {
 		if ((cookie == null) || (StringUtils.isBlank((sessionCookieValue = cookie.getValue()))) || (!ParameterValidator.validateIdSeq(sessionCookieValue))) {
 			response.setHeader("Content-Type", TEXT_PLAIN_MIME_TYPE);
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			IOUtils.copy(new ByteArrayInputStream(("Session Cookie is not found or not valid: " + sessionCookieValue).getBytes()),
+			IOUtils.copy(new ByteArrayInputStream((SESSION_NOT_VALID + sessionCookieValue).getBytes()),
 				response.getOutputStream());
 		} 
 		else {
@@ -578,7 +578,7 @@ public class GatewayBootController {
 		if ((cookie == null) || (!ParameterValidator.validateIdSeq(sessionCookieValue)) || (!ParameterValidator.validateIdSeq(idseq))) {
 			response.setHeader("Content-Type", TEXT_PLAIN_MIME_TYPE);
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			IOUtils.copy(new ByteArrayInputStream(("Sessionis not found or not valid, cookie: " + sessionCookieValue + ", sessionid: " + idseq).getBytes()),
+			IOUtils.copy(new ByteArrayInputStream((SESSION_NOT_VALID+ " cookie: " + sessionCookieValue + ", sessionid: " + idseq).getBytes()),
 				response.getOutputStream());
 		} 
 		else {
