@@ -574,7 +574,7 @@ public class GatewayBootController {
 	@GetMapping("/genexcelcheckreport/{idseq}")
 	public void genExcelCheckReport(HttpServletRequest request, HttpServletResponse response,  @PathVariable("idseq") String idseq) throws IOException {
 		Cookie cookie = retrieveCookie(request);
-		String sessionCookieValue = null;
+		String sessionCookieValue = cookie.getValue();
 		if ((cookie == null) || (!ParameterValidator.validateIdSeq(sessionCookieValue)) || (!ParameterValidator.validateIdSeq(idseq))) {
 			response.setHeader("Content-Type", TEXT_PLAIN_MIME_TYPE);
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
