@@ -63,9 +63,6 @@ public class ReportGeneratorFeed implements ReportOutput {
 	private static List<CategoryCde> categoryCdeList;
 	private static List<CategoryNrds> categoryNrdsList;
 	private static String noCdeMsg = "No CDE provided : {%s}.";
-	private static int totalNrdsCong;
-	private static int totalNrdsWarn;
-	private static int totalNrdsError;	
 	
 	static{
 		categoryCdeList = retrieveCdeCrfData();
@@ -247,9 +244,9 @@ public class ReportGeneratorFeed implements ReportOutput {
 		int totalFormsCongruent = 0;
 		int totalQuestWithoutCde = 0;
 		int countQuestChecked = 0;
-		totalNrdsCong = 0;
-		totalNrdsWarn = 0;
-		totalNrdsError = 0;		
+		int totalNrdsCong = 0;
+		int totalNrdsWarn = 0;
+		int totalNrdsError = 0;		
 
 		List<NrdsCde> nrdsCdeList = new ArrayList<NrdsCde>();
 		List<StandardCrfCde> standardCrfCdeList = new ArrayList<StandardCrfCde>();
@@ -351,7 +348,18 @@ public class ReportGeneratorFeed implements ReportOutput {
 							CdeStdCrfData cdeCrfData = fetchCdeStandardCrfData(question.getCdePublicId(), question.getCdeVersion());
 							
 							// updating the NCI category to the question
-							question = updateNciCategory(checkStdCrfCde, cdeCrfData, question, cdeDetails, nrdsCdeList, standardCrfCdeList);
+							question = updateNciCategory(checkStdCrfCde, cdeCrfData, question, cdeDetails);
+							nrdsCdeList = getNrdsCdeList(question, cdeDetails, nrdsCdeList);
+							standardCrfCdeList = getStdCrfCdeList(checkStdCrfCde, cdeCrfData, question, cdeDetails, standardCrfCdeList);
+							if (nrds_cde.equalsIgnoreCase(question.getNciCategory())) {
+								if (congStatus_congruent.equals(question.getQuestionCongruencyStatus())) {
+									totalNrdsCong++;
+								} else if (congStatus_errors.equals(question.getQuestionCongruencyStatus())) {
+									totalNrdsError++;
+								} else if (congStatus_warn.equals(question.getQuestionCongruencyStatus())) {
+									totalNrdsWarn++;
+								}
+							}							
 							
 							if (question.getQuestionCongruencyStatus() != null) {
 								if (congStatus_congruent.equals(question.getQuestionCongruencyStatus())) {
@@ -458,15 +466,14 @@ public class ReportGeneratorFeed implements ReportOutput {
 	
 	
 	/**
-	 * Checks and assigns NCI category [NRDS, Mandatory, Optional, Conditional] to the question, 
-	 * with the totals of the questions in each category
+	 * Checks and assigns NCI category [NRDS, Mandatory, Optional, Conditional] to the question 
 	 * @param checkStdCrfCde
 	 * @param cdeCrfData
 	 * @param question
 	 * @param cdeDetails
 	 * @return CCCQuestion
 	 */
-	protected static CCCQuestion updateNciCategory (Boolean checkStdCrfCde, CdeStdCrfData cdeCrfData, CCCQuestion question, CdeDetails cdeDetails, List<NrdsCde> nrdsCdeList, List<StandardCrfCde> standardCrfCdeList) {
+	protected static CCCQuestion updateNciCategory (Boolean checkStdCrfCde, CdeStdCrfData cdeCrfData, CCCQuestion question, CdeDetails cdeDetails) {
 		if (cdeCrfData!=null) {
 			if (checkStdCrfCde) {
 				question.setNciCategory(cdeCrfData.getNciCategory());
@@ -475,19 +482,40 @@ public class ReportGeneratorFeed implements ReportOutput {
 					question.setNciCategory(nrds_cde);
 			}
 		}
-	if (cdeCrfData!=null && cdeDetails.getDataElement()!=null)  {
+		return question;
+	}	
+	
+	
+	/**
+	 * Assigning the CDE to the NRDS CDEs list based on the question's NCI category 
+	 * @param question
+	 * @param cdeDetails
+	 * @param nrdsCdeList
+	 * @return List<NrdsCde>
+	 */
+	protected static List<NrdsCde> getNrdsCdeList (CCCQuestion question, CdeDetails cdeDetails, List<NrdsCde> nrdsCdeList) {
+	if (cdeDetails.getDataElement()!=null)  {
 	if (nrds_cde.equalsIgnoreCase(question.getNciCategory())) {
 		nrdsCdeList.add(buildNrdsCde(question,
 				cdeDetails.getDataElement().getDataElementDetails().getLongName()));
-			if (congStatus_congruent.equals(question.getQuestionCongruencyStatus())) {
-				totalNrdsCong++;
-			} else if (congStatus_errors.equals(question.getQuestionCongruencyStatus())) {
-				totalNrdsError++;
-			} else if (congStatus_warn.equals(question.getQuestionCongruencyStatus())) {
-				totalNrdsWarn++;
-			}
 		}
-	else if ((mandatory_crf.equalsIgnoreCase(question.getNciCategory()))
+	}		
+		return nrdsCdeList;
+	}	
+	
+	
+	/**
+	 * Assigning the CDE to the Standard CRF CDEs list based on the question's NCI category 
+	 * @param checkStdCrfCde
+	 * @param cdeCrfData
+	 * @param question
+	 * @param cdeDetails
+	 * @param standardCrfCdeList 
+	 * @return List<StandardCrfCde>
+	 */
+	protected static List<StandardCrfCde> getStdCrfCdeList (Boolean checkStdCrfCde, CdeStdCrfData cdeCrfData, CCCQuestion question, CdeDetails cdeDetails, List<StandardCrfCde> standardCrfCdeList) {
+	if (cdeCrfData!=null && cdeDetails.getDataElement()!=null)  {
+		if ((mandatory_crf.equalsIgnoreCase(question.getNciCategory()))
 			|| (optional_crf.equalsIgnoreCase(question.getNciCategory()))
 			|| (conditional_crf.equalsIgnoreCase(question.getNciCategory()))) {
 		if (checkStdCrfCde) {
@@ -495,10 +523,9 @@ public class ReportGeneratorFeed implements ReportOutput {
 			} 
 		}
 	}		
-		return question;
-	}
-	
-	
+		return standardCrfCdeList;
+	}	
+		
 	
 	/**
 	 * @param ALSField
