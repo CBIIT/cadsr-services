@@ -57,7 +57,8 @@ public class ExcelGenController {
 			CCCReport cccReport = retrieveReportErrorData(idseq);
 			String fileName = cccReport.getFileName();//expected Excel file name
 			String fileNameReport = REPORT_FOLDER + filePrefix + idseq + fileExtension;
-			ExcelReportGenerator.writeExcel(fileNameReport, cccReport);
+			ExcelReportGenerator excelGen = new ExcelReportGenerator(); 
+			excelGen.writeExcel(fileNameReport, cccReport);
 			InputStream inputStream = getExcelFileAsInputStream(fileNameReport);
 			InputStreamResource isr = new InputStreamResource(inputStream);
 			HttpHeaders httpHeaders = new HttpHeaders();
@@ -89,7 +90,8 @@ public class ExcelGenController {
 		String fileName = cccReport.getFileName();//expected Excel file name
 		logger.debug("genExcelReportErrorExcel generated for: " + fileName);
 		String fileNameReport = REPORT_FOLDER + filePrefix + idseq + fileExtension;
-		ExcelReportGenerator.writeExcel(fileNameReport, cccReport);
+		ExcelReportGenerator excelGen = new ExcelReportGenerator(); 
+		excelGen.writeExcel(fileNameReport, cccReport);
 		InputStream inputStream = getExcelFileAsInputStream(fileNameReport);
 		InputStreamResource isr = new InputStreamResource(inputStream);
 		HttpHeaders httpHeaders = new HttpHeaders();

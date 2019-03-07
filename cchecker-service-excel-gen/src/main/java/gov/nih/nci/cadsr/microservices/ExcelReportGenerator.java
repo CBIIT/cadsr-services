@@ -132,38 +132,35 @@ public class ExcelReportGenerator {
 	private static final String raveDisplayFormatLbl = "RAVE Display Format";
 	private static final String formatCheckerResultLbl = "Format Checker Result";
 	private static final String cdeDisplayFormatLbl = "CDE Display Format";
-	private static Map<String, String> formOidSheetNamesMap;
-	private static Set<String> formOids;
-	private static Map<String, Integer> formOidDupes;
 	private static final int truncSheetNumSingleDigit = 3;
 	private static final int truncSheetNumDoubleDigit = 4;
 	private static final int truncSheetNumTripleDigit = 5;
 	private static final String backToSummary = "Click here to go back to Summary sheet.";
-	private static CellStyle hlink_style;
-	private static CellStyle header_lbl_style;
-	private static CellStyle header_lbl_style_2;
-	private static Font hlink_font;
-	private static Font header_lbl_font;
-	private static Font header_lbl_font_2;
 	private static final String summaryLbl = "Summary";
-	private static CreationHelper createHelper;
 
 	/**
-	 * @param
-	 * @return Implementation for Writing the final output report object into an
-	 *         excel (as a feasibility check)
-	 * 
+	 * Writing the final output report object into an Excel for download
+	 * @param OUTPUT_XLSX_FILE_PATH
+	 * @param cccReport
 	 */
-	public static void writeExcel(String OUTPUT_XLSX_FILE_PATH, CCCReport cccReport)
+	public void writeExcel(String OUTPUT_XLSX_FILE_PATH, CCCReport cccReport)
 			throws IOException, InvalidFormatException, NullPointerException {
 
 		Row row;
 		Workbook workbook = new XSSFWorkbook();
 		Sheet sheet = workbook.createSheet(summaryLbl);
+		CellStyle hlink_style;
+		CellStyle header_lbl_style;
+		CellStyle header_lbl_style_2;
+		Font hlink_font;
+		Font header_lbl_font;
+		Font header_lbl_font_2;
+
+		CreationHelper createHelper;		
 		createHelper = workbook.getCreationHelper();
-		formOidSheetNamesMap = new HashMap<String, String>();
-		formOids = new HashSet<String>();
-		formOidDupes = new HashMap<String, Integer>();
+		Map<String, String> formOidSheetNamesMap = new HashMap<String, String>();
+		Set<String> formOids = new HashSet<String>();
+		Map<String, Integer> formOidDupes  = new HashMap<String, Integer>();		
 
 		// cell style for hyperlinks
 		// by default hyperlinks are blue and underlined
@@ -223,26 +220,26 @@ public class ExcelReportGenerator {
 				cell.setCellStyle(header_lbl_style);
 			} else if (reqQuestMissLbl.equals(lblKey)) {
 				// Link to the NRDS missing CDEs sheet
-				linkToSheet(cell, (String) lblKey, nrds_missing_cde_tab_name);
+				linkToSheet(cell, (String) lblKey, nrds_missing_cde_tab_name, createHelper, hlink_style);
 			} else if (reqNrdsQuestCongLbl.equals(lblKey) || reqNrdsQuestErrorLbl.equals(lblKey)
 					|| reqNrdsQuestWarnLbl.equals(lblKey)) {
 				// Link to the NRDS ALS matching CDEs sheet
-				linkToSheet(cell, (String) lblKey, matching_nrds_cdes_tab_name);
+				linkToSheet(cell, (String) lblKey, matching_nrds_cdes_tab_name, createHelper, hlink_style);
 			} else if ((nciStdCondCongLbl.equals(lblKey) || nciStdCondErrorLbl.equals(lblKey)
 					|| nciStdCondQuestLbl.equals(lblKey) || nciStdCondWarnLbl.equals(lblKey))
 					&& isCheckStdCrfCdeChecked) {
 				// Link to the Standard CRF Conditional CDEs sheet (provided check CDE flag is checked)
-				linkToSheet(cell, (String) lblKey, stdCrfCondMiss_tab_name);
+				linkToSheet(cell, (String) lblKey, stdCrfCondMiss_tab_name, createHelper, hlink_style);
 			} else if ((nciStdOptCongLbl.equals(lblKey) || nciStdOptErrorLbl.equals(lblKey)
 					|| nciStdOptQuestLbl.equals(lblKey) || nciStdOptWarnLbl.equals(lblKey))
 					&& isCheckStdCrfCdeChecked) {
 				// Link to the Standard CRF Optional CDEs sheet (provided check CDE flag is checked)
-				linkToSheet(cell, (String) lblKey, stdCrfOptMiss_tab_name);
+				linkToSheet(cell, (String) lblKey, stdCrfOptMiss_tab_name, createHelper, hlink_style);
 			} else if ((nciStdManCongLbl.equals(lblKey) || nciStdManErrorLbl.equals(lblKey)
 					|| nciStdManQuestLbl.equals(lblKey) || nciStdManWarnLbl.equals(lblKey))
 					&& isCheckStdCrfCdeChecked) {
 				// Link to the Standard CRF Mandatory CDEs sheet (provided check CDE flag is checked)				
-				linkToSheet(cell, (String) lblKey, stdCrfManMiss_tab_name);
+				linkToSheet(cell, (String) lblKey, stdCrfManMiss_tab_name, createHelper, hlink_style);
 			} else {
 				// Print without a link
 				cell.setCellValue((String) lblKey);
@@ -277,9 +274,47 @@ public class ExcelReportGenerator {
 			if (!congStatus_Congruent.equalsIgnoreCase(form.getCongruencyStatus())) {
 				// Creating the link for another sheet in the document
 				Hyperlink newlink = createHelper.createHyperlink(HyperlinkType.DOCUMENT);
-				// Obtaining a cropped version of the form name in case it's
-				// longer than 31
-				worksheetName = cropFormNameForExcel(worksheetName);
+				// Obtaining a cropped version of form name if longer than 31
+				 /* Checks and crops the worksheetname to less than 31 for accommodating the
+				 * 31 character limit for names of worksheets allowed by excel
+				 * 
+				 * If a duplicate worksheetname is found, then the last 3 characters of the
+				 * worksheetname are truncated and appended with "(n)" to indicate the
+				 * number of times the worksheet name is duplicated because of the excel
+				 * limit truncation of the worksheet name */
+				// Checking and cropping the form OID if more than 31 characters long
+				if (worksheetName.length() > 31) {// Excel limits 31 character on
+													// worksheet name length
+					worksheetName = worksheetName.substring(0, 31);
+				}
+				// count for the duplicates of truncated form sheet name
+				int count = 0;
+				// Checking the presence of the worksheet to identify duplicates
+				if (formOids.contains(worksheetName)) {
+					// Get the count of how many times the duplicate formOID is present
+					if (formOidDupes.containsKey(worksheetName)) {
+						count = formOidDupes.get(worksheetName);
+					}
+					String longWorksheetName = worksheetName;
+					int truncLength = 0;
+					// Determining the length of truncation based on the number of duplicates for a form name
+					// when they go into double or triple digits - highly unlikely scenario yet not impossible
+					if (count < 9) {
+						truncLength = truncSheetNumSingleDigit;
+					} else if (count == 9 || count > 9) {
+						truncLength = truncSheetNumDoubleDigit;
+					} else if (count == 99 || count > 99) {
+						truncLength = truncSheetNumTripleDigit;
+					}
+					// Truncating the last set of characters of the worksheet name to
+					// append "(n)" where 'n' is the count
+					worksheetName = worksheetName.substring(0, worksheetName.length() - truncLength) + "(" + (++count) + ")";
+					formOidDupes.put(longWorksheetName, count);
+				}
+				// Add the worksheet name to the Set for the first time
+				else {
+					formOids.add(worksheetName);
+				}
 				String linkText = "'" + worksheetName + "'!E1";// "'Target Sheet'!A1"
 				newlink.setAddress(linkText);
 				cell.setHyperlink(newlink);
@@ -308,7 +343,7 @@ public class ExcelReportGenerator {
 					newCell.setCellValue(String.format(formHeader, cccForm.getRaveFormOid()));
 					newCell.setCellStyle(header_lbl_style_2);
 					newCell = row.createCell(6);
-					linkToSheet(newCell, backToSummary, summaryLbl);
+					linkToSheet(newCell, backToSummary, summaryLbl, createHelper, hlink_style);
 					row = sheet2.createRow(rowNum++);
 					int colNum = 0;
 					// Print row headers in the form sheet
@@ -355,12 +390,12 @@ public class ExcelReportGenerator {
 				}
 			}
 		}
-		buildNrdsTab(workbook, cccReport.getNrdsCdeList());
-		buildMissingNrdsCdesTab(workbook, cccReport.getMissingNrdsCdeList());
+		buildNrdsTab(workbook, cccReport.getNrdsCdeList(), createHelper, hlink_style, header_lbl_style, header_lbl_style_2);
+		buildMissingNrdsCdesTab(workbook, cccReport.getMissingNrdsCdeList(), createHelper, hlink_style, header_lbl_style, header_lbl_style_2);
 		boolean isCheckStdCrfCdeChecked = cccReport.getIsCheckStdCrfCdeChecked() != null ? 
 				cccReport.getIsCheckStdCrfCdeChecked() : false;//this is to avoid NullPointerException
 		if (isCheckStdCrfCdeChecked) {
-			buildStdCrfMissingTabs(workbook, cccReport.getMissingStandardCrfCdeList());
+			buildStdCrfMissingTabs(workbook, cccReport.getMissingStandardCrfCdeList(), createHelper, hlink_style, header_lbl_style, header_lbl_style_2);
 		}
 		FileOutputStream outputStream = null;
 		try {
@@ -394,7 +429,7 @@ public class ExcelReportGenerator {
 	 * @param cccReport
 	 * @return Map<String, String>
 	 */
-	public static Map<String, String> returnSummaryLabelsMap(CCCReport cccReport) {
+	public Map<String, String> returnSummaryLabelsMap(CCCReport cccReport) {
 		Map<String, String> summaryLabels = new LinkedHashMap<String, String>();
 		summaryLabels.put(checkerReportOwnerLbl, cccReport.getReportOwner());
 		summaryLabels.put(raveProtocolNameLbl, cccReport.getRaveProtocolName());
@@ -432,7 +467,7 @@ public class ExcelReportGenerator {
 	 * @param cccReport
 	 * @return Map<String, String>
 	 */
-	public static Map<String, String> returnFormFieldsPart1(CCCQuestion question) {
+	public Map<String, String> returnFormFieldsPart1(CCCQuestion question) {
 		Map<String, String> formFields = new LinkedHashMap<String, String>();
 		formFields.put(fieldOrderLbl, question.getFieldOrder());
 		formFields.put(cdeIdLbl, question.getCdePublicId());
@@ -461,7 +496,7 @@ public class ExcelReportGenerator {
 	 * @param cccReport
 	 * @return Map<String, String>
 	 */
-	public static Map<String, String> returnFormFieldsPart2(CCCQuestion question) {
+	public Map<String, String> returnFormFieldsPart2(CCCQuestion question) {
 		Map<String, String> formFields = new LinkedHashMap<String, String>();
 		formFields.put(raveFieldDataTypeLbl, question.getRaveFieldDataType());
 		formFields.put(dataTypeCheckerResultLbl, question.getDatatypeCheckerResult());
@@ -490,7 +525,7 @@ public class ExcelReportGenerator {
 	 * @param cellStyle
 	 * @return Row
 	 */
-	public static Row returnFilledRow(Map<String, String> formFields, Row row, int colNum, CellStyle cellStyle) {
+	public Row returnFilledRow(Map<String, String> formFields, Row row, int colNum, CellStyle cellStyle) {
 		Cell newCell;
 		// Iterating through the Map of report fields to print them into the
 		// excel sheet
@@ -514,7 +549,7 @@ public class ExcelReportGenerator {
 	 * @param sheet
 	 * @return Map<String, Integer>
 	 */
-	public static Map<String, Integer> prepareCodedDataResultsforReport(CCCQuestion question, Row row,
+	public Map<String, Integer> prepareCodedDataResultsforReport(CCCQuestion question, Row row,
 			CellStyle cellStyle, int rowNum, Sheet sheet) {
 		Cell newCell;
 		Map<String, Integer> colNumbers = new LinkedHashMap<String, Integer>();
@@ -582,7 +617,8 @@ public class ExcelReportGenerator {
 	 * @param nrdsCdeList
 	 * @return XSSFWorkbook
 	 */
-	public static Workbook buildNrdsTab(Workbook workbook, List<NrdsCde> nrdsCdeList) {
+	public Workbook buildNrdsTab(Workbook workbook, List<NrdsCde> nrdsCdeList, CreationHelper createHelper, 
+			CellStyle hlink_style, CellStyle header_lbl_style, CellStyle header_lbl_style_2) {
 		Row row;
 		Sheet sheet = workbook.createSheet(matching_nrds_cdes_tab_name);
 		// Setting fixed column widths for cells
@@ -613,7 +649,7 @@ public class ExcelReportGenerator {
 		newCell.setCellValue(matching_nrds_cdes_header);
 		newCell.setCellStyle(header_lbl_style);
 		newCell = row.createCell(4);
-		linkToSheet(newCell, backToSummary, summaryLbl);
+		linkToSheet(newCell, backToSummary, summaryLbl, createHelper, hlink_style);
 		row = sheet.createRow(rowNum++);
 		row = sheet.createRow(rowNum++);
 		int colNum = 0;
@@ -658,7 +694,8 @@ public class ExcelReportGenerator {
 	 * @param missingNrdsCdeList
 	 * @return XSSFWorkbook
 	 */
-	public static Workbook buildMissingNrdsCdesTab(Workbook workbook, List<NrdsCde> missingNrdsCdeList) {
+	public Workbook buildMissingNrdsCdesTab(Workbook workbook, List<NrdsCde> missingNrdsCdeList, CreationHelper createHelper, 
+			CellStyle hlink_style, CellStyle header_lbl_style, CellStyle header_lbl_style_2) {
 		final String[] nrdsRowHeaders = crfRowHeaders;
 		Sheet sheet = workbook.createSheet(nrds_missing_cde_tab_name);
 		Row row;
@@ -682,7 +719,7 @@ public class ExcelReportGenerator {
 		newCell.setCellValue(nrds_missing_cde_header);
 		newCell.setCellStyle(header_lbl_style);
 		newCell = row.createCell(2);
-		linkToSheet(newCell, backToSummary, summaryLbl);
+		linkToSheet(newCell, backToSummary, summaryLbl, createHelper, hlink_style);
 		row = sheet.createRow(rowNum++);
 		row = sheet.createRow(rowNum++);
 		int colNum = 0;
@@ -715,10 +752,11 @@ public class ExcelReportGenerator {
 	 * @param stdCrfCdeList
 	 * @return XSSFWorkbook
 	 */
-	public static Workbook buildStdCrfMissingTabs(Workbook workbook, List<StandardCrfCde> stdCrfCdeList) {
+	public Workbook buildStdCrfMissingTabs(Workbook workbook, List<StandardCrfCde> stdCrfCdeList, CreationHelper createHelper, 
+			CellStyle hlink_style, CellStyle header_lbl_style, CellStyle header_lbl_style_2) {
 		int crfTabsCount = 3; // 3 categories of standard CRF CDEs
 		for (int i = 0; i < crfTabsCount; i++)
-			buildCrfTab(workbook.createSheet(tabNames[i]), stdCrfCdeList, templateTypes[i]);
+			buildCrfTab(workbook.createSheet(tabNames[i]), stdCrfCdeList, templateTypes[i], createHelper, hlink_style, header_lbl_style, header_lbl_style_2);
 		return workbook;
 	}
 
@@ -730,7 +768,8 @@ public class ExcelReportGenerator {
 	 * @param category
 	 * @return XSSFSheet
 	 */
-	private static Sheet buildCrfTab(Sheet sheet, List<StandardCrfCde> stdCrfCdeList, String category) {
+	private Sheet buildCrfTab(Sheet sheet, List<StandardCrfCde> stdCrfCdeList, String category, CreationHelper createHelper, 
+			CellStyle hlink_style, CellStyle header_lbl_style, CellStyle header_lbl_style_2) {
 		Row row;
 		// Setting fixed column widths for cells
 		final int idxOfCdeId = 0;// 0-based
@@ -752,7 +791,7 @@ public class ExcelReportGenerator {
 		newCell.setCellValue(String.format(cdeStdCrfMissingmsg, category));
 		newCell.setCellStyle(header_lbl_style);
 		newCell = row.createCell(2);
-		linkToSheet(newCell, backToSummary, summaryLbl);
+		linkToSheet(newCell, backToSummary, summaryLbl, createHelper, hlink_style);
 		row = sheet.createRow(rowNum++);
 		row = sheet.createRow(rowNum++);
 		// Print row headers in the CRF sheets
@@ -789,7 +828,7 @@ public class ExcelReportGenerator {
 	 * @param colWidth
 	 * @return XSSFSheet
 	 */
-	private static Sheet setColumnWidth(Sheet sheet, Integer[] columns, int colWidth) {
+	private Sheet setColumnWidth(Sheet sheet, Integer[] columns, int colWidth) {
 		for (Integer colIndx : columns) {
 			sheet.setColumnWidth(colIndx, colWidth);
 		}
@@ -797,63 +836,11 @@ public class ExcelReportGenerator {
 	}
 
 	/**
-	 * Checks and crops the worksheetname to less than 31 for accommodating the
-	 * 31 character limit for names of worksheets allowed by excel
-	 * 
-	 * If a duplicate worksheetname is found, then the last 3 characters of the
-	 * worksheetname are truncated and appended with "(n)" to indicate the
-	 * number of times the worksheet name is duplicated because of the excel
-	 * limit truncation of the worksheet name
-	 * 
-	 * @param sheet
-	 * @param columns
-	 * @param colWidth
-	 * @return XSSFSheet
-	 */
-	private static String cropFormNameForExcel(String worksheetName) {
-		// Checking and cropping the form OID if it's more than 31 characters
-		// long
-		if (worksheetName.length() > 31) {// Excel limits 31 character on
-											// worksheet name length
-			worksheetName = worksheetName.substring(0, 31);
-		}
-		// count for the duplicates of truncated form sheet name
-		int count = 0;
-		// Checking the presence of the worksheet to identify duplicates
-		if (formOids.contains(worksheetName)) {
-			// Get the count of how many times the duplicate formOID is present
-			if (formOidDupes.containsKey(worksheetName)) {
-				count = formOidDupes.get(worksheetName);
-			}
-			String longWorksheetName = worksheetName;
-			int truncLength = 0;
-			// Determining the length of truncation based on the number of duplicates for a form name
-			// when they go into double or triple digits - highly unlikely scenario yet not impossible
-			if (count < 9) {
-				truncLength = truncSheetNumSingleDigit;
-			} else if (count == 9 || count > 9) {
-				truncLength = truncSheetNumDoubleDigit;
-			} else if (count == 99 || count > 99) {
-				truncLength = truncSheetNumTripleDigit;
-			}
-			// Truncating the last set of characters of the worksheet name to
-			// append "(n)" where 'n' is the count
-			worksheetName = worksheetName.substring(0, worksheetName.length() - truncLength) + "(" + (++count) + ")";
-			formOidDupes.put(longWorksheetName, count);
-		}
-		// Add the worksheet name to the Set for the first time
-		else {
-			formOids.add(worksheetName);
-		}
-		return worksheetName;
-	}
-
-	/**
-	 * Creates a hyperlink to a given Sheet in the final report
+	 * Creates an hyperlink to a given Sheet in the final report
 	 * 
 	 * @param newCell
 	 */
-	private static void linkToSheet(Cell newCell, String cellText, String sheetName) {
+	private void linkToSheet(Cell newCell, String cellText, String sheetName, CreationHelper createHelper, CellStyle hlink_style) {
 		Hyperlink sheetLink = createHelper.createHyperlink(HyperlinkType.DOCUMENT);
 		newCell.setCellValue(cellText);
 		String linkText = "'" + sheetName + "'!A1";// "'Target Sheet'!A1"
