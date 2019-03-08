@@ -277,7 +277,9 @@ public class GatewayBootControllerTest {
 	@Test
 	public void checkServiceResponseValidatorDown() throws Exception {
 		given(this.serviceValidator.sendPostRequestValidator(Mockito.any(), Mockito.any(), Mockito.eq(false), Mockito.eq(false), Mockito.eq(false))).willThrow(new RestClientException("Test Exception"));
-		this.mockMvc.perform(post("/validateservice").contentType("application/json")
+		this.mockMvc.perform(post("/checkservice")
+				.param("sessionid", "40A7A07A-CE45-4DEF-A1E3-3C78F67B2E37")
+				.contentType("application/json")
 				.content(createFormNameList())
 				.cookie(cookie))
 			.andExpect(content().string(new StringContains(UNEXPECTED_ERROR)))
@@ -285,7 +287,9 @@ public class GatewayBootControllerTest {
 	}	
 	@Test
 	public void checkServiceResponseNoCookie() throws Exception {
-		this.mockMvc.perform(post("/validateservice").contentType("application/json")
+		this.mockMvc.perform(post("/checkservice")
+				.param("sessionid", "40A7A07A-CE45-4DEF-A1E3-3C78F67B2E37")
+				.contentType("application/json")
 				.content(createFormNameList())
 				)
 			.andExpect(content().string(new StringContains(GatewayBootController.SESSION_NOT_VALID)))
@@ -296,7 +300,9 @@ public class GatewayBootControllerTest {
 		given(this.serviceValidator.sendPostRequestValidator(Mockito.any(), Mockito.any(), Mockito.eq(false), Mockito.eq(false), Mockito.eq(false))).willReturn(null);
 		Cookie cookie = GatewayBootController.generateCookie();
 		System.out.println("cookie: " + cookie);
-		this.mockMvc.perform(post("/validateservice").contentType("application/json")
+		this.mockMvc.perform(post("/checkservice")
+				.param("sessionid", "40A7A07A-CE45-4DEF-A1E3-3C78F67B2E37")
+				.contentType("application/json")
 				.content(createFormNameList())
 				.cookie(cookie))
 			.andExpect(content().string(new StringContains(GatewayBootController.SESSION_DATA_NOT_FOUND)))

@@ -20,7 +20,7 @@ It is served by:
 cchecker-gateway/src/main/resources/templates/welcome.html
 
 GatewayBootWebApplication is a spring boot service to be deployed to a standalone Tomcat.
-********
+********parseservice**********
 Upload file request to parse ALS uploaded file. This is multipart content.
 
 curl -F file=@"/local/content/cchecker/RAVE-ALS-10057-VS.xlsx" http://localhost:8080/gateway/parseservice?owner=owner1
@@ -28,60 +28,61 @@ curl -F file=@"/local/content/cchecker/RAVE-ALS-10057-VS.xlsx" -F owner="owner1"
 
 Error response on a wrong file format:
 curl -F file=@"/local/content/cchecker/data.txt" -F owner="owner1" http://localhost:8080/gateway/parseservice
-********
+********checkservice**********
 Service "/gateway/checkservice" is a sample implementation as of now.
 For a manual test take a look into your directory /local/contents/cchecker.
 Find any file created by parseservice with UID-like name on /local/content/cchecker.
-The file is retrieved from DB storage table. 
-This is one example we have in DEV DB: 0BCAEE78-9916-4ADA-B7CD-CE5854AFDD82.
+The file is retrieved from DB storage table which is stored for a short time only. 
+This is one example we could have in DEV DB: 40A7A07A-CE45-4DEF-A1E3-3C78F67B2E37.
  
-use an existed UID as a cookie for testing this service. ALS parser data with this ID shall be save in DB before this call.
+Use an existed UID as a cookie and as a URL path parameter for testing this service. 
+ALS parser data with this ID shall be save in DB before this call.
 curl -v --cookie "_cchecker=0BCAEE78-9916-4ADA-B7CD-CE5854AFDD82" -X POST \
--H "Content-Type: application/json" --data "@/local/content/cchecker/formnamelist.json" http://localhost:8080/gateway/checkservice
+-H "Content-Type: application/json" --data "@/local/content/cchecker/formnamelist.json" http://localhost:8080/gateway/checkservice?sessionid=40A7A07A-CE45-4DEF-A1E3-3C78F67B2E37
+
 "formnamelist.json" file contains a json array of string. Each String is a form name.
 Examples of Form names lists: 
 ["Enrollment"]
 ["HISTOLOGY AND DISEASE","PATIENT ELIGIBILITY"]
-Other request parameters which are all "false" by default:
-checkUOM=true/false
-checkCRF=true/false
-displayExceptions=true/false
 
-Service "/gateway/validateservice" works the same as "checkservice", but returns HTTP response code 201 (Created) with "Location" header to the report, 
-and does not send the report itself.
-URI in Location header is to call 'retrievereporterror' service (below).
+Other URL query request parameter which is "false" by default:
+checkCRF=true/false
 Example:
-curl -v --cookie "_cchecker=45635A0C-6B3D-4BFB-ADA4-FC28DC557B2E" -X POST \
--H "Content-Type: application/json" --data "@/local/content/cchecker/formnamelist.json" http://localhost:8080/gateway/validateservice
+curl 'http://nciws-d1030-v.nci.nih.gov:8080/gateway/checkservice?checkCRF=true&sessionid=40A7A07A-CE45-4DEF-A1E3-3C78F67B2E37' \
+-H 'Accept: application/json, text/plain, */*' -H 'Content-Type: application/json' -H 'Cookie: _cchecker=40A7A07A-CE45-4DEF-A1E3-3C78F67B2E37'\
+--data '["US","Vital Signs"]'
+
+Response HTTP Status code is 201 (Created) 
+URI in Location header is to call 'retrievereporterror' service (below).
+
 Location header:
 http://localhost:8080/gateway/retrievereporterror/45635A0C-6B3D-4BFB-ADA4-FC28DC557B2E
-********
-The next call shall open Save as dialog for a report previously generated:
-curl -v --cookie "_cchecker=0BCAEE78-9916-4ADA-B7CD-CE5854AFDD82" http://localhost:8080/gateway/genexcelreporterror
-********
+
+********genexcelcheckreport***********
+The next call shall open Save as dialog for a report previously generated.
+Use an existed UID as a cookie and as a URL path parameter for testing this service. 
+curl -v --cookie "_cchecker=0BCAEE78-9916-4ADA-B7CD-CE5854AFDD82" http://localhost:8080/gateway/genexcelcheckreport/40A7A07A-CE45-4DEF-A1E3-3C78F67B2E37
+
+********retrievereporterror************
 Retrieve an existed report
 curl -v http://localhost:8080/gateway/retrievereporterror/235393B4-3676-4A79-871C-EE632D4E8279
 returns CCCReport object
 or 400 - wrong ID format
 or 404 - not found
-********
+********retrieveexcelreporterror**********
 Retrieve an existed Excel report generated earlier.
 curl -v http://localhost:8080/gateway/retrieveexcelreporterror/A9D4DF89-7680-48F5-8E0E-7094567944D1
 returns Save as Excel object
 or 400 - wrong ID format
 or 404 - not found
-**********
+**********feedcheckstatus************
 Feed Validation status
 /feedcheckstatus/{sessionid}
+Use an existed UID as a cookie and as a URL path parameter for testing this service.
 Example:
 curl -v --cookie "_cchecker=005BE648-0924-491B-AF22-C02AEF415FB8" http://localhost:8080/gateway/feedcheckstatus/A9D4DF89-7680-48F5-8E0E-7094567944D1
 return SSE with current form number
 
-
-Feed Validation status expects a session cookie
-/feedvalidatestatus
-curl -v --cookie "_cchecker=005BE648-0924-491B-AF22-C02AEF415FB8" http://localhost:8080/gateway/feedvalidatestatus/
-return SSE with current form number
 ********
 Swagger 2 - Documentation
 Swagger and Swagger-UI are added.

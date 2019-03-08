@@ -374,69 +374,7 @@ public class GatewayBootController {
 			 return buildErrorResponse(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	/**
-	 * 
-	 * @param request
-	 * @param response
-	 * @param checkUOM
-	 * @param checkCRF
-	 * @param displayExceptions
-	 * @param requestEntity not null and not empty
-	 * @return ResponseEntity
-	 */
-	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
-	@PostMapping("/validateservice")
-	public ResponseEntity<?> validateService(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam(name = "checkUOM", required = false, defaultValue = "false") boolean checkUOM,
-			@RequestParam(name = "checkCRF", required = false, defaultValue = "false") boolean checkCRF,
-			@RequestParam(name = "displayExceptions", required = false, defaultValue = "false") boolean displayExceptions,
-			RequestEntity<List<String>> requestEntity) {
-		//logger.debug("request received validateService");
-		// check for session cookie
-		Cookie cookie = retrieveCookie(request);
-		String sessionCookieValue = null;
-
-		if ((cookie == null) || (StringUtils.isBlank((sessionCookieValue = cookie.getValue()))) || (!ParameterValidator.validateIdSeq(sessionCookieValue))) {
-			return buildErrorResponse(SESSION_NOT_VALID + sessionCookieValue, HttpStatus.BAD_REQUEST);
-		}
-
-		logger.debug("validateService session cookie: " + sessionCookieValue);
-		
-		List<String> formNames = requestEntity.getBody();
-		logger.debug("Selected forms received: " + formNames);
-
-		HttpStatus errorCode =  HttpStatus.BAD_REQUEST;
-
-		//call Validator service
-		try {
-			StringResponseWrapper stringResponseWrapper = serviceValidator.sendPostRequestValidator(formNames, sessionCookieValue, checkUOM, checkCRF, displayExceptions);
-			
-			if (stringResponseWrapper == null) {
-				//We never expect validate request failure. It shall always send a report.
-				logger.error("sendPostRequestValidator error on " + sessionCookieValue);
-				return buildErrorResponse(SESSION_DATA_NOT_FOUND + sessionCookieValue, HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-			HttpStatus statusCode = stringResponseWrapper.getStatusCode();
-			if (HttpStatus.OK.equals(statusCode)) {
-				URI url = requestEntity.getUrl();
-				String path = String.format("%s://%s:%d%s",url.getScheme(),  url.getHost(), url.getPort(), url.getPath());
-				String location = path.replace(VALIDATE_SERVICE_URL_STR, RETRIEVE_ERROR_REPORT_URL_STR) + '/'+ sessionCookieValue;
-				//logger.debug("Report error Location header value: " + location);	
-				HttpHeaders httpHeaders = createHttpValidateHeaders(TEXT_PLAIN_MIME_TYPE, location);
-				return new ResponseEntity<String>(location, httpHeaders, HttpStatus.CREATED);
-			}
-			else {
-				logger.error("sendPostRequestValidator error response: " + stringResponseWrapper);
-				errorCode = stringResponseWrapper.getStatusCode();//This can be user error or server error
-				String detailsStr = StringUtils.isNotBlank(stringResponseWrapper.getResponseData()) ? ". Details: " + stringResponseWrapper.getResponseData() : "";
-				return buildErrorResponse("Unexpected error on validate for session: " + sessionCookieValue + detailsStr, errorCode);
-			}
-		}
-		catch (RestClientException re) {
-			 String errorMessage = "Unexpected error on validate for session: " + sessionCookieValue + ". Details: " + re.getMessage();
-			 return buildErrorResponse(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
+	
 	/**
 	 * 
 	 * @param request
@@ -530,44 +468,6 @@ public class GatewayBootController {
 			return buildErrorResponse("Report is not found by ID: " + idseq + '\n', e.getStatusCode());
 		}
 	
-	}
-	
-	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
-	@GetMapping("/genexcelreporterror")
-	public void genExcelReportError(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		Cookie cookie = retrieveCookie(request);
-		String sessionCookieValue = null;
-		if ((cookie == null) || (StringUtils.isBlank((sessionCookieValue = cookie.getValue()))) || (!ParameterValidator.validateIdSeq(sessionCookieValue))) {
-			response.setHeader("Content-Type", TEXT_PLAIN_MIME_TYPE);
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			IOUtils.copy(new ByteArrayInputStream((SESSION_NOT_VALID + sessionCookieValue).getBytes()),
-				response.getOutputStream());
-		} 
-		else {
-			try {
-				String urlStr = String.format(URL_GEN_EXCEL_REPORT_ERROR_FORMAT, sessionCookieValue);
-				logger.debug("...retrieveData: " + urlStr);
-				response.setHeader("Content-Type", MS_EXCEL_MIME_TYPE);
-				response.setHeader("Content-Disposition", "attachment; filename=" + fileExcelReportPrefix + sessionCookieValue + EXCEL_FILE_EXT);
-				response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
-				response.setStatus(HttpServletResponse.SC_OK);
-	
-				restTemplate.execute(urlStr, HttpMethod.GET, (ClientHttpRequest requestCallback) -> {
-				}, responseExtractor -> {
-					IOUtils.copy(responseExtractor.getBody(), response.getOutputStream());
-					return null;
-				});
-			}
-			catch (RestClientException re) {
-				response.setHeader("Content-Type", TEXT_PLAIN_MIME_TYPE);
-				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-				//origin ?
-				String errorMessage = "Unexpected error on generate Excel: session: " + sessionCookieValue + ". Details: " + re.getMessage();
-				logger.error(errorMessage + ", exception: " + re.getClass().getName());
-				IOUtils.copy(new ByteArrayInputStream(errorMessage.getBytes()), response.getOutputStream());
-			}
-		}
-		response.flushBuffer();
 	}
 	
 	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
@@ -844,10 +744,15 @@ public class GatewayBootController {
 		Cookie cookie = retrieveCookie(request);
 
 		if ((cookie == null) || (!ParameterValidator.validateIdSeq(cookie.getValue()))) {
-			logger.debug("feedcheckstatus session cookie is not found");
+			logger.error("feedcheckstatus session cookie is not found or not valid");
 			return null;
 		}
-
+		
+		if (!ParameterValidator.validateIdSeq(idseq)) {
+			logger.error("feedcheckstatus session ID is not valid: " + idseq);
+			return null;
+		}
+		
 		final SseEmitter emitter = new SseEmitter();
 
 		ExecutorService service = Executors.newSingleThreadExecutor();
@@ -865,7 +770,7 @@ public class GatewayBootController {
 					res = retrieveFeedValidate(idseq);
 					if (logger.isDebugEnabled()) {
 						if (! StringUtils.equals(res, resPre))  {//reduce amount of logs
-							logger.debug("feedcheckstatus current form for session " + idseq + ", " + res);
+							logger.debug("feedcheckstatus current form for session " + idseq + " is " + res);
 							resPre = res;
 						}
 					}
@@ -883,70 +788,6 @@ public class GatewayBootController {
 				} 
 				catch (Exception e) {
 					logger.error("Error in feedcheckstatus " + idseq + ", " + e);
-					//e.printStackTrace();
-					emitter.completeWithError(e);
-					return;
-				}
-			}
-			emitter.complete();
-		});
-
-		return emitter;
-	}
-	/**
-	 * Returns form under validation number.
-	 * 
-	 * @param idseq not null
-	 * @return SseEmitter
-	 */
-	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
-	@GetMapping("/feedvalidatestatus")
-	public ResponseBodyEmitter feedStatusByCookie(HttpServletRequest request) {
-
-		Cookie cookie = retrieveCookie(request);
-		final String idseq;
-		
-		if ((cookie == null) || (StringUtils.isBlank((idseq = cookie.getValue()))) || (!ParameterValidator.validateIdSeq(idseq))) {
-			logger.debug("feedvalidatestatus session cookie is not found");
-			return null;
-		}
-
-		logger.debug("feedvalidatestatus session cookie: " + idseq);
-		final SseEmitter emitter = new SseEmitter();
-
-		ExecutorService service = Executors.newSingleThreadExecutor();
-		service.execute(() -> {
-			String resPre = "-1";//we expect to receive a form number
-			String res;
-			try {
-				Thread.sleep(timeBetweenFeeds*2);//delay to give validator some time to start
-			} catch (Exception e1) {
-				// Do nothing
-			}
-			//TODO make loop run until we got "0"
-			for (int i = 0; i < maxFeedRequests; i++) {//let's restrict not to risk endless cycle
-				try {
-					res = retrieveFeedValidate(idseq);
-					if (logger.isDebugEnabled()) {
-						if (! StringUtils.equals(res, resPre))  {//reduce amount of logs
-							logger.debug("feedvalidatestatus current form for " + idseq + ", " + res);
-							resPre = res;
-						}
-					}
-					if (!("0".equals(res))) {
-							emitter.send(res, MediaType.TEXT_PLAIN);
-							Thread.sleep(timeBetweenFeeds);
-					}
-					else if (("0".equals(res)) && (i < 1)) {//it looks like this request goes to validator sooner than the form validate
-						Thread.sleep(timeBetweenFeeds);
-					}
-					else {
-						logger.info("feedvalidatestatus is over: " + idseq);
-						break;
-					}
-				} 
-				catch (Exception e) {
-					logger.error("Error in feedvalidatestatus " + idseq + ", " + e);
 					//e.printStackTrace();
 					emitter.completeWithError(e);
 					return;
