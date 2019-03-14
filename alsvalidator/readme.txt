@@ -53,3 +53,23 @@ Running Unit tests (Excludes integration tests):
 Running Integration tests:
 
 >mvn integration-test
+
+
+
+Running code coverage reports (Jacoco):
+
+Running one of the below commands will create code coverage reports with respect to unit tests (no integration tests) under target/report/jacoco-ut.
+Open the master report - index.html with links to reports by package.
+
+>mvn clean package
+
+	or
+	
+>mvn test	 
+
+Running the below command will create code coverage reports for both unit & integration tests under target/report/jacoco-ut & target/report/jacoco-it.
+Open the master report - index.html with links to reports by package.
+
+>mvn clean verify
+
+ 
