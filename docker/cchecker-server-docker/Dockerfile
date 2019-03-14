@@ -7,7 +7,7 @@ RUN yum -y install nginx
 WORKDIR /tmp
 RUN wget https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.11/bin/apache-tomcat-9.0.11.tar.gz \
     && mkdir apache-tomcat && tar xvfz apache-tomcat-9.0.11.tar.gz -C ./apache-tomcat --strip-components 1 \
-    && cd apache-tomcat/webapps && rm -rf ROOT examples docs host-manager manager && cd ../.. \
+    && cd apache-tomcat/webapps && rm -rf examples docs host-manager manager ROOT/*  && cd ../.. \
     && mv apache-tomcat /usr/local/apache-tomcat
 
 RUN wget https://archive.apache.org/dist/maven/maven-3/3.5.4/binaries/apache-maven-3.5.4-bin.tar.gz \
@@ -22,8 +22,10 @@ WORKDIR /var/local
 RUN mkdir -p /local/content/cchecker /logs
 
 COPY entrypoint/run.sh /usr/bin/
-COPY crondelete /etc/cron.d/crondelete
-COPY nginx.conf /etc/nginx
+COPY assets/crondelete /etc/cron.d/crondelete
+COPY assets/nginx.conf /etc/nginx
+COPY assets/web.xml /usr/local/apache-tomcat/conf
+COPY assets/error.html /usr/local/apache-tomcat/webapps/ROOT
 
 RUN chmod 0644 /etc/cron.d/crondelete
 RUN crontab /etc/cron.d/crondelete
