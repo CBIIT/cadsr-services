@@ -8,7 +8,7 @@ WORKDIR /tmp
 RUN wget https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.11/bin/apache-tomcat-9.0.11.tar.gz \
     && tar xvfz apache-tomcat-9.0.11.tar.gz \
     && mv apache-tomcat-9.0.11 /usr/local/apache-tomcat \
-    && rm -rf /usr/local/apache-tomcat/docs /usr/local/apache-tomcat/examples
+    && rm -rf /usr/local/apache-tomcat/webapps/docs /usr/local/apache-tomcat/webapps/examples
 
 RUN wget https://archive.apache.org/dist/maven/maven-3/3.5.4/binaries/apache-maven-3.5.4-bin.tar.gz \
     && tar xvfz apache-maven-3.5.4-bin.tar.gz \
