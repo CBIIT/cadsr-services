@@ -68,13 +68,13 @@ cd /usr/local/apache-tomcat
 ./bin/catalina.sh run &
 echo "done starting tomcat"
 
-while [ ! -d "/usr/local/apache-tomcat/log" ]
+while [ ! -d "/usr/local/apache-tomcat/logs" ]
   do
   echo "Waiting for tomcat to start"
   sleep 1
 done
 echo "changing permissions on apache-tomcat log directory"
-chmod 755 -R /usr/local/apache-tomcat/log
+chmod 755 -R /usr/local/apache-tomcat/logs
 
 echo "starting nginx web server"
 nginx -g 'daemon off;'
