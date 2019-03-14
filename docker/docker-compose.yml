@@ -10,7 +10,7 @@ services:
       configuration: $configuration
     networks:
       app_net:
-        ipv4_address: 172.16.239.10
+        ipv4_address: 172.18.239.10
   server:
     container_name: cchecker-gateway
     build: ./cchecker-server-docker
@@ -19,7 +19,7 @@ services:
      - "8082:8082"
     networks:
       app_net:
-        ipv4_address: 172.16.239.11
+        ipv4_address: 172.18.239.11
     environment:
       cdetier: $cdetier
       LANG: $LANG
@@ -34,4 +34,4 @@ networks:
       driver: default
       config:
       -
-        subnet: 172.16.239.0/24
+        subnet: 172.18.239.0/24
