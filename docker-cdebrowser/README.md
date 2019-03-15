@@ -1,1 +1,1 @@
-create docker with jdk 11 and wildfly 8
+create docker with jdk 8 and wildfly 8
