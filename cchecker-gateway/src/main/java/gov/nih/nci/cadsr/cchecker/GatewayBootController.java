@@ -96,7 +96,8 @@ public class GatewayBootController {
 	static final String VALIDATE_SERVICE_URL_STR = "validateservice";
 	static final String CHECK_SERVICE_URL_STR = "checkservice";
 	static final String RETRIEVE_ERROR_REPORT_URL_STR = "retrievereporterror";
-
+	static final String RETRIEVE_GATEWAY_REPORT_PATHPARAM_STR = "/gateway/retrievereporterror";
+	static final String REST_API_SERVER_ENV = "REST_API";
 	{
 		loadProperties();
 	}
@@ -430,9 +431,7 @@ public class GatewayBootController {
 			HttpStatus statusCode = stringResponseWrapper.getStatusCode();
 			if (HttpStatus.OK.equals(statusCode)) {
 				URI url = requestEntity.getUrl();
-				String path = String.format("%s://%s:%d%s",url.getScheme(),  url.getHost(), url.getPort(), url.getPath());
-				String location = path.replace(CHECK_SERVICE_URL_STR, RETRIEVE_ERROR_REPORT_URL_STR) + '/'+ sessionid;
-				//logger.debug("Report error Location header value: " + location);	
+				String location = buildLocationUri(url, sessionid);	
 				HttpHeaders httpHeaders = createHttpValidateHeaders(TEXT_PLAIN_MIME_TYPE, location);
 				return new ResponseEntity<String>(location, httpHeaders, HttpStatus.CREATED);
 			}
@@ -447,6 +446,28 @@ public class GatewayBootController {
 			 String errorMessage = "Unexpected error on validate for session: " + sessionid + ". Details: " + re.getMessage();
 			 return buildErrorResponse(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+	/**
+	 * 
+	 * @param url not null
+	 * @param sessionid not null
+	 * @return String URI to get validation report
+	 */
+	protected String buildLocationUri(URI url, String sessionid) {
+		String gatewyPath = System.getenv(REST_API_SERVER_ENV);
+		String location;
+		if (StringUtils.isNotBlank(gatewyPath)) {
+			location = gatewyPath + RETRIEVE_GATEWAY_REPORT_PATHPARAM_STR + '/'+ sessionid;
+			logger.debug("Report error Location header value using REST_API: " + location);	
+		}
+		else {
+			String path = String.format("%s://%s:%d%s", url.getScheme(), url.getHost(), url.getPort(), url.getPath());
+			location = path.replace(CHECK_SERVICE_URL_STR, RETRIEVE_ERROR_REPORT_URL_STR) + '/'+ sessionid;
+			logger.error("Environment variable not found: " + REST_API_SERVER_ENV);	
+			logger.debug("Report error Location header value using request URI: " + location);	
+		}
+
+		return location;
 	}
 	
 	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
