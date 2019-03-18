@@ -25,7 +25,7 @@ export class RestService {
 
   // gets report data from location //
   getReportFromLocation = (location) => {
-    return this.http.get(location,
+    return this.http.get(`${this.REST_API}/gateway/retrievereporterror/${location}`,
     {
       withCredentials:true
     });
