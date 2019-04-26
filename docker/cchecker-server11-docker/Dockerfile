@@ -1,4 +1,4 @@
-FROM cbiit/centos7_base
+FROM ncidockerhub.nci.nih.gov/cbiit/centos7_base
 MAINTAINER Shaun Einolf
 
 RUN yum -y update && yum -y install cronie git java-11-openjdk-devel sudo util-linux wget which epel-release

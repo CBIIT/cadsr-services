@@ -1,4 +1,4 @@
-FROM cbiit/centos7_base
+FROM ncidockerhub.nci.nih.gov/cbiit/centos7_base
 MAINTAINER Shaun Einolf
 RUN yum -y install epel-release
 RUN yum -y update && yum -y install git httpd sudo util-linux
@@ -8,7 +8,7 @@ RUN curl --silent --location https://rpm.nodesource.com/setup_10.x | sudo bash -
 RUN npm install -g @angular/cli \
     && git config --global user.email "you@example.com" \ 
     && git config --global user.name "Your Name" 
-
+ENV abc=123
 ADD conf/httpd.conf /etc/httpd/conf
 ADD conf/.htaccess /etc/httpd/conf.d
 ADD run.sh /usr/bin/
