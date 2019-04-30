@@ -1,5 +1,5 @@
 #!/bin/bash
-TAG=`git log -1 --pretty=%at`-`git log -1 --pretty=%h`
+TAG=`git log -1 --pretty=%ad --date=format:%Y%m%d-%H%M`-`git log -1 --pretty=%h`
 
 echo "Building ui image"
 docker build ./cchecker-ui-docker -t temp_ui
