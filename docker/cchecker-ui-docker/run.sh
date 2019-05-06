@@ -1,4 +1,5 @@
 #!/bin/sh
+echo "get current date for footer"
 timestamp=`date`
 if [ -d "/root/cadsr-services" ]; then
         echo "Skipping cc ui install"
