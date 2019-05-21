@@ -68,7 +68,7 @@ cd /usr/local/apache-tomcat
 ./bin/catalina.sh run &
 echo "done starting tomcat"
 
-while [ ! -d "/usr/local/apache-tomcat/logs" ]
+while [ ! -d "/usr/local/apache-tomcat/log" ]
   do
   echo "Waiting for tomcat to start"
   sleep 1
