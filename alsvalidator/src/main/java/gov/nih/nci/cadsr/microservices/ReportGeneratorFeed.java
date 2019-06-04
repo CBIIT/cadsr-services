@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import gov.nih.nci.cadsr.data.CCCQuestion;
 import gov.nih.nci.cadsr.data.CCCReport;
 import gov.nih.nci.cadsr.data.CategoryCde;
 import gov.nih.nci.cadsr.data.CategoryNrds;
+import gov.nih.nci.cadsr.data.CdeMissing;
 import gov.nih.nci.cadsr.data.CdeStdCrfData;
 import gov.nih.nci.cadsr.data.NrdsCde;
 import gov.nih.nci.cadsr.data.StandardCrfCde;
@@ -268,8 +270,8 @@ public class ReportGeneratorFeed implements ReportOutput {
 		
 		//FORMBUILD-621
 		List<NrdsCde> reportCdeList = new ArrayList<NrdsCde>();
-		List<NrdsCde> missingCdashCdesList = new ArrayList<NrdsCde>();
-		List<NrdsCde> missingSdtmCdesList = new ArrayList<NrdsCde>();
+		List<CdeMissing> missingCdashCdesList = new ArrayList<>();
+		List<CdeMissing> missingSdtmCdesList = new ArrayList<>();
 		
 		List<StandardCrfCde> missingStdCrfCdeList = new ArrayList<StandardCrfCde>();
 		Map<String, ALSDataDictionaryEntry> ddeMap = alsData.getDataDictionaryEntries();
@@ -482,13 +484,15 @@ public class ReportGeneratorFeed implements ReportOutput {
 		List<CategoryNrds> missingCategoryCdashCdesList = createMissingList(reportCdeList, categoryCdashList);
 		List<CategoryNrds> missingCategorySdtmCdesList = createMissingList(reportCdeList, categorySdtmList);
 		missingCdashCdesList = missingCategoryCdashCdesList.stream().map(categoryNrds->{
-			NrdsCde nrdsCde = buildMissingNrdsCde(categoryNrds);
+			CdeMissing nrdsCde = buildMissingCde(categoryNrds);
             return nrdsCde;
         }).collect(Collectors.toList());
 		missingSdtmCdesList = missingCategorySdtmCdesList.stream().map(categoryNrds->{
-			NrdsCde nrdsCde = buildMissingNrdsCde(categoryNrds);
+			CdeMissing nrdsCde = buildMissingCde(categoryNrds);
             return nrdsCde;
         }).collect(Collectors.toList());
+		Collections.sort(missingCdashCdesList);
+		Collections.sort(missingSdtmCdesList);
 		cccReport.setMissingCdashCdeList(missingCdashCdesList);
 		cccReport.setMissingSdtmCdeList(missingSdtmCdesList);
 		cccReport.setCountCdashMissing(missingCdashCdesList.size());
@@ -735,7 +739,18 @@ public class ReportGeneratorFeed implements ReportOutput {
 		nrds.setCdeName(nrdsDb.getDeName());
 		return nrds;
 	}	
-
+	/**
+	 * Populate a missing NRDS CDE from a NRDS 
+	 * @param nrdsDb
+	 * @return Return NrdsCde for a CDE returned from the static list of NRDS CDEs
+	 * 
+	 */
+	protected static CdeMissing buildMissingCde(CategoryNrds nrdsDb) {
+		CdeMissing cdeMissing = new CdeMissing();
+		cdeMissing.setCdeIdVersion(nrdsDb.getCdeId()+"v"+nrdsDb.getDeVersion());
+		cdeMissing.setCdeName(nrdsDb.getDeName());
+		return cdeMissing;
+	}
 	/**
 	 * Populate a Standard CRF CDE
 	 * @param cdeCrfData

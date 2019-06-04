@@ -65,8 +65,8 @@ int countSdtmMissing;
 List<CCCForm> cccForms = new ArrayList<CCCForm>();
 List<NrdsCde> nrdsCdeList = new ArrayList<NrdsCde>();
 List<NrdsCde> missingNrdsCdeList = new ArrayList<NrdsCde>();
-List<NrdsCde> missingCdashCdeList = new ArrayList<NrdsCde>();
-List<NrdsCde> missingSdtmCdeList = new ArrayList<NrdsCde>();
+List<CdeMissing> missingCdashCdeList = new ArrayList<>();
+List<CdeMissing> missingSdtmCdeList = new ArrayList<>();
 List<StandardCrfCde> missingStandardCrfCdeList = new ArrayList<StandardCrfCde>();
 
 Boolean isCheckStdCrfCdeChecked;
@@ -336,19 +336,19 @@ public void setMissingNrdsCdeList(List<NrdsCde> missingNrdsCdeList) {
 	this.missingNrdsCdeList = missingNrdsCdeList;
 }
 
-public List<NrdsCde> getMissingCdashCdeList() {
+public List<CdeMissing> getMissingCdashCdeList() {
 	return missingCdashCdeList;
 }
 
-public void setMissingCdashCdeList(List<NrdsCde> missingCdashCdeList) {
+public void setMissingCdashCdeList(List<CdeMissing> missingCdashCdeList) {
 	this.missingCdashCdeList = missingCdashCdeList;
 }
 
-public List<NrdsCde> getMissingSdtmCdeList() {
+public List<CdeMissing> getMissingSdtmCdeList() {
 	return missingSdtmCdeList;
 }
 
-public void setMissingSdtmCdeList(List<NrdsCde> missingSdtmCdeList) {
+public void setMissingSdtmCdeList(List<CdeMissing> missingSdtmCdeList) {
 	this.missingSdtmCdeList = missingSdtmCdeList;
 }
 
