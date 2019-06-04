@@ -33,6 +33,8 @@ public class ValidateService {
 	public static final String CDE_TIER_PROD_SHIFT = "";//we do not need -prod
 	public static final String CDE_TIER_DEFAULT = "dev";
 	public static final String CDE_TIER_URL_PLACEHOLDER = "@@cdetier@@";
+	protected static String CDEBROWSER_REST_GET_CDE_CDASH;
+	protected static String CDEBROWSER_REST_GET_CDE_SDTM;
 	static String CCHECKER_DB_SERVICE_URL_CREATE_REPORT_ERROR;
 	
 	public static String getCDEBROWSER_REST_GET_CDE() {
@@ -68,15 +70,25 @@ public class ValidateService {
 		else {
 			logger.info("Environment variable " + CDE_TIER_ENV + " is " + CDEBROWSER_CDE_TIER);
 		}
+		
 		String formattedPropUrl = properties.getProperty("CDEBROWSER_REST_GET_CDE");
+		String formattedPropUrlSDTM = properties.getProperty("CDEBROWSER_REST_GET_CDE_SDTM");
+		String formattedPropUrlCDASH = properties.getProperty("CDEBROWSER_REST_GET_CDE_CDASH");
+		
 		if (CDEBROWSER_CDE_TIER.startsWith(CDE_TIER_PROD)) {
 			CDEBROWSER_REST_GET_CDE = formattedPropUrl.replace(CDE_TIER_URL_PLACEHOLDER, "");
+			CDEBROWSER_REST_GET_CDE_SDTM = formattedPropUrlSDTM.replace(CDE_TIER_URL_PLACEHOLDER, "");
+			CDEBROWSER_REST_GET_CDE_CDASH = formattedPropUrlCDASH.replace(CDE_TIER_URL_PLACEHOLDER, "");
 		}
 		else {
 			CDEBROWSER_REST_GET_CDE = formattedPropUrl.replace(CDE_TIER_URL_PLACEHOLDER,  ('-'+ CDEBROWSER_CDE_TIER));
+			CDEBROWSER_REST_GET_CDE_SDTM = formattedPropUrlSDTM.replace(CDE_TIER_URL_PLACEHOLDER,  ('-'+ CDEBROWSER_CDE_TIER));
+			CDEBROWSER_REST_GET_CDE_CDASH = formattedPropUrlCDASH.replace(CDE_TIER_URL_PLACEHOLDER,  ('-'+ CDEBROWSER_CDE_TIER));
 		}
 		
 		logger.info("CDEBROWSER_REST_GET_CDE: " + CDEBROWSER_REST_GET_CDE);
+		logger.info("CDEBROWSER_REST_GET_CDE_SDTM: " + CDEBROWSER_REST_GET_CDE_SDTM);
+		logger.info("CDEBROWSER_REST_GET_CDE_CDASH: " + CDEBROWSER_REST_GET_CDE_CDASH);
 		
 		SpringApplication.run(ValidateService.class, args);
 	}

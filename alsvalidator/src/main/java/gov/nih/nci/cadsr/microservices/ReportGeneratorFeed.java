@@ -6,6 +6,7 @@ package gov.nih.nci.cadsr.microservices;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,7 @@ import gov.nih.nci.cadsr.report.CdeFormInfo;
 import gov.nih.nci.cadsr.report.ReportOutput;
 import gov.nih.nci.cadsr.service.model.cdeData.CdeDetails;
 import gov.nih.nci.cadsr.service.model.cdeData.dataElement.DataElementDetails;
+import gov.nih.nci.cadsr.service.model.search.SearchNode;
 import gov.nih.nci.cadsr.service.validator.ValidatorService;
 @Service
 public class ReportGeneratorFeed implements ReportOutput {
@@ -64,9 +66,18 @@ public class ReportGeneratorFeed implements ReportOutput {
 	private static List<CategoryNrds> categoryNrdsList;
 	private static String noCdeMsg = "No CDE provided : {%s}.";
 	
+	//FORMBUILD-621
+	private static List<CategoryNrds> categoryCdashList;
+	private static List<CategoryNrds> categorySdtmList;
+	private static final String CDEBROWSER_REST_GET_CDE_SDTM = ValidateService.CDEBROWSER_REST_GET_CDE_SDTM;
+	private static final String CDEBROWSER_REST_GET_CDE_CDASH = ValidateService.CDEBROWSER_REST_GET_CDE_CDASH;
+
 	static{
 		categoryCdeList = retrieveCdeCrfData();
 		categoryNrdsList = retrieveNrdsData();
+		//FORMBUILD-621
+		categoryCdashList = retrieveDataElementsCDASH();
+		categorySdtmList = retrieveDataElementsSDTM();
 	}
 	
 	@Autowired
@@ -79,6 +90,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 	public void setCdeServiceDetails(CdeServiceDetails cdeServiceDetails) {
 		this.cdeServiceDetails = cdeServiceDetails;
 	}
+
 	//we will keep here a status of requests: sessionID-form processed number
 	private ConcurrentMap<String, String> requestStatusMap = new ConcurrentHashMap<>();
 	
@@ -253,6 +265,12 @@ public class ReportGeneratorFeed implements ReportOutput {
 		List<CCCQuestion> questionsList = new ArrayList<CCCQuestion>();
 		List<CCCQuestion> congQuestionsList = new ArrayList<CCCQuestion>();
 		List<NrdsCde> missingNrdsCdesList = new ArrayList<NrdsCde>();
+		
+		//FORMBUILD-621
+		List<NrdsCde> reportCdeList = new ArrayList<NrdsCde>();
+		List<NrdsCde> missingCdashCdesList = new ArrayList<NrdsCde>();
+		List<NrdsCde> missingSdtmCdesList = new ArrayList<NrdsCde>();
+		
 		List<StandardCrfCde> missingStdCrfCdeList = new ArrayList<StandardCrfCde>();
 		Map<String, ALSDataDictionaryEntry> ddeMap = alsData.getDataDictionaryEntries();
 		Map<String, List<CdeFormInfo>> cdeFormInfoMap = buildFormCdeList(alsData, selForms);
@@ -350,6 +368,10 @@ public class ReportGeneratorFeed implements ReportOutput {
 							// updating the NCI category to the question
 							question = updateNciCategory(checkStdCrfCde, cdeCrfData, question, cdeDetails);
 							nrdsCdeList = getNrdsCdeList(question, cdeDetails, nrdsCdeList);
+							
+							//FORMBUILD-621
+							addToReportCdeList(question, cdeDetails, reportCdeList);
+							
 							standardCrfCdeList = getStdCrfCdeList(checkStdCrfCde, cdeCrfData, question, cdeDetails, standardCrfCdeList);
 							if (nrds_cde.equalsIgnoreCase(question.getNciCategory())) {
 								if (congStatus_congruent.equals(question.getQuestionCongruencyStatus())) {
@@ -446,14 +468,32 @@ public class ReportGeneratorFeed implements ReportOutput {
 		cccReport.setCountNrdsWithWarnings(totalNrdsWarn);
 		cccReport.setMissingNrdsCdeList(missingNrdsCdesList);
 		cccReport.setCountNrdsMissing(missingNrdsCdesList.size());
+		
 		cccReport.setNrdsCdeList(nrdsCdeList);
 		if (checkStdCrfCde) {		
 			cccReport.setMissingStandardCrfCdeList(missingStdCrfCdeList);
 		}
 		cccReport.setCountCongruentQuestions(congQuestionsList.size());
 		cccReport = computeFormsAndQuestionsCount(cccReport);
-		cccReport = addFormNamestoForms(cccReport, alsData.getForms());		
+		cccReport = addFormNamestoForms(cccReport, alsData.getForms());
 		cccReport.setCountQuestionsChecked(totalCountQuestChecked);
+		
+		//FORMBUILD-621 CDASH, SDTM classified
+		List<CategoryNrds> missingCategoryCdashCdesList = createMissingList(reportCdeList, categoryCdashList);
+		List<CategoryNrds> missingCategorySdtmCdesList = createMissingList(reportCdeList, categorySdtmList);
+		missingCdashCdesList = missingCategoryCdashCdesList.stream().map(categoryNrds->{
+			NrdsCde nrdsCde = buildMissingNrdsCde(categoryNrds);
+            return nrdsCde;
+        }).collect(Collectors.toList());
+		missingSdtmCdesList = missingCategorySdtmCdesList.stream().map(categoryNrds->{
+			NrdsCde nrdsCde = buildMissingNrdsCde(categoryNrds);
+            return nrdsCde;
+        }).collect(Collectors.toList());
+		cccReport.setMissingCdashCdeList(missingCdashCdesList);
+		cccReport.setMissingSdtmCdeList(missingSdtmCdesList);
+		cccReport.setCountCdashMissing(missingCdashCdesList.size());
+		cccReport.setCountSdtmMissing(missingSdtmCdesList.size());
+		
 		requestStatusMap.remove(sessionId);
 		return cccReport;
 	}
@@ -503,6 +543,20 @@ public class ReportGeneratorFeed implements ReportOutput {
 		return nrdsCdeList;
 	}	
 	
+	//FORMBUILD-621
+	/**
+	 * Add a question for report CDE List.
+	 * 
+	 * @param question
+	 * @param cdeDetails
+	 * @param nrdsCdeList where to add
+	 */
+	protected void addToReportCdeList (CCCQuestion question, CdeDetails cdeDetails, List<NrdsCde> nrdsCdeList) {
+		if (cdeDetails.getDataElement()!=null)  {
+			nrdsCdeList.add(buildNrdsCde(question,
+				cdeDetails.getDataElement().getDataElementDetails().getLongName()));
+		}
+	}
 	
 	/**
 	 * Assigning the CDE to the Standard CRF CDEs list based on the question's NCI category 
@@ -732,6 +786,21 @@ public class ReportGeneratorFeed implements ReportOutput {
 		return missing;
 	}
 	
+	protected List<CategoryNrds> createMissingList(List<NrdsCde> nrdsCdeList, List<CategoryNrds> categoryList) {
+		List<CategoryNrds> missing = new ArrayList<>();
+		for (CategoryNrds nrds : categoryList) {
+			missing.add(nrds);
+			for (NrdsCde nrdsCdeStatic : nrdsCdeList) {
+			    if (nrdsCdeStatic.getCdeIdVersion().equals(nrds.getCdeId()+"v"+nrds.getDeVersion())) {
+			        // Remove the current element from the list.
+			    	missing.remove(nrds);
+			    	break;
+			    }
+		    }
+		}		
+		return missing;
+	}
+
 	protected static List<CategoryCde> createMissingCategoryCdeList(List<StandardCrfCde> standardCrfCdeList) {		
 		List<CategoryCde> missing = new ArrayList<>();
 		for (CategoryCde categoryCde : categoryCdeList ) {
@@ -1016,6 +1085,39 @@ public class ReportGeneratorFeed implements ReportOutput {
 			form.setFormVersion(version);
 		}
 		return form;
-	}	
+	}
+	
+	//FORMBUILD-621
+	/**
+	 * retrieve CDE List by calling restful service 'cdesByClassificationSchemeItem'.
+	 * 
+	 * @param String urlPath
+	 * @return List<SearchNode> CDE List
+	 */
 
+	public static List<SearchNode> retrieveDataElements(String urlPath) {
+		RestTemplate restTemplate = new RestTemplate();
+		SearchNode[] cdeBrowserCdes = restTemplate.getForObject(urlPath, SearchNode[].class);
+		return Arrays.asList(cdeBrowserCdes);
+	}
+
+	public static List<CategoryNrds> retrieveDataElementsSDTM() {
+		return mapCategoryNrds(retrieveDataElements(CDEBROWSER_REST_GET_CDE_SDTM));
+		
+	}
+	public static List<CategoryNrds> retrieveDataElementsCDASH() {
+		return mapCategoryNrds(retrieveDataElements(CDEBROWSER_REST_GET_CDE_CDASH));
+	}
+	
+	protected static List<CategoryNrds> mapCategoryNrds(List<SearchNode> searchNodeList) {
+		List<CategoryNrds> result = searchNodeList.stream().map(searchNode -> {
+			CategoryNrds categoryNrds = new CategoryNrds();
+            categoryNrds.setDeName(searchNode.getLongName());
+            categoryNrds.setDeVersion(new Float(searchNode.getVersion()));
+            categoryNrds.setCdeId(searchNode.getPublicId());
+            return categoryNrds;
+        }).collect(Collectors.toList());
+		return result;
+	}
+	
 }

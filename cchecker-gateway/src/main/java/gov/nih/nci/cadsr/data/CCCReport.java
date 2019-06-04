@@ -57,9 +57,16 @@ int countNrdsMissing;
 int countNrdsWithWarnings;
 int countNrdsWithErrors;
 
+//FORMBUILD-621
+//CDASH and SDTM classified missing
+int countCdashMissing;
+int countSdtmMissing;
+
 List<CCCForm> cccForms = new ArrayList<CCCForm>();
 List<NrdsCde> nrdsCdeList = new ArrayList<NrdsCde>();
 List<NrdsCde> missingNrdsCdeList = new ArrayList<NrdsCde>();
+List<NrdsCde> missingCdashCdeList = new ArrayList<NrdsCde>();
+List<NrdsCde> missingSdtmCdeList = new ArrayList<NrdsCde>();
 List<StandardCrfCde> missingStandardCrfCdeList = new ArrayList<StandardCrfCde>();
 
 Boolean isCheckStdCrfCdeChecked;
@@ -288,6 +295,22 @@ public int getCountNrdsWithErrors() {
 public void setCountNrdsWithErrors(int countNrdsWithErrors) {
 	this.countNrdsWithErrors = countNrdsWithErrors;
 }
+//FORMBUILD-621
+public int getCountCdashMissing() {
+	return countCdashMissing;
+}
+
+public void setCountCdashMissing(int countCdashMissing) {
+	this.countCdashMissing = countCdashMissing;
+}
+
+public int getCountSdtmMissing() {
+	return countSdtmMissing;
+}
+
+public void setCountSdtmMissing(int countSdtmMissing) {
+	this.countSdtmMissing = countSdtmMissing;
+}
 
 public List<CCCForm> getCccForms() {
 	return cccForms;
@@ -313,6 +336,22 @@ public void setMissingNrdsCdeList(List<NrdsCde> missingNrdsCdeList) {
 	this.missingNrdsCdeList = missingNrdsCdeList;
 }
 
+public List<NrdsCde> getMissingCdashCdeList() {
+	return missingCdashCdeList;
+}
+
+public void setMissingCdashCdeList(List<NrdsCde> missingCdashCdeList) {
+	this.missingCdashCdeList = missingCdashCdeList;
+}
+
+public List<NrdsCde> getMissingSdtmCdeList() {
+	return missingSdtmCdeList;
+}
+
+public void setMissingSdtmCdeList(List<NrdsCde> missingSdtmCdeList) {
+	this.missingSdtmCdeList = missingSdtmCdeList;
+}
+
 public List<StandardCrfCde> getMissingStandardCrfCdeList() {
 	return missingStandardCrfCdeList;
 }
@@ -320,6 +359,7 @@ public List<StandardCrfCde> getMissingStandardCrfCdeList() {
 public void setMissingStandardCrfCdeList(List<StandardCrfCde> missingStandardCrfCdeList) {
 	this.missingStandardCrfCdeList = missingStandardCrfCdeList;
 }
+
 public Boolean getIsCheckStdCrfCdeChecked() {
 	return isCheckStdCrfCdeChecked;
 }
