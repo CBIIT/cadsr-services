@@ -214,6 +214,36 @@
         </table>
        </ng-template>
    </ngb-tab>
+   <ngb-tab *ngIf="reportData.cccForms.length">
+       <ng-template ngbTabTitle>CDISC/CDASH 2.0 CDEs Missing</ng-template>
+       <ng-template ngbTabContent>
+         <div class="tableHeader">CDISC/CDASH 2.0 CDEs missing from the ALS file</div>
+
+        <table datatable [dtOptions]="dtNrdsOptionsMissing" class="display compact">
+            <tbody>
+                <tr *ngFor="let missingCdashs of reportData.missingCdashCdeList">
+                    <td>{{missingCdashs.cdeIdVersion}}</td>
+                    <td>{{missingCdashs.cdeName}}</td>
+                </tr>
+            </tbody>
+        </table>
+       </ng-template>
+   </ngb-tab>
+   <ngb-tab *ngIf="reportData.cccForms.length">
+       <ng-template ngbTabTitle>CDISC/SDTM 3.3 CDEs Missing</ng-template>
+       <ng-template ngbTabContent>
+         <div class="tableHeader">CDISC/SDTM 3.3 CDEs missing from the ALS file</div>
+
+        <table datatable [dtOptions]="dtNrdsOptionsMissing" class="display compact">
+            <tbody>
+                <tr *ngFor="let missingSdtms of reportData.missingSdtmCdeList">
+                    <td>{{missingSdtms.cdeIdVersion}}</td>
+                    <td>{{missingSdtms.cdeName}}</td>
+                </tr>
+            </tbody>
+        </table>
+       </ng-template>
+   </ngb-tab>
    <ngb-tab *ngIf="reportData.isCheckStdCrfCdeChecked">
        <ng-template ngbTabTitle>Standard CRF Mandatory Missing</ng-template>
        <ng-template ngbTabContent>
