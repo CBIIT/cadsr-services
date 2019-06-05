@@ -76,8 +76,8 @@ public class ExcelReportGenerator {
 	//FORMBUILD-621
 	private static final String reqCdashMissLbl = "# CDISC/CDASH 2.0 CDEs Classified Missing ";
 	private static final String reqSdtmMissLbl = "# CDISC/SDTM 3.3 CDEs Classified Missing ";
-	private static final String cdash_missing_cde_tab_name = "CDISC/CDASH 2.0 CDEs Missing";
-	private static final String sdtm_missing_cde_tab_name = "CDISC/SDTM 3.3 CDEs Missing";
+	private static final String cdash_missing_cde_sheet_name = "CDASH 2.0 CDEs Missing";
+	private static final String sdtm_missing_cde_sheet_name = "SDTM 3.3 CDEs Missing";
 	private static final String cdash_missing_cde_header = "CDISC/CDASH 2.0 CDEs missing from the ALS file";
 	private static final String sdtm_missing_cde_header = "CDISC/SDTM 3.3 CDEs missing from the ALS file";
 	private static final String[] classifiedMissingRowHeaders = { "CDE IDVersion", "CDE Name" };
@@ -240,10 +240,10 @@ public class ExcelReportGenerator {
 			//FORMBUILD-621
 			} else if (reqCdashMissLbl.equals(lblKey)) {
 					// Link to the CDASH missing CDEs sheet
-					linkToSheet(cell, (String) lblKey, cdash_missing_cde_tab_name);
+					linkToSheet(cell, (String) lblKey, cdash_missing_cde_sheet_name);
 			} else if (reqSdtmMissLbl.equals(lblKey)) {
 				// Link to the SDTM missing CDEs sheet
-				linkToSheet(cell, (String) lblKey, sdtm_missing_cde_tab_name);
+				linkToSheet(cell, (String) lblKey, sdtm_missing_cde_sheet_name);
 			} else if ((nciStdCondCongLbl.equals(lblKey) || nciStdCondErrorLbl.equals(lblKey)
 					|| nciStdCondQuestLbl.equals(lblKey) || nciStdCondWarnLbl.equals(lblKey))
 					&& isCheckStdCrfCdeChecked) {
@@ -374,8 +374,8 @@ public class ExcelReportGenerator {
 		buildNrdsTab(workbook, cccReport.getNrdsCdeList());
 		buildMissingNrdsCdesTab(workbook, cccReport.getMissingNrdsCdeList());
 		//FORMBUILD-621
-		buildMissingCdesTab(workbook, cccReport.getMissingCdashCdeList(), cdash_missing_cde_header, cdash_missing_cde_tab_name);
-		buildMissingCdesTab(workbook, cccReport.getMissingSdtmCdeList(), sdtm_missing_cde_header, sdtm_missing_cde_tab_name);
+		buildMissingCdesTab(workbook, cccReport.getMissingCdashCdeList(), cdash_missing_cde_sheet_name, cdash_missing_cde_header);
+		buildMissingCdesTab(workbook, cccReport.getMissingSdtmCdeList(), sdtm_missing_cde_sheet_name, sdtm_missing_cde_header);
 		//
 		boolean isCheckStdCrfCdeChecked = cccReport.getIsCheckStdCrfCdeChecked() != null ? 
 				cccReport.getIsCheckStdCrfCdeChecked() : false;//this is to avoid NullPointerException
@@ -737,7 +737,7 @@ public class ExcelReportGenerator {
 	 * @param missingNrdsCdeList
 	 * @return XSSFWorkbook
 	 */
-	public static Workbook buildMissingCdesTab(Workbook workbook, List<CdeMissing> missingNrdsCdeList, String tabHeader, String sheetName) {
+	public static Workbook buildMissingCdesTab(Workbook workbook, List<CdeMissing> missingNrdsCdeList, String sheetName, String header) {
 		final String[] nrdsRowHeaders = classifiedMissingRowHeaders;
 		Sheet sheet = workbook.createSheet(sheetName);
 		Row row;
@@ -758,7 +758,7 @@ public class ExcelReportGenerator {
 		int rowNum = 0;
 		row = sheet.createRow(rowNum++);
 		Cell newCell = row.createCell(0);
-		newCell.setCellValue(tabHeader);
+		newCell.setCellValue(header);
 		newCell.setCellStyle(header_lbl_style);
 		newCell = row.createCell(2);
 		linkToSheet(newCell, backToSummary, summaryLbl);
