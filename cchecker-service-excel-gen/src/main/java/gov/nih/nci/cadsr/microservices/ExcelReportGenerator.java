@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import gov.nih.nci.cadsr.data.CCCForm;
 import gov.nih.nci.cadsr.data.CCCQuestion;
 import gov.nih.nci.cadsr.data.CCCReport;
+import gov.nih.nci.cadsr.data.CdeMissing;
 import gov.nih.nci.cadsr.data.NrdsCde;
 import gov.nih.nci.cadsr.data.StandardCrfCde;
 
@@ -71,7 +72,16 @@ public class ExcelReportGenerator {
 	private static final int raveFieldDataTypeCol = 22;
 	private static final int codedDataColStart = 16;
 	private static final String matching_nrds_cdes_tab_name = "NRDS CDEs in ALS";
-	private static final String nrds_missing_cde_tab_name = "NRDS CDEs missing";
+	private static final String nrds_missing_cde_tab_name = "NRDS CDEs Missing";
+	//FORMBUILD-621
+	private static final String reqCdashMissLbl = "# CDISC/CDASH 2.0 CDEs Classified Missing ";
+	private static final String reqSdtmMissLbl = "# CDISC/SDTM 3.3 CDEs Classified Missing ";
+	private static final String cdash_missing_cde_tab_name = "CDISC/CDASH 2.0 CDEs Missing";
+	private static final String sdtm_missing_cde_tab_name = "CDISC/SDTM 3.3 CDEs Missing";
+	private static final String cdash_missing_cde_header = "CDISC/CDASH 2.0 CDEs missing from the ALS file";
+	private static final String sdtm_missing_cde_header = "CDISC/SDTM 3.3 CDEs missing from the ALS file";
+	private static final String[] classifiedMissingRowHeaders = { "CDE IDVersion", "CDE Name" };
+	//
 	private static final String nrds_missing_cde_header = "NRDS CDEs missing from the ALS file";
 	private static final String matching_nrds_cdes_header = "NRDS CDEs included in Protocol Forms with Warnings or Errors";
 	private static final String congStatus_Congruent = "CONGRUENT";
@@ -227,6 +237,13 @@ public class ExcelReportGenerator {
 					|| reqNrdsQuestWarnLbl.equals(lblKey)) {
 				// Link to the NRDS ALS matching CDEs sheet
 				linkToSheet(cell, (String) lblKey, matching_nrds_cdes_tab_name);
+			//FORMBUILD-621
+			} else if (reqCdashMissLbl.equals(lblKey)) {
+					// Link to the CDASH missing CDEs sheet
+					linkToSheet(cell, (String) lblKey, cdash_missing_cde_tab_name);
+			} else if (reqSdtmMissLbl.equals(lblKey)) {
+				// Link to the SDTM missing CDEs sheet
+				linkToSheet(cell, (String) lblKey, sdtm_missing_cde_tab_name);
 			} else if ((nciStdCondCongLbl.equals(lblKey) || nciStdCondErrorLbl.equals(lblKey)
 					|| nciStdCondQuestLbl.equals(lblKey) || nciStdCondWarnLbl.equals(lblKey))
 					&& isCheckStdCrfCdeChecked) {
@@ -356,6 +373,10 @@ public class ExcelReportGenerator {
 		}
 		buildNrdsTab(workbook, cccReport.getNrdsCdeList());
 		buildMissingNrdsCdesTab(workbook, cccReport.getMissingNrdsCdeList());
+		//FORMBUILD-621
+		buildMissingCdesTab(workbook, cccReport.getMissingCdashCdeList(), cdash_missing_cde_header, cdash_missing_cde_tab_name);
+		buildMissingCdesTab(workbook, cccReport.getMissingSdtmCdeList(), sdtm_missing_cde_header, sdtm_missing_cde_tab_name);
+		//
 		boolean isCheckStdCrfCdeChecked = cccReport.getIsCheckStdCrfCdeChecked() != null ? 
 				cccReport.getIsCheckStdCrfCdeChecked() : false;//this is to avoid NullPointerException
 		if (isCheckStdCrfCdeChecked) {
@@ -409,6 +430,9 @@ public class ExcelReportGenerator {
 		summaryLabels.put(reqNrdsQuestCongLbl, String.valueOf(cccReport.getCountNrdsCongruent()));
 		summaryLabels.put(reqNrdsQuestWarnLbl, String.valueOf(cccReport.getCountNrdsWithWarnings()));
 		summaryLabels.put(reqNrdsQuestErrorLbl, String.valueOf(cccReport.getCountNrdsWithErrors()));
+		//FORMBUILD-621
+		summaryLabels.put(reqCdashMissLbl, String.valueOf(cccReport.getCountCdashMissing()));
+		summaryLabels.put(reqSdtmMissLbl, String.valueOf(cccReport.getCountSdtmMissing()));
 		summaryLabels.put(nciStdManQuestLbl, String.valueOf(cccReport.getCountManCrfMissing()));
 		summaryLabels.put(nciStdManCongLbl, String.valueOf(cccReport.getCountManCrfCongruent()));
 		summaryLabels.put(nciStdManErrorLbl, String.valueOf(cccReport.getCountManCrfWithErrors()));
@@ -706,7 +730,62 @@ public class ExcelReportGenerator {
 
 		return workbook;
 	}
+	/**
+	 * Builds and returns an excel tab (sheet) with CDE missing from the ALS
+	 * 
+	 * @param workbook
+	 * @param missingNrdsCdeList
+	 * @return XSSFWorkbook
+	 */
+	public static Workbook buildMissingCdesTab(Workbook workbook, List<CdeMissing> missingNrdsCdeList, String tabHeader, String sheetName) {
+		final String[] nrdsRowHeaders = classifiedMissingRowHeaders;
+		Sheet sheet = workbook.createSheet(sheetName);
+		Row row;
 
+		// Setting fixed column widths for cells
+		final int idxOfCdeId = 0;// 0-based
+		final int widthOfCdeId = 12 * 256;// in characters
+		final int idxOfCdeName = 1;// 0-based
+		final int widthOfCdeName = 100 * 256;
+		final int idxOfFormName = 2;
+		final int widthOfFormName = 100 * 256;
+		final int idxOfFormId = 3;
+		final int widthOfFormId = 20 * 256;// in characters
+		sheet.setColumnWidth(idxOfCdeId, widthOfCdeId);
+		sheet.setColumnWidth(idxOfCdeName, widthOfCdeName);
+		sheet.setColumnWidth(idxOfFormName, widthOfFormName);
+		sheet.setColumnWidth(idxOfFormId, widthOfFormId);
+		int rowNum = 0;
+		row = sheet.createRow(rowNum++);
+		Cell newCell = row.createCell(0);
+		newCell.setCellValue(tabHeader);
+		newCell.setCellStyle(header_lbl_style);
+		newCell = row.createCell(2);
+		linkToSheet(newCell, backToSummary, summaryLbl);
+		row = sheet.createRow(rowNum++);
+		row = sheet.createRow(rowNum++);
+		int colNum = 0;
+		// Print row headers in the NRDS sheet
+		for (String rowHeader : nrdsRowHeaders) {
+			newCell = row.createCell(colNum++);
+			newCell.setCellValue(rowHeader);
+			newCell.setCellStyle(header_lbl_style_2);
+		}
+		CellStyle cellStyle = workbook.createCellStyle();
+		cellStyle.setWrapText(true);
+		colNum = 0;
+		// Print the missing NRDS CDEs
+		for (CdeMissing cde : missingNrdsCdeList) {
+			colNum = 0;
+			row = sheet.createRow(rowNum++);
+			newCell = row.createCell(colNum++);
+			newCell.setCellValue(cde.getCdeIdVersion());
+			newCell = row.createCell(colNum++);
+			newCell.setCellValue(cde.getCdeName());
+		}
+
+		return workbook;
+	}
 	/**
 	 * Build the Standard CRF tabs
 	 * 
