@@ -13,5 +13,6 @@ export class AppComponent {
   formBuilderUrl:string = environment.formBuilderUrl;
   cdeBrowserUrl:string = environment.cdeBrowserUrl;
   timestamp:string = environment.timestamp;  
+  version:string = environment.version;
 }
 
