@@ -5,7 +5,7 @@
 export const environment = {
   production: false,
   REST_API: 'http://127.0.0.1:8080',
-  version: 'REPLACEME',
+  version: 'VERSIONNUMBER',
   timestamp: '',
   
   cdeBrowserUrl:'https://cdebrowser-dev.nci.nih.gov',
