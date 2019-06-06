@@ -9,15 +9,18 @@ else
   cd /root
   git clone https://github.com/CBIIT/cadsr-services
 fi
+version=`xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" /root/cadsr-services/cchecker-gateway/pom.xml`
 cd /root/cadsr-services/cchecker-ui
 echo "installing node modules"
 npm install
 
 if [ $configuration ]; then 
   sed "s#REPLACEME#$REST_API#g" -i src/environments/environment.${configuration}.ts
+  sed "s#VERSIONNUMBER#$version#g" -i src/environments/environment.${configuration}.ts  
   sed "s/timestamp:.*/timestamp: '$timestamp',/g" -i src/environments/environment.${configuration}.ts  
   ng build -c=$configuration --output-path /var/www/html
 else
+  sed "s#VERSIONNUMBER#$version#g" -i src/environments/environment.${configuration}.ts
   sed "s/timestamp:.*/timestamp: '$timestamp',/g" -i src/environments/environment.ts
   ng build --output-path /var/www/html
 fi
