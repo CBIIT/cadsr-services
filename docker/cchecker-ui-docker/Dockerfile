@@ -1,7 +1,7 @@
 FROM ncidockerhub.nci.nih.gov/cbiit/centos7_base
 MAINTAINER Shaun Einolf
 RUN yum -y install epel-release
-RUN yum -y update && yum -y install git httpd sudo util-linux
+RUN yum -y update && yum -y install git httpd sudo util-linux libxml2
 RUN curl --silent --location https://rpm.nodesource.com/setup_10.x | sudo bash - \
     && yum -y install nodejs
 
