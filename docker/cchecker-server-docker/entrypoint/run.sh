@@ -22,7 +22,8 @@ echo "entering cchecker-service-parser directory"
 cd cchecker-service-parser
 echo "building cchecker-service-parser"
 mvn package
-java -jar target/cchecker-service-parser-0.0.1-SNAPSHOT.jar &
+mv target/cchecker-service-parser*.jar target/cchecker-service-parser.jar
+java -jar target/cchecker-service-parser.jar &
 echo "done building cchecker-service-parser"
 
 # build and run the cchecker db service #
