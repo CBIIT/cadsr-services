@@ -14,6 +14,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +24,7 @@ import org.springframework.web.client.RestTemplate;
 @RestController
 @EnableAutoConfiguration
 @EnableAsync
+@EnableScheduling
 public class ValidateService {
 	private static final Logger logger = LoggerFactory.getLogger(ValidateService.class);
 	protected static String CCHECKER_DB_SERVICE_URL_RETRIEVE;

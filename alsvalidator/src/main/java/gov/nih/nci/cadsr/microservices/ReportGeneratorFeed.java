@@ -75,6 +75,9 @@ public class ReportGeneratorFeed implements ReportOutput {
 	private static final String CDEBROWSER_REST_GET_CDE_CDASH = ValidateService.CDEBROWSER_REST_GET_CDE_CDASH;
 
 	static{
+		initCache();
+	}
+	public static final void initCache() {
 		categoryCdeList = retrieveCdeCrfData();
 		categoryNrdsList = retrieveNrdsData();
 		//FORMBUILD-621
