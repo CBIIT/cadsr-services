@@ -57,8 +57,7 @@ echo "done building cchecker-service-excel-gen, cchecker-service-excel-gen servi
 echo "entering cchecker-gateway directory"
 cd ../cchecker-gateway
 echo "building cchecker-gateway"
-mvn package
-mv target/cchecker-gateway*.jar target/cchecker-gateway.jar
+mvn clean package
 cp target/cchecker-gateway*.war ./gateway.war
 mv gateway.war /usr/local/apache-tomcat/webapps
 echo "done building cchecker-gateway"
