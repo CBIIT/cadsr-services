@@ -79,6 +79,7 @@ while [ ! -d "/usr/local/apache-tomcat/log" ]
 done
 echo "changing permissions on apache-tomcat log directory"
 chmod 777 -R /usr/local/apache-tomcat/log
+chmod 777 -R /usr/local/apache-tomcat/log/*
 
 echo "starting nginx web server"
 nginx -g 'daemon off;'
