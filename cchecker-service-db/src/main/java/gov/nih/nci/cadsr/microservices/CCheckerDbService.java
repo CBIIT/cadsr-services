@@ -1,7 +1,4 @@
-/**
- * Copyright (C) 2018 Leidos Biomedical Research, Inc. - All rights reserved.
- */
-/**
+/*
  * Copyright (C) 2018 Leidos Biomedical Research, Inc. - All rights reserved.
  */
 package gov.nih.nci.cadsr.microservices;
