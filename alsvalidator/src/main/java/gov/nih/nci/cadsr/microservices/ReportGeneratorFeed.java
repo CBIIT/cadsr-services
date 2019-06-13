@@ -687,25 +687,33 @@ public class ReportGeneratorFeed implements ReportOutput {
 					cdeCrfData = new CdeStdCrfData();
 					cdeCrfData.setCdePublicId(cdePublicId);
 					cdeCrfData.setCdeVersion(cdeVersion);
-					cdeCrfData.setCrfIdVersion(cde.getFormId()); // Mock data
-					cdeCrfData.setCrfName(cde.getFormName()); // Mock data
+					cdeCrfData.setCrfIdVersion(cde.getFormId());
+					cdeCrfData.setCrfName(cde.getFormName());
 					if (moduleType == null)
 						moduleType = cde.getModuleType();
 					else 
 						moduleType = moduleType + ", " + cde.getModuleType();
-					cdeCrfData.setNciCategory(moduleType);
+					cdeCrfData.setNciCategory(moduleType);					
 				}
 			}
-			if (cdeCrfData == null) {
+
 				for (CategoryNrds cde : categoryNrdsList) {
+					// Moving the comparison inside the loop
 					if (cde.getCdeId() == Float.valueOf(cdePublicId) && cde.getDeVersion() == Float.valueOf(cdeVersion)) {
+						if (cdeCrfData == null) {						
 						cdeCrfData = new CdeStdCrfData();
 						cdeCrfData.setCdePublicId(cdePublicId);
 						cdeCrfData.setCdeVersion(cdeVersion);
-						cdeCrfData.setNciCategory(nrds_cde);
+						}
+						// Adding Std CRF and NRDS as categories, if the CDE is present in NRDS & both Std CRF lists
+						String category = cdeCrfData.getNciCategory();
+						if (category!=null)
+							cdeCrfData.setNciCategory(cdeCrfData.getNciCategory()  + ", " +  nrds_cde);
+						else 												
+							cdeCrfData.setNciCategory(nrds_cde);
 					}
 				}
-			}
+			
 		}
 		return cdeCrfData;
 	}
