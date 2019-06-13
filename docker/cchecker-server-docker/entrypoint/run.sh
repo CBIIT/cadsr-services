@@ -10,13 +10,6 @@ else
   ln -s /var/local/cadsr-services/cchecker-service-excel-gen/log/cchecker-excel-gen.log /logs/cchecker-excel-gen.log
   ln -s /var/local/cadsr-services/cchecker-service-parser/log/cchecker-parser.log /logs/cchecker-parser.log
   
-  ln -sf /dev/stdout /logs/cchecker-gateway.log
-  ln -sf /dev/stdout /logs/alsvalidator.log
-  ln -sf /dev/stdout /logs/cchecker-db.log
-  ln -sf /dev/stdout /logs/cchecker-excel-gen.log
-  ln -sf /dev/stdout /logs/cchecker-parser.log
-  
-  echo "creating symlinks for log files"
 fi
 # pull up to date code #
 echo "entering cadsr-services directory"
