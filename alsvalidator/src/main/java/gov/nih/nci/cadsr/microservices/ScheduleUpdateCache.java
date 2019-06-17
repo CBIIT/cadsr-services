@@ -22,7 +22,7 @@ public class ScheduleUpdateCache {
 		try {
 			logger.info("Update CDE Cache started");
 			ReportGeneratorFeed.initCache();
-			logger.info("Done update CDE Cache done");
+			logger.info("Update CDE Cache done");
 		}
 		catch (Exception e) {
 			logger.error("Error in scheduled updateCdeCache", e);

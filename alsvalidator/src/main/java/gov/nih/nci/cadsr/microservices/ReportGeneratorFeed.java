@@ -78,11 +78,35 @@ public class ReportGeneratorFeed implements ReportOutput {
 		initCache();
 	}
 	public static final void initCache() {
-		categoryCdeList = retrieveCdeCrfData();
-		categoryNrdsList = retrieveNrdsData();
+		try {
+			categoryCdeList = retrieveCdeCrfData();
+		}
+		catch (Exception e) {
+			logger.error("initCache problem on CDE category", e);
+			categoryCdeList = new ArrayList<>();
+		}
+		try {
+			categoryNrdsList = retrieveNrdsData();
+		}
+		catch (Exception e) {
+			logger.error("initCache problem on CDE NRDS category", e);
+			categoryNrdsList = new ArrayList<>();
+		}
 		//FORMBUILD-621
-		categoryCdashList = retrieveDataElementsCDASH();
-		categorySdtmList = retrieveDataElementsSDTM();
+		try {
+			categoryCdashList = retrieveDataElementsCDASH();
+		}
+		catch (Exception e) {
+			logger.error("initCache problem on CDE CDASH category by " + CDEBROWSER_REST_GET_CDE_CDASH, e);
+			categoryCdashList = new ArrayList<>();
+		}
+		try {
+			categorySdtmList = retrieveDataElementsSDTM();
+		}
+		catch (Exception e) {
+			logger.error("initCache problem on CDE SDTM category by " + CDEBROWSER_REST_GET_CDE_SDTM, e);
+			categorySdtmList = new ArrayList<>();
+		}
 	}
 	
 	@Autowired
@@ -931,7 +955,23 @@ public class ReportGeneratorFeed implements ReportOutput {
 		report.setCountOptCrfWithErrors(optCrfErr);
 		return report;
 	}
-		
+	
+	private static Properties loadBootProperties() {
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		InputStream input = classLoader.getResourceAsStream("boot.properties");
+		Properties properties = new Properties();
+		try {
+			properties.load(input);
+		} catch (IOException e) {
+			logger.error("failed to load boot properties" + e);
+		    /**
+		     * If properties not found throws runtime exception
+		     */
+			e.printStackTrace();
+			throw new RuntimeException (e);
+		}
+		return properties;
+	}
 	/**
 	 * This method makes a rest call to retrieve all the standard CRF CDEs from the caDSR database
 	 * It is called only once per instance of this class.
@@ -941,19 +981,8 @@ public class ReportGeneratorFeed implements ReportOutput {
 	 */	
 	protected static List<CategoryCde> retrieveCdeCrfData () {
 		RestTemplate restTemplate = new RestTemplate();
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		InputStream input = classLoader.getResourceAsStream("boot.properties");
-		Properties properties = new Properties();
-		try {
-			properties.load(input);
-		} catch (IOException e) {
-			logger.error("failed to load boot properties" + e);
-		    /**
-		     * If properties not found throws runtime exception
-		     */
-			e.printStackTrace();
-			throw new RuntimeException (e);
-		}
+		Properties properties = loadBootProperties();
+
 		ResponseEntity<List<CategoryCde>> categoryCdeResponse =
 		        restTemplate.exchange(properties.getProperty("RETRIEVE_STD_CDECRF_URL"),
 		                    HttpMethod.GET, null, new ParameterizedTypeReference<List<CategoryCde>>() {
@@ -961,7 +990,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 		List<CategoryCde> categoryCdeList = categoryCdeResponse.getBody();		
 		return categoryCdeList;
 	}
-	
+
 	/**
 	 * This method makes a rest call to retrieve all the NRDS CDEs from the caDSR database
 	 * It is called only once per instance of this class.
@@ -971,19 +1000,8 @@ public class ReportGeneratorFeed implements ReportOutput {
 	 */		
 	protected static List<CategoryNrds> retrieveNrdsData () {
 		RestTemplate restTemplate = new RestTemplate();
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		InputStream input = classLoader.getResourceAsStream("boot.properties");
-		Properties properties = new Properties();
-		try {
-			properties.load(input);
-		} catch (IOException e) {
-			logger.error("failed to load boot properties" + e);
-		    /**
-		     * If properties not found throws runtime exception
-		     */
-			e.printStackTrace();
-			throw new RuntimeException (e);
-		}
+		Properties properties = loadBootProperties();
+
 		ResponseEntity<List<CategoryNrds>> categoryNrdsResponse =
 		        restTemplate.exchange(properties.getProperty("RETRIEVE_NRDS_URL"),
 		                    HttpMethod.GET, null, new ParameterizedTypeReference<List<CategoryNrds>>() {
@@ -1117,22 +1135,36 @@ public class ReportGeneratorFeed implements ReportOutput {
 	/**
 	 * retrieve CDE List by calling restful service 'cdesByClassificationSchemeItem'.
 	 * 
-	 * @param String urlPath
+	 * @param String urlPath shall not be null
 	 * @return List<SearchNode> CDE List
 	 */
-
 	public static List<SearchNode> retrieveDataElements(String urlPath) {
 		RestTemplate restTemplate = new RestTemplate();
 		SearchNode[] cdeBrowserCdes = restTemplate.getForObject(urlPath, SearchNode[].class);
-		return Arrays.asList(cdeBrowserCdes);
+		if (cdeBrowserCdes != null)
+			return Arrays.asList(cdeBrowserCdes);
+		else {
+			logger.error("retrieveDataElements results is null for " + urlPath);
+			return new ArrayList<SearchNode>();
+		}
 	}
 
 	public static List<CategoryNrds> retrieveDataElementsSDTM() {
-		return mapCategoryNrds(retrieveDataElements(CDEBROWSER_REST_GET_CDE_SDTM));
-		
+		if (CDEBROWSER_REST_GET_CDE_SDTM != null)
+			return mapCategoryNrds(retrieveDataElements(CDEBROWSER_REST_GET_CDE_SDTM));
+		else {
+			logger.error("Configuration problems: CDEBROWSER_REST_GET_CDE_SDTM is null");
+			return new ArrayList<CategoryNrds>();
+		}
 	}
+	
 	public static List<CategoryNrds> retrieveDataElementsCDASH() {
-		return mapCategoryNrds(retrieveDataElements(CDEBROWSER_REST_GET_CDE_CDASH));
+		if (CDEBROWSER_REST_GET_CDE_CDASH != null) 
+			return mapCategoryNrds(retrieveDataElements(CDEBROWSER_REST_GET_CDE_CDASH));
+		else {
+			logger.error("Configuration problems: CDEBROWSER_REST_GET_CDE_CDASH is null");
+			return new ArrayList<CategoryNrds>();
+		}
 	}
 	
 	protected static List<CategoryNrds> mapCategoryNrds(List<SearchNode> searchNodeList) {
