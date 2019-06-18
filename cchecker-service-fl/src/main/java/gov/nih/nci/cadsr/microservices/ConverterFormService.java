@@ -41,6 +41,12 @@ public class ConverterFormService {
 	}
 	
 	
+	/**
+	 * Return a Module
+	 * @param alsForm
+	 * @param alsData
+	 * @return ModuleDescriptor
+	 */
 	private ModuleDescriptor addModule(ALSForm alsForm, ALSData alsData) {
 		ModuleDescriptor defaultModule = new ModuleDescriptor();
 		defaultModule.setLongName("Default Module");
@@ -50,6 +56,12 @@ public class ConverterFormService {
 	}
 	
 	
+	/**
+	 * Return a list of questions
+	 * @param alsForm
+	 * @param alsData
+	 * @return List<QuestionDescriptor>
+	 */	
 	private List<QuestionDescriptor> addQuestions (ALSForm alsForm, ALSData alsData) {
 		List<QuestionDescriptor> questions = new ArrayList<QuestionDescriptor>();
 		String formOid = null;
@@ -66,19 +78,31 @@ public class ConverterFormService {
 	}
 	
 	
+	/**
+	 * Return a single question and its valid values filled up
+	 * @param alsForm
+	 * @param alsData
+	 * @return QuestionDescriptor
+	 */		
 	private QuestionDescriptor addSingleQuestion (ALSField alsField, ALSData alsData) {
 		QuestionDescriptor question = new QuestionDescriptor();
 		//question.setDisplayOrder(alsField.getOrdinal()); // Not present at the moment
 		question.setQuestionText(alsField.getPreText());
 		question.setCdePublicId(alsField.getDraftFieldName());
 		question.setCdeVersion(alsField.getDraftFieldName());
-		if (!alsField.getDataDictionaryName().isEmpty()) {					
+		if (alsField.getDataDictionaryName()!=null) {
 			question.setValidValues(addValidValues(alsField.getDataDictionaryName(), alsData.getDataDictionaryEntries(), question));
 		}
 		return question;
 	}
 	
 	
+	/**
+	 * Return a list of Valid Values for the question
+	 * @param alsForm
+	 * @param alsData
+	 * @return List<ValidValue>
+	 */			
 	private List<ValidValue> addValidValues (String ddeName, Map<String, ALSDataDictionaryEntry> ddeMap, QuestionDescriptor question) {
 		List<ValidValue> validValues = new ArrayList<ValidValue>();
 		for (String key : ddeMap.keySet()) {
