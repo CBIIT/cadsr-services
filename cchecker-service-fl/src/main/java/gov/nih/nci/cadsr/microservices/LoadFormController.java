@@ -56,7 +56,6 @@ public class LoadFormController {
 	
 	@Autowired
 	private LoadServiceRepositoryImpl loadServiceRepositoryImpl;
-
 	
 	@PostMapping(value = "/rest/loadforms")
 	public ResponseEntity<?>loadForms(HttpServletRequest request, HttpServletResponse response,
@@ -65,7 +64,7 @@ public class LoadFormController {
 		logger.debug("loadForms session: " + idseq);
 		if (StringUtils.isBlank(idseq)) {
 			//no session received
-			return buildErrorResponse(strError, HttpStatus.SERVICE_UNAVAILABLE);
+			return buildErrorResponse(strError, HttpStatus.BAD_REQUEST);
 		}
 		
 		FormLoadParamWrapper formLoadParamWrapper = requestEntity.getBody();
@@ -86,6 +85,14 @@ public class LoadFormController {
 					for (ALSForm alsForm : alsFormList) {
 						alsForm.getDraftFormName();
 						formDescriptor = formConverterService.convertAlsToCadsr(alsForm, alsData);
+						formDescriptor.setContext(formLoadParamWrapper.getContextName());
+						//FIXME this is TEST IDSEQ. Do we need to set it up?
+						formDescriptor.setContextSeqid("29A8FB18-0AB1-11D6-A42F-0010A4C1E842");
+						formDescriptor.setType("CRF");
+						//FIXME this is for test only, what shall it be?
+						formDescriptor.setLoadType(FormDescriptor.LOAD_TYPE_NEW);
+						//FIXME currently not mapped to ALS
+						formDescriptor.setPreferredDefinition("No Definition");
 						loadServiceRepositoryImpl.createForm(formDescriptor, null);
 					}
 					logger.info("Loaded forms ");

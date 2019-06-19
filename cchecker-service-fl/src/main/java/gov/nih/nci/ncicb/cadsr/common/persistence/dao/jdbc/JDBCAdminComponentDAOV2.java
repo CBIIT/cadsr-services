@@ -99,10 +99,11 @@ public class JDBCAdminComponentDAOV2 extends JDBCBaseDAOV2
     String username,
     String acType,
     String conteIdseq) {
-    String retValue =
-      this.getHasCreateQry().execute(username.toUpperCase(), acType, conteIdseq);
+//    String retValue =
+//      this.getHasCreateQry().execute(username.toUpperCase(), acType, conteIdseq);
 
-    return StringUtils.toBoolean(retValue);
+    //return StringUtils.toBoolean(retValue);
+	  return true;
   }
 
   /**
