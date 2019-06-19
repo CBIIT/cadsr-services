@@ -25,8 +25,9 @@ public class RestCallsInterceptor implements HandlerInterceptor {
 	public static final String REST_CONTROLLER_USAGE_PREFIX_REQUEST = "CCHECKER_REST_REQUEST";
 	public static final String REST_CONTROLLER_USAGE_PREFIX_RESPONSE = "CCHECKER_REST_RESPONSE";
 	public static final String REST_CONTROLLER_ERROR = "CCHECKER_REST_ERROR";
-    public static final String LOG_DATE_TIME_FORMAT = "YYYY-MM-dd'T'HH:mm:ss.SSS";
+	public static final String LOG_DATE_TIME_FORMAT = "YYYY-MM-dd'T'HH:mm:ss.SSS";
 	public static final String REST_USAGE_LOG_REQUEST_FORMAT = "[%s][%s][%s][%s][%s][%s][%s]";//prefix time method URI query cookie [owner]
+	public static final String REST_USAGE_LOG_REQUEST_FORMAT_1 = "[%s][%s][%s][%s][%s][%s]";//prefix time method URI query cookie [owner]
 	public static final String REST_USAGE_LOG_RESPONSE_FORMAT = "[%s][%s][response code %d][%s][%s][%s]";//prefix time code method URI query
 	public static final String REST_USAGE_LOG_ERROR_FORMAT = "[%s][%s][%s]";//prefix time code method URI query
 
@@ -67,12 +68,28 @@ public class RestCallsInterceptor implements HandlerInterceptor {
 		}
 		String paramOwner = request.getParameter("owner");
 		paramOwner = (StringUtils.isNotBlank(paramOwner)) ? paramOwner : "";
-		String toLog = String.format(REST_USAGE_LOG_REQUEST_FORMAT, REST_CONTROLLER_USAGE_PREFIX_REQUEST, 
+		//prefix time method URI query cookie [owner]
+		String toLog = formatRequestLog(
 			formattedCurrentDate, request.getMethod(), request.getRequestURI(),
 			request.getQueryString(), cookieList.toString(), paramOwner);
 		logger.info(toLog);
 		
 		return true;
 	}
-
+	protected static String formatRequestLog(String formattedCurrentDate, String reqMethod, String reqURI, String reqQuery, String reqCookieList, String paramOwner) {
+		String toLog;
+		if (StringUtils.isNotBlank(paramOwner)) {
+		toLog = String.format(REST_USAGE_LOG_REQUEST_FORMAT, 
+			REST_CONTROLLER_USAGE_PREFIX_REQUEST, 
+			formattedCurrentDate, reqMethod, reqURI,
+			reqQuery, reqCookieList, paramOwner);
+		}
+		else {
+			toLog = String.format(REST_USAGE_LOG_REQUEST_FORMAT_1, 
+					REST_CONTROLLER_USAGE_PREFIX_REQUEST, 
+					formattedCurrentDate, reqMethod, reqURI,
+					reqQuery, reqCookieList);
+		}
+		return toLog;
+	}
 }
