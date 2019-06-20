@@ -99,10 +99,11 @@ public class JDBCFormValidValueDAOV2 extends JDBCAdminComponentDAOV2
 		params.addValue("p_long_name", newVV.getLongName());
 		logger.debug(newVV.getLongName());
 		
-//		String prefDef =  newVV.getPreferredDefinition();
-//		if (prefDef == null || prefDef.length() == 0)
-//			prefDef = "Form Loader Testing";
-		params.addValue("p_preferred_definition", newVV.getPreferredDefinition());
+		String prefDef =  newVV.getPreferredDefinition();
+		if (prefDef == null || prefDef.length() == 0)
+			prefDef = "No Definition";
+
+		params.addValue("p_preferred_definition", prefDef);
 		logger.debug(newVV.getPreferredDefinition());
 		params.addValue("p_conte_idseq", newVV.getContext().getConteIdseq());
 		logger.debug(newVV.getContext().getConteIdseq());
@@ -155,6 +156,11 @@ public class JDBCFormValidValueDAOV2 extends JDBCAdminComponentDAOV2
 		
 		MapSqlParameterSource params = new MapSqlParameterSource();
 		params.addValue("vvseqid", vvSeqid);
+		if (meaningText.length() > 1999) {
+			// Valid Value Meaning Text Column in the DB has a limit of 2000 chars.
+			logger.debug("****** Valid Value Meaning text over 2000 chars, so truncating...");
+			meaningText = meaningText.substring(0, 2000); 
+		}
 		params.addValue("meaningText", meaningText);
 		params.addValue("desc", description);
 		params.addValue("createdBy", userName);
@@ -570,6 +576,11 @@ public class JDBCFormValidValueDAOV2 extends JDBCAdminComponentDAOV2
       protected int updateValueMeaning(String qcIdSeq, String valueMeaningText, 
                                         String valueMeaningDesc,String userName) 
       {
+  		if (valueMeaningText.length() > 1999) {
+			// Valid Value Meaning Text Column in the DB has a limit of 2000 chars.
+			logger.debug("****** Valid Value Meaning text over 2000 chars, so truncating...");
+			valueMeaningText = valueMeaningText.substring(0, 2000); 
+		}    	  
         Object [] obj = 
           new Object[]
             {valueMeaningText,

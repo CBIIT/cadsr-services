@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
-
 import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.ALSDataDictionaryEntry;
 import gov.nih.nci.cadsr.data.ALSField;
@@ -92,8 +92,11 @@ public class ConverterFormService {
 		question.setQuestionText(alsField.getPreText());
 		String[] idVersion = extractIdVersion(alsField.getDraftFieldName());
 		if (idVersion[0] != null) {
-			question.setCdePublicId(idVersion[0]); 
-			question.setCdeVersion(idVersion[1] + "." + idVersion[2]); 
+			if (NumberUtils.isCreatable(idVersion[0]) && NumberUtils.isCreatable(idVersion[1])
+					&& NumberUtils.isCreatable(idVersion[2])) {
+				question.setCdePublicId(idVersion[0]);
+				question.setCdeVersion(idVersion[1] + "." + idVersion[2]);
+			}
 		}
 		if (alsField.getDataDictionaryName()!=null) {
 			question.setValidValues(addValidValues(alsField.getDataDictionaryName(), alsData.getDataDictionaryEntries(), question));
@@ -112,10 +115,11 @@ public class ConverterFormService {
 		List<ValidValue> validValues = new ArrayList<ValidValue>();
 		for (String key : ddeMap.keySet()) {
 			if (key.equals(ddeName)) {
-				ValidValue validVal = question.new ValidValue();
+				ValidValue validVal = question.new ValidValue();				
 				//validVal.setDisplayOrder(ddeMap.get(key).getOrdinal()); // Not present at the moment 
 				validVal.setValue(ddeMap.get(key).getCodedData().toString());
 				validVal.setMeaningText(ddeMap.get(key).getUserDataString().toString());
+				validVal.setPreferredDefinition("No definition");				
 				validValues.add(validVal);
 			}							
 		}			

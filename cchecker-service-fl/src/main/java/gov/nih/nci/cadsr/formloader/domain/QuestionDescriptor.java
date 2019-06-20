@@ -310,7 +310,7 @@ public class QuestionDescriptor {
 		
 		//Denise: value meaning public id_quetionpublicid_form_public_id_version_<x> x = 1, 2, 3
 		String preferredName; //This happens to be the value meaning's public id
-		String perferredDefinition;
+		String preferredDefinition;
 		String longName;
 		String instruction;
 		String description;
@@ -347,6 +347,12 @@ public class QuestionDescriptor {
 			this.preferredName = preferredName;
 		}
 		
+		public String getPreferredDefinition() {
+			return preferredDefinition;
+		}
+		public void setPreferredDefinition(String preferredDefinition) {
+			this.preferredDefinition = preferredDefinition;
+		}
 		public String getInstruction() {
 			return instruction;
 		}
