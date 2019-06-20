@@ -91,8 +91,6 @@ public class LoadFormController {
 						formDescriptor.setType("CRF");
 						//FIXME this is for test only, what shall it be?
 						formDescriptor.setLoadType(FormDescriptor.LOAD_TYPE_NEW);
-						//FIXME currently not mapped to ALS
-						formDescriptor.setPreferredDefinition("No Definition");
 						loadServiceRepositoryImpl.createForm(formDescriptor, null);
 					}
 					logger.info("Loaded forms ");
