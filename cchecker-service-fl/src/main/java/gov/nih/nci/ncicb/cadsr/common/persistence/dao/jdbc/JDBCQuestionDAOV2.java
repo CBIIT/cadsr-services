@@ -1045,13 +1045,13 @@ private static Logger logger = Logger.getLogger(JDBCQuestionDAOV2.class.getName(
     
 
 
-    public List<DataElementTransferObject> getCdesByPublicId(String cdePublidId) {
+    public List<DataElementTransferObject> getCdesByPublicId(String cdePublicId) {
     	String sql = 
     			"select de.* from DATA_ELEMENTS_VIEW de " +
     					"where de.cde_id=:id";
 
     	MapSqlParameterSource params = new MapSqlParameterSource();
-    	params.addValue("id", cdePublidId);
+    	params.addValue("id", cdePublicId);
 
     	List<DataElementTransferObject> des = 
     			this.namedParameterJdbcTemplate.query(sql, params, 
@@ -1063,7 +1063,6 @@ private static Logger logger = Logger.getLogger(JDBCQuestionDAOV2.class.getName(
     					de.setVersion(rs.getFloat("VERSION"));
     					de.setLongName(rs.getString("LONG_NAME"));
     					de.setVdIdseq(rs.getString("VD_IDSEQ"));
-
     					return de;
     				}
     			});
@@ -1071,13 +1070,13 @@ private static Logger logger = Logger.getLogger(JDBCQuestionDAOV2.class.getName(
     	return des;
     }
     
-    public List<DataElementTransferObject> getCdesByPublicIds(List<String> cdePublidIds) {
+    public List<DataElementTransferObject> getCdesByPublicIds(List<String> cdePublicIds) {
     	String sql = 
     			"select de.* from DATA_ELEMENTS_VIEW de " +
     					"where de.cde_id in(:ids)";
 
     	MapSqlParameterSource params = new MapSqlParameterSource();
-    	params.addValue("ids", cdePublidIds);
+    	params.addValue("ids", cdePublicIds);
 
     	List<DataElementTransferObject> des = 
     			this.namedParameterJdbcTemplate.query(sql, params, 
