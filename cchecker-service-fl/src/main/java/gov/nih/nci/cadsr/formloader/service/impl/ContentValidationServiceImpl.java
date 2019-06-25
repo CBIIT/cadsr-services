@@ -1,5 +1,15 @@
 package gov.nih.nci.cadsr.formloader.service.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.stereotype.Service;
+
 import gov.nih.nci.cadsr.formloader.domain.FormCollection;
 import gov.nih.nci.cadsr.formloader.domain.FormDescriptor;
 import gov.nih.nci.cadsr.formloader.domain.ModuleDescriptor;
@@ -20,21 +30,10 @@ import gov.nih.nci.ncicb.cadsr.common.dto.ProtocolTransferObjectExt;
 import gov.nih.nci.ncicb.cadsr.common.dto.QuestionTransferObject;
 import gov.nih.nci.ncicb.cadsr.common.dto.ReferenceDocumentTransferObject;
 import gov.nih.nci.ncicb.cadsr.common.dto.ValueMeaningV2TransferObject;
-import gov.nih.nci.ncicb.cadsr.common.resource.Definition;
 import gov.nih.nci.ncicb.cadsr.common.resource.FormV2;
 import gov.nih.nci.ncicb.cadsr.common.resource.ReferenceDocument;
 import gov.nih.nci.ncicb.cadsr.common.resource.ValueDomainV2;
-import gov.nih.nci.ncicb.cadsr.common.resource.ValueMeaningV2;
 import gov.nih.nci.ncicb.cadsr.common.util.ValueHolder;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
-import org.apache.log4j.Logger;
-import org.springframework.stereotype.Service;
 
 @Service
 public class ContentValidationServiceImpl implements ContentValidationService {
@@ -903,7 +902,7 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 				
 				int match = 0;
 				for (QuestionTransferObject qDto : questDtos) {
-					if (qDto.getPublicId() == Integer.parseInt(publicId)) {
+					if ((StringUtils.isNumeric(question.getCdePublicId())) && (qDto.getPublicId() == Integer.parseInt(publicId))) {
 						match = 1;
 						if (qDto.getVersion().floatValue() == Float.parseFloat(version)) {
 							match = 2;

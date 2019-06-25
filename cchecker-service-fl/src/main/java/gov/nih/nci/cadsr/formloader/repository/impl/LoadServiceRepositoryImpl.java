@@ -79,6 +79,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 		String formSeqid = "";
 		
 		try {
+			//FIXME this call expects that this context is found. Context IDSEQ cannot be null. The code fails later if a context is not found.
 			form.setContextSeqid(this.getContextSeqIdByName(form.getContext()));
 			FormV2TransferObject formdto = DomainObjectTranslator.translateIntoFormDTO(form);	
 			if (formdto == null) 
@@ -649,11 +650,20 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 	@Transactional
 	protected void createQuestionsInModule(ModuleDescriptor module, ModuleTransferObject moduledto, 
 			FormDescriptor form, FormV2TransferObject formdto, HashMap<String, List<PermissibleValueV2TransferObject>> pvDtos, List<DataElementTransferObject> cdeDtos) {
+		if (module == null) return;
+		logger.debug("Creating questions for module: " + module.getLongName());
 		List<QuestionDescriptor> questions = module.getQuestions();
+		if ((questions == null) || (questions.size() == 0)) {
+			logger.debug("Module has no question");
+			return;
+		}
+		else {
+			logger.debug("Amount of module questions: " + (questions.size()));
+		}
 		
-		logger.debug("Creating questions for module");
 		int idx = 0;
 		for (QuestionDescriptor question : questions) {
+			if (question == null) continue;
 			if (question.isSkip()) continue;
 			
 			QuestionTransferObject questdto = DomainObjectTranslator.translateIntoQuestionDTO(question, form);

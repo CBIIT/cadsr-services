@@ -365,6 +365,13 @@ public class QuestionDescriptor {
 		public void setDescription(String description) {
 			this.description = description;
 		}
+		@Override
+		public String toString() {
+			return "ValidValue [value=" + value + ", meaningText=" + meaningText + ", skip=" + skip
+					+ ", vdPermissibleValueSeqid=" + vdPermissibleValueSeqid + ", preferredName=" + preferredName
+					+ ", preferredDefinition=" + preferredDefinition + ", longName=" + longName + ", instruction="
+					+ instruction + ", description=" + description + "]";
+		}
 		
 	}
 
