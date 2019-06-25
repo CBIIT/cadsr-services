@@ -39,7 +39,7 @@ public class ConverterFormService {
 		formDesc.setModules(modules);
 		List<ProtocolTransferObjectExt> protocols = new ArrayList<ProtocolTransferObjectExt>();
 		formDesc.setProtocols(protocols);
-		return formDesc;		
+		return formDesc;
 	}
 	
 	
@@ -70,10 +70,12 @@ public class ConverterFormService {
 		for (ALSField alsField : alsData.getFields()) {
 			formOid = alsField.getFormOid();
 			if (formOid != null) {
-				if (formOid.equals(alsForm.getFormOid())) {
-					questions.add(addSingleQuestion(alsField, alsData));
-					formOid = null;
-				}				
+				if (!"FORM_OID".equals(alsField.getFieldOid())) {
+					if (formOid.equals(alsForm.getFormOid())) {
+						questions.add(addSingleQuestion(alsField, alsData));
+						formOid = null;
+					}
+				}
 			}
 		}
 		return questions;

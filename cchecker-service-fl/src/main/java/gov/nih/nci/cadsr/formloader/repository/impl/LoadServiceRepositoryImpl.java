@@ -79,6 +79,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 		String formSeqid = "";
 		
 		try {
+			form.setContextSeqid(this.getContextSeqIdByName(form.getContext()));
 			FormV2TransferObject formdto = DomainObjectTranslator.translateIntoFormDTO(form);	
 			if (formdto == null) 
 				return null;

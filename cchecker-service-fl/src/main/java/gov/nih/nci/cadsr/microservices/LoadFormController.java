@@ -86,8 +86,6 @@ public class LoadFormController {
 						alsForm.getDraftFormName();
 						formDescriptor = formConverterService.convertAlsToCadsr(alsForm, alsData);
 						formDescriptor.setContext(formLoadParamWrapper.getContextName());
-						//FIXME this is TEST IDSEQ. Do we need to set it up?
-						formDescriptor.setContextSeqid("29A8FB18-0AB1-11D6-A42F-0010A4C1E842");
 						formDescriptor.setType("CRF");
 						//FIXME this is for test only, what shall it be?
 						formDescriptor.setLoadType(FormDescriptor.LOAD_TYPE_NEW);
