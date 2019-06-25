@@ -117,12 +117,14 @@ public class ConverterFormService {
 		List<ValidValue> validValues = new ArrayList<ValidValue>();
 		for (String key : ddeMap.keySet()) {
 			if (key.equals(ddeName)) {
-				ValidValue validVal = question.new ValidValue();				
-				//validVal.setDisplayOrder(ddeMap.get(key).getOrdinal()); // Not present at the moment 
-				validVal.setValue(ddeMap.get(key).getCodedData().toString());
-				validVal.setMeaningText(ddeMap.get(key).getUserDataString().toString());
-				validVal.setPreferredDefinition("No definition");				
-				validValues.add(validVal);
+				for (int i = 0; i < ddeMap.get(key).getCodedData().size(); i++) {
+					ValidValue validVal = question.new ValidValue();
+					//validVal.setDisplayOrder(ddeMap.get(key).getOrdinal()); // Not present at the moment 
+					validVal.setValue(ddeMap.get(key).getCodedData().get(i));
+					validVal.setMeaningText(ddeMap.get(key).getUserDataString().get(i));
+					validVal.setPreferredDefinition("No definition");				
+					validValues.add(validVal);
+				}
 			}							
 		}			
 		return validValues;
