@@ -83,13 +83,15 @@ public class LoadFormController {
 				{
 					FormDescriptor formDescriptor;
 					for (ALSForm alsForm : alsFormList) {
-						alsForm.getDraftFormName();
-						formDescriptor = formConverterService.convertAlsToCadsr(alsForm, alsData);
-						formDescriptor.setContext(formLoadParamWrapper.getContextName());
-						formDescriptor.setType("CRF");
-						//FIXME this is for test only, what shall it be?
-						formDescriptor.setLoadType(FormDescriptor.LOAD_TYPE_NEW);
-						loadServiceRepositoryImpl.createForm(formDescriptor, null);
+						if (selForms.contains(alsForm.getFormOid())) {
+							alsForm.getDraftFormName();
+							formDescriptor = formConverterService.convertAlsToCadsr(alsForm, alsData);
+							formDescriptor.setContext(formLoadParamWrapper.getContextName());
+							formDescriptor.setType("CRF");
+							//FIXME this is for test only, what shall it be?
+							formDescriptor.setLoadType(FormDescriptor.LOAD_TYPE_NEW);
+							loadServiceRepositoryImpl.createForm(formDescriptor, null);
+						}
 					}
 					logger.info("Loaded forms ");
 				}
