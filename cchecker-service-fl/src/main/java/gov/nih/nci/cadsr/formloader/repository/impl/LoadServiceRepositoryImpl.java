@@ -38,6 +38,7 @@ import gov.nih.nci.ncicb.cadsr.common.dto.RefdocTransferObjectExt;
 import gov.nih.nci.ncicb.cadsr.common.dto.ReferenceDocumentTransferObject;
 import gov.nih.nci.ncicb.cadsr.common.exception.DMLException;
 import gov.nih.nci.ncicb.cadsr.common.resource.Instruction;
+import gov.nih.nci.ncicb.cadsr.common.util.StringUtils;
 import gov.nih.nci.ncicb.cadsr.common.util.ValueHolder;
 @ConditionalOnBean(name = "dataSource")
 
@@ -627,7 +628,16 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 		String cdePublicId = question.getCdePublicId();
 		String cdeVersion = question.getCdeVersion();
 		DataElementTransferObject matchedCde = null;
-
+		String strPublicId = question.getCdePublicId();
+		
+		if (strPublicId == null) {
+			logger.info("getMatchingDataElement: question.getCdePublicId is null: " + question.getValidValues());
+			return matchedCde;
+		}
+		else if (! StringUtils.isInteger(strPublicId)) {
+			logger.error("getMatchingDataElement: question.getCdePublicId is not numeric: " + question.getValidValues());
+			return matchedCde;
+		}
 		try
 		{
 			int cdePubIdNum = Integer.parseInt(cdePublicId);
@@ -707,15 +717,13 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 		List<QuestionDescriptor.ValidValue>  validValues = question.getValidValues();
 		
 		int idx = 0;
-		logger.info("LoadServiceRepositoryImpl.java#createQuestionValidValues 1");
+		logger.debug("LoadServiceRepositoryImpl.java#createQuestionValidValues");
 		for (QuestionDescriptor.ValidValue vValue : validValues) {
-			logger.info("LoadServiceRepositoryImpl.java#createQuestionValidValues 2");
 			if (vValue.isSkip()) { 
 				logger.debug("LoadServiceRepositoryImpl.java#createQuestionValidValues vValue " + vValue.getMeaningText() + " vpIdSeq [" + vValue.getVdPermissibleValueSeqid() + "] skipped!");
 				continue;
 			}
 			
-			logger.info("LoadServiceRepositoryImpl.java#createQuestionValidValues 3");
 			idx++;
 			
 			//FORMBUILD-424, 425 : Following block of code to be done in validation step and get the correct PV and set values for Meaning Text and Description

@@ -66,7 +66,7 @@ public class LoadFormController {
 			//no session received
 			return buildErrorResponse(strError, HttpStatus.BAD_REQUEST);
 		}
-		
+		HttpStatus httpStatus = HttpStatus.OK;
 		FormLoadParamWrapper formLoadParamWrapper = requestEntity.getBody();
 		logger.info("loadForms body: " + formLoadParamWrapper);
 		String fileName = null;
@@ -78,14 +78,15 @@ public class LoadFormController {
 				fileName = alsData.getFileName();//expected file name
 				List<String> selForms = formLoadParamWrapper.getSelForms();
 				List<ALSForm> alsFormList = alsData.getForms();
-				
+				int count = 0;
 				if ((selForms != null) && (! selForms.isEmpty())) 
 				{
-					FormDescriptor formDescriptor;
 					for (ALSForm alsForm : alsFormList) {
-						if (selForms.contains(alsForm.getFormOid())) {
+						if (selForms.contains(alsForm.getDraftFormName())) {
+							count++;
+							logger.info("Loading form: " + alsForm.getDraftFormName());
 							alsForm.getDraftFormName();
-							formDescriptor = formConverterService.convertAlsToCadsr(alsForm, alsData);
+							FormDescriptor formDescriptor = formConverterService.convertAlsToCadsr(alsForm, alsData);
 							formDescriptor.setContext(formLoadParamWrapper.getContextName());
 							formDescriptor.setType("CRF");
 							//FIXME this is for test only, what shall it be?
@@ -93,7 +94,7 @@ public class LoadFormController {
 							loadServiceRepositoryImpl.createForm(formDescriptor, null);
 						}
 					}
-					logger.info("Loaded forms ");
+					logger.info("Loaded forms amount: " + count);
 				}
 				else {//source default data to add
 					logger.error("No selected forms");
@@ -102,12 +103,13 @@ public class LoadFormController {
 			else {
 				strMsg = "FATAL error: no data found in retrieving ALSData parser data by ID: " + idseq;
 				logger.error(strMsg);
+				httpStatus = HttpStatus.BAD_REQUEST;
 			}
 			
 			HttpHeaders httpHeaders = new HttpHeaders();
 			httpHeaders.add("Content-Type", "text/plain");
 			return new ResponseEntity<String>("load form controller " + fileName + ", strMsg: " + strMsg +" \n", 
-				httpHeaders, HttpStatus.OK);
+				httpHeaders, httpStatus);
 		}
 		catch (RestClientException e) {
 			e.printStackTrace();
