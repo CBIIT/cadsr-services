@@ -13,8 +13,8 @@
 <ng-container *ngIf="(formListData |  async)?.formsList.length">
     <div>
         <button [disabled]="!(checkedItems | async)?.length || validating" class="btn btn-primary" (click)="checkForms()">Check Form<span *ngIf="(checkedItems | async)?.length>1">s</span></button>
-    </div><br />
-  Select one or more forms to check and click "Check Form(s)".<br /><br />
+    </div>
+  <div class="tooltip">Select one or more forms to check and click "Check Form(s)".</div><br />
     <div class="formCriteriaCheckboxes" style="border-bottom:1px solid #000">
         <div style="display:none">
             <input type="checkbox" id="checkUom" name="checkUom" [disabled]="validating" (change)="setFormListOptionCheckbox($event)" ([ngModel])="checkUom" [checked]="(formListData | async)?.checkUom">
