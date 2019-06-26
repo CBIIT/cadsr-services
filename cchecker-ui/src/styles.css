@@ -137,3 +137,13 @@ font-size:14px;
 table.dataTable thead th,table.dataTable thead td,table.dataTable tbody td {
 vertical-align:top!important;
 }
+
+.help_text {
+ font-size:13px;
+ font-style:italic;
+ color:#717171;
+}
+
+.help_text::before {
+content: "» "
+}
