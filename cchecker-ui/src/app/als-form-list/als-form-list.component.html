@@ -21,7 +21,7 @@
         </div>
         <div>
             <input type="checkbox" [disabled]="validating" id="checkStdCrfCde" name="checkStdCrfCde" (change)="setFormListOptionCheckbox($event)" ([ngModel])="checkStdCrfCde" [checked]="(formListData | async)?.checkStdCrfCde">
-            <label for="checkStdCrfCde">Check against CDEs in Standard CRF Modules</label>        
+            <label for="checkStdCrfCde">Include check against CDEs in Standard CRF Modules</label>        
         </div>
         <div style="display:none">
             <input type="checkbox" [disabled]="validating" id="mustDisplayException" name="mustDisplayException" (change)="setFormListOptionCheckbox($event)" ([ngModel])="mustDisplayException" [checked]="(formListData | async)?.mustDisplayException">
