@@ -85,7 +85,6 @@ public class LoadFormController {
 					for (ALSForm alsForm : alsFormList) {
 						if (selForms.contains(alsForm.getFormOid())) {
 							logger.info("Loading form: " + alsForm.getDraftFormName());
-							alsForm.getDraftFormName();
 							FormDescriptor formDescriptor = formConverterService.convertAlsToCadsr(alsForm, alsData);
 							formDescriptor.setContext(formLoadParamWrapper.getContextName());
 							formDescriptor.setType("CRF");
