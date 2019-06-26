@@ -65,7 +65,7 @@ CCheckerParserService, and run "curl" command POST request with _cchecker QUERY 
 curl -X POST -H "Content-Type: application/json" --data "@/local/content/cchecker/formloadlist.json" \
 http://localhost:4811/rest/loadforms?_cchecker=9AD561C1-0BF4-43FE-BC9D-09402D6824D6
 
-"formloadlist.json" file contains all parameters. Parameter selForms is required. It has selected form name list.
+"formloadlist.json" file contains all parameters. Parameter selForms is required. It has selected form names[FORM OID] list.
 Example:
 {
 	"contextName":"TEST",
