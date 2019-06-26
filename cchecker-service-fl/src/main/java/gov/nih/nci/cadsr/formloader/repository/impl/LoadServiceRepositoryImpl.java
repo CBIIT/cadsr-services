@@ -631,11 +631,11 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 		String strPublicId = question.getCdePublicId();
 		
 		if (strPublicId == null) {
-			logger.info("getMatchingDataElement: question.getCdePublicId is null: " + question.getValidValues());
+			logger.info("getMatchingDataElement: question.getCdePublicId returns null");
 			return matchedCde;
 		}
 		else if (! StringUtils.isInteger(strPublicId)) {
-			logger.error("getMatchingDataElement: question.getCdePublicId is not numeric: " + question.getValidValues());
+			logger.error("getMatchingDataElement: question.getCdePublicId is not numeric");
 			return matchedCde;
 		}
 		try
@@ -668,16 +668,17 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 			return;
 		}
 		else {
-			logger.debug("Amount of module questions: " + (questions.size()));
+			logger.info("Amount of module questions: " + (questions.size()));
 		}
 		
 		int idx = 0;
 		for (QuestionDescriptor question : questions) {
 			if (question == null) continue;
 			if (question.isSkip()) continue;
+			logger.trace("question number: " + idx);
 			
 			QuestionTransferObject questdto = DomainObjectTranslator.translateIntoQuestionDTO(question, form);
-			
+
 			questdto.setDisplayOrder(idx++);
 			questdto.setContext(formdto.getContext());
 			questdto.setModule(moduledto);
@@ -798,9 +799,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 				}
 			}
 			
-			logger.debug("Created new valid valid");
-			logger.info("LoadServiceRepositoryImpl.java#createQuestionValidValues Created new valid valid [" + validValues + "]");
-
+			logger.debug("Created new valid value #: " + idx + ", MeaningText: "+ vValue.getMeaningText());
 		}
 	}
 	

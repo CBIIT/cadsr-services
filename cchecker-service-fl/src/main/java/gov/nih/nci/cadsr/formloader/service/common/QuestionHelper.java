@@ -23,7 +23,7 @@ public class QuestionHelper {
 			}*/
 			else
 			{
-				questionText = "Data Element " + cdeDto.getLongName() + " does not have Preferred Question Text";	//TODO test it and confirm that if is it not cdeDto.getLongName()
+				questionText = "Data Element " + cdeDto + " does not have Preferred Question Text";	//TODO test it and confirm that if is it not cdeDto.getLongName()
 			}
 			questdto.setLongName(questionText);
 			questdto.setPreferredDefinition(questionText);
