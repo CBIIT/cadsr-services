@@ -79,27 +79,29 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 		
 		String formSeqid = "";
 		
-		try {
-			//FIXME this call expects that this context is found. Context IDSEQ cannot be null. The code fails later if a context is not found.
+		try {			 
+			// 06/25/2019 VS added context seq ID after retrieving it from the caDSR DB 
 			form.setContextSeqid(this.getContextSeqIdByName(form.getContext()));
-			FormV2TransferObject formdto = DomainObjectTranslator.translateIntoFormDTO(form);	
-			if (formdto == null) 
-				return null;
-
-			formSeqid = formV2Dao.createFormComponent(formdto);		
-			logger.debug("Created form. Seqid: " + formSeqid);
-			
-			retrievePublicIdForForm(formSeqid, form);
-
-			formdto.setFormIdseq(formSeqid);
-			form.setFormSeqId(formSeqid);
-
-			createFormInstructions(form, formdto);
-
-			processFormdetails(form, xmlPathName, form.getIndex());
-
-			createModulesInForm(form, formdto);
-			
+			//06/25/2019 VS : Checking ContextSeqid for null, in case context from the form is not found
+				if (form.getContextSeqid()!=null) {
+					FormV2TransferObject formdto = DomainObjectTranslator.translateIntoFormDTO(form);
+					if (formdto == null) 
+						return null;
+		
+					formSeqid = formV2Dao.createFormComponent(formdto);		
+					logger.debug("Created form. Seqid: " + formSeqid);
+					
+					retrievePublicIdForForm(formSeqid, form);
+		
+					formdto.setFormIdseq(formSeqid);
+					form.setFormSeqId(formSeqid);
+		
+					createFormInstructions(form, formdto);
+		
+					processFormdetails(form, xmlPathName, form.getIndex());
+		
+					createModulesInForm(form, formdto);
+			}
 		} catch (DMLException dbe) {
 			logger.error(dbe.getMessage());
 			form.addMessage(dbe.getMessage());

@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -76,14 +77,13 @@ public class LoadFormController {
 			if (alsData != null) {
 				logger.debug("Retrieved parsed file for validation, with name: " + alsData.getFileName());
 				fileName = alsData.getFileName();//expected file name
-				List<String> selForms = formLoadParamWrapper.getSelForms();
 				List<ALSForm> alsFormList = alsData.getForms();
-				int count = 0;
+				List<String> selForms = getFormIdList(formLoadParamWrapper.getSelForms(), alsFormList);
+				List<String> formSeqIdList = new ArrayList<String>();
 				if ((selForms != null) && (! selForms.isEmpty())) 
 				{
 					for (ALSForm alsForm : alsFormList) {
-						if (selForms.contains(alsForm.getDraftFormName())) {
-							count++;
+						if (selForms.contains(alsForm.getFormOid())) {
 							logger.info("Loading form: " + alsForm.getDraftFormName());
 							alsForm.getDraftFormName();
 							FormDescriptor formDescriptor = formConverterService.convertAlsToCadsr(alsForm, alsData);
@@ -91,10 +91,11 @@ public class LoadFormController {
 							formDescriptor.setType("CRF");
 							//FIXME this is for test only, what shall it be?
 							formDescriptor.setLoadType(FormDescriptor.LOAD_TYPE_NEW);
-							loadServiceRepositoryImpl.createForm(formDescriptor, null);
+							formSeqIdList.add(loadServiceRepositoryImpl.createForm(formDescriptor, null));
 						}
 					}
-					logger.info("Loaded forms amount: " + count);
+					logger.info("Total forms loaded: "+formSeqIdList.size());
+					logger.info("Loaded form Seq IDs: "+formSeqIdList);
 				}
 				else {//source default data to add
 					logger.error("No selected forms");
@@ -182,4 +183,24 @@ public class LoadFormController {
 		}
 		return data;
 	}
+	
+	
+	/**
+	 * Returns a list of Form OIDs for the respective Form Names list 
+	 * 
+	 * @param selForms
+	 * @param formsList
+	 * @return List<String>
+	 */		
+	protected static List<String> getFormIdList(List<String> selForms, List<ALSForm> formsList) {
+		List<String> formIdsList = new ArrayList<String>();
+		for (String selectedFormName : selForms) {			
+			for (ALSForm alsForm : formsList) {
+				if (alsForm.getDraftFormName().equalsIgnoreCase(selectedFormName)) {
+						formIdsList.add(alsForm.getFormOid());
+					}
+				}
+		}
+		return formIdsList;
+	}	
 }
