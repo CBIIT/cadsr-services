@@ -95,7 +95,11 @@ public class ConverterFormService {
 	private QuestionDescriptor addSingleQuestion (ALSField alsField, ALSData alsData) {
 		QuestionDescriptor question = new QuestionDescriptor();
 		//question.setDisplayOrder(alsField.getOrdinal()); // Not present at the moment
-		question.setQuestionText(alsField.getPreText());
+		if (alsField.getPreText()!=null && (!alsField.getPreText().isEmpty())) {
+			question.setQuestionText(alsField.getPreText()); 
+		} else {
+			question.setQuestionText(alsField.getFieldOid());
+		}
 		String[] idVersion = extractIdVersion(alsField.getDraftFieldName());
 		if (idVersion[0] != null) {
 			if (NumberUtils.isCreatable(idVersion[0]) && NumberUtils.isCreatable(idVersion[1])
