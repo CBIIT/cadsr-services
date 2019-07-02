@@ -35,6 +35,7 @@ import gov.nih.nci.cadsr.data.ALSForm;
 import gov.nih.nci.cadsr.data.FormLoadParamWrapper;
 import gov.nih.nci.cadsr.formloader.domain.FormDescriptor;
 import gov.nih.nci.cadsr.formloader.repository.impl.LoadServiceRepositoryImpl;
+import gov.nih.nci.ncicb.cadsr.common.dto.ProtocolTransferObjectExt;
 /**
  * Generate FL Forms from ALS forms Controller.
  * 
@@ -49,6 +50,8 @@ public class LoadFormController {
 	protected static String CCHECKER_DB_SERVICE_URL_RETRIEVE = CCheckerLoadFormService.CCHECKER_DB_SERVICE_URL_RETRIEVE;
 	protected static String REPORT_FOLDER = CCheckerLoadFormService.REPORT_FOLDER;
 	public final String strError = "No report information received";
+	public final String strErrorWrongContext = "Wrong context information received: ";
+	public final String strErrorNoFormFound= "No form found";
 	public final String MS_EXCEL_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 	@Autowired
 	private RestTemplate restTemplate;
@@ -57,59 +60,126 @@ public class LoadFormController {
 	
 	@Autowired
 	private LoadServiceRepositoryImpl loadServiceRepositoryImpl;
-	
+
+	protected String retrieveContextIdseq(String contextName) {
+		String res = null;
+		if (!StringUtils.isBlank(contextName))
+			return loadServiceRepositoryImpl.getContextSeqIdByName(contextName);
+		else {
+			logger.error("Request context is empty");
+		}
+		return res;
+	}
+
+	protected String retrieveProtocolIdseq(String protocolPreferredName) {
+		List<String> protocolIdseqList;
+		//we need Protocol IDSEQ to add a protocol to a form
+		String protocolIdseq = null;
+		//retrieve protocol information for forms
+		if (StringUtils.isNotBlank(protocolPreferredName)) {
+			//retrieve protocol information for forms
+			protocolIdseqList = loadServiceRepositoryImpl.getProtocolV2Dao()
+					.getProtocolIdseqByPreferredName(protocolPreferredName);
+			if ((protocolIdseqList != null) && (protocolIdseqList.size() == 1)) {
+				protocolIdseq = protocolIdseqList.get(0);
+			} 
+			else if ((protocolIdseqList != null) && (protocolIdseqList.size() > 1)) {
+				logger.warn("Protocol Preferred Name is not unique: " + protocolPreferredName, protocolIdseqList);
+				protocolIdseq = protocolIdseqList.get(0);
+			} 
+			else {
+				logger.error("Protocol Preferred Name is not found: " + protocolPreferredName);
+			}
+		}
+		return protocolIdseq;
+	}
+	protected List<ProtocolTransferObjectExt> buildProtocolListForForms(String protocolPreferredName, String protocolIdseq) {
+		List<ProtocolTransferObjectExt> protocols = new ArrayList<ProtocolTransferObjectExt>();
+		if (protocolIdseq != null) {
+			ProtocolTransferObjectExt protocol = new ProtocolTransferObjectExt();
+			//we do not need protocolPreferredName for FL legacy code, only IDSEQ
+			protocol.setPreferredName(protocolPreferredName);
+			protocol.setIdseq(protocolIdseq);
+			protocols.add(protocol);
+		}
+		return protocols;
+	}
 	@PostMapping(value = "/rest/loadforms")
 	public ResponseEntity<?>loadForms(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(name="_cchecker", required=true) String idseq,
 			RequestEntity<FormLoadParamWrapper> requestEntity) {
 		logger.debug("loadForms session: " + idseq);
+		//prepare data from parameters
+		//session ID
 		if (StringUtils.isBlank(idseq)) {
 			//no session received
 			return buildErrorResponse(strError, HttpStatus.BAD_REQUEST);
 		}
-		HttpStatus httpStatus = HttpStatus.OK;
+		
 		FormLoadParamWrapper formLoadParamWrapper = requestEntity.getBody();
 		logger.info("loadForms body: " + formLoadParamWrapper);
-		String fileName = null;
+
+		//retrieve context
+		String contextIdseq = retrieveContextIdseq(formLoadParamWrapper.getContextName());
+		if (StringUtils.isBlank(contextIdseq)) {
+			//context not found
+			return buildErrorResponse(strErrorWrongContext + formLoadParamWrapper.getContextName(), HttpStatus.BAD_REQUEST);
+		}
+		
 		String strMsg = "OK";
+		HttpStatus httpStatus = HttpStatus.OK;
+		HttpHeaders httpHeaders = new HttpHeaders();
 		try {
 			ALSData alsData = retrieveAlsData(idseq);
 			if (alsData != null) {
-				logger.debug("Retrieved parsed file for validation, with name: " + alsData.getFileName());
-				fileName = alsData.getFileName();//expected file name
+				String fileName = alsData.getFileName();//expected file name
+				logger.info("Retrieved parsed file for form generation, with name: " + fileName);
+				
 				List<ALSForm> alsFormList = alsData.getForms();
 				List<String> selForms = getFormIdList(formLoadParamWrapper.getSelForms(), alsFormList);
-				List<String> formSeqIdList = new ArrayList<String>();
-				if ((selForms != null) && (! selForms.isEmpty())) 
-				{
-					for (ALSForm alsForm : alsFormList) {
-						if (selForms.contains(alsForm.getFormOid())) {
-							logger.info("Loading form: " + alsForm.getDraftFormName());
-							FormDescriptor formDescriptor = formConverterService.convertAlsToCadsr(alsForm, alsData);
-							formDescriptor.setContext(formLoadParamWrapper.getContextName());
-							formDescriptor.setType("CRF");
-							//FIXME this is for test only, what shall it be?
-							formDescriptor.setLoadType(FormDescriptor.LOAD_TYPE_NEW);
-							formSeqIdList.add(loadServiceRepositoryImpl.createForm(formDescriptor, null));
-						}
+				//check that the file contains selected forms
+				if (selForms.isEmpty()) {
+					return buildErrorResponse(strErrorNoFormFound , HttpStatus.BAD_REQUEST);
+				}
+				
+				//retrieve protocol information for forms
+				String protocolPreferredName = alsData.getCrfDraft().getProjectName();
+				//we need Protocol IDSEQ to add a protocol to a form
+				String protocolIdseq = retrieveProtocolIdseq(protocolPreferredName);
+
+				List<ProtocolTransferObjectExt> protocols = buildProtocolListForForms(protocolPreferredName, protocolIdseq);
+				
+				List<String> formNamesLoaded = new ArrayList<String>();
+
+				for (ALSForm alsForm : alsFormList) {
+					if (selForms.contains(alsForm.getFormOid())) {
+						logger.info("Loading form: " + alsForm.getDraftFormName());
+						//collect processed form names to return as JSON Array
+						formNamesLoaded.add(alsForm.getDraftFormName());
+						//map ALS data to FL form attributes
+						FormDescriptor formDescriptor = formConverterService.convertAlsToCadsr(alsForm, alsData);
+						//add other form attributes
+						formDescriptor.setContext(formLoadParamWrapper.getContextName());
+						formDescriptor.setContextSeqid(contextIdseq);
+						formDescriptor.setType("CRF");
+						formDescriptor.setProtocols(protocols);
+						//TODO what shall it be?
+						formDescriptor.setLoadType(FormDescriptor.LOAD_TYPE_NEW);
+						String currIdseq = loadServiceRepositoryImpl.createForm(formDescriptor, null);
+						logger.info("Loaded form: " + alsForm.getDraftFormName() + ". IDSeq: " + currIdseq);
 					}
-					logger.info("Total forms loaded: "+formSeqIdList.size());
-					logger.info("Loaded form Seq IDs: "+formSeqIdList);
 				}
-				else {//source default data to add
-					logger.error("No selected forms");
-				}
+				logger.info("Total forms loaded: " + formNamesLoaded.size());
+				httpHeaders.add("Content-Type", "application/json");
+				return new ResponseEntity<List<String>>(formNamesLoaded, httpHeaders, httpStatus);
 			}
 			else {
-				strMsg = "FATAL error: no data found in retrieving ALSData parser data by ID: " + idseq;
+				strMsg = "FATAL error: no parsed data found in retrieving ALSData parser data by ID: " + idseq;
 				logger.error(strMsg);
 				httpStatus = HttpStatus.BAD_REQUEST;
+				httpHeaders.add("Content-Type", "text/plain");
+				return new ResponseEntity<String>(strMsg +" \n", httpHeaders, httpStatus);
 			}
-			
-			HttpHeaders httpHeaders = new HttpHeaders();
-			httpHeaders.add("Content-Type", "text/plain");
-			return new ResponseEntity<String>("load form controller " + fileName + ", strMsg: " + strMsg +" \n", 
-				httpHeaders, httpStatus);
 		}
 		catch (RestClientException e) {
 			e.printStackTrace();

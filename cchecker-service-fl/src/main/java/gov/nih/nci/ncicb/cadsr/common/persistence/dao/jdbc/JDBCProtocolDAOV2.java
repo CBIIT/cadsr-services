@@ -156,5 +156,27 @@ public class JDBCProtocolDAOV2 extends JDBCBaseDAOV2 implements ProtocolDAO {
     	return (des == null || des.size() == 0) ? "" : des.get(0);
 
     }
+    
+    public List<String> getProtocolIdseqByPreferredName(String shortName) {
+    	
+    	String sql = 
+    			"select proto_idseq, protocol_Id, conte_idseq, long_name from sbrext.protocols_view_ext pv " +
+    					" where PV.PREFERRED_NAME=:shortName";
+
+    	MapSqlParameterSource params = new MapSqlParameterSource();
+    	params.addValue("shortName", shortName);
+
+    	List<String> des = 
+    			this.namedParameterJdbcTemplate.query(sql, params, 
+    					new RowMapper<String>() {
+    				public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+    					
+    					return rs.getString("proto_idseq");
+    				}
+    			});
+
+    	return des;
+
+    }
 
 }

@@ -79,28 +79,28 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 		
 		String formSeqid = "";
 		
-		try {			 
-			// 06/25/2019 VS added context seq ID after retrieving it from the caDSR DB 
-			form.setContextSeqid(this.getContextSeqIdByName(form.getContext()));
-			//06/25/2019 VS : Checking ContextSeqid for null, in case context from the form is not found
-				if (form.getContextSeqid()!=null) {
-					FormV2TransferObject formdto = DomainObjectTranslator.translateIntoFormDTO(form);
-					if (formdto == null) 
-						return null;
-		
-					formSeqid = formV2Dao.createFormComponent(formdto);		
-					logger.debug("Created form. Seqid: " + formSeqid);
-					
-					retrievePublicIdForForm(formSeqid, form);
-		
-					formdto.setFormIdseq(formSeqid);
-					form.setFormSeqId(formSeqid);
-		
-					createFormInstructions(form, formdto);
-		
-					processFormdetails(form, xmlPathName, form.getIndex());
-		
-					createModulesInForm(form, formdto);
+		try {
+			if (form.getContextSeqid()!=null) {
+				FormV2TransferObject formdto = DomainObjectTranslator.translateIntoFormDTO(form);
+				if (formdto == null) 
+					return null;
+	
+				formSeqid = formV2Dao.createFormComponent(formdto);		
+				logger.debug("Created form. Seqid: " + formSeqid);
+				
+				retrievePublicIdForForm(formSeqid, form);
+	
+				formdto.setFormIdseq(formSeqid);
+				form.setFormSeqId(formSeqid);
+	
+				createFormInstructions(form, formdto);
+	
+				processFormdetails(form, xmlPathName, form.getIndex());
+	
+				createModulesInForm(form, formdto);
+			}
+			else {
+				logger.error("Form received with empty Context IDSEQ: " + form);
 			}
 		} catch (DMLException dbe) {
 			logger.error(dbe.getMessage());

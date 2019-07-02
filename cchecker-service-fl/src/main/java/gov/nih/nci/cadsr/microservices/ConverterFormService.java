@@ -37,12 +37,6 @@ public class ConverterFormService {
 		List<ModuleDescriptor> modules = new ArrayList<ModuleDescriptor>();
 		modules.add(addModule(alsForm, alsData));
 		formDesc.setModules(modules);
-		List<ProtocolTransferObjectExt> protocols = new ArrayList<ProtocolTransferObjectExt>();
-		ProtocolTransferObjectExt protocol = new ProtocolTransferObjectExt();
-		protocol.setProtocolId(alsData.getCrfDraft().getPrimaryFormOid());
-		protocol.setPreferredName(alsData.getCrfDraft().getProjectName());
-		protocols.add(protocol);
-		formDesc.setProtocols(protocols);
 		return formDesc;
 	}
 	
