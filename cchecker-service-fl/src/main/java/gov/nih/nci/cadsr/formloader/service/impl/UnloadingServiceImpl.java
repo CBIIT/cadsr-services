@@ -1,5 +1,7 @@
 package gov.nih.nci.cadsr.formloader.service.impl;
-import org.apache.log4j.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,7 +12,6 @@ import java.util.List;
 
 import gov.nih.nci.cadsr.formloader.domain.FormCollection;
 import gov.nih.nci.cadsr.formloader.domain.FormDescriptor;
-import gov.nih.nci.cadsr.formloader.repository.FormLoaderRepository;
 import gov.nih.nci.cadsr.formloader.repository.impl.LoadServiceRepositoryImpl;
 import gov.nih.nci.cadsr.formloader.service.UnloadingService;
 import gov.nih.nci.cadsr.formloader.service.common.FormLoaderHelper;
@@ -19,7 +20,7 @@ import gov.nih.nci.cadsr.formloader.service.common.FormLoaderServiceException;
 @Service
 public class UnloadingServiceImpl implements UnloadingService {
 	
-	private static Logger logger = Logger.getLogger(UnloadingServiceImpl.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(UnloadingServiceImpl.class.getName());
 	
 	LoadServiceRepositoryImpl loadRepository;
 	

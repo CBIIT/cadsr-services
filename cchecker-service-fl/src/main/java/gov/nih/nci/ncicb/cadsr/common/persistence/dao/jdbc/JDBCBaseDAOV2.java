@@ -17,7 +17,8 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -28,7 +29,7 @@ import org.springframework.jdbc.object.StoredProcedure;
 public class JDBCBaseDAOV2 extends BaseDAOV2 implements PersistenceConstants,
 		ErrorCodeConstants {
 	
-	private static Logger logger = Logger.getLogger(JDBCBaseDAOV2.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(JDBCBaseDAOV2.class.getName());
 
 	String jndiName = "";
 	GUIDGenerator idGen = null;

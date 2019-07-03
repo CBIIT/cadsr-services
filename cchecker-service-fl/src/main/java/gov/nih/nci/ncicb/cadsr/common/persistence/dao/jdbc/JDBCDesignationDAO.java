@@ -4,12 +4,13 @@ import gov.nih.nci.ncicb.cadsr.common.dto.DesignationTransferObjectExt;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 public class JDBCDesignationDAO extends JDBCBaseDAOV2 {
-	private static Logger logger = Logger.getLogger(JDBCDesignationDAO.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(JDBCDesignationDAO.class.getName());
 	
 	public JDBCDesignationDAO(DataSource dataSource) {
 		super(dataSource);

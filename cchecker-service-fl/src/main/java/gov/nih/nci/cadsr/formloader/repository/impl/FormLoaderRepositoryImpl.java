@@ -7,8 +7,8 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import gov.nih.nci.cadsr.formloader.domain.FormCollection;
@@ -46,7 +46,7 @@ public class FormLoaderRepositoryImpl implements FormLoaderRepository {
 	
 	private DataSource dataSource;
 
-	private static Logger logger = Logger.getLogger(FormLoaderRepositoryImpl.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(FormLoaderRepositoryImpl.class.getName());
 	
 	static final int MAX_LONG_NAME_LENGTH = 255;
 	

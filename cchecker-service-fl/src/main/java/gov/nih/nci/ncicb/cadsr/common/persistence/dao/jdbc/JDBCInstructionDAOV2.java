@@ -15,7 +15,8 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
@@ -28,7 +29,7 @@ public abstract class JDBCInstructionDAOV2 extends JDBCAdminComponentDAOV2 imple
 {
   
 	
-	private static Logger logger = Logger.getLogger(JDBCInstructionDAOV2.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(JDBCInstructionDAOV2.class.getName());
 	
 	public JDBCInstructionDAOV2(DataSource dataSource) {
 		super(dataSource);

@@ -6,11 +6,12 @@ import java.util.List;
 
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXParseException;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class XmlValidationErrorHandler implements ErrorHandler {
 	
-	private static Logger logger = Logger.getLogger(XmlValidationErrorHandler.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(XmlValidationErrorHandler.class.getName());
 	
 	private List<XmlValidationError> xmlErrors = new ArrayList<XmlValidationError>();
 

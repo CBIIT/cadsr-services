@@ -13,11 +13,12 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DomainObjectTranslator {
 	
-	private static Logger logger = Logger.getLogger(DomainObjectTranslator.class.getName());
+	private static final Logger logger =  LoggerFactory.getLogger(DomainObjectTranslator.class.getName());
 	
 	public static final	String FORM_LOADER_DB_USER = "FORMLOADER";
 	public static final	String WORKFLOW_STATUS_UNLOADED = "RETIRED UNLOADED"; 

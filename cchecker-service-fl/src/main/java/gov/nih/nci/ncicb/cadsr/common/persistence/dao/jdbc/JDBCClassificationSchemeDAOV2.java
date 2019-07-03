@@ -17,7 +17,8 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -26,7 +27,7 @@ import org.springframework.jdbc.object.MappingSqlQuery;
 
 public class JDBCClassificationSchemeDAOV2 extends JDBCAdminComponentDAOV2 implements ClassificationSchemeDAO
 {	
-	private static Logger logger = Logger.getLogger(JDBCClassificationSchemeDAOV2.class);
+	private static final Logger logger = LoggerFactory.getLogger(JDBCClassificationSchemeDAOV2.class);
 
 	public JDBCClassificationSchemeDAOV2(DataSource dataSource) {
 		super(dataSource);

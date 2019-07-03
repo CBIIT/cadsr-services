@@ -15,7 +15,8 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.nih.nci.cadsr.formloader.domain.FormCollection;
 import gov.nih.nci.cadsr.formloader.domain.FormDescriptor;
@@ -28,7 +29,7 @@ import gov.nih.nci.ncicb.cadsr.common.dto.RefdocTransferObjectExt;
 
 public class StaXParser {
 	
-	private static Logger logger = Logger.getLogger(StaXParser.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(StaXParser.class.getName());
 	
 	protected static final Map<String, String> MAP_XML_ELEM_TO_DTO_PROPERTY = createMap();
 	

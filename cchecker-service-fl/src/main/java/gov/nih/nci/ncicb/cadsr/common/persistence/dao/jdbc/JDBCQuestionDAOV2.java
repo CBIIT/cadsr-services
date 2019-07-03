@@ -25,7 +25,8 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
@@ -37,7 +38,7 @@ import org.springframework.jdbc.object.StoredProcedure;
 
 public class JDBCQuestionDAOV2 extends JDBCAdminComponentDAOV2 implements QuestionDAO {
   
-private static Logger logger = Logger.getLogger(JDBCQuestionDAOV2.class.getName());
+private static final Logger logger = LoggerFactory.getLogger(JDBCQuestionDAOV2.class.getName());
 	
 	public JDBCQuestionDAOV2(DataSource dataSource) {
 		super(dataSource);

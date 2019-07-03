@@ -19,7 +19,8 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -28,7 +29,7 @@ import org.springframework.jdbc.object.MappingSqlQuery;
 public class JDBCContactCommunicationDAOV2 extends JDBCAdminComponentDAOV2
 		implements ContactCommunicationV2DAO {
 	
-	private static Logger logger = Logger.getLogger(JDBCContactCommunicationDAOV2.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(JDBCContactCommunicationDAOV2.class.getName());
 	
 	public JDBCContactCommunicationDAOV2(DataSource dataSource) {
 		super(dataSource);

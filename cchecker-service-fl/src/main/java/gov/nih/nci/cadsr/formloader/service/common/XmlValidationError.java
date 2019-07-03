@@ -1,11 +1,11 @@
 package gov.nih.nci.cadsr.formloader.service.common;
 
-
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class XmlValidationError {
 	
-	private static Logger logger = Logger.getLogger(XmlValidationError.class.getName());
+	private static Logger logger = LoggerFactory.getLogger(XmlValidationError.class.getName());
 	
 	public static final String XML_NO_ERROR = "NoError";
 	public static final String XML_WARNING = "Warning";

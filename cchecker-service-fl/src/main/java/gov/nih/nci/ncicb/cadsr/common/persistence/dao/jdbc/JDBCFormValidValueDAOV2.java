@@ -9,7 +9,8 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlOutParameter;
@@ -26,7 +27,7 @@ import gov.nih.nci.ncicb.cadsr.common.util.StringUtils;
 public class JDBCFormValidValueDAOV2 extends JDBCAdminComponentDAOV2
   implements FormValidValueDAO {
 	
-	private static Logger logger = Logger.getLogger(JDBCFormValidValueDAOV2.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(JDBCFormValidValueDAOV2.class.getName());
   
 	public JDBCFormValidValueDAOV2(DataSource dataSource) {
 		super(dataSource);

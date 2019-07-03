@@ -6,7 +6,6 @@ import gov.nih.nci.cadsr.formloader.domain.FormDescriptor;
 import gov.nih.nci.cadsr.formloader.domain.FormStatus;
 import gov.nih.nci.cadsr.formloader.domain.ModuleStatus;
 import gov.nih.nci.cadsr.formloader.domain.QuestionStatus;
-import gov.nih.nci.cadsr.formloader.service.impl.LoadingServiceImpl;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -19,10 +18,11 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StatusFormatter {
-	private static Logger logger = Logger.getLogger(StatusFormatter.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(StatusFormatter.class.getName());
 	
 	/**
 	 * Returns empty string if no messages found at form or question level

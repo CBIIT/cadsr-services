@@ -2,7 +2,6 @@ package gov.nih.nci.cadsr.formloader.service.impl;
 
 import gov.nih.nci.cadsr.formloader.domain.FormCollection;
 import gov.nih.nci.cadsr.formloader.domain.FormDescriptor;
-import gov.nih.nci.cadsr.formloader.repository.FormLoaderRepository;
 import gov.nih.nci.cadsr.formloader.repository.impl.LoadServiceRepositoryImpl;
 import gov.nih.nci.cadsr.formloader.service.LoadingService;
 import gov.nih.nci.cadsr.formloader.service.common.FormLoaderServiceException;
@@ -12,15 +11,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+
 
 @Service
 public class LoadingServiceImpl implements LoadingService {
 	
-	private static Logger logger = Logger.getLogger(LoadingServiceImpl.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(LoadingServiceImpl.class.getName());
 	
 	LoadServiceRepositoryImpl loadRepository;
 	

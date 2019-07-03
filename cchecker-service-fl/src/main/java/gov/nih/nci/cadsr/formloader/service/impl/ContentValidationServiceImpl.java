@@ -7,7 +7,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import gov.nih.nci.cadsr.formloader.domain.FormCollection;
@@ -38,7 +39,7 @@ import gov.nih.nci.ncicb.cadsr.common.util.ValueHolder;
 @Service
 public class ContentValidationServiceImpl implements ContentValidationService {
 	
-	private static Logger logger = Logger.getLogger(ContentValidationServiceImpl.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(ContentValidationServiceImpl.class.getName());
 	
 	FormLoaderRepositoryImpl repository;
 	

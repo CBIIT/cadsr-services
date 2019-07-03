@@ -40,15 +40,15 @@ import java.util.Properties;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.xpath.XPathFactory;
 
-import org.apache.commons.lang3.SerializationUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Helper is generally very application specific (i.e. very FormLoader specific).
  */
 public class FormLoaderHelper {
 	
-	private static Logger logger = Logger.getLogger(FormLoaderHelper.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(FormLoaderHelper.class.getName());
 	
 	private static Properties properties = null;
 	

@@ -7,7 +7,8 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,7 +45,7 @@ import gov.nih.nci.ncicb.cadsr.common.util.ValueHolder;
 
 public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 	
-	private static Logger logger = Logger.getLogger(LoadServiceRepositoryImpl.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(LoadServiceRepositoryImpl.class.getName());
 	
 //	FormLoaderRepositoryImpl repository;
 //	

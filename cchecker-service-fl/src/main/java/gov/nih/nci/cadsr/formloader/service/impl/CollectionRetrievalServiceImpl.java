@@ -13,14 +13,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CollectionRetrievalServiceImpl implements CollectionRetrievalService {
 
-	private static Logger logger = Logger.getLogger(CollectionRetrievalServiceImpl.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(CollectionRetrievalServiceImpl.class.getName());
 	
 	FormLoaderRepository repository;
 	

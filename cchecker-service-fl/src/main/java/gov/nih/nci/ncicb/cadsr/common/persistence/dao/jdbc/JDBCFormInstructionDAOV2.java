@@ -8,12 +8,13 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JDBCFormInstructionDAOV2 extends JDBCInstructionDAOV2
   implements FormInstructionDAO {
   
-private static Logger logger = Logger.getLogger(JDBCFormInstructionDAOV2.class.getName());
+private static final Logger logger = LoggerFactory.getLogger(JDBCFormInstructionDAOV2.class.getName());
 	
 	public JDBCFormInstructionDAOV2(DataSource dataSource) {
 		super(dataSource);

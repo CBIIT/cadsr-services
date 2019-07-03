@@ -43,7 +43,8 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlOutParameter;
@@ -57,7 +58,7 @@ import org.springframework.jdbc.object.StoredProcedure;
 public class JDBCAdminComponentDAOV2 extends JDBCBaseDAOV2
   implements AdminComponentDAOV2 {
 	
-	private static Logger logger = Logger.getLogger(JDBCAdminComponentDAOV2.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(JDBCAdminComponentDAOV2.class.getName());
  
 	private static PreferredNameGenerator nameGen = null;
   private static HasCreateQuery hasCreateQry = null;

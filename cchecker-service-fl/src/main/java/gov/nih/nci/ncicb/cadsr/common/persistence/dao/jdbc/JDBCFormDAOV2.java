@@ -42,8 +42,8 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
-import org.springframework.dao.DataAccessException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
@@ -56,7 +56,7 @@ import org.springframework.jdbc.object.StoredProcedure;
 //Modification off JDBCFormV2Dao
 public class JDBCFormDAOV2 extends JDBCAdminComponentDAOV2 implements FormV2DAO {
 	
-	private static Logger logger = Logger.getLogger(JDBCFormDAOV2.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(JDBCFormDAOV2.class.getName());
 	
 	public JDBCFormDAOV2(DataSource dataSource) {
 		super(dataSource);

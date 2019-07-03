@@ -18,11 +18,12 @@ import gov.nih.nci.ncicb.cadsr.common.dto.QuestionTransferObject;
 import gov.nih.nci.ncicb.cadsr.common.exception.DMLException;
 import gov.nih.nci.ncicb.cadsr.common.resource.Instruction;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 public class UpdateFormRepositoryImpl extends LoadServiceRepositoryImpl {
-	private static Logger logger = Logger.getLogger(UpdateFormRepositoryImpl.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(UpdateFormRepositoryImpl.class.getName());
 	
 	public UpdateFormRepositoryImpl(DataSource dataSource2) {
 		super(dataSource2);

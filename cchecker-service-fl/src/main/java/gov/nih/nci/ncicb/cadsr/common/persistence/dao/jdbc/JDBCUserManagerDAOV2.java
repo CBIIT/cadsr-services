@@ -19,7 +19,8 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
@@ -29,7 +30,7 @@ import org.springframework.jdbc.object.StoredProcedure;
 
 public class JDBCUserManagerDAOV2 extends JDBCBaseDAOV2 implements UserManagerDAO {
  
-	private static Logger logger = Logger.getLogger(JDBCUserManagerDAOV2.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(JDBCUserManagerDAOV2.class.getName());
  
   public JDBCUserManagerDAOV2(DataSource dataSource) {
 		super(dataSource);

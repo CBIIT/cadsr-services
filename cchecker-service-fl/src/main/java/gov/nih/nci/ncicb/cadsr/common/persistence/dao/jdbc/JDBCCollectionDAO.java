@@ -11,17 +11,17 @@ import gov.nih.nci.cadsr.formloader.domain.FormDescriptor;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class JDBCCollectionDAO extends JDBCBaseDAOV2 implements CollectionDAO {
 	
 	
-	private static Logger logger = Logger.getLogger(JDBCFormDAOV2.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(JDBCFormDAOV2.class.getName());
 	
 	public JDBCCollectionDAO(DataSource dataSource) {
 		super(dataSource);

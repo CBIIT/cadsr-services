@@ -1,16 +1,16 @@
 package gov.nih.nci.ncicb.cadsr.common.persistence.dao.jdbc;
 
 import gov.nih.nci.ncicb.cadsr.common.dto.DefinitionTransferObjectExt;
-import gov.nih.nci.ncicb.cadsr.common.dto.DesignationTransferObjectExt;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 public class JDBCDefinitionDAO extends JDBCBaseDAOV2 {
-	private static Logger logger = Logger.getLogger(JDBCDesignationDAO.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(JDBCDesignationDAO.class.getName());
 	
 	public JDBCDefinitionDAO(DataSource dataSource) {
 		super(dataSource);

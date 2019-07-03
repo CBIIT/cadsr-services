@@ -12,14 +12,15 @@ import gov.nih.nci.cadsr.formloader.domain.ModuleDescriptor;
 
 import javax.xml.stream.XMLStreamReader;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author yangs8
  *
  */
 public class FormParserHandler extends ParserHandler {
-	private static Logger logger = Logger.getLogger(FormParserHandler.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(FormParserHandler.class.getName());
 	
 	FormDescriptor tempForm;
 	int moduleCountForForm = 0;	
@@ -195,7 +196,7 @@ protected void setFormProperty(String methodName, String value) {
 			method.invoke(tempForm, value);
 			
 		} catch (SecurityException se) {
-			logger.debug(se);
+			logger.error("setFormProperty: ", se);
 		} catch (IllegalArgumentException ex) {
             ex.printStackTrace();
         } catch (InvocationTargetException ex) {
@@ -205,9 +206,9 @@ protected void setFormProperty(String methodName, String value) {
             ex.printStackTrace();
             return;
         } catch(Exception ex) {
-			logger.debug(ex);
+			logger.error("setFormProperty: ", ex);
     	} catch (Throwable t) {
-    		logger.debug(t);
+    		logger.error("setFormProperty: ", t);
     	}
 
 	}
@@ -242,7 +243,7 @@ protected void setFormProperty(String methodName, String value) {
 			method.invoke(tempForm, value);
 			
 		} catch (SecurityException se) {
-			logger.debug(se);
+			logger.error("setFormPropertyV2: ", se);
 		} catch (IllegalArgumentException ex) {
             ex.printStackTrace();
         } catch (InvocationTargetException ex) {
@@ -252,9 +253,9 @@ protected void setFormProperty(String methodName, String value) {
             ex.printStackTrace();
             return;
         } catch(Exception ex) {
-			logger.debug(ex);
+			logger.error("setFormPropertyV2: ", ex);
     	} catch (Throwable t) {
-    		logger.debug(t);
+    		logger.error("setFormPropertyV2: ", t);
     	}
 
 	}

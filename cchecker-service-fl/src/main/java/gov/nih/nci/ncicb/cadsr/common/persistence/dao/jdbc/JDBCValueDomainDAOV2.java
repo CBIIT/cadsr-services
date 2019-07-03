@@ -19,7 +19,8 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -33,7 +34,7 @@ import org.springframework.jdbc.object.MappingSqlQuery;
 public class JDBCValueDomainDAOV2 extends JDBCAdminComponentDAOV2 implements
 	ValueDomainDAOV2 {
 	
-	private static Logger logger = Logger.getLogger(JDBCValueDomainDAOV2.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(JDBCValueDomainDAOV2.class.getName());
 	
 	 public JDBCValueDomainDAOV2(DataSource dataSource) {
 		  super(dataSource);

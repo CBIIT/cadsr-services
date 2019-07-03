@@ -14,8 +14,8 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class performs common login credential security checks and processing for the caDSR Tool suite deployed under JBoss. The default &lt;jndi-name&gt;
@@ -100,7 +100,7 @@ public class CaDsrUserCredentialsV2
     private String _applPswd;
     private int _checkCode;
 
-    private Logger _logger = Logger.getLogger(CaDsrUserCredentialsV2.class);
+    private static final Logger _logger = LoggerFactory.getLogger(CaDsrUserCredentialsV2.class);
     
     private static String _jndiName = "java:jboss/datasources/FormBuilderDS";
     

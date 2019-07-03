@@ -15,15 +15,15 @@ import java.util.List;
 
 import javax.xml.stream.XMLStreamReader;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author yangs8
  *
  */
 public class FormDetailsParserHandler extends ParserHandler {
-	private static Logger logger = Logger.getLogger(FormParserHandler.class.getName());
-	
+	private static final Logger logger = LoggerFactory.getLogger(FormParserHandler.class.getName());
 	
 	ArrayDeque<String> nodeQueue;
 	int startFormIdx;
@@ -419,7 +419,7 @@ public class FormDetailsParserHandler extends ParserHandler {
 			method.invoke(currObj, value);
 			
 		} catch (SecurityException se) {
-			logger.debug(se);
+			logger.error("setPropertyForObject: ", se);
 		} catch (IllegalArgumentException ex) {
             ex.printStackTrace();
         } catch (InvocationTargetException ex) {
@@ -429,9 +429,9 @@ public class FormDetailsParserHandler extends ParserHandler {
             ex.printStackTrace();
             return;
         } catch(Exception ex) {
-			logger.debug(ex);
+			logger.error("setPropertyForObject: ", ex);
     	} catch (Throwable t) {
-    		logger.debug(t);
+    		logger.error("setPropertyForObject: ", t);
     	}
 
 	}

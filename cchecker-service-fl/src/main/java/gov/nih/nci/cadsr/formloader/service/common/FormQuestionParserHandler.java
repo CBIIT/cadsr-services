@@ -11,10 +11,11 @@ import gov.nih.nci.cadsr.formloader.domain.QuestionDescriptor;
 
 import javax.xml.stream.XMLStreamReader;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FormQuestionParserHandler extends ParserHandler {
-	private static Logger logger = Logger
+	private static final Logger logger = LoggerFactory
 			.getLogger(FormQuestionParserHandler.class.getName());
 
 	ArrayDeque<String> nodeQueue;
@@ -214,7 +215,7 @@ public class FormQuestionParserHandler extends ParserHandler {
 			method.invoke(targetObj, value);
 
 		} catch (SecurityException se) {
-			logger.debug(se);
+			logger.error("setProperty: ", se);
 		} catch (IllegalArgumentException ex) {
 			ex.printStackTrace();
 		} catch (InvocationTargetException ex) {
@@ -224,9 +225,9 @@ public class FormQuestionParserHandler extends ParserHandler {
 			ex.printStackTrace();
 			return;
 		} catch (Exception ex) {
-			logger.debug(ex);
+			logger.error("setProperty: ", ex);
 		} catch (Throwable t) {
-			logger.debug(t);
+			logger.error("setProperty: ", t);
 		}
 
 	}
