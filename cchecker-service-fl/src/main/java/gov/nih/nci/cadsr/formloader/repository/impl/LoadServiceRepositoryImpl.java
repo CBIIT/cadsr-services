@@ -37,8 +37,10 @@ import gov.nih.nci.ncicb.cadsr.common.dto.ProtocolTransferObjectExt;
 import gov.nih.nci.ncicb.cadsr.common.dto.QuestionTransferObject;
 import gov.nih.nci.ncicb.cadsr.common.dto.RefdocTransferObjectExt;
 import gov.nih.nci.ncicb.cadsr.common.dto.ReferenceDocumentTransferObject;
+import gov.nih.nci.ncicb.cadsr.common.dto.ValueMeaningV2TransferObject;
 import gov.nih.nci.ncicb.cadsr.common.exception.DMLException;
 import gov.nih.nci.ncicb.cadsr.common.resource.Instruction;
+import gov.nih.nci.ncicb.cadsr.common.resource.ValueMeaningV2;
 import gov.nih.nci.ncicb.cadsr.common.util.StringUtils;
 import gov.nih.nci.ncicb.cadsr.common.util.ValueHolder;
 @ConditionalOnBean(name = "dataSource")
@@ -733,9 +735,9 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 			//FORMBUILD-424, 425 : Following block of code to be done in validation step and get the correct PV and set values for Meaning Text and Description
 			//JR417 begin
 			//get the correct vv's pvdto and set vv's vdPermissibleValueSeqid
-			/*PermissibleValueV2TransferObject pv = null;
-			 * try {
-			 pv = FormLoaderHelper.getValidValuePV(vValue, pvDtos, repository);
+			PermissibleValueV2TransferObject pv = null;
+			 try {
+			 pv = FormLoaderHelper.getValidValuePV(vValue, pvDtos);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -749,7 +751,8 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 				//FORMBUILD-448 following is redundant code as the PV already has the correct VMs associated with it. 
 				if(pvVM != null) {
 					vValue.setPreferredName(pvVM.getPublicId() + "v" + pvVM.getVersion());
-					System.out.println("*********** pv value[" + pv.getValue() + "] vValue getPreferredName[" + vValue.getPreferredName() + "] ***********");
+					logger.debug("pv value[" + pv.getValue() + "] vValue getPreferredName[" + vValue.getPreferredName() + "] ");
+					vValue.setDescription(pvVM.getPreferredDefinition());
 					ValueMeaningV2TransferObject vm = new ValueMeaningV2TransferObject();
 					vm.setPublicId(pvVM.getPublicId()); //this is also the preferred name for some reason
 					vm.setVersion(pvVM.getVersion());
@@ -763,7 +766,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 				}
 			} //what happend if it is null? do we need to check?
 			//JR417 end
-			*/
+		
 			FormValidValueTransferObject fvv = translateIntoValidValueDto(vValue, newQuestdto, moduledto, formdto, idx);	 //JR417 vValue's vdpvseqid / vp_idseq is NOT empty anymore (fixed in this ticket)
 			
 			fvv.setDisplayOrder(idx);
