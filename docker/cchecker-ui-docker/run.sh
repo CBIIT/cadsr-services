@@ -8,6 +8,9 @@ if [ -d "/root/cadsr-services" ]; then
 else
   cd /root
   git clone https://github.com/CBIIT/cadsr-services
+  branchOrTag="${BRANCH_OR_TAG/origin\//}"
+  cd cadsr-services
+  git checkout $branchOrTag
 fi
 version=`xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" /root/cadsr-services/cchecker-gateway/pom.xml`
 cd /root/cadsr-services/cchecker-ui

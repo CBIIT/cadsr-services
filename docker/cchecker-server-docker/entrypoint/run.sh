@@ -4,6 +4,10 @@ if [ -d "/var/local/cadsr-services" ]; then
 else
   git clone https://github.com/CBIIT/cadsr-services  
   echo "Cloning the repository"
+  branchOrTag="${BRANCH_OR_TAG/origin\//}"  
+  cd cadsr-services
+  git checkout $branchOrTag
+
   ln -s /usr/local/apache-tomcat/log/cchecker-gateway.log /logs/cchecker-gateway.log
   ln -s /var/local/cadsr-services/alsvalidator/log/alsvalidator.log /logs/alsvalidator.log
   ln -s /var/local/cadsr-services/cchecker-service-db/log/cchecker-db.log /logs/cchecker-db.log
