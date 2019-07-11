@@ -690,7 +690,10 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 			
 			//FORMBUILD-529 associate the correct CDE and then use that CDE for setting Question Text
 			DataElementTransferObject matchingCde = getMatchingDataElement(question, cdeDtos);
-			
+			if (matchingCde!=null) {
+				questdto.setDataElement(matchingCde);
+			}
+
 			QuestionHelper.handleEmptyQuestionText(questdto, matchingCde);
 
 			//better to call createQuestionComponents, which is not implement.
