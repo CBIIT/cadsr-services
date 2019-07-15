@@ -26,13 +26,11 @@ import gov.nih.nci.ncicb.cadsr.common.dto.ProtocolTransferObjectExt;
  */
 @Service
 public class ConverterFormService {
-	public FormDescriptor convertAlsToCadsr(ALSForm alsForm, ALSData alsData) {
-		FormDescriptor formDesc = new FormDescriptor();
+	public FormDescriptor convertAlsToCadsr(ALSForm alsForm, ALSData alsData, FormDescriptor formDesc) {
 		formDesc.setCollectionName(alsData.getCrfDraft().getPrimaryFormOid());
-		formDesc.setContext("TEST"); // Retrieve from caDSR DB for the protocol in the ALS file
 		formDesc.setLoadType(FormDescriptor.LOAD_TYPE_NEW);
 		formDesc.setLongName(alsForm.getDraftFormName());
-		formDesc.setType("CRF");
+		formDesc.setType("CRF");		
 		formDesc.setPreferredDefinition(alsForm.getFormOid());
 		List<ModuleDescriptor> modules = new ArrayList<ModuleDescriptor>();
 		modules.add(addModule(alsForm, alsData));

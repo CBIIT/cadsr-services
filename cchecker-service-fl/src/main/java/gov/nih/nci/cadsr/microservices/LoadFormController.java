@@ -157,14 +157,12 @@ public class LoadFormController {
 						//collect processed form names to return as JSON Array
 						formNamesLoaded.add(alsForm.getDraftFormName());
 						//map ALS data to FL form attributes
-						FormDescriptor formDescriptor = formConverterService.convertAlsToCadsr(alsForm, alsData);
-						//add other form attributes
+						FormDescriptor formDescriptor = new FormDescriptor();
 						formDescriptor.setContext(formLoadParamWrapper.getContextName());
 						formDescriptor.setContextSeqid(contextIdseq);
-						formDescriptor.setType("CRF");
 						formDescriptor.setProtocols(protocols);
-						//TODO what shall it be?
-						formDescriptor.setLoadType(FormDescriptor.LOAD_TYPE_NEW);
+						formDescriptor = formConverterService.convertAlsToCadsr(alsForm, alsData, formDescriptor);
+						//add other form attributes
 						String currIdseq = loadServiceRepositoryImpl.createForm(formDescriptor, null);
 						logger.info("Loaded form: " + alsForm.getDraftFormName() + ". IDSeq: " + currIdseq);
 					}
