@@ -89,8 +89,6 @@ public class ConverterFormService {
 		//question.setDisplayOrder(alsField.getOrdinal()); // Not present at the moment
 		if (alsField.getPreText()!=null && (!alsField.getPreText().isEmpty())) {
 			question.setQuestionText(alsField.getPreText()); 
-		} else {
-			question.setQuestionText(alsField.getFieldOid());
 		}
 		String[] idVersion = extractIdVersion(alsField.getDraftFieldName());
 		if (idVersion[0] != null) {
