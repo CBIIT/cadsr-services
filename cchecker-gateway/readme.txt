@@ -83,6 +83,11 @@ Example:
 curl -v --cookie "_cchecker=005BE648-0924-491B-AF22-C02AEF415FB8" http://localhost:8080/gateway/feedcheckstatus/A9D4DF89-7680-48F5-8E0E-7094567944D1
 return SSE with current form number
 
+********ALS Forms to caDSR Forms*********
+********retrievecontexts**********
+GET request to retrieve a list of caDSR context names.
+/retrievecontexts
+http://localhost:8080/gateway/retrievecontexts
 ********
 Swagger 2 - Documentation
 Swagger and Swagger-UI are added.
