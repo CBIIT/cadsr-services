@@ -692,8 +692,10 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 			DataElementTransferObject matchingCde = getMatchingDataElement(question, cdeDtos);
 			
 			// 07/11/19 - santhanamv - Added the data element to the Question Transfer Object - Might need change if need be - Begin
-			if (matchingCde!=null) {
-				questdto.setDataElement(matchingCde);
+
+			// santhanamv - Long CDE name contains any question text that might be associated with DE
+			if (matchingCde!=null && matchingCde.getLongCDEName()!=null) {
+					questdto.setDataElement(matchingCde); 
 			}
 
 			// 07/11/19 - santhanamv - Added the data element to the Question Transfer Object - Might need change if need be - End

@@ -1089,7 +1089,8 @@ private static final Logger logger = LoggerFactory.getLogger(JDBCQuestionDAOV2.c
     					de.setVersion(rs.getFloat("VERSION"));
     					de.setLongName(rs.getString("LONG_NAME"));
     					de.setVdIdseq(rs.getString("VD_IDSEQ"));
-
+    					// santhanamv added this attribute to store any Question text for DE
+    					de.setLongCDEName(rs.getString("QUESTION"));
     					return de;
     				}
     			});
