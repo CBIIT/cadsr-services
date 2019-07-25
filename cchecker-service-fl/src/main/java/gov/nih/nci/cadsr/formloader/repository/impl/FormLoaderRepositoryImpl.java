@@ -320,7 +320,7 @@ public class FormLoaderRepositoryImpl implements FormLoaderRepository {
 		fvv.setFormValueMeaningText(vValue.getMeaningText());
 		fvv.setFormValueMeaningIdVersion(vValue.getPreferredName());
 		fvv.setFormValueMeaningDesc(vValue.getDescription());
-		logger.debug("FormLoaderRepositoryImpl.java#translateIntoValidValueDto JR417 *** the three fields of fvv have to be populated! *** fvv [" + fvv + "]");
+		logger.trace("FormLoaderRepositoryImpl.java#translateIntoValidValueDto JR417 *** the three fields of fvv have to be populated! *** fvv [" + fvv + "]");
 		//JR417	end
 		
 		fvv.setVersion(Float.valueOf("1.0"));
