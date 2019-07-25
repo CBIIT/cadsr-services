@@ -98,7 +98,7 @@ Example of JSON request body:
 	"selForms": ["Follow Up"]
 }
 Request body provides a valid caDSR Context name, and a JSON Array of Strings with ALS Form names.
-This service requires cchecher-service-db and cchecher-service-fl running.
+This service requires cchecker-service-db and cchecker-service-fl running.
 ********
 Swagger 2 - Documentation
 Swagger and Swagger-UI are added.
