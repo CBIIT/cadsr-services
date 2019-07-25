@@ -688,13 +688,31 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 			questdto.setContext(formdto.getContext());
 			questdto.setModule(moduledto);
 			
+			// santhanamv - Added PV comparison to valid values - Begin
+			
+			List<QuestionDescriptor.ValidValue>  validValues = question.getValidValues();
+			boolean cdeAssoc = true;
+			for (QuestionDescriptor.ValidValue vValue : validValues) {
+				PermissibleValueV2TransferObject pv = null;
+				 try {
+				 pv = FormLoaderHelper.getValidValuePV(vValue, pvDtos);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				 if (pv == null)
+					 cdeAssoc = false;
+			}
+			
+			// santhanamv - Added PV comparison to valid values - End
+			
 			//FORMBUILD-529 associate the correct CDE and then use that CDE for setting Question Text
 			DataElementTransferObject matchingCde = getMatchingDataElement(question, cdeDtos);
 			
 			// 07/11/19 - santhanamv - Added the data element to the Question Transfer Object - Might need change if need be - Begin
 
 			// santhanamv - Long CDE name contains any question text that might be associated with DE
-			if (matchingCde!=null && matchingCde.getLongCDEName()!=null) {
+			if (matchingCde!=null && matchingCde.getLongCDEName()!=null && cdeAssoc) {
 					questdto.setDataElement(matchingCde); 
 			}
 
@@ -762,19 +780,20 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 				
 				//FORMBUILD-448 following is redundant code as the PV already has the correct VMs associated with it. 
 				if(pvVM != null) {
-					vValue.setPreferredName(pvVM.getPublicId() + "v" + pvVM.getVersion());
-					logger.debug("pv value[" + pv.getValue() + "] vValue getPreferredName[" + vValue.getPreferredName() + "] ");
-					vValue.setDescription(pvVM.getPreferredDefinition());
-					ValueMeaningV2TransferObject vm = new ValueMeaningV2TransferObject();
+						vValue.setPreferredName(pvVM.getPublicId() + "v" + pvVM.getVersion());
+						vValue.setDescription(pvVM.getPreferredDefinition()); 
+					//logger.debug("pv value[" + pv.getValue() + "] vValue getPreferredName[" + vValue.getPreferredName() + "] ");										
+				/*	ValueMeaningV2TransferObject vm = new ValueMeaningV2TransferObject();
 					vm.setPublicId(pvVM.getPublicId()); //this is also the preferred name for some reason
-					vm.setVersion(pvVM.getVersion());
+					vm.setVersion(pvVM.getVersion()); 
+					
 					vm.setPreferredName(pvVM.getPreferredName());
 					vm.setPreferredDefinition(pv.getValue());	//or pvVM's preferedDefinition/vValue's meaningText
 					vm.setLongName(pvVM.getLongName());
 					vm.setDescription(pvVM.getPreferredDefinition());
 					vm.setPreferredDefinition(pvVM.getPreferredDefinition());
 					vm.setIdseq(pvVM.getIdseq());
-					pv.setValueMeaningV2(vm);
+					pv.setValueMeaningV2(vm);*/
 				}
 			} //what happend if it is null? do we need to check?
 			//JR417 end

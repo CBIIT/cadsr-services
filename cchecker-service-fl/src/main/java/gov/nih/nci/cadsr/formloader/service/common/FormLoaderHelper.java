@@ -510,14 +510,15 @@ public class FormLoaderHelper {
 	        pvs = (ArrayList<PermissibleValueV2TransferObject>) pair.getValue();
 	        for(int i=0; i<pvs.size(); i++) {
 		        pv = pvs.get(i);
-		        logger.debug(pair.getKey() + " = " + pv.getValue());
+		        //logger.debug(pair.getKey() + " = " + pv.getValue());
 		        //FORMBUILD-448 failing to identify a pv based on the following comparison
 		        //pv long name should be compared to vValue Meaning Text to find reliable matches.
 		        if(pv.getValueMeaningV2() != null)
 		        	value = pv.getValueMeaningV2().getLongName();
 		        	//value = pv.getValueMeaningV2().getPreferredDefinition();
-		        logger.debug("pv vm value = [" + value + "] vValue.getMeaningText() = [" + vValue.getMeaningText() + "]");
-		        if(value != null && value.equals(vValue.getMeaningText())) {
+		        //logger.debug("pv vm value = [" + value + "] vValue.getMeaningText() = [" + vValue.getMeaningText() + "]");
+		        // santhanamv - added pv value comparison to block unmatched valid values
+		        if(value != null && value.equals(vValue.getMeaningText()) && pv.getValue().equals(vValue.getValue())) {
 		        	ret = pv;
 		        	found = true;
 		        	break;
