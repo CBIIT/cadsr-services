@@ -455,7 +455,7 @@ public class GatewayBootController {
 	 * @param sessionid not null
 	 * @return String URI to get validation report
 	 */
-	protected String buildLocationUri(URI url, String sessionid) {
+	protected static String buildLocationUri(URI url, String sessionid) {
 		String location;
 		
 		String path = String.format("%s://%s:%d%s", url.getScheme(), url.getHost(), url.getPort(), url.getPath());
@@ -579,7 +579,7 @@ public class GatewayBootController {
 		response.flushBuffer();
 	}
 	
-	private Cookie retrieveCookie(HttpServletRequest request) {
+	protected static Cookie retrieveCookie(HttpServletRequest request) {
 		Cookie[] cookieArr = request.getCookies();
 		Cookie sessionCookie = null;
 		if (cookieArr != null) {
@@ -677,7 +677,7 @@ public class GatewayBootController {
 		// httpHeaders.setAccessControlAllowOrigin(ACCESS_CONTROL_ALLOW_ORIGIN);
 		return httpHeaders;
 	}
-	protected HttpHeaders createHttpValidateHeaders(String contextTypeSting, String locationHeaderString) {
+	protected static HttpHeaders createHttpValidateHeaders(String contextTypeSting, String locationHeaderString) {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.add("Content-Type", contextTypeSting);
 		httpHeaders.add("Location", locationHeaderString);

@@ -28,7 +28,7 @@ public class FormLoadParamWrapper {
 	
 	@Override
 	public String toString() {
-		return "FormLoadParamWrapper [selForms=" + selForms + ", contextName=" + contextName + "]";
+		return "[contextName=" + contextName + ", selForms=" + selForms + "]";
 	}
 
 }

@@ -88,6 +88,17 @@ return SSE with current form number
 GET request to retrieve a list of caDSR context names.
 /retrievecontexts
 http://localhost:8080/gateway/retrievecontexts
+********loadformservice**********
+curl -v --cookie "_cchecker=B0625028-88E7-44E0-80B8-D52D0ADC1131" -X POST \
+-H "Content-Type: application/json" --data "@/local/content/cchecker/formloadlist.json" http://localhost:8080/gateway/loadformservice?sessionid=B0625028-88E7-44E0-80B8-D52D0ADC1131
+This service expects a cookie which is ID of a session and earlier parsed ALS File.
+Example of JSON request body:
+{
+	"contextName":"TEST",
+	"selForms": ["Follow Up"]
+}
+Request body provides a valid caDSR Context name, and a JSON Array of Strings with ALS Form names.
+This service requires cchecher-service-db and cchecher-service-fl running.
 ********
 Swagger 2 - Documentation
 Swagger and Swagger-UI are added.
