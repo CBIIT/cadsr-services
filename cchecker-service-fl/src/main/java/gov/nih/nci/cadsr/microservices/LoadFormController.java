@@ -71,24 +71,25 @@ public class LoadFormController {
 		return res;
 	}
 
-	protected String retrieveProtocolIdseq(String protocolPreferredName) {
+	protected String retrieveProtocolIdseq(String protocolAlsName) {
 		List<String> protocolIdseqList;
 		//we need Protocol IDSEQ to add a protocol to a form
 		String protocolIdseq = null;
 		//retrieve protocol information for forms
-		if (StringUtils.isNotBlank(protocolPreferredName)) {
+		if (StringUtils.isNotBlank(protocolAlsName)) {
 			//retrieve protocol information for forms
 			protocolIdseqList = loadServiceRepositoryImpl.getProtocolV2Dao()
-					.getProtocolIdseqByPreferredName(protocolPreferredName);
+//				.getProtocolIdseqByPreferredName(protocolAlsName);//TODO remove when receive a confirmation on ALS Project data
+				.getProtocolIdseqByLongName(protocolAlsName);
 			if ((protocolIdseqList != null) && (protocolIdseqList.size() == 1)) {
 				protocolIdseq = protocolIdseqList.get(0);
 			} 
 			else if ((protocolIdseqList != null) && (protocolIdseqList.size() > 1)) {
-				logger.warn("Protocol Preferred Name is not unique: " + protocolPreferredName, protocolIdseqList);
+				logger.warn("Protocol ALS Name is not unique: " + protocolAlsName, protocolIdseqList);
 				protocolIdseq = protocolIdseqList.get(0);
 			} 
 			else {
-				logger.error("Protocol Preferred Name is not found: " + protocolPreferredName);
+				logger.error("Protocol ALS Name is not found: " + protocolAlsName);
 			}
 		}
 		return protocolIdseq;
@@ -98,12 +99,21 @@ public class LoadFormController {
 		if (protocolIdseq != null) {
 			ProtocolTransferObjectExt protocol = new ProtocolTransferObjectExt();
 			//we do not need protocolPreferredName for FL legacy code, only IDSEQ
-			protocol.setPreferredName(protocolPreferredName);
+			//protocol.setPreferredName(protocolPreferredName);
 			protocol.setIdseq(protocolIdseq);
 			protocols.add(protocol);
 		}
 		return protocols;
 	}
+	/**
+	 * 
+	 * @param request
+	 * @param response
+	 * @param idseq
+	 * @param requestEntity
+	 * @return ResponseEntity which is JSON string array. On error, the array has one string error message.
+	 */
+	
 	@PostMapping(value = "/rest/loadforms")
 	public ResponseEntity<?>loadForms(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(name="_cchecker", required=true) String idseq,
@@ -129,6 +139,7 @@ public class LoadFormController {
 		String strMsg = "OK";
 		HttpStatus httpStatus = HttpStatus.OK;
 		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.add("Content-Type", "application/json");
 		try {
 			ALSData alsData = retrieveAlsData(idseq);
 			if (alsData != null) {
@@ -143,11 +154,11 @@ public class LoadFormController {
 				}
 				
 				//retrieve protocol information for forms
-				String protocolPreferredName = alsData.getCrfDraft().getProjectName();
+				String protocolAlsName = alsData.getCrfDraft().getProjectName();
 				//we need Protocol IDSEQ to add a protocol to a form
-				String protocolIdseq = retrieveProtocolIdseq(protocolPreferredName);
+				String protocolIdseq = retrieveProtocolIdseq(protocolAlsName);
 
-				List<ProtocolTransferObjectExt> protocols = buildProtocolListForForms(protocolPreferredName, protocolIdseq);
+				List<ProtocolTransferObjectExt> protocols = buildProtocolListForForms(protocolAlsName, protocolIdseq);
 				
 				List<String> formNamesLoaded = new ArrayList<String>();
 
@@ -173,20 +184,34 @@ public class LoadFormController {
 			}
 			else {
 				strMsg = "FATAL error: no parsed data found in retrieving ALSData parser data by ID: " + idseq;
+				List<String> errorArr = new ArrayList<>();
+				errorArr.add(strMsg);
 				logger.error(strMsg);
 				httpStatus = HttpStatus.BAD_REQUEST;
-				httpHeaders.add("Content-Type", "text/plain");
-				return new ResponseEntity<String>(strMsg +" \n", httpHeaders, httpStatus);
+				return new ResponseEntity<List<String>>(errorArr, httpHeaders, httpStatus);
 			}
 		}
 		catch (RestClientException e) {
 			e.printStackTrace();
 			logger.error("RestClientException on idseq: " + idseq, e);
-			return buildErrorResponse("ALS is not found by " + idseq + e, HttpStatus.BAD_REQUEST);
+			//return buildErrorResponse("ALS is not found by " + idseq + e, HttpStatus.BAD_REQUEST);
+			strMsg = "ALS is not found by " + idseq + e;
+			List<String> errorArr = new ArrayList<>();
+			errorArr.add(strMsg);
+			logger.error(strMsg);
+			httpStatus = HttpStatus.BAD_REQUEST;
+			return new ResponseEntity<List<String>>(errorArr, httpHeaders, httpStatus);
+
 		}
 		catch (Exception e) {
 			e.printStackTrace();
-			return buildErrorResponse("error in form load on id: " + idseq + e, HttpStatus.INTERNAL_SERVER_ERROR);
+			//return buildErrorResponse("server error in form load on id: " + idseq + e, HttpStatus.INTERNAL_SERVER_ERROR);
+			strMsg = "server error in form load on id: " + idseq + e;
+			List<String> errorArr = new ArrayList<>();
+			errorArr.add(strMsg);
+			logger.error(strMsg);
+			httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+			return new ResponseEntity<List<String>>(errorArr, httpHeaders, httpStatus);
 		}
 	}
 	
