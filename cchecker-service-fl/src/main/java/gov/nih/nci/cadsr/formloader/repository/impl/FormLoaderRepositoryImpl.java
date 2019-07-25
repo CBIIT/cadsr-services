@@ -297,7 +297,7 @@ public class FormLoaderRepositoryImpl implements FormLoaderRepository {
 		fvv.setCreatedBy(moduledto.getCreatedBy());
 		fvv.setQuestion(newQuestdto);
 		fvv.setVpIdseq(vValue.getVdPermissibleValueSeqid());	//JR417 vValue vdPermissibleValueSeqid can not be empty (fixed in this ticket)!
-		logger.debug("FormLoaderRepositoryImpl.java#translateIntoValidValueDto vValue.getVdPermissibleValueSeqid() can not be empty! *** vdPVIdSeq [" + vValue.getVdPermissibleValueSeqid() + "]");
+		logger.trace("FormLoaderRepositoryImpl.java#translateIntoValidValueDto vValue.getVdPermissibleValueSeqid() can not be empty! *** vdPVIdSeq [" + vValue.getVdPermissibleValueSeqid() + "]");
 		
 		//FORMBUILD-448 inserting a valid value finally inserts a record in SBR.ADMIN_COMPONENTS_VIEW which has a unique key on the combination of
 		//Version, Preferred name and Context. For this to work, Preferred Name is being set as a uniquely generated ID to cover cases where 
