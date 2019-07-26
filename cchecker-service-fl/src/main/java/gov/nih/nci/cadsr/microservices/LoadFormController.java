@@ -33,8 +33,10 @@ import org.springframework.web.multipart.MultipartFile;
 import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.ALSForm;
 import gov.nih.nci.cadsr.data.FormLoadParamWrapper;
+import gov.nih.nci.cadsr.formloader.domain.FormCollection;
 import gov.nih.nci.cadsr.formloader.domain.FormDescriptor;
 import gov.nih.nci.cadsr.formloader.repository.impl.LoadServiceRepositoryImpl;
+import gov.nih.nci.cadsr.formloader.service.impl.ContentValidationServiceImpl;
 import gov.nih.nci.ncicb.cadsr.common.dto.ProtocolTransferObjectExt;
 /**
  * Generate FL Forms from ALS forms Controller.
@@ -60,6 +62,9 @@ public class LoadFormController {
 	
 	@Autowired
 	private LoadServiceRepositoryImpl loadServiceRepositoryImpl;
+	
+	@Autowired
+	private ContentValidationServiceImpl contentValidationServiceImpl;
 
 	protected String retrieveContextIdseq(String contextName) {
 		String res = null;
@@ -172,10 +177,20 @@ public class LoadFormController {
 						formDescriptor.setContext(formLoadParamWrapper.getContextName());
 						formDescriptor.setContextSeqid(contextIdseq);
 						formDescriptor.setProtocols(protocols);
-						formDescriptor = formConverterService.convertAlsToCadsr(alsForm, alsData, formDescriptor);
+						formDescriptor.setLoadType(FormDescriptor.LOAD_TYPE_NEW);
+						formDescriptor.setType("CRF");
+						formDescriptor.setSelected(true);
+						FormCollection formColl = new FormCollection();
+						List<FormDescriptor> forms = new ArrayList<FormDescriptor>();
+						forms.add(formDescriptor);
+						formColl.setForms(forms);
+						formColl = contentValidationServiceImpl.validateXmlContent(formColl); 
+						for (FormDescriptor validFormDescriptor : formColl.getForms()) {
+							validFormDescriptor = formConverterService.convertAlsToCadsr(alsForm, alsData, validFormDescriptor);
 						//add other form attributes
-						String currIdseq = loadServiceRepositoryImpl.createForm(formDescriptor, null);
-						logger.info("Loaded form: " + alsForm.getDraftFormName() + ". IDSeq: " + currIdseq);
+						String currIdseq = loadServiceRepositoryImpl.createForm(validFormDescriptor, null);
+						logger.info("Loaded form: " + alsForm.getDraftFormName() + ". IDSeq: " + currIdseq); 
+						}
 					}
 				}
 				logger.info("Total forms loaded: " + formNamesLoaded.size());

@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import gov.nih.nci.cadsr.formloader.repository.impl.LoadServiceRepositoryImpl;
+import gov.nih.nci.cadsr.formloader.service.impl.ContentValidationServiceImpl;
 /**
  * We use embedded Tomcat DB data source.
  * 
@@ -45,4 +46,13 @@ public class EmbeddedTomcatDBConfig {
 		templ.setDataSource(dataSource);
 		return templ;
 	}
+	
+	// santhanamv added
+	@Primary
+	@Bean(name = "contentValidationServiceImpl")
+	public ContentValidationServiceImpl getContentValidationServiceImpl() {
+		logger.debug("contentValidationServiceImpl loading, dataSource defined? " + (dataSource != null));
+		ContentValidationServiceImpl templ = new ContentValidationServiceImpl();
+		return templ;
+	}	
 }

@@ -9,6 +9,7 @@ import java.util.TreeSet;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import gov.nih.nci.cadsr.formloader.domain.FormCollection;
@@ -16,6 +17,7 @@ import gov.nih.nci.cadsr.formloader.domain.FormDescriptor;
 import gov.nih.nci.cadsr.formloader.domain.ModuleDescriptor;
 import gov.nih.nci.cadsr.formloader.domain.QuestionDescriptor;
 import gov.nih.nci.cadsr.formloader.repository.impl.FormLoaderRepositoryImpl;
+import gov.nih.nci.cadsr.formloader.repository.impl.LoadServiceRepositoryImpl;
 import gov.nih.nci.cadsr.formloader.service.ContentValidationService;
 import gov.nih.nci.cadsr.formloader.service.common.FormLoaderHelper;
 import gov.nih.nci.cadsr.formloader.service.common.FormLoaderServiceException;
@@ -56,24 +58,30 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 	public void setRepository(FormLoaderRepositoryImpl repository) {
 		this.repository = repository;
 	}
+	
+	@Autowired
+	private LoadServiceRepositoryImpl loadServiceRepositoryImpl; // santhanamv 
 
 	@Override
 	public FormCollection validateXmlContent(FormCollection aCollection) 
 			throws FormLoaderServiceException {
 		
-		quickCheckOnCollection(aCollection);
+		// santhanamv - commented out methods that may not be necessary, to just get the questions validated
+		
+/*		quickCheckOnCollection(aCollection);
 		
 		String xmlPathName = FormLoaderHelper.checkInputFile(aCollection.getXmlPathOnServer(), aCollection.getXmlFileName());
 			
 		if (aCollection.isSelectAllForms()) 
-			aCollection.resetAllSelectFlag(true);
+			aCollection.resetAllSelectFlag(true); */
 		
 		List<FormDescriptor> formHeaders = aCollection.getForms();
-		determineLoadType(formHeaders);
+		/*determineLoadType(formHeaders);
 		 
-		validateFormInfo(xmlPathName, formHeaders, aCollection.getCreatedBy());
+		validateFormInfo(xmlPathName, formHeaders, aCollection.getCreatedBy()); */ // santhanamv - end
 		
-		validateQuestions(xmlPathName, formHeaders);
+		// santhanamv - xmlPathName is not required (temporarily disabled inside validateQuestions method) 		
+		validateQuestions("File path name", formHeaders); // validateQuestions(xmlPathName, formHeaders);
 		
 		aCollection.resetAllSelectFlag(false);
 		return aCollection;
@@ -698,13 +706,13 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 	 * @param formHeaders
 	 */
 	protected void validateQuestions(String xmlPathName, List<FormDescriptor> formDescriptors) {
-		
-		List<FormDescriptor> forms = getFormQuestionsFromXml(xmlPathName, formDescriptors);
+		// santhanamv - start
+		/*List<FormDescriptor> forms = getFormQuestionsFromXml(xmlPathName, formDescriptors);
 		
 		if (forms == null) {
 			logger.error("form list is null. This should not happen");
 			return;
-		}
+		}*/ // santhanamv - end
 			
 		//First pass, collect question public ids and their cde ids so we could get necessary data from 
 		//database as a list (= less queries)
@@ -753,7 +761,7 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 //					repository.getPermissibleValuesByVdIds(vdSeqIds);	//JR417 pv has the vpIdseq and vm has the vmIdseq after this successful call!
 
 			logger.info("ContentValidationServiceImpl.java#validateQuestions before FormLoaderHelper.populateQuestionsPV");
-			ValueHolder vh = FormLoaderHelper.populateQuestionsPV(form, repository);
+			ValueHolder vh = FormLoaderHelper.populateQuestionsPV(form, loadServiceRepositoryImpl); // santhanamv - repository was null here, so passing LoadServiceRepositoryImpl instead
 			logger.info("ContentValidationServiceImpl.java#validateQuestions after FormLoaderHelper.populateQuestionsPV");
 			HashMap<String, List<ReferenceDocumentTransferObject>> refdocDtos = null;
 			HashMap<String, List<PermissibleValueV2TransferObject>> pvDtos = null;
