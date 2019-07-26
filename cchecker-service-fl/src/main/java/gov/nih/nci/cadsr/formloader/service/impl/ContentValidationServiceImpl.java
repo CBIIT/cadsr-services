@@ -141,7 +141,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 		}
 		
 		if (pidList.size() > 0) {
-			List<FormV2> formDtos = repository.getFormsForPublicIDs(pidList);
+			List<FormV2> formDtos = loadServiceRepositoryImpl.getFormsForPublicIDs(pidList);
 			HashMap<String, List<Float>> publicIdVersions = createFormExistingVersionMap(formDtos);
 			determineLoadTypeByVersion(formDescriptors, publicIdVersions);
 
@@ -164,7 +164,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 			if (!form.isSelected()) 
 				continue;
 			
-			this.repository.checkWorkflowStatusName(form);
+			this.loadServiceRepositoryImpl.checkWorkflowStatusName(form);
 			
 			if (!validContextName(form)) {
 				form.setLoadStatus(FormDescriptor.STATUS_CONTENT_VALIDATION_FAILED);
@@ -209,7 +209,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 				}
 				else
 				{
-					String csCsiIdSeq = this.repository.getClassificationSchemeItem(classification.getPublicID(), classification.getVersion(),
+					String csCsiIdSeq = this.loadServiceRepositoryImpl.getClassificationSchemeItem(classification.getPublicID(), classification.getVersion(),
 																				  classification.getCsiPublicID(), classification.getCsiVersion());
 					if (csCsiIdSeq == null || csCsiIdSeq.length() == 0 )
 					{
@@ -244,11 +244,11 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 				continue;
 			}
 			
-			String contextSeqid = this.repository.getContextSeqIdByName(proto.getContextName());
+			String contextSeqid = this.loadServiceRepositoryImpl.getContextSeqIdByName(proto.getContextName());
 			if (contextSeqid == null || contextSeqid.length() == 0)
 				contextSeqid = form.getContextSeqid();
 			
-			String protoSeqid = this.repository.getProtocolSeqidByPreferredName(preferredName, contextSeqid);
+			String protoSeqid = this.loadServiceRepositoryImpl.getProtocolSeqidByPreferredName(preferredName, contextSeqid);
 			if (protoSeqid != null && protoSeqid.length() > 0) {
 				proto.setConteIdseq(contextSeqid);
 				proto.setIdseq(protoSeqid);
@@ -293,7 +293,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 				continue;  
 			}
 			
-			if (!repository.designationTypeExists(des.getType())) {
+			if (!loadServiceRepositoryImpl.designationTypeExists(des.getType())) {
 				form.addMessage("Designation #" + idx + " has invalid type \"" + des.getType() + "\". Skip loading.");
 				continue;
 			}
@@ -340,12 +340,12 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 				continue;  
 			}
 			
-			if (!repository.isContactCommunicationTypeValid(type)) {
+			if (!loadServiceRepositoryImpl.isContactCommunicationTypeValid(type)) {
 				form.addMessage("ContactCommunication type [" + type + "] is invalid. Skip loading.");
 				continue;
 			}
 			
-			String orgSeqid = repository.getOrganizationSeqidByName(con.getOrganizationName());
+			String orgSeqid = loadServiceRepositoryImpl.getOrganizationSeqidByName(con.getOrganizationName());
 			if (orgSeqid == null || orgSeqid.length() == 0) {
 				form.addMessage("ContactCommunication #" + idx + " has invalid organization name [" + con.getOrganizationName() + "]. Skip loading.");
 				continue;
@@ -365,10 +365,10 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 			String[] pair = classificationPublicIdVersionPairs.get(i).split(",");
 			
 			if (i == 0) {
-				if (!this.repository.validClassificationScheme(pair[0], pair[1]))
+				if (!this.loadServiceRepositoryImpl.validClassificationScheme(pair[0], pair[1]))
 					return false;
 			} else {
-				if (!this.repository.validClassificationSchemeItem(pair[0], pair[1]))
+				if (!this.loadServiceRepositoryImpl.validClassificationSchemeItem(pair[0], pair[1]))
 					return false;
 			}
 		}
@@ -404,7 +404,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 				continue; 
 			}
 			
-			if (!repository.definitionTypeValid(def.getType())) {
+			if (!loadServiceRepositoryImpl.definitionTypeValid(def.getType())) {
 				form.addMessage("Definition #" + idx + " has invalid type \"" + def.getType() + "\". Skip loading.");
 				continue;
 			}
@@ -454,7 +454,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 	protected void verifyCredential(FormDescriptor form, String loggedinUser) {
 		if (form == null) return;
 		
-		if (!this.repository.hasLoadFormRight(form, loggedinUser, form.getContext())) {
+		if (!this.loadServiceRepositoryImpl.hasLoadFormRight(form, loggedinUser, form.getContext())) {
 			form.addMessage("Form Loader logged in user [" + loggedinUser + "] doesn't have load form right in context [" + 
 					form.getContext() + "]. Validation failed");
 			form.setLoadStatus(FormDescriptor.STATUS_CONTENT_VALIDATION_FAILED);
@@ -490,7 +490,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 			form.setDefaultWorkflowName();
 		}
 		
-		String contextSeqid = this.repository.getContextSeqIdByName(form.getContext());
+		String contextSeqid = this.loadServiceRepositoryImpl.getContextSeqIdByName(form.getContext());
 		if (contextSeqid == null || contextSeqid.length() == 0) {
 			form.addMessage("Context name in form [" + form.getContext() + "] is not valid. Unable to load form");
 			return false;
@@ -979,7 +979,7 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 		String vdseqid = matchingCde.getVdIdseq();
 		if (vdseqid != null)
 		{
-			ValueDomainV2 vd = repository.getValueDomainBySeqid(vdseqid);
+			ValueDomainV2 vd = loadServiceRepositoryImpl.getValueDomainBySeqid(vdseqid);
 			if (vd != null && "N".equalsIgnoreCase(vd.getVDType()) && 
 				question.getValidValues() != null && question.getValidValues().size() > 0)
 			{
@@ -1019,7 +1019,7 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 		}
 			
 		//1. get vd from db with vdseqid
-		ValueDomainV2 vd = repository.getValueDomainBySeqid(vdseqid);
+		ValueDomainV2 vd = loadServiceRepositoryImpl.getValueDomainBySeqid(vdseqid);
 		if (vd == null) {
 			if (question.hasVDValueInDE())
 				question.setCdeSeqId(""); 
@@ -1149,7 +1149,7 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 	protected List<ReferenceDocumentTransferObject> getReferenceDocsForCdeFromDB(String cdePublicId, String cdeVersion,
 			QuestionDescriptor question) {
 		
-		List<ReferenceDocumentTransferObject> refDocs = repository.getReferenceDocsForQuestionCde(cdePublicId, cdeVersion);
+		List<ReferenceDocumentTransferObject> refDocs = loadServiceRepositoryImpl.getReferenceDocsForQuestionCde(cdePublicId, cdeVersion);
 		 
 		if (refDocs == null || refDocs.size() == 0) {
 			logger.debug("Unable to load any reference document from db with CDE public id and version [" + cdePublicId +
@@ -1353,7 +1353,7 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 	
 	protected boolean ableToValidateByAlternatives(String valMeaningLongName, String vmSeqid) {
 
-		List<String> desNames = this.repository.getDesignationNamesByVmIds(vmSeqid);
+		List<String> desNames = this.loadServiceRepositoryImpl.getDesignationNamesByVmIds(vmSeqid);
 		if (desNames != null && desNames.size() > 0) {
 			for (String desName : desNames) {
 				desName = FormLoaderHelper.normalizeSpace(desName);
@@ -1365,7 +1365,7 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 	}
 	
 	protected boolean matchMeaningDefinitions(String valDesc, String vmSeqid) {
-		List<String> defTexts = this.repository.getDefinitionTextsByVmIds(vmSeqid);
+		List<String> defTexts = this.loadServiceRepositoryImpl.getDefinitionTextsByVmIds(vmSeqid);
 		if (defTexts != null && defTexts.size() > 0) {
 			for (String defTest : defTexts) {
 				defTest = FormLoaderHelper.normalizeSpace(defTest);

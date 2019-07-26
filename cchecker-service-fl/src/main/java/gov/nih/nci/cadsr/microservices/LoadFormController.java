@@ -177,23 +177,20 @@ public class LoadFormController {
 						formDescriptor.setContext(formLoadParamWrapper.getContextName());
 						formDescriptor.setContextSeqid(contextIdseq);
 						formDescriptor.setProtocols(protocols);
-						formDescriptor.setLoadType(FormDescriptor.LOAD_TYPE_NEW);
-						formDescriptor.setType("CRF");
 						formDescriptor.setSelected(true);
+						formDescriptor = formConverterService.convertAlsToCadsr(alsForm, alsData, formDescriptor);
 						FormCollection formColl = new FormCollection();
 						List<FormDescriptor> forms = new ArrayList<FormDescriptor>();
 						forms.add(formDescriptor);
 						formColl.setForms(forms);
-						formColl = contentValidationServiceImpl.validateXmlContent(formColl); 
-						for (FormDescriptor validFormDescriptor : formColl.getForms()) {
-							validFormDescriptor = formConverterService.convertAlsToCadsr(alsForm, alsData, validFormDescriptor);
+						formColl = contentValidationServiceImpl.validateXmlContent(formColl); 						
 						//add other form attributes
-						String currIdseq = loadServiceRepositoryImpl.createForm(validFormDescriptor, null);
-						logger.info("Loaded form: " + alsForm.getDraftFormName() + ". IDSeq: " + currIdseq); 
+						for (FormDescriptor validFormDescriptor : formColl.getForms()) {
+							String currIdseq = loadServiceRepositoryImpl.createForm(validFormDescriptor, null);
+							logger.info("Loaded form: " + alsForm.getDraftFormName() + ". IDSeq: " + currIdseq);
 						}
 					}
 				}
-				logger.info("Total forms loaded: " + formNamesLoaded.size());
 				httpHeaders.add("Content-Type", "application/json");
 				return new ResponseEntity<List<String>>(formNamesLoaded, httpHeaders, httpStatus);
 			}
