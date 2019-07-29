@@ -80,21 +80,31 @@ public class LoadFormController {
 		List<String> protocolIdseqList;
 		//we need Protocol IDSEQ to add a protocol to a form
 		String protocolIdseq = null;
-		//retrieve protocol information for forms
 		if (StringUtils.isNotBlank(protocolAlsName)) {
-			//retrieve protocol information for forms
+			//retrieve protocol information for forms by Protocol LongName
 			protocolIdseqList = loadServiceRepositoryImpl.getProtocolV2Dao()
-//				.getProtocolIdseqByPreferredName(protocolAlsName);//TODO remove when receive a confirmation on ALS Project data
 				.getProtocolIdseqByLongName(protocolAlsName);
 			if ((protocolIdseqList != null) && (protocolIdseqList.size() == 1)) {
 				protocolIdseq = protocolIdseqList.get(0);
 			} 
 			else if ((protocolIdseqList != null) && (protocolIdseqList.size() > 1)) {
-				logger.warn("Protocol ALS Name is not unique: " + protocolAlsName, protocolIdseqList);
+				logger.warn("Protocol ALS Name is not unique as caDSR Protocol LongName: " + protocolAlsName, protocolIdseqList);
 				protocolIdseq = protocolIdseqList.get(0);
 			} 
-			else {
-				logger.error("Protocol ALS Name is not found: " + protocolAlsName);
+			if (protocolIdseq == null) {//we could not a protocol find by LongName
+				//retrieve protocol information for forms by Protocol PreferredName
+				protocolIdseqList = loadServiceRepositoryImpl.getProtocolV2Dao()
+						.getProtocolIdseqByPreferredName(protocolAlsName);
+					if ((protocolIdseqList != null) && (protocolIdseqList.size() == 1)) {
+						protocolIdseq = protocolIdseqList.get(0);
+					} 
+					else if ((protocolIdseqList != null) && (protocolIdseqList.size() > 1)) {
+						logger.warn("Protocol ALS Name is not unique as caDSR Protocol PreferredName: " + protocolAlsName, protocolIdseqList);
+						protocolIdseq = protocolIdseqList.get(0);
+					} 
+					else {
+						logger.error("Protocol ALS Name is not found: " + protocolAlsName);
+					}
 			}
 		}
 		return protocolIdseq;
