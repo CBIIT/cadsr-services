@@ -3,13 +3,11 @@
  */
 package gov.nih.nci.cadsr.microservices;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,22 +17,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartFile;
 
 import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.ALSForm;
 import gov.nih.nci.cadsr.data.FormLoadParamWrapper;
-import gov.nih.nci.cadsr.formloader.domain.FormCollection;
-import gov.nih.nci.cadsr.formloader.domain.FormDescriptor;
 import gov.nih.nci.cadsr.formloader.repository.impl.LoadServiceRepositoryImpl;
 import gov.nih.nci.cadsr.formloader.service.impl.ContentValidationServiceImpl;
 import gov.nih.nci.ncicb.cadsr.common.dto.ProtocolTransferObjectExt;
@@ -46,6 +44,7 @@ import gov.nih.nci.ncicb.cadsr.common.dto.ProtocolTransferObjectExt;
  */
 @RestController
 @EnableAutoConfiguration
+@EnableAsync
 public class LoadFormController {
 	private final static Logger logger = LoggerFactory.getLogger(LoadFormController.class);
 	protected static String CCHECKER_DB_SERVICE_URL_REPORT_ERROR_RETRIEVE = CCheckerLoadFormService.CCHECKER_DB_SERVICE_URL_REPORT_ERROR_RETRIEVE;
@@ -55,8 +54,10 @@ public class LoadFormController {
 	public final String strErrorWrongContext = "Wrong context information received: ";
 	public final String strErrorNoFormFound= "No form found";
 	public final String MS_EXCEL_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+	
 	@Autowired
 	private RestTemplate restTemplate;
+	
 	@Autowired
 	private ConverterFormService formConverterService;
 	
@@ -65,6 +66,9 @@ public class LoadFormController {
 	
 	@Autowired
 	private ContentValidationServiceImpl contentValidationServiceImpl;
+	
+	@Autowired
+	private LoadFormService loadFormService;
 
 	protected String retrieveContextIdseq(String contextName) {
 		String res = null;
@@ -121,6 +125,51 @@ public class LoadFormController {
 		return protocols;
 	}
 	/**
+	 * Load ALS Forms to caDSR asynchronously.
+	 * 
+	 * @param alsForm
+	 * @param selForms
+	 * @return List<String> list of loaded form names
+	 */
+	
+	public List<String> formLoadExecAsync(ALSData alsData, List<String> selForms, 
+			String contextName, String conteIdseq, List<ProtocolTransferObjectExt> protocols) {
+		//long start = System.currentTimeMillis();
+		List<ALSForm> alsFormList = alsData.getForms();
+		List<String> resultList = new ArrayList<>();
+		if ((alsFormList == null) || (selForms == null) || (selForms.isEmpty())) return resultList;
+	
+		List<CompletableFuture<String>> arrFuture = new ArrayList<>(selForms.size());
+
+			//long stepStart = System.currentTimeMillis();
+		for (ALSForm alsForm : alsFormList) {
+			if (selForms.contains(alsForm.getFormOid())) {
+				logger.info("Loading form: " + alsForm.getDraftFormName());
+				//load ALS data as FL form
+				CompletableFuture<String> futureFormLongName = loadFormService.loadFormTocaDsr(contextName, conteIdseq, alsData, alsForm, protocols);
+				//collect processed form names to return as JSON Array
+				arrFuture.add(futureFormLongName);
+			}
+		}
+		String curr;
+		CompletableFuture.allOf(arrFuture.toArray(new CompletableFuture[arrFuture.size()])).join();
+		for (CompletableFuture<String> future : arrFuture) {
+			try {
+				curr = future.get();
+				if (curr != null) {
+					resultList.add(curr);
+				}
+			} catch (InterruptedException e) {
+				logger.error("formLoadExecAsync InterruptedException: " + e);
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				logger.error("formLoadExecAsync ExecutionException: " + e);
+				e.printStackTrace();
+			}
+		}
+		return resultList;
+	}
+	/**
 	 * 
 	 * @param request
 	 * @param response
@@ -175,32 +224,8 @@ public class LoadFormController {
 
 				List<ProtocolTransferObjectExt> protocols = buildProtocolListForForms(protocolAlsName, protocolIdseq);
 				
-				List<String> formNamesLoaded = new ArrayList<String>();
-
-				for (ALSForm alsForm : alsFormList) {
-					if (selForms.contains(alsForm.getFormOid())) {
-						logger.info("Loading form: " + alsForm.getDraftFormName());
-						//collect processed form names to return as JSON Array
-						formNamesLoaded.add(alsForm.getDraftFormName());
-						//map ALS data to FL form attributes
-						FormDescriptor formDescriptor = new FormDescriptor();
-						formDescriptor.setContext(formLoadParamWrapper.getContextName());
-						formDescriptor.setContextSeqid(contextIdseq);
-						formDescriptor.setProtocols(protocols);
-						formDescriptor.setSelected(true);
-						formDescriptor = formConverterService.convertAlsToCadsr(alsForm, alsData, formDescriptor);
-						FormCollection formColl = new FormCollection();
-						List<FormDescriptor> forms = new ArrayList<FormDescriptor>();
-						forms.add(formDescriptor);
-						formColl.setForms(forms);
-						formColl = contentValidationServiceImpl.validateXmlContent(formColl); 						
-						//add other form attributes
-						for (FormDescriptor validFormDescriptor : formColl.getForms()) {
-							String currIdseq = loadServiceRepositoryImpl.createForm(validFormDescriptor, null);
-							logger.info("Loaded form: " + alsForm.getDraftFormName() + ". IDSeq: " + currIdseq);
-						}
-					}
-				}
+				List<String> formNamesLoaded = formLoadExecAsync(alsData, selForms, 
+					formLoadParamWrapper.getContextName(), contextIdseq, protocols);
 				httpHeaders.add("Content-Type", "application/json");
 				return new ResponseEntity<List<String>>(formNamesLoaded, httpHeaders, httpStatus);
 			}
@@ -223,7 +248,6 @@ public class LoadFormController {
 			logger.error(strMsg);
 			httpStatus = HttpStatus.BAD_REQUEST;
 			return new ResponseEntity<List<String>>(errorArr, httpHeaders, httpStatus);
-
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -235,13 +259,6 @@ public class LoadFormController {
 			httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
 			return new ResponseEntity<List<String>>(errorArr, httpHeaders, httpStatus);
 		}
-	}
-	
-	protected Path saveUploadedFile(MultipartFile uploadfile, String fileName) throws IOException {
-		byte[] bytes = uploadfile.getBytes();
-		Path path = Paths.get(REPORT_FOLDER + fileName);
-		Path pathNew = Files.write(path, bytes, StandardOpenOption.CREATE_NEW);
-		return pathNew;
 	}
 
 	protected ResponseEntity<String> buildErrorResponse(String errorMessage, HttpStatus httpStatus) {
@@ -316,5 +333,17 @@ public class LoadFormController {
 				}
 		}
 		return formIdsList;
-	}	
+	}
+
+	@Bean(name = "formThreadPoolTaskExecutor")
+	public Executor formAsyncExecutor() {
+		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+		executor.setCorePoolSize(6);
+		executor.setMaxPoolSize(12);
+		executor.setQueueCapacity(100);
+		executor.setThreadNamePrefix("LoadAlsForm-");
+		executor.initialize();
+		logger.debug("Created bean formThreadPoolTaskExecutor: " + Thread.currentThread().getName());
+		return executor;
+	}
 }
