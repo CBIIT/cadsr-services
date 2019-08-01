@@ -293,7 +293,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 		List<ContactCommunicationV2TransferObject> contacts = form.getContactCommnunications();
 		
 		if (contacts == null || contacts.size() == 0) {
-			logger.debug("Form " + form.getPublicId() + " has no contact. Do nothing");
+			logger.trace("Form " + form.getPublicId() + " has no contact. Do nothing");
 			return;
 		}
 		
@@ -313,7 +313,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 	@Transactional
 	protected void processRefdocs(FormDescriptor form, List<RefdocTransferObjectExt> refdocs) {
 		if (refdocs == null) {
-			logger.error("Null refdocs list passed in to processRefdocs(). Do nothing");
+			logger.trace("Null refdocs list passed in to processRefdocs(). Do nothing");
 			return;
 		}
 		
@@ -385,7 +385,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 	protected void processDesignations(FormDescriptor form, List<DesignationTransferObjectExt> designations) {
 		
 		if (designations == null) {
-			logger.debug("Null designation list passed in to processDesignations(). Do nothing");
+			logger.trace("Null designation list passed in to processDesignations(). Do nothing");
 			return;
 		}
 		
@@ -423,7 +423,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 	@Transactional
 	protected void processDefinitions(FormDescriptor form, List<DefinitionTransferObjectExt> definitions) {
 		if (definitions == null) {
-			logger.debug("Null definiion list passed in to processDefinitions(). Do nothing");
+			logger.trace("Null definiion list passed in to processDefinitions(). Do nothing");
 			return;
 		}
 		
@@ -444,7 +444,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 		List<ClassificationTransferObject> classifications = form.getClassifications();
 		
 		if (classifications == null || classifications.size() == 0) {
-			logger.debug("Form " + form.getPublicId() + " has no classifications to be loaded.");
+			logger.trace("Form " + form.getPublicId() + " has no classifications to be loaded.");
 		}
 		else
 		{
@@ -574,7 +574,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 	
 	@Transactional
 	protected void createModulesInForm(FormDescriptor form, FormV2TransferObject formdto) {
-		logger.debug("Start creating modules for form");
+		logger.debug("Start creating modules for form " + formdto.getLongName());
 		List<ModuleDescriptor> modules = form.getModules();
 		
 		//modules = FormLoaderHelper.handleModuleRepeat(modules);  //JR366 not needed
@@ -634,7 +634,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 		String strPublicId = question.getCdePublicId();
 		
 		if (strPublicId == null) {
-			logger.info("getMatchingDataElement: question.getCdePublicId returns null");
+			logger.trace("getMatchingDataElement: question.getCdePublicId returns null");
 			return matchedCde;
 		}
 		else if (! StringUtils.isInteger(strPublicId)) {
@@ -667,11 +667,11 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 		logger.debug("Creating questions for module: " + module.getLongName());
 		List<QuestionDescriptor> questions = module.getQuestions();
 		if ((questions == null) || (questions.size() == 0)) {
-			logger.debug("Module has no question");
+			logger.trace("Module has no question");
 			return;
 		}
 		else {
-			logger.info("Amount of module questions: " + (questions.size()));
+			logger.debug("Amount of module questions: " + (questions.size()));
 		}
 		
 		int idx = 0;
@@ -695,7 +695,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 			QuestionTransferObject newQuestdto = (QuestionTransferObject)this.questionV2Dao.createQuestionComponent(questdto);
 			String seqid = newQuestdto.getQuesIdseq();
 			
-			logger.debug("Created a question: " + seqid);
+			logger.debug("Created a question: " + seqid + ", quest LongName: " + questdto.getLongName());
 			question.setQuestionSeqId(seqid);
 			retrievePublicIdForQuestion(seqid, question, questdto);
 			
@@ -703,7 +703,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 			
 			createQuestionValidValues(question, form, newQuestdto, moduledto, formdto, pvDtos);		//JR417 entry point
 		}
-		logger.debug("Done creating questions for module");
+		logger.trace("Done creating questions for module");
 	}
 	
 	/**
@@ -721,7 +721,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 		List<QuestionDescriptor.ValidValue>  validValues = question.getValidValues();
 		
 		int idx = 0;
-		logger.debug("LoadServiceRepositoryImpl.java#createQuestionValidValues");
+		logger.trace("LoadServiceRepositoryImpl.java#createQuestionValidValues");
 		for (QuestionDescriptor.ValidValue vValue : validValues) {
 			if (vValue.isSkip()) { 
 				logger.debug("LoadServiceRepositoryImpl.java#createQuestionValidValues vValue " + vValue.getMeaningText() + " vpIdSeq [" + vValue.getVdPermissibleValueSeqid() + "] skipped!");

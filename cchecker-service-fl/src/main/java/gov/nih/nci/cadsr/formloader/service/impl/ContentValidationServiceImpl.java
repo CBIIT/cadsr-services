@@ -760,9 +760,9 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 //			HashMap<String, List<PermissibleValueV2TransferObject>> pvDtos = 
 //					repository.getPermissibleValuesByVdIds(vdSeqIds);	//JR417 pv has the vpIdseq and vm has the vmIdseq after this successful call!
 
-			logger.info("ContentValidationServiceImpl.java#validateQuestions before FormLoaderHelper.populateQuestionsPV");
+			logger.trace("ContentValidationServiceImpl.java#validateQuestions before FormLoaderHelper.populateQuestionsPV");
 			ValueHolder vh = FormLoaderHelper.populateQuestionsPV(form, loadServiceRepositoryImpl); // santhanamv - repository was null here, so passing LoadServiceRepositoryImpl instead
-			logger.info("ContentValidationServiceImpl.java#validateQuestions after FormLoaderHelper.populateQuestionsPV");
+			logger.trace("ContentValidationServiceImpl.java#validateQuestions after FormLoaderHelper.populateQuestionsPV");
 			HashMap<String, List<ReferenceDocumentTransferObject>> refdocDtos = null;
 			HashMap<String, List<PermissibleValueV2TransferObject>> pvDtos = null;
 			try {
@@ -778,9 +778,9 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 			}
 			//JR417 end
 
-			logger.info("ContentValidationServiceImpl.java#validateQuestions before validateQuestionsInModules");
+			logger.trace("ContentValidationServiceImpl.java#validateQuestions before validateQuestionsInModules");
 			validateQuestionsInModules(modules, form, questDtos, cdeDtos, refdocDtos, pvDtos);		
-			logger.info("ContentValidationServiceImpl.java#validateQuestions after validateQuestionsInModules");
+			logger.trace("ContentValidationServiceImpl.java#validateQuestions after validateQuestionsInModules");
 			
 			form.setLoadStatus(FormDescriptor.STATUS_CONTENT_VALIDATED);
 			
@@ -794,12 +794,12 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 			HashMap<String, List<ReferenceDocumentTransferObject>> refdocDtos, HashMap<String, 
 			List<PermissibleValueV2TransferObject>> pvDtos) {
 		if (modules == null) {
-			logger.debug("Module list is null. Unable to validate questions.");
+			logger.trace("Module list is null. Unable to validate questions.");
 			return;
 		}
 		
 		for (ModuleDescriptor module : modules) {
-			logger.debug("Start validating questions for module [" + module.getPublicId() + "|" + 
+			logger.trace("Start validating questions for module [" + module.getPublicId() + "|" + 
 					module.getVersion() + "|" + module.getModuleSeqId()  + "]");
 			
 			//TODO: waiting on Denise to answer the question about "existing module" - 2014-01-27
@@ -807,12 +807,12 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 			List<QuestionDescriptor> questions = module.getQuestions();		
 			for (QuestionDescriptor question : questions) {
 				
-				logger.debug("Start validating question [" + question.getPublicId() + "|" + question.getVersion() + 
+				logger.trace("Start validating question [" + question.getPublicId() + "|" + question.getVersion() + 
 						"|" + question.getQuestionSeqId()  + "]");
 				validateQuestion(question, form, questDtos, cdeDtos, refdocDtos, pvDtos);
 			}
 			
-			logger.debug("Done validating questions for module [" + module.getPublicId() + "|" + module.getVersion() + 
+			logger.trace("Done validating questions for module [" + module.getPublicId() + "|" + module.getVersion() + 
 					"|" + module.getModuleSeqId()  + "]");
 		}
 	}
@@ -1004,7 +1004,7 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 		List<ReferenceDocumentTransferObject> rdDtos = refdocDtos.get("" + matchingCde.getPublicId() + "-" + matchingCde.getVersion());
 		verifyQuestionText(form, question, rdDtos, matchingCde);
 		
-		logger.debug("Done validating question against CDE");
+		logger.trace("Done validating question against CDE");
 	}
 	
 	
@@ -1057,7 +1057,7 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 	 * @param message
 	 */
 	protected void prepareQuestionForLoadWithoutValidation(FormDescriptor form, QuestionDescriptor question, String message) {
-		logger.debug(message);
+		logger.trace(message);
 		question.addMessage(message);
 		question.addInstruction(message);
 		question.setCdeSeqId(""); //disassociate cde if it's there.
@@ -1068,22 +1068,22 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 	protected String verifyPublicIdAndVersion(String publicid, String version) {
 		String errField = "";
 		if (publicid == null || publicid.length() == 0 ) {
-			errField = "public id";
+			errField = "public id null";
 		} else {
 			try {
 				int num = Integer.parseInt(publicid);
 			} catch (NumberFormatException ne) {
-				errField = "public id";
+				errField = "public id wrong: publicid";
 			}
 		}
 
 		if (version == null || version.length() == 0) {
-			errField += (errField.length() > 0) ? " and version" : "version";
+			errField += (errField.length() > 0) ? " and version null" : "version null";
 		} else {
 			try {
 				float ver = Float.parseFloat(version); 
 			} catch (NumberFormatException ne) {
-				errField += (errField.length() > 0) ? " and version" : "version";
+				errField += (errField.length() > 0) ? " and version wrong: " +  version : "version wrong: " + version;
 			}
 		}
 
