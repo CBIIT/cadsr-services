@@ -22,14 +22,14 @@ import gov.nih.nci.cadsr.formloader.repository.impl.LoadServiceRepositoryImpl;
 import gov.nih.nci.cadsr.formloader.service.impl.ContentValidationServiceImpl;
 import gov.nih.nci.ncicb.cadsr.common.dto.ProtocolTransferObjectExt;
 /**
- * This is a class to load forms.
+ * This is a class to load forms using Executor thread pool. Not used.
  * 
  * @author asafievan
  *
  */
 @Service
-public class LoadFormService {
-	private final static Logger logger = LoggerFactory.getLogger(LoadFormService.class);
+public class LoadFormServicePool {
+	private final static Logger logger = LoggerFactory.getLogger(LoadFormServicePool.class);
 	
 	@Autowired
 	private ConverterFormService formConverterService;
@@ -40,7 +40,19 @@ public class LoadFormService {
 	@Autowired
 	private ContentValidationServiceImpl contentValidationServiceImpl;
 	
-	public String loadFormTocaDsr (String contextName, String contextIdseq, 
+	/**
+	 * Load ALS Form to caDSR DB.
+	 * 
+	 * @param contextName not null
+	 * @param contextIdseq not null
+	 * @param alsData not null
+	 * @param alsForm not null
+	 * @param protocols not null
+	 * @return CompletableFuture with a String form Long Name or null if an error.
+	 */
+	//uncomment Async if use
+	//@Async("formThreadPoolTaskExecutor")
+	public CompletableFuture<String> loadFormTocaDsr (String contextName, String contextIdseq, 
 			ALSData alsData, ALSForm alsForm, List<ProtocolTransferObjectExt> protocols) {
 		String formLongName = null;
 		//Load ALS Form to caDSR DB
@@ -51,7 +63,7 @@ public class LoadFormService {
 			logger.error("loadFormTocaDsr error: contextName: " + contextName +
 				", Report Owner: " + alsData.getReportOwner() + ", alsForm: " + alsForm.getDraftFormName() + ", exception: " +  e);
 		}
-		return formLongName;
+		return CompletableFuture.completedFuture(formLongName);
 	}
 	/**
 	 * 
@@ -87,6 +99,7 @@ public class LoadFormService {
 			currIdseq = loadServiceRepositoryImpl.createForm(validFormDescriptor, null);
 			logger.info("Loaded a new form: " + alsForm.getDraftFormName() + ". IDSeq: " + currIdseq);
 		}
+		Thread.sleep(1000L);
 		return alsForm.getDraftFormName();
 	}
 }

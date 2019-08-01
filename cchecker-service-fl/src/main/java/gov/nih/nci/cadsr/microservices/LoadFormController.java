@@ -131,7 +131,7 @@ public class LoadFormController {
 	 * @param selForms
 	 * @return List<String> list of loaded form names
 	 */
-	
+	/*  We have a problem with DB deadlock
 	public List<String> formLoadExecAsync(ALSData alsData, List<String> selForms, 
 			String contextName, String conteIdseq, List<ProtocolTransferObjectExt> protocols) {
 		//long start = System.currentTimeMillis();
@@ -167,6 +167,36 @@ public class LoadFormController {
 				e.printStackTrace();
 			}
 		}
+		return resultList;
+	}
+	*/
+	/**
+	 * Load ALS Forms to caDSR sequentially.
+	 * 
+	 * @param alsForm
+	 * @param selForms
+	 * @return List<String> list of loaded form names
+	 */
+	
+	public List<String> formLoad(ALSData alsData, List<String> selForms, 
+			String contextName, String conteIdseq, List<ProtocolTransferObjectExt> protocols) {
+		//long start = System.currentTimeMillis();
+		List<ALSForm> alsFormList = alsData.getForms();
+		List<String> resultList = new ArrayList<>();
+		if ((alsFormList == null) || (selForms == null) || (selForms.isEmpty())) return resultList;
+
+			//long stepStart = System.currentTimeMillis();
+		for (ALSForm alsForm : alsFormList) {
+			if (selForms.contains(alsForm.getFormOid())) {
+				logger.info("Loading form: " + alsForm.getDraftFormName());
+				//load ALS data as FL form
+				String formLongName = loadFormService.loadFormTocaDsr(contextName, conteIdseq, alsData, alsForm, protocols);
+				//collect processed form names to return as JSON Array
+				if (formLongName != null)
+					resultList.add(formLongName);
+			}
+		}
+
 		return resultList;
 	}
 	/**
@@ -224,8 +254,11 @@ public class LoadFormController {
 
 				List<ProtocolTransferObjectExt> protocols = buildProtocolListForForms(protocolAlsName, protocolIdseq);
 				
-				List<String> formNamesLoaded = formLoadExecAsync(alsData, selForms, 
-					formLoadParamWrapper.getContextName(), contextIdseq, protocols);
+				//we do not use Executor pool for FL requests for now because of DB deadlock
+//				List<String> formNamesLoaded = formLoadExecAsync(alsData, selForms, 
+//					formLoadParamWrapper.getContextName(), contextIdseq, protocols);
+				List<String> formNamesLoaded = formLoad(alsData, selForms, 
+						formLoadParamWrapper.getContextName(), contextIdseq, protocols);
 				httpHeaders.add("Content-Type", "application/json");
 				return new ResponseEntity<List<String>>(formNamesLoaded, httpHeaders, httpStatus);
 			}
@@ -334,16 +367,16 @@ public class LoadFormController {
 		}
 		return formIdsList;
 	}
-
-	@Bean(name = "formThreadPoolTaskExecutor")
-	public Executor formAsyncExecutor() {
-		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-		executor.setCorePoolSize(6);
-		executor.setMaxPoolSize(12);
-		executor.setQueueCapacity(100);
-		executor.setThreadNamePrefix("LoadAlsForm-");
-		executor.initialize();
-		logger.debug("Created bean formThreadPoolTaskExecutor: " + Thread.currentThread().getName());
-		return executor;
-	}
+	//We do not use Executor pool for now
+//	@Bean(name = "formThreadPoolTaskExecutor")
+//	public Executor formAsyncExecutor() {
+//		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+//		executor.setCorePoolSize(6);
+//		executor.setMaxPoolSize(12);
+//		executor.setQueueCapacity(100);
+//		executor.setThreadNamePrefix("LoadAlsForm-");
+//		executor.initialize();
+//		logger.debug("Created bean formThreadPoolTaskExecutor: " + Thread.currentThread().getName());
+//		return executor;
+//	}
 }
