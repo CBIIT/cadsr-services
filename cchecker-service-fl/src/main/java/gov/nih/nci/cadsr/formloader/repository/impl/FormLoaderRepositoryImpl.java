@@ -145,12 +145,12 @@ public class FormLoaderRepositoryImpl implements FormLoaderRepository {
 	@Transactional(readOnly=true)
 	public List<QuestionTransferObject> getQuestionsByPublicIds(List<String> publicIds) {
 		if (publicIds == null || publicIds.size() == 0) {
-			logger.debug("getQuestionsByPublicIds(): Question public id list is null or empty. Unable to querry db.");
+			logger.trace("getQuestionsByPublicIds(): Question public id list is null or empty. Unable to querry db.");
 			return null;
 		}
 			
 		List<QuestionTransferObject> questions = questionV2Dao.getQuestionsByPublicIds(publicIds);
-		logger.debug("getQuestionsByPublicId(): Dao returns " + questions.size() + " questions.");
+		logger.trace("getQuestionsByPublicId(): Dao returns " + questions.size() + " questions." + publicIds);
 		return questions;
 	}
 	

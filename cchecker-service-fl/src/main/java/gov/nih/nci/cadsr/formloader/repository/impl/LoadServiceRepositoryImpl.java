@@ -210,7 +210,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 	
 	@Transactional
 	protected void createFormInstructions(FormDescriptor form, FormV2TransferObject formdto) {
-		logger.debug("Creating instructions for form");
+		logger.trace("Creating instructions for form");
 		String instructString = form.getHeaderInstruction();
 		if (instructString == null || instructString.length() == 0)
 			return;
@@ -224,7 +224,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 		if (formInstruction != null)
 			formInstructionV2Dao.createFooterInstruction(formInstruction, formdto.getFormIdseq());
 		
-		logger.debug("Done creating instructions for form");
+		logger.debug("Done creating instructions for form " + formdto.getLongName());
 	}
 	
 	/**
