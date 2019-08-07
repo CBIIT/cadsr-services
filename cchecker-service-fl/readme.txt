@@ -73,7 +73,7 @@ curl -X POST -H "Content-Type: application/json" --data "@/local/content/cchecke
 http://localhost:4811/rest/loadforms?_cchecker=9AD561C1-0BF4-43FE-BC9D-09402D6824D6
 
 6b. To run generate XML Service
-curl -X POST -H "Content-Type: application/json" --data "@/local/content/cchecker/formloadlist31.json" http://localhost:4811/rest/loadforms?_cchecker=1296201E-6DCA-4E4D-93F9-E0A377868A0F
+curl -X POST -H "Content-Type: application/json" --data "@/local/content/cchecker/formloadlist31.json" http://localhost:4811/rest/formxml?_cchecker=1296201E-6DCA-4E4D-93F9-E0A377868A0F
 FL XML file is saved on the server REPORT directory in a file:
 FormLoader-<session>.xml
 Example:
