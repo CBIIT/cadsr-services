@@ -5,14 +5,12 @@ package gov.nih.nci.cadsr.microservices;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
+//import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.ALSForm;
@@ -22,7 +20,7 @@ import gov.nih.nci.cadsr.formloader.repository.impl.LoadServiceRepositoryImpl;
 import gov.nih.nci.cadsr.formloader.service.impl.ContentValidationServiceImpl;
 import gov.nih.nci.ncicb.cadsr.common.dto.ProtocolTransferObjectExt;
 /**
- * This is a class to load forms.
+ * This is a class to load forms or generate FL Forms XML.
  * 
  * @author asafievan
  *
@@ -39,13 +37,13 @@ public class LoadFormService {
 	
 	@Autowired
 	private ContentValidationServiceImpl contentValidationServiceImpl;
-	
-	public String loadFormTocaDsr (String contextName, String contextIdseq, 
+		
+	public String loadForm2caDsr (String contextName, String contextIdseq, 
 			ALSData alsData, ALSForm alsForm, List<ProtocolTransferObjectExt> protocols) {
 		String formLongName = null;
 		//Load ALS Form to caDSR DB
 		try {
-			formLongName = createAlsForm(contextName, contextIdseq, alsData, alsForm, protocols);
+			formLongName = loadAlsForms2caDSR(contextName, contextIdseq, alsData, alsForm, protocols);
 		}
 		catch(Exception e) {
 			logger.error("loadFormTocaDsr error: contextName: " + contextName +
@@ -60,10 +58,10 @@ public class LoadFormService {
 	 * @param alsData
 	 * @param alsForm
 	 * @param protocols
-	 * @return created form long name
+	 * @return FormCollection FL class to generate forms
 	 * @throws Exception
 	 */
-	protected String createAlsForm(String contextName, String contextIdseq, 
+	protected FormCollection mapAlsForm(String contextName, String contextIdseq, 
 			ALSData alsData, ALSForm alsForm, List<ProtocolTransferObjectExt> protocols) throws Exception {
 		//map ALS data to FL form attributes
 		FormDescriptor formDescriptor = new FormDescriptor();
@@ -80,6 +78,23 @@ public class LoadFormService {
 		forms.add(formDescriptor);
 		formColl.setForms(forms);
 		formColl = contentValidationServiceImpl.validateXmlContent(formColl);
+		return formColl;
+	}
+	/**
+	 * This method loads a form to caDSR DB.
+	 * 
+	 * @param contextName
+	 * @param contextIdseq
+	 * @param alsData
+	 * @param alsForm
+	 * @param protocols
+	 * @return created form long name
+	 * @throws Exception
+	 */
+	protected String loadAlsForms2caDSR(String contextName, String contextIdseq, 
+			ALSData alsData, ALSForm alsForm, List<ProtocolTransferObjectExt> protocols) throws Exception {
+		//add other form attributes using FL code
+		FormCollection formColl = mapAlsForm(contextIdseq, contextIdseq, alsData, alsForm, protocols);//this object is created for FL API only
 		String currIdseq = null;
 		for (FormDescriptor validFormDescriptor : formColl.getForms()) {//always  expecting 1 object in our case
 			//load new form using FL code
@@ -89,4 +104,6 @@ public class LoadFormService {
 		}
 		return alsForm.getDraftFormName();
 	}
+
+
 }

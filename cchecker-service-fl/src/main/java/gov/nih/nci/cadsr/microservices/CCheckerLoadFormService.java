@@ -59,7 +59,7 @@ public class CCheckerLoadFormService {
 		else {
 			throw new RuntimeException("CCHECKER_DB_SERVICE_URL_REPORT_ERROR_RETRIEVE parameter is not found");
 		}
-		//TODO do we need this folder in this service
+		//we save XML FL files to this folder
 		if ((propVal = properties.getProperty("REPORT_FOLDER")) != null) {
 			REPORT_FOLDER = propVal;
 		}

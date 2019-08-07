@@ -5,9 +5,9 @@ package gov.nih.nci.cadsr.microservices;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
+//import java.util.concurrent.CompletableFuture;
+//import java.util.concurrent.ExecutionException;
+//import java.util.concurrent.Executor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,13 +17,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.Bean;
+//import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+//import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -69,6 +69,9 @@ public class LoadFormController {
 	
 	@Autowired
 	private LoadFormService loadFormService;
+	
+	@Autowired
+	private ConverterFormV2Service converterFormV2Service;
 
 	protected String retrieveContextIdseq(String contextName) {
 		String res = null;
@@ -118,7 +121,8 @@ public class LoadFormController {
 		if (protocolIdseq != null) {
 			ProtocolTransferObjectExt protocol = new ProtocolTransferObjectExt();
 			//we do not need protocolPreferredName for FL legacy code, only IDSEQ
-			//protocol.setPreferredName(protocolPreferredName);
+//			protocol.setPreferredName(protocolPreferredName);
+//			protocol.setLongName(protocolPreferredName);
 			protocol.setIdseq(protocolIdseq);
 			protocols.add(protocol);
 		}
@@ -190,7 +194,7 @@ public class LoadFormController {
 			if (selForms.contains(alsForm.getFormOid())) {
 				logger.info("Loading form: " + alsForm.getDraftFormName());
 				//load ALS data as FL form
-				String formLongName = loadFormService.loadFormTocaDsr(contextName, conteIdseq, alsData, alsForm, protocols);
+				String formLongName = loadFormService.loadForm2caDsr(contextName, conteIdseq, alsData, alsForm, protocols);
 				//collect processed form names to return as JSON Array
 				if (formLongName != null)
 					resultList.add(formLongName);
@@ -347,8 +351,7 @@ public class LoadFormController {
 		}
 		return data;
 	}
-	
-	
+		
 	/**
 	 * Returns a list of Form OIDs for the respective Form Names list 
 	 * 
@@ -367,6 +370,91 @@ public class LoadFormController {
 		}
 		return formIdsList;
 	}
+
+	@PostMapping(value = "/rest/formxml")
+	public ResponseEntity<?>generateLoadFormXml(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam(name="_cchecker", required=true) String idseq,
+			RequestEntity<FormLoadParamWrapper> requestEntity) {
+		logger.debug("generateLoadFormXml session: " + idseq);
+		//prepare data from parameters
+		//session ID
+		if (StringUtils.isBlank(idseq)) {
+			//no session received
+			return buildErrorResponse(strError, HttpStatus.BAD_REQUEST);
+		}
+		
+		FormLoadParamWrapper formLoadParamWrapper = requestEntity.getBody();
+		logger.info("generateLoadFormXml body: " + formLoadParamWrapper);
+
+		//retrieve context
+		String contextIdseq = retrieveContextIdseq(formLoadParamWrapper.getContextName());
+		if (StringUtils.isBlank(contextIdseq)) {
+			//context not found
+			return buildErrorResponse(strErrorWrongContext + formLoadParamWrapper.getContextName(), HttpStatus.BAD_REQUEST);
+		}
+		
+		String strMsg = "OK";
+		HttpStatus httpStatus = HttpStatus.OK;
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.add("Content-Type", "application/json");
+		try {
+			ALSData alsData = retrieveAlsData(idseq);
+			if (alsData != null) {
+				String fileName = alsData.getFileName();//expected file name
+				logger.info("Retrieved parsed file for form XML generation, with name: " + fileName);
+				
+				List<ALSForm> alsFormList = alsData.getForms();
+				List<String> selForms = getFormIdList(formLoadParamWrapper.getSelForms(), alsFormList);
+				//check that the file contains selected forms
+				if (selForms.isEmpty()) {
+					return buildErrorResponse(strErrorNoFormFound , HttpStatus.BAD_REQUEST);
+				}
+				
+				//retrieve protocol information for forms
+				String protocolAlsName = alsData.getCrfDraft().getProjectName();
+				//we need Protocol IDSEQ to add a protocol to a form
+				String protocolIdseq = retrieveProtocolIdseq(protocolAlsName);
+
+				List<ProtocolTransferObjectExt> protocols = buildProtocolListForForms(protocolAlsName, protocolIdseq);
+
+				converterFormV2Service.prepareXmlFile(idseq, formLoadParamWrapper.getContextName(), 
+						contextIdseq, alsData, selForms, protocols);
+				httpHeaders.add("Content-Type", "application/json");
+				//FIXME return names of Forms created
+				return new ResponseEntity<List<String>>(formLoadParamWrapper.getSelForms(), httpHeaders, httpStatus);
+			}
+			else {
+				strMsg = "FATAL error: no parsed data found in retrieving ALSData parser data by ID: " + idseq;
+				List<String> errorArr = new ArrayList<>();
+				errorArr.add(strMsg);
+				logger.error(strMsg);
+				httpStatus = HttpStatus.BAD_REQUEST;
+				return new ResponseEntity<List<String>>(errorArr, httpHeaders, httpStatus);
+			}
+		}
+		catch (RestClientException e) {
+			e.printStackTrace();
+			logger.error("RestClientException on idseq: " + idseq, e);
+			//return buildErrorResponse("ALS is not found by " + idseq + e, HttpStatus.BAD_REQUEST);
+			strMsg = "ALS is not found by " + idseq + e;
+			List<String> errorArr = new ArrayList<>();
+			errorArr.add(strMsg);
+			logger.error(strMsg);
+			httpStatus = HttpStatus.BAD_REQUEST;
+			return new ResponseEntity<List<String>>(errorArr, httpHeaders, httpStatus);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			//return buildErrorResponse("server error in form load on id: " + idseq + e, HttpStatus.INTERNAL_SERVER_ERROR);
+			strMsg = "server error in form load on id: " + idseq + e;
+			List<String> errorArr = new ArrayList<>();
+			errorArr.add(strMsg);
+			logger.error(strMsg);
+			httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+			return new ResponseEntity<List<String>>(errorArr, httpHeaders, httpStatus);
+		}
+	}
+
 	//We do not use Executor pool for now
 //	@Bean(name = "formThreadPoolTaskExecutor")
 //	public Executor formAsyncExecutor() {
