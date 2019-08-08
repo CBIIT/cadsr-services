@@ -34,13 +34,10 @@ import gov.nih.nci.ncicb.cadsr.common.dto.ModuleTransferObject;
 import gov.nih.nci.ncicb.cadsr.common.dto.ProtocolTransferObject;
 import gov.nih.nci.ncicb.cadsr.common.dto.ProtocolTransferObjectExt;
 import gov.nih.nci.ncicb.cadsr.common.dto.QuestionTransferObject;
-import gov.nih.nci.ncicb.cadsr.common.dto.ValueDomainV2TransferObject;
-import gov.nih.nci.ncicb.cadsr.common.dto.ValueMeaningTransferObject;
 import gov.nih.nci.ncicb.cadsr.common.resource.FormV2;
 import gov.nih.nci.ncicb.cadsr.common.resource.FormValidValue;
 import gov.nih.nci.ncicb.cadsr.common.resource.Module;
 import gov.nih.nci.ncicb.cadsr.common.resource.Question;
-import gov.nih.nci.ncicb.cadsr.common.resource.ValueMeaning;
 /**
  * Create FormV2 object and FL XML from ALSForm.
  * 

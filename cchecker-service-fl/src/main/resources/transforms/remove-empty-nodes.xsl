@@ -9,5 +9,5 @@
         </xsl:copy>
     </xsl:template>
 
-    <xsl:template match="*[not(normalize-space())]"/>
+    <xsl:template match="*[not(normalize-space())][not(self::questionText)]"/>
 </xsl:stylesheet>
