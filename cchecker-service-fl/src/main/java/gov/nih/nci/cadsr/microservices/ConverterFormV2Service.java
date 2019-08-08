@@ -185,9 +185,9 @@ public class ConverterFormV2Service {
 		//question.setMandatory();
 		//question.setPublicId();
 		//question.setVersion();
-		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-		question.setDateCreated(timestamp);
-		question.setDateModified(timestamp);
+//		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+//		question.setDateCreated(timestamp);
+//		question.setDateModified(timestamp);
 
 		//question.setEditable();
 

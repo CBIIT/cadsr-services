@@ -342,9 +342,9 @@
                 <!-- xsl:value-of select="$FILLVERSION"/ -->
 				<!--   xsl:value-of select="./version"/ -->
         <!-- /xsl:element -->
-            <xsl:element name="isDerived">
+            <!-- xsl:element name="isDerived">
                 <xsl:value-of select="@de-derived"/>
-            </xsl:element>
+            </xsl:element-->
             <xsl:element name="displayOrder">
                 <xsl:value-of select="@display-order"/>
             </xsl:element>
@@ -400,9 +400,9 @@
                     <xsl:when test="@editable = 'true'">
                         <xsl:text>Yes</xsl:text>
                     </xsl:when>
-                    <xsl:otherwise>
+                    <!-- xsl:otherwise>
                         <xsl:text>No</xsl:text>
-                    </xsl:otherwise>
+                    </xsl:otherwise-->
                 </xsl:choose>
             </xsl:element>
             <xsl:element name="isMandatory">
@@ -410,9 +410,9 @@
                     <xsl:when test="@mandatory = 'true'">
                         <xsl:text>Yes</xsl:text>
                     </xsl:when>
-                    <xsl:otherwise>
+                    <!-- xsl:otherwise>
                         <xsl:text>No</xsl:text>
-                    </xsl:otherwise>
+                    </xsl:otherwise -->
                 </xsl:choose>
             </xsl:element>
             <xsl:element name="multiValue">
@@ -451,7 +451,7 @@
                         <xsl:text>Yes</xsl:text>
                     </xsl:when>
                     <xsl:otherwise>
-                        <xsl:text>No</xsl:text>
+                        <xsl:text></xsl:text>
                     </xsl:otherwise>
                 </xsl:choose>
             </xsl:element>
