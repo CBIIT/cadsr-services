@@ -12,6 +12,7 @@ export class AppComponent {
   title = 'cchecker-ui';
   formBuilderUrl:string = environment.formBuilderUrl;
   cdeBrowserUrl:string = environment.cdeBrowserUrl;
+  helpLink:string = environment.helpLink;
   timestamp:string = environment.timestamp;  
   version:string = environment.version;
 }
