@@ -28,7 +28,9 @@ public class FormLoadParamWrapper {
 	
 	@Override
 	public String toString() {
-		return "FormLoadParamWrapper [selForms=" + selForms + ", contextName=" + contextName + "]";
+		int size = (selForms != null) ? selForms.size() : 0;
+		return "FormLoadParamWrapper [number of forms=" 
+				+ size + ", selForms=" + selForms + ", contextName=" + contextName + "]";
 	}
 
 }
