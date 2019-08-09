@@ -9,17 +9,13 @@ import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import gov.nih.nci.cadsr.data.ALSData;
-import gov.nih.nci.cadsr.data.ALSDataDictionaryEntry;
-import gov.nih.nci.cadsr.data.ALSField;
 import gov.nih.nci.cadsr.data.ALSForm;
 import gov.nih.nci.cadsr.formloader.domain.FormCollection;
 import gov.nih.nci.cadsr.formloader.domain.FormDescriptor;
@@ -49,7 +45,7 @@ public class ConverterFormV2Service {
 	private static final Logger logger = LoggerFactory.getLogger(ConverterFormV2Service.class);
 	private static final String convertedFormEnd = "\n</forms>";
 	//TODO check requirements for collection values
-	private static final String startXmlFormat = "<forms>\n<collectionName>%s</collectionName>\n<collectionDescription>%s</collectionDescription>";
+	private static final String startXmlFormat = "<forms>\n<collectionName>%s</collectionName>\n<collectionDescription>%s</collectionDescription>\n";
 	public static final String fileFormLoaderPrefix = "FormLoader-";
 	protected static String REPORT_FOLDER = CCheckerLoadFormService.REPORT_FOLDER;
 	
@@ -62,7 +58,7 @@ public class ConverterFormV2Service {
 			for (ProtocolTransferObjectExt protocolExt : protocols) {
 				curr = new ProtocolTransferObject();
 				curr.setLongName(protocolExt.getProtoIdseq());
-				//FIXME fix protocol attributes based on caDSR and ALS data
+				//TODO check mapping of protocol attributes based on caDSR and ALS data
 				curr.setLongName(alsProjectName);
 				curr.setProtocolId(alsProjectName);
 				curr.setPreferredName(alsProjectName);
@@ -73,20 +69,6 @@ public class ConverterFormV2Service {
 		return protocolList;
 		
 	}
-
-	private static OutputStream startXMLFile(String formFileNameAppend, String ownerFileName) throws Exception {
-		//String separator = System.getProperty("file.separator");
-		//String xmlFilename = "dwld" + separator + contextInPath + dir + separator + "FormsDownload-" + formFileNameAppend + ".xml";
-		//FIXME dump to /local cchecker sub-directory
-		String xmlFilename = formFileNameAppend + ".xml";
-		logger.info("xmlFilename: " + xmlFilename);
-		String beginXml = String.format(startXmlFormat, ownerFileName, ownerFileName);
-		BufferedOutputStream fileOut = new BufferedOutputStream(new FileOutputStream(xmlFilename));
-		fileOut.write(beginXml.getBytes("UTF-8"));
-		fileOut.flush();
-		return fileOut;
-	}
-	
 	
 	public FormV2 convertFDToFormV2(FormDescriptor formDesc, List<ProtocolTransferObject> protocols) {
 		
@@ -131,7 +113,7 @@ public class ConverterFormV2Service {
 		// QC_IDSEQ we do not need
 		// form.setIdseq();
 		form.setLongName(formDesc.getLongName()); // LONG_NAME
-		// FIXME is this the right info???
+		//TODO check mapping of form attributes
 		form.setPreferredName(formDesc.getPreferredDefinition()); // PREFERRED_NAME taken from alsForm getFormOid
 
 		// setContext(new ContextTransferObject(rs.getString("context_name")));
@@ -149,7 +131,7 @@ public class ConverterFormV2Service {
 		form.setAslName(FormDescriptor.LOAD_TYPE_NEW); // WORKFLOW
 		form.setVersion(new Float(1.0)); // VERSION
 		form.setPreferredDefinition(formDesc.getPreferredDefinition()); // PREFERRED_DEFINITION
-		//TODO to be confirmed
+
 		//form.setCreatedBy("GUEST"); // CREATED_BY is ignored by FL
 		
 		form.setProtocols(protocols);
@@ -181,7 +163,7 @@ public class ConverterFormV2Service {
 		question.setDisplayOrder(displayOrder); // DISPLAY_ORDER
 		//question.setAslName();//Workflow
 		question.setPreferredDefinition(questionDescriptor.getQuestionText());
-		//TODO do we have Mandatory in ALS?
+		//we do not need those in FL XML
 		//question.setMandatory();
 		//question.setPublicId();
 		//question.setVersion();
@@ -220,140 +202,27 @@ public class ConverterFormV2Service {
 			//dataElementTransferObject.setValueDomain(valueDomainV2TransferObject);
 		}
 		//we do not set up question instructions
-        //question.setInstructions(qInstructions);
+		//question.setInstructions(qInstructions);
 		return question;
 	}
 	
 	protected FormValidValue mapValidValue (ValidValue validValue, int displayOrder) {
-		//FIXME check if this mapping is correct
+		//TODO check mapping of valid values
 		FormValidValue fvv = new FormValidValueTransferObject();
 		fvv.setFormValueMeaningText(validValue.getMeaningText());
 		fvv.setFormValueMeaningDesc(validValue.getPreferredDefinition());
-		//FIXME where does value go
+
 		fvv.setPreferredDefinition(validValue.getPreferredDefinition());
 		fvv.setShortMeaning(validValue.getValue());
 		fvv.setPreferredName(validValue.getValue());
 		fvv.setLongName(validValue.getValue());
-		//we do not have VM info
+		//we do not need to create VM element for FL XML
 //		ValueMeaning vm = new ValueMeaningTransferObject();
 //		vm.setLongName(validValue.getValue());
 //		fvv.setValueMeaning(vm);
 		fvv.setDisplayOrder(displayOrder);
 		return fvv;
 	}
-	/***********************below is FD create code**************************/
-	/**
-	 * Return a Module
-	 * @param alsForm
-	 * @param alsData
-	 * @return ModuleDescriptor
-	 */
-	private ModuleDescriptor addModule(ALSForm alsForm, ALSData alsData) {
-		ModuleDescriptor defaultModule = new ModuleDescriptor();
-		defaultModule.setLongName("Default Module");
-		defaultModule.setPreferredDefinition("No Definition");
-		defaultModule.setQuestions(addQuestions(alsForm, alsData));
-		return defaultModule;
-	}
-
-	/**
-	 * Return a list of questions
-	 * @param alsForm
-	 * @param alsData
-	 * @return List<QuestionDescriptor>
-	 */	
-	private List<QuestionDescriptor> addQuestions (ALSForm alsForm, ALSData alsData) {
-		List<QuestionDescriptor> questions = new ArrayList<QuestionDescriptor>();
-		String formOid = null;
-		for (ALSField alsField : alsData.getFields()) {
-			formOid = alsField.getFormOid();
-			if (formOid != null) {
-				if (!"FORM_OID".equals(alsField.getFieldOid())) {
-					if (formOid.equals(alsForm.getFormOid())) {
-						questions.add(addSingleQuestion(alsField, alsData));
-						formOid = null;
-					}
-				}
-			}
-		}
-		return questions;
-	}
-	
-	
-	/**
-	 * Return a single question and its valid values filled up
-	 * @param alsForm
-	 * @param alsData
-	 * @return QuestionDescriptor
-	 */		
-	private QuestionDescriptor addSingleQuestion (ALSField alsField, ALSData alsData) {
-		QuestionDescriptor question = new QuestionDescriptor();
-		//question.setDisplayOrder(alsField.getOrdinal()); // Not present at the moment
-		if (alsField.getPreText()!=null && (!alsField.getPreText().isEmpty())) {
-			question.setQuestionText(alsField.getPreText()); 
-		}
-		String[] idVersion = extractIdVersion(alsField.getDraftFieldName());
-		if (idVersion[0] != null) {
-			if (NumberUtils.isCreatable(idVersion[0]) && NumberUtils.isCreatable(idVersion[1])
-					&& NumberUtils.isCreatable(idVersion[2])) {
-				question.setCdePublicId(idVersion[0]);
-				question.setCdeVersion(idVersion[1] + "." + idVersion[2]);
-			}
-		}
-		if (alsField.getDataDictionaryName()!=null) {
-			question.setValidValues(addValidValues(alsField.getDataDictionaryName(), alsData.getDataDictionaryEntries(), question));
-		}
-		return question;
-	}
-	
-	
-	/**
-	 * Return a list of Valid Values for the question
-	 * @param alsForm
-	 * @param alsData
-	 * @return List<ValidValue>
-	 */			
-	private List<ValidValue> addValidValues (String ddeName, Map<String, ALSDataDictionaryEntry> ddeMap, QuestionDescriptor question) {
-		List<ValidValue> validValues = new ArrayList<ValidValue>();
-		for (String key : ddeMap.keySet()) {
-			if (key.equals(ddeName)) {
-				for (int i = 0; i < ddeMap.get(key).getCodedData().size(); i++) {
-					ValidValue validVal = question.new ValidValue();
-					//validVal.setDisplayOrder(ddeMap.get(key).getOrdinal()); // Not present at the moment 
-					validVal.setValue(ddeMap.get(key).getCodedData().get(i));
-					validVal.setMeaningText(ddeMap.get(key).getUserDataString().get(i));
-					validVal.setPreferredDefinition("No definition");				
-					validValues.add(validVal);
-				}
-			}							
-		}			
-		return validValues;
-	}
-	
-	
-	/**
-	 * Splits & extracts the Public ID and Version from a string of format [PIDXXXXX_Vxx_x]
-	 * @param draftFieldName
-	 * @return String[]
-	 */
-	protected static String[] extractIdVersion (String draftFieldName) {
-		String publicid_prefix = "PID";
-		String version_prefix = "_V";		
-		String[] idVersionSplitElements = new String[3];
-		if (draftFieldName.indexOf(publicid_prefix) > -1 && draftFieldName.indexOf(version_prefix) > -1) {
-			String idVn = draftFieldName.substring(draftFieldName.indexOf(publicid_prefix),
-					draftFieldName.length());
-			String id = idVn.substring(3, idVn.indexOf("_"));
-			String version = (idVn.substring(idVn.indexOf(version_prefix) + 2, idVn.length()));
-			id = id.trim();
-			String[] versionTokens = version.split("\\_");
-			version = versionTokens[0] + "." + versionTokens[1];
-			idVersionSplitElements[0] = id;
-			idVersionSplitElements[1] = versionTokens[0];
-			idVersionSplitElements[2] = versionTokens[1];
-		}
-		return idVersionSplitElements;
-	}	
 	/**
 	 * This method writes XML file with FL XML.
 	 * 
@@ -365,10 +234,11 @@ public class ConverterFormV2Service {
 	 * @param protocols
 	 * @throws Exception
 	 */
-	public void prepareXmlFile(String sessionId, String contextName, String contextIdseq, ALSData alsData, 
+	public List<String> prepareXmlFile(String sessionId, String contextName, String contextIdseq, ALSData alsData, 
 			List<String> selForms, List<ProtocolTransferObjectExt> protocols) throws Exception {
 		String formFileNameAppend = REPORT_FOLDER + fileFormLoaderPrefix + sessionId;
 		logger.info("Form XML file: " + formFileNameAppend);
+		List<String> preraredForms = new ArrayList<>();
 		//start a new file
 		OutputStream currFileOut = startXMLFile(formFileNameAppend, alsData.getFileName());
 		List<ProtocolTransferObject> protocolList = mapProtocols(protocols, alsData.getCrfDraft().getProjectName());
@@ -388,6 +258,7 @@ public class ConverterFormV2Service {
 					
 					FormV2 crf = convertFDToFormV2(fd, protocolList);
 					currentForm = FormConverterUtil.instance().convertFormToV2(crf);
+					preraredForms.add(fd.getLongName());
 				
 				} catch (Exception exp) {
 					logger.error("Exception getting CRF: " + exp);
@@ -402,7 +273,22 @@ public class ConverterFormV2Service {
 			}//one form processing loop
 		}
 		closeXMLFile(currFileOut);
+		return preraredForms;
 	}
+
+	private static OutputStream startXMLFile(String formFileNameAppend, String ownerFileName) throws Exception {
+		//String separator = System.getProperty("file.separator");
+		//String xmlFilename = "dwld" + separator + contextInPath + dir + separator + "FormsDownload-" + formFileNameAppend + ".xml";
+		//dump to REPORT-DIRECTORY
+		String xmlFilename = formFileNameAppend + ".xml";
+		logger.info("xmlFilename: " + xmlFilename);
+		String beginXml = String.format(startXmlFormat, ownerFileName, ownerFileName);
+		BufferedOutputStream fileOut = new BufferedOutputStream(new FileOutputStream(xmlFilename));
+		fileOut.write(beginXml.getBytes("UTF-8"));
+		fileOut.flush();
+		return fileOut;
+	}
+	
 	private static void closeXMLFile(OutputStream fileOut) {
 		try {
 			fileOut.write(convertedFormEnd.getBytes("UTF-8"));
@@ -413,5 +299,4 @@ public class ConverterFormV2Service {
 			exp.printStackTrace();
 		}		
 	}
-
 }

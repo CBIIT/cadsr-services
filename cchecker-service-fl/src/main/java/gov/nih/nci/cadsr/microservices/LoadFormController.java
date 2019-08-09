@@ -417,11 +417,11 @@ public class LoadFormController {
 
 				List<ProtocolTransferObjectExt> protocols = buildProtocolListForForms(protocolAlsName, protocolIdseq);
 
-				converterFormV2Service.prepareXmlFile(idseq, formLoadParamWrapper.getContextName(), 
+				List<String> xmlFormList = converterFormV2Service.prepareXmlFile(idseq, formLoadParamWrapper.getContextName(), 
 						contextIdseq, alsData, selForms, protocols);
 				httpHeaders.add("Content-Type", "application/json");
-				//FIXME return names of Forms created
-				return new ResponseEntity<List<String>>(formLoadParamWrapper.getSelForms(), httpHeaders, httpStatus);
+				//return names of Form in XML-generated document
+				return new ResponseEntity<List<String>>(xmlFormList, httpHeaders, httpStatus);
 			}
 			else {
 				strMsg = "FATAL error: no parsed data found in retrieving ALSData parser data by ID: " + idseq;
