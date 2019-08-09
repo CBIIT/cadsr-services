@@ -55,28 +55,6 @@ public class FormConverterUtil {
 				throw ex;
 			}
 			
-			try {
-				 
-				String content = writer.toString();
-				//FIXME create a file with a session related name in cchecker directory
-				File file = new File("download1.xml");
-	 
-				// if file doesnt exists, then create it
-				if (!file.exists()) {
-					file.createNewFile();
-				}
-	 
-				FileWriter fw = new FileWriter(file.getAbsoluteFile());
-				BufferedWriter bw = new BufferedWriter(fw);
-				bw.write(content);
-				bw.close();
-	 
-				log.debug("Done");
-	 
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
 			// Now use our transformer to create V2 format
 			Source xmlInput = new StreamSource(new StringReader(writer.toString()));
 			ByteArrayOutputStream xmlOutputStream = new ByteArrayOutputStream();  
