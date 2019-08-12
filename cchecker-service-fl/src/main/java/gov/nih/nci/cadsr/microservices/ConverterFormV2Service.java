@@ -128,7 +128,7 @@ public class ConverterFormV2Service {
 		// multiple protocols will be set later
 
 		form.setFormType("CRF"); // TYPE
-		form.setAslName(FormDescriptor.LOAD_TYPE_NEW); // WORKFLOW
+		form.setAslName(formDesc.getLoadType()); // WORKFLOW
 		form.setVersion(new Float(1.0)); // VERSION
 		form.setPreferredDefinition(formDesc.getPreferredDefinition()); // PREFERRED_DEFINITION
 
@@ -136,7 +136,7 @@ public class ConverterFormV2Service {
 		
 		form.setProtocols(protocols);
 		return form;
-      }
+	}
 
 	protected Module mapModuleTransferObject() {
 		Module module = new ModuleTransferObject();
