@@ -1,2 +1,2 @@
-0 0 * * * find /local/content/cchecker -name '*.xlsx' -type f -mtime +14 -delete > /dev/null 2>&1
+0 0 * * * find /local/content/cchecker -name ‘*.x*’ -type f -mtime +14 -delete > /dev/null 2>&1
 #
