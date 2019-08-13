@@ -44,6 +44,7 @@ public class GatewayBootWebApplication extends SpringBootServletInitializer {
 	static String CCHECKER_FEED_VALIDATE_SERVICE_URL;
 	static String CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL;
 	static String CCHECKER_LOAD_FORM_SERVICE_URL;
+	static String CCHECKER_FORM_XML_SERVICE_URL;
 	//Save the uploaded file to this folder
 	static String UPLOADED_FOLDER;
 	static String ACCESS_CONTROL_ALLOW_ORIGIN_HEADER = "Access-Control-Allow-Origin";
@@ -85,6 +86,7 @@ public class GatewayBootWebApplication extends SpringBootServletInitializer {
 		CCHECKER_FEED_VALIDATE_SERVICE_URL = properties.getProperty("CCHECKER_FEED_VALIDATE_SERVICE_URL");
 		CCHECKER_DB_SERVICE_URL_RETRIEVE_CONTEXTS = properties.getProperty("CCHECKER_DB_SERVICE_URL_RETRIEVE_CONTEXTS");
 		CCHECKER_LOAD_FORM_SERVICE_URL = properties.getProperty("CCHECKER_LOAD_FORM_SERVICE_URL");
+		CCHECKER_FORM_XML_SERVICE_URL = properties.getProperty("CCHECKER_FORM_XML_SERVICE_URL");
 		
 		logger.info("!!! Loaded CChecker Gateway properties: " + properties);
 

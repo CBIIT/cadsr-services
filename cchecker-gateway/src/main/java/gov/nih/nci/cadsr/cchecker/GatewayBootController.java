@@ -652,7 +652,7 @@ public class GatewayBootController {
 	 * @return BufferedInputStream
 	 * @throws Exception
 	 */
-	protected BufferedInputStream openFileAsInputStream(String filePathString) throws Exception {
+	protected static BufferedInputStream openFileAsInputStream(String filePathString) throws Exception {
 		BufferedInputStream bis = null;
 		Path path = Paths.get(filePathString);
 		if (Files.exists(path)) {
@@ -669,7 +669,7 @@ public class GatewayBootController {
 		httpHeaders.setAccessControlAllowOrigin(ACCESS_CONTROL_ALLOW_ORIGIN);
 	}
 
-	protected HttpHeaders createHttpOkHeaders() {
+	protected static HttpHeaders createHttpOkHeaders() {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.add("Content-Type", "application/json");
 		// We have configured springframework CrossOrigin so we do not need this
