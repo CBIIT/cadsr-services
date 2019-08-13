@@ -58,11 +58,11 @@ public class ConverterFormV2Service {
 			for (ProtocolTransferObjectExt protocolExt : protocols) {
 				curr = new ProtocolTransferObject();
 				curr.setLongName(protocolExt.getProtoIdseq());
-				//TODO check mapping of protocol attributes based on caDSR and ALS data
-				curr.setLongName(alsProjectName);
+				//mapping of protocol attributes based on caDSR and ALS data
+				curr.setLongName(protocolExt.getLongName());
 				curr.setProtocolId(alsProjectName);
-				curr.setPreferredName(alsProjectName);
-				curr.setPreferredDefinition(alsProjectName);
+				curr.setPreferredName(protocolExt.getPreferredName());
+				curr.setPreferredDefinition(protocolExt.getPreferredDefinition());
 				protocolList.add(curr);
 			}
 		}

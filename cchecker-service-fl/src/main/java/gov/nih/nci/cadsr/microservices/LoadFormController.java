@@ -36,6 +36,7 @@ import gov.nih.nci.cadsr.data.FormLoadParamWrapper;
 import gov.nih.nci.cadsr.formloader.repository.impl.LoadServiceRepositoryImpl;
 import gov.nih.nci.cadsr.formloader.service.impl.ContentValidationServiceImpl;
 import gov.nih.nci.ncicb.cadsr.common.dto.ProtocolTransferObjectExt;
+import gov.nih.nci.ncicb.cadsr.common.resource.Protocol;
 /**
  * Generate FL Forms from ALS forms Controller.
  * 
@@ -116,14 +117,25 @@ public class LoadFormController {
 		}
 		return protocolIdseq;
 	}
-	protected List<ProtocolTransferObjectExt> buildProtocolListForForms(String protocolPreferredName, String protocolIdseq) {
+	protected List<ProtocolTransferObjectExt> buildProtocolListForFormLoad(String protocolAlsdName, String protocolIdseq) {
 		List<ProtocolTransferObjectExt> protocols = new ArrayList<ProtocolTransferObjectExt>();
-		if (protocolIdseq != null) {
+		if (protocolIdseq != null) {//at that point this is an existed caDSR DB Protocol
 			ProtocolTransferObjectExt protocol = new ProtocolTransferObjectExt();
-			//we do not need protocolPreferredName for FL legacy code, only IDSEQ
-//			protocol.setPreferredName(protocolPreferredName);
-//			protocol.setLongName(protocolPreferredName);
+			//we need only IDSEQ for FL load legacy code
 			protocol.setIdseq(protocolIdseq);
+			protocols.add(protocol);
+		}
+		return protocols;
+	}
+	protected List<ProtocolTransferObjectExt> buildProtocolListForFormXml(String protocolAlsdName, String protocolIdseq) {
+		List<ProtocolTransferObjectExt> protocols = new ArrayList<ProtocolTransferObjectExt>();
+		if (protocolIdseq != null) {//at that point this is an existed caDSR DB Protocol
+			ProtocolTransferObjectExt protocol = new ProtocolTransferObjectExt();
+			Protocol protocolcaDSR = loadServiceRepositoryImpl.getProtocolV2Dao().getProtocolByPK(protocolIdseq);
+			protocol.setIdseq(protocolIdseq);
+			protocol.setPreferredName(protocolcaDSR.getPreferredName());
+			protocol.setLongName(protocolcaDSR.getLongName());
+			protocol.setPreferredDefinition(protocolcaDSR.getPreferredDefinition());
 			protocols.add(protocol);
 		}
 		return protocols;
@@ -256,11 +268,12 @@ public class LoadFormController {
 				//we need Protocol IDSEQ to add a protocol to a form
 				String protocolIdseq = retrieveProtocolIdseq(protocolAlsName);
 
-				List<ProtocolTransferObjectExt> protocols = buildProtocolListForForms(protocolAlsName, protocolIdseq);
+				List<ProtocolTransferObjectExt> protocols = buildProtocolListForFormLoad(protocolAlsName, protocolIdseq);
 				
 				//we do not use Executor pool for FL requests for now because of DB deadlock
 //				List<String> formNamesLoaded = formLoadExecAsync(alsData, selForms, 
 //					formLoadParamWrapper.getContextName(), contextIdseq, protocols);
+				
 				List<String> formNamesLoaded = formLoad(alsData, selForms, 
 						formLoadParamWrapper.getContextName(), contextIdseq, protocols);
 				httpHeaders.add("Content-Type", "application/json");
@@ -415,7 +428,7 @@ public class LoadFormController {
 				//we need Protocol IDSEQ to add a protocol to a form
 				String protocolIdseq = retrieveProtocolIdseq(protocolAlsName);
 
-				List<ProtocolTransferObjectExt> protocols = buildProtocolListForForms(protocolAlsName, protocolIdseq);
+				List<ProtocolTransferObjectExt> protocols = buildProtocolListForFormXml(protocolAlsName, protocolIdseq);
 
 				List<String> xmlFormList = converterFormV2Service.prepareXmlFile(idseq, formLoadParamWrapper.getContextName(), 
 						contextIdseq, alsData, selForms, protocols);
