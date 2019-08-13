@@ -48,21 +48,26 @@ public class ConverterFormV2Service {
 	private static final String startXmlFormat = "<forms>\n<collectionName>%s</collectionName>\n<collectionDescription>%s</collectionDescription>\n";
 	public static final String fileFormLoaderPrefix = "FormLoader-";
 	protected static String REPORT_FOLDER = CCheckerLoadFormService.REPORT_FOLDER;
-	
+
+	/**
+	 * Map FD Protocols to FormV2 Protocols. Used in XML generation.
+	 */
 	@Autowired
 	private LoadFormService loadFormService;
+	
 	protected List<ProtocolTransferObject> mapProtocols(List<ProtocolTransferObjectExt> protocols, String alsProjectName) {
 		List<ProtocolTransferObject> protocolList = new ArrayList<>();
 		ProtocolTransferObject curr;
 		if (protocols != null) {
 			for (ProtocolTransferObjectExt protocolExt : protocols) {
 				curr = new ProtocolTransferObject();
-				curr.setLongName(protocolExt.getProtoIdseq());
+				curr.setIdseq(protocolExt.getProtoIdseq());
 				//mapping of protocol attributes based on caDSR and ALS data
 				curr.setLongName(protocolExt.getLongName());
-				curr.setProtocolId(alsProjectName);
+				curr.setProtocolId(protocolExt.getProtocolId());
 				curr.setPreferredName(protocolExt.getPreferredName());
 				curr.setPreferredDefinition(protocolExt.getPreferredDefinition());
+				curr.setContext(protocolExt.getContext());
 				protocolList.add(curr);
 			}
 		}

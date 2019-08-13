@@ -35,8 +35,10 @@ import gov.nih.nci.cadsr.data.ALSForm;
 import gov.nih.nci.cadsr.data.FormLoadParamWrapper;
 import gov.nih.nci.cadsr.formloader.repository.impl.LoadServiceRepositoryImpl;
 import gov.nih.nci.cadsr.formloader.service.impl.ContentValidationServiceImpl;
+import gov.nih.nci.ncicb.cadsr.common.dto.ContextTransferObject;
 import gov.nih.nci.ncicb.cadsr.common.dto.ProtocolTransferObjectExt;
 import gov.nih.nci.ncicb.cadsr.common.resource.Protocol;
+import gov.nih.nci.ncicb.cadsr.common.resource.Context;
 /**
  * Generate FL Forms from ALS forms Controller.
  * 
@@ -127,17 +129,27 @@ public class LoadFormController {
 		}
 		return protocols;
 	}
-	protected List<ProtocolTransferObjectExt> buildProtocolListForFormXml(String protocolAlsdName, String protocolIdseq) {
+	protected List<ProtocolTransferObjectExt> buildProtocolListForFormXml(String protocolAlsdName, String protocolIdseq, String formContextname) {
 		List<ProtocolTransferObjectExt> protocols = new ArrayList<ProtocolTransferObjectExt>();
+		ProtocolTransferObjectExt protocol = new ProtocolTransferObjectExt();
 		if (protocolIdseq != null) {//at that point this is an existed caDSR DB Protocol
-			ProtocolTransferObjectExt protocol = new ProtocolTransferObjectExt();
 			Protocol protocolcaDSR = loadServiceRepositoryImpl.getProtocolV2Dao().getProtocolByPK(protocolIdseq);
 			protocol.setIdseq(protocolIdseq);
 			protocol.setPreferredName(protocolcaDSR.getPreferredName());
 			protocol.setLongName(protocolcaDSR.getLongName());
 			protocol.setPreferredDefinition(protocolcaDSR.getPreferredDefinition());
-			protocols.add(protocol);
+			protocol.setProtocolId(protocolcaDSR.getProtocolId());
+			protocol.setContext(protocolcaDSR.getContext());
 		}
+		else {
+			Context context = new ContextTransferObject();
+			context.setName(formContextname);
+			protocol.setPreferredName(protocolAlsdName);
+			protocol.setPreferredDefinition(protocolAlsdName);
+			protocol.setProtocolId(protocolAlsdName);
+			protocol.setContext(context);
+		}
+		protocols.add(protocol);
 		return protocols;
 	}
 	/**
@@ -428,7 +440,7 @@ public class LoadFormController {
 				//we need Protocol IDSEQ to add a protocol to a form
 				String protocolIdseq = retrieveProtocolIdseq(protocolAlsName);
 
-				List<ProtocolTransferObjectExt> protocols = buildProtocolListForFormXml(protocolAlsName, protocolIdseq);
+				List<ProtocolTransferObjectExt> protocols = buildProtocolListForFormXml(protocolAlsName, protocolIdseq,formLoadParamWrapper.getContextName());
 
 				List<String> xmlFormList = converterFormV2Service.prepareXmlFile(idseq, formLoadParamWrapper.getContextName(), 
 						contextIdseq, alsData, selForms, protocols);
