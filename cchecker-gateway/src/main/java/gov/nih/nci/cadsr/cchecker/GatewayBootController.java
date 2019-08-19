@@ -90,7 +90,7 @@ public class GatewayBootController {
 	public static final String COOKIE_PATH = "/gateway";
 	
 	static final int timeBetweenFeeds = 2000;
-	static final int maxFeedRequests = 300;
+	static final int maxFeedRequests = 900;
 	static final String SESSION_NOT_VALID = "Session is not found or not valid: ";
 	static final String SESSION_DATA_NOT_FOUND = "Session data is not found based on: ";
 	static final String VALIDATE_SERVICE_URL_STR = "validateservice";
