@@ -122,13 +122,18 @@ public class ReportGeneratorFeed implements ReportOutput {
 
 	//we will keep here a status of requests: sessionID-form processed number
 	private ConcurrentMap<String, String> requestStatusMap = new ConcurrentHashMap<>();
+	//we will keep here a status of requests: sessionID-form processed number
+	private ConcurrentMap<String, String> requestRunningMap = new ConcurrentHashMap<>();
 	
 	public String feedRequestStatus(String sessionId) {
 		String feedNumber = requestStatusMap.get(sessionId);
 		if (feedNumber == null) feedNumber = "0";
 		return feedNumber;
 	}
-	
+	public void cancelValidate(String sessionId) {
+		requestRunningMap.remove(sessionId);
+		logger.info("cancelValidate: " + sessionId);
+	}	
 	
 	/**
 	 * @param alsData - Complete data from the RAVE ALS (XLSX) file uploaded
@@ -267,7 +272,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 		logger.info("getFinalReportData selected alsData: " + alsData.getFileName() + ", session: " + idseq);
 		
 		String sessionId = idseq;//we keep track of form number processed by session ID
-		
+		requestRunningMap.put(idseq, idseq);
 		CCCReport cccReport = new CCCReport();
 		cccReport.setReportOwner(alsData.getReportOwner());
 		cccReport.setFileName(alsData.getFileName());
@@ -313,6 +318,11 @@ public class ReportGeneratorFeed implements ReportOutput {
 		for (ALSField alsField : alsData.getFields()) {
 			Boolean cdeServiceCall = true;
 			if (selForms.contains(alsField.getFormOid())) {
+				if (! requestRunningMap.containsKey(sessionId)){
+					//the request has been cancelled
+					logger.warn("The request has been cancelled for session: " + sessionId + ", owner: " + alsData.getReportOwner() + ", file: " + alsData.getFileName());
+					break;
+				}
 				if (formOid == null ) {//the first form
 					requestStatusMap.put(sessionId, ""+feedFormNumber);
 					logger.debug("Current form to feed map, session: " + sessionId + ", form: " + feedFormNumber + ", FormOid:" + alsField.getFormOid());

@@ -41,6 +41,9 @@ To call feed current form number:
 http://localhost:4805/rest/validateservice/feedvalidateformnumber/8519163A-ECB2-40C4-B229-5C13E0F4279B
 curl -X GET -i http://localhost:4805/rest/feedvalidateformnumber/8519163A-ECB2-40C4-B229-5C13E0F4279B
 
+To call cancel current form validation:
+http://localhost:4805/rest/validateservice/cancelrequest/8519163A-ECB2-40C4-B229-5C13E0F4279B
+curl -v -X GET -i http://localhost:4805/rest/cancelrequest/8519163A-ECB2-40C4-B229-5C13E0F4279B
 
 Running Unit tests (Excludes integration tests):
 >mvn clean package

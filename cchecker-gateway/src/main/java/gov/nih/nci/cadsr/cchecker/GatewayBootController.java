@@ -579,7 +579,7 @@ public class GatewayBootController {
 		response.flushBuffer();
 	}
 	
-	private Cookie retrieveCookie(HttpServletRequest request) {
+	protected static Cookie retrieveCookie(HttpServletRequest request) {
 		Cookie[] cookieArr = request.getCookies();
 		Cookie sessionCookie = null;
 		if (cookieArr != null) {

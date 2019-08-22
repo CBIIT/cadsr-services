@@ -55,6 +55,14 @@ public class ValidateController {
 		//logger.debug("feedValidateStatus called: " + idseq + ", current form: " + formUndervalidation);
 		return new ResponseEntity<String>(formUndervalidation, HttpStatus.OK);
 	}
+	@CrossOrigin
+	@GetMapping("/rest/cancelvalidate/{idseq}")
+	public ResponseEntity<?> cancelValidate(HttpServletRequest request,
+			@PathVariable("idseq") String idseq) {
+		logger.info("cancelvalidate request received: " + idseq);
+		reportGeneratorFeed.cancelValidate(idseq);
+		return new ResponseEntity<String>(idseq, HttpStatus.OK);
+	}
 	@PostMapping("/rest/validateservice")
 	public ResponseEntity<String> validateService(HttpServletRequest request, HttpServletResponse response,
 		@RequestParam(name="_cchecker", required=true) String idseq, 
