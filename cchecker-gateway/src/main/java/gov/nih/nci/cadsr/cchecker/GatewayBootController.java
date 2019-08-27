@@ -796,6 +796,7 @@ public class GatewayBootController {
 		final SseEmitter emitter = new SseEmitter();
 
 		ExecutorService service = Executors.newSingleThreadExecutor();
+		String threadName = Thread.currentThread().getName();
 		service.execute(() -> {
 			String resPre = "-1";//we expect to receive a form number
 			String res;
@@ -810,7 +811,7 @@ public class GatewayBootController {
 					res = retrieveFeedValidate(idseq);
 					if (logger.isDebugEnabled()) {
 						if (! StringUtils.equals(res, resPre))  {//reduce amount of logs
-							logger.debug("feedcheckstatus current form for session " + idseq + " is " + res);
+							logger.debug("feedcheckstatus current form for session " + idseq + " is " + res + ", thread: " + threadName);
 							resPre = res;
 						}
 					}
@@ -822,12 +823,12 @@ public class GatewayBootController {
 						Thread.sleep(timeBetweenFeeds);
 					}
 					else {
-						logger.info("feedcheckstatus is over: " + idseq);
+						logger.info("feedcheckstatus is over: " + idseq + ", thread: " + threadName);
 						break;
 					}
 				} 
 				catch (Exception e) {
-					logger.error("!!! Error in feedcheckstatus, exiting feed for: " + idseq + ", " + e);
+					logger.error("!!! Error in feedcheckstatus, exiting feed for: " + idseq + ", " + e + ", thread: " + threadName);
 					//e.printStackTrace();
 					//we receive multiple Apache errors
 					//org.apache.catalina.connector.ClientAbortException: java.io.IOException: Connection reset by peer
@@ -841,7 +842,7 @@ public class GatewayBootController {
 			}
 			emitter.complete();
 		});
-
+		service.shutdown();
 		return emitter;
 	}
 }
