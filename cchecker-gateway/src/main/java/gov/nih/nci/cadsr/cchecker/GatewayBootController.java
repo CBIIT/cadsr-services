@@ -827,10 +827,16 @@ public class GatewayBootController {
 					}
 				} 
 				catch (Exception e) {
-					logger.error("Error in feedcheckstatus " + idseq + ", " + e);
+					logger.error("!!! Error in feedcheckstatus, exiting feed for: " + idseq + ", " + e);
 					//e.printStackTrace();
-					emitter.completeWithError(e);
-					return;
+					//we receive multiple Apache errors
+					//org.apache.catalina.connector.ClientAbortException: java.io.IOException: Connection reset by peer
+					//org.apache.catalina.connector.CoyoteAdapter.asyncDispatch Exception while processing an asynchronous request
+					//java.lang.IllegalStateException: Calling [asyncError()] is not valid for a request with Async state [MUST_DISPATCH]
+					//after this errors the service process does not continue well. Changing completeWithError (commented) to just finish.
+					//emitter.completeWithError(e);
+					//return;
+					break;
 				}
 			}
 			emitter.complete();
