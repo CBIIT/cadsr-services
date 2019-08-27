@@ -796,8 +796,7 @@ public class GatewayBootController {
 		final SseEmitter emitter = new SseEmitter();
 
 		ExecutorService service = Executors.newSingleThreadExecutor();
-		String threadName = Thread.currentThread().getName();
-		String identity = service.toString();
+		String identity = "@" + Integer.toHexString(System.identityHashCode(service));
 		service.execute(() -> {
 			String resPre = "-1";//we expect to receive a form number
 			String res;
