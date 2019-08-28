@@ -1,7 +1,9 @@
 <h1>
    Medidata RAVE ALS Form List
 </h1>
-
+<div *ngIf="validating">
+    <button (click)="cancelValidation()" class="btn btn-primary" [disabled]="!validating">Cancel Validation</button>
+</div>
 <div class="alert alert-danger" role="alert" *ngIf="!(formListData | async)?.formsList.length">
     Please upload a file with form data.
 </div>

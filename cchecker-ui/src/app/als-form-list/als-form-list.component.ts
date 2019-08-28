@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { ReportService } from '../services/report.service'
 import { Router } from '../../../node_modules/@angular/router';
 import { HttpEventType }  from '@angular/common/http';
+import { NgControlStatus } from '@angular/forms';
 
 @Component({
   selector: 'app-als-form-list',
@@ -35,6 +36,19 @@ export class AlsFormListComponent implements OnInit {
     };
   };
 
+  cancelValidation() {
+    this.restService.cancelValidation(this.formListData.source['value'].sessionid).subscribe(
+      data => {
+        console.log(data);
+      },
+      error => {
+        console.log(error)
+      },
+      () => {
+        console.log("DONE")
+      }
+    )
+    }
   // check forms (validate) and go to report page //
   checkForms() {
     let checkedItems:String[];
