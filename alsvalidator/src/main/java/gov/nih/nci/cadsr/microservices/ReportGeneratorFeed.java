@@ -315,13 +315,13 @@ public class ReportGeneratorFeed implements ReportOutput {
 		// Running through the list of CDEs/Questions (Fields sheet) to identify & 
 		// assign them into forms that they belong to
 		for (ALSField alsField : alsData.getFields()) {
+			if (! requestRunningMap.containsKey(sessionId)){
+				//the request has been cancelled
+				logger.warn("The request has been cancelled for session: " + sessionId + ", owner: " + alsData.getReportOwner() + ", file: " + alsData.getFileName());
+				break;
+			}
 			Boolean cdeServiceCall = true;
 			if (selForms.contains(alsField.getFormOid())) {
-				if (! requestRunningMap.containsKey(sessionId)){
-					//the request has been cancelled
-					logger.warn("The request has been cancelled for session: " + sessionId + ", owner: " + alsData.getReportOwner() + ", file: " + alsData.getFileName());
-					break;
-				}
 				if (formOid == null ) {//the first form
 					requestStatusMap.put(sessionId, ""+feedFormNumber);
 					logger.debug("Current form to feed map, session: " + sessionId + ", form: " + feedFormNumber + ", FormOid:" + alsField.getFormOid());
@@ -459,18 +459,21 @@ public class ReportGeneratorFeed implements ReportOutput {
 						}					
 				}
 			}
-		}
+		}//end of for by ALS fields/creating questions
 		// After all the fields have been processed, the last form needs to be completed and added to the list of forms
-		form.setCountTotalQuestions(totalQuestCount);
-		form.setTotalQuestionsChecked(countQuestChecked);
-		form.setRaveFormOid(formOid);
-		if (!questionsList.isEmpty()) {
-			form.setQuestions(questionsList);
-			form = setFormCongruencyStatus(form);
-		} else {
-			form.setCongruencyStatus(congStatus_congruent);
+		if (requestRunningMap.containsKey(sessionId))	{
+			//we add the last form only if the request was not cancelled/still in running state
+			form.setCountTotalQuestions(totalQuestCount);
+			form.setTotalQuestionsChecked(countQuestChecked);
+			form.setRaveFormOid(formOid);
+			if (!questionsList.isEmpty()) {
+				form.setQuestions(questionsList);
+				form = setFormCongruencyStatus(form);
+			} else {
+				form.setCongruencyStatus(congStatus_congruent);
+			}
+			formsList.add(form);
 		}
-		formsList.add(form);
 		// Setting the list of forms to the report
 		cccReport.setCccForms(formsList);
 		logger.info("getFinalReportData created formsList size: " + formsList.size());
