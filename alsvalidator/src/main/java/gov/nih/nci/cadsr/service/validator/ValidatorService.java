@@ -6,8 +6,10 @@ package gov.nih.nci.cadsr.service.validator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -734,6 +736,7 @@ public class ValidatorService {
 	protected static String createAllowableTextChoices (List<String> pvVmList) {
 		StringBuffer allowableVmTextChoices = new StringBuffer();
 		// Building a list of Allowable CDE text choices (in case of a 'Not match' for PV checker)
+		pvVmList = returnOrderedNonDuplicateVMs(pvVmList);
 		for (String altName : pvVmList) {
 			if (allowableVmTextChoices.length() > 0)
 				allowableVmTextChoices.append("|"+altName);
@@ -844,6 +847,24 @@ public class ValidatorService {
 			return true;
 		else
 			return false;
-	}	
+	}
+	
+	
+	/**
+	 * Returning an ordered non-duplicate list of CDE text choices
+	 * @param allowableCdeTextChoicesList
+	 * @return List<String>
+	 */		
+	protected static List<String> returnOrderedNonDuplicateVMs(List<String> allowableCdeTextChoicesList) {
+		if (allowableCdeTextChoicesList!=null && allowableCdeTextChoicesList.size()>0) {
+			Set<String> allowCdesSet = new HashSet<String>(); 
+			allowCdesSet.addAll(allowableCdeTextChoicesList);
+			List<String> tempChoicesList = new ArrayList<String>();
+			tempChoicesList.addAll(allowCdesSet);
+			return tempChoicesList; 
+		} else 
+			return allowableCdeTextChoicesList;
+		
+	}
 	
 }
