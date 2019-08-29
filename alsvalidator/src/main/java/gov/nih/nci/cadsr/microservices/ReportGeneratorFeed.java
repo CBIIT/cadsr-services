@@ -258,8 +258,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 		return resMap;
 	}
 	/**
-	 * TODO Consider to add session ID parameter.
-	 * 
+	 * @param idseq session ID parameter not null
 	 * @param  alsData not null
 	 * @param  selForms not null
 	 * @return Populates the output object for the report after initial
@@ -536,6 +535,10 @@ public class ReportGeneratorFeed implements ReportOutput {
 		cccReport.setCountSdtmMissing(missingSdtmCdesList.size());
 		
 		requestStatusMap.remove(sessionId);
+		//this is a feasibility implementation; 
+		//we assume that just one request with this session ID can be running.
+		//TODO change to a more sophisticated approach if two validation requests can be running using the same session ID.
+		requestRunningMap.remove(sessionId);
 		return cccReport;
 	}
 	
