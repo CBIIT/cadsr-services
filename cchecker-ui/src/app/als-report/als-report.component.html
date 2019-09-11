@@ -370,14 +370,19 @@
                   <td><span *ngFor="let line of question.raveCodedData">{{line}}<br /></span></td>
                   <td><span *ngFor="let line of question.codedDataResult">{{line}}<br /></span></td>
                   <td style="max-width:300px;word-wrap:break-word">{{question.allowableCdeValue}}</td>
-                  <td><span *ngFor="let line of question.raveUserString">{{line}}<br /></span></td>
-                  <td><span *ngFor="let line of question.pvResults">{{line}}<br /></span></td>
-                  <td><span *ngFor="let line of question.allowableCdeTextChoices">{{line}}<br /></span></td>
-                  <!-- <td><span *ngFor="let line of question.codedDataResult">{{line}}<br /></span></td>
-                  <td>{{question.allowableCdeValue}}</td>
-                  <td><span *ngFor="let line of question.raveUserString">{{line}}<br /></span></td>
-                  <td><span *ngFor="let line of question.pvResults">{{line}}<br /></span></td>
-                  <td><span *ngFor="let line of question.allowableCdeTextChoices">{{line}}<br /></span></td> -->
+                  <td colspan="3">
+                     <table class="colspan">
+                        <tr *ngFor="let line of question.raveUserString; let i = index">
+                              <td class="raveUserString">{{line}}</td>
+                              <td class="pvResult">{{question.pvResults[i]}}</td>
+                              <td class="textChoices">{{question.allowableCdeTextChoices[i]}}</td>
+                           </tr>
+                     </table>
+                  </td>
+                  <!-- <td>{{i}}<span *ngFor="let line of question.pvResults">{{line}}<br /></span></td> -->
+                  <td style="display: none;">Invisible Cell to get around lack of colpsan</td>
+                  <td style="display: none;">Invisible Cell to get around lack of colpsan</td>
+                  <!-- <td><span *ngFor="let line of question.allowableCdeTextChoices">{{line}}<br /></span></td> -->
                   <td>{{question.raveFieldDataType}}</td>
                   <td>{{question.datatypeCheckerResult}}</td>
                   <td>{{question.cdeDataType}}</td>

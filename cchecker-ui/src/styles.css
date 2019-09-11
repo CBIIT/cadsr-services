@@ -152,3 +152,24 @@ content: "» "
 .filetype_line2 {
   padding-left:9px;
 }
+
+
+.display.compact .colspan tr{
+    background-color:transparent !important;
+  }
+  .display.compact .colspan td {
+    border:0px solid red !important;
+  }
+
+  .display.compact .colspan td.raveUserString{
+    width:156px !important;
+    padding-right:5px !important;
+  }
+
+  .display.compact .colspan td.pvResult{
+    width:134px !important;
+  }
+
+  .display.compact .colspan td.raveUserString{
+    width:150px;
+  }
