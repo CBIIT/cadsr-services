@@ -477,9 +477,10 @@ public class ReportGeneratorFeed implements ReportOutput {
 		// Setting the list of forms to the report
 		cccReport.setCccForms(formsList);
 		logger.info("getFinalReportData created formsList size: " + formsList.size());
-		if (formsList.size() == 0) {
-			throw new RuntimeException("!!!!!!!!! GenerateReport.getFinalReportData created report with no FORMS!!!");
-		}
+		//FORMBUILD-641 with cancel we do not need this error; the report can have no form.
+		//if (formsList.size() == 0) {
+			//throw new RuntimeException("!!!!!!!!! GenerateReport.getFinalReportData created report with no FORMS!!!");
+		//}
 		// categoryNrdsList and categoryCdeList will be reduced to those CDEs that are missing
 		List<CategoryCde> missingCdeStd = createMissingCategoryCdeList(standardCrfCdeList);
 		List<CategoryNrds> missingCategoryNrdsList = createMissingNrdsCategoryNrdsList(nrdsCdeList);
