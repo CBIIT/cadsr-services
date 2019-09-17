@@ -15,6 +15,7 @@ import java.util.Set;
 
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CreationHelper;
@@ -69,6 +70,9 @@ public class ExcelReportGenerator {
 	private static final String nciStdOptErrorLbl = "# NCI Standard Template Optional Modules Questions With Errors ";
 	private static final String nciStdOptWarnLbl = "# NCI Standard Template Optional Modules Questions With Warnings ";
 	private static final int formStartColumn = 4;
+	private static final int borderStartColumn1 = 10;
+	private static final int borderStartColumn2 = 13;
+	private static final int borderStartColumn3 = 19;
 	private static final int raveFieldDataTypeCol = 22;
 	private static final int codedDataColStart = 16;
 	private static final String matching_nrds_cdes_tab_name = "NRDS CDEs in ALS";
@@ -152,6 +156,9 @@ public class ExcelReportGenerator {
 	private static CellStyle hlink_style;
 	private static CellStyle header_lbl_style;
 	private static CellStyle header_lbl_style_2;
+	private static CellStyle header_lbl_style_leftB;
+	private static CellStyle cell_leftBorder_Style;
+	private static CellStyle cell_rightBorder_Style;
 	private static Font hlink_font;
 	private static Font header_lbl_font;
 	private static Font header_lbl_font_2;
@@ -196,6 +203,16 @@ public class ExcelReportGenerator {
 		header_lbl_font_2.setFontName(headerFontName);
 		header_lbl_font_2.setFontHeight(headerLblFontSize2);
 		header_lbl_style_2.setFont(header_lbl_font_2);
+		
+		header_lbl_style_leftB = workbook.createCellStyle();
+		header_lbl_style_leftB.cloneStyleFrom(header_lbl_style_2);
+		header_lbl_style_leftB.setBorderLeft(BorderStyle.THIN);	
+
+		
+		cell_leftBorder_Style = workbook.createCellStyle();
+		cell_rightBorder_Style = workbook.createCellStyle();
+		cell_leftBorder_Style.setBorderLeft(BorderStyle.THIN);
+		cell_rightBorder_Style.setBorderRight(BorderStyle.THIN);
 
 		// Adding labels for each value (row) displayed in the summary page of
 		// the report
@@ -325,16 +342,22 @@ public class ExcelReportGenerator {
 					newCell.setCellStyle(header_lbl_style_2);
 					newCell = row.createCell(6);
 					linkToSheet(newCell, backToSummary, summaryLbl);
+					groupTripletCells(row, cell_leftBorder_Style);					
 					row = sheet2.createRow(rowNum++);
 					int colNum = 0;
 					// Print row headers in the form sheet
 					for (String rowHeader : rowHeaders) {
 						newCell = row.createCell(colNum++);
 						newCell.setCellValue(rowHeader);
-						newCell.setCellStyle(header_lbl_style_2);
+						if (newCell.getColumnIndex() == borderStartColumn1 || newCell.getColumnIndex() == borderStartColumn2 || newCell.getColumnIndex() == codedDataColStart || newCell.getColumnIndex() == borderStartColumn3 || newCell.getColumnIndex() == raveFieldDataTypeCol) {
+							newCell.setCellStyle(header_lbl_style_leftB); 
+						} else { 
+							newCell.setCellStyle(header_lbl_style_2);							 
+						}
 					}
 					colNum = 0;
 					row = sheet2.createRow(rowNum++);
+					groupTripletCells(row, cell_leftBorder_Style);
 					newCell = row.createCell(0);
 					newCell.setCellValue(cccForm.getRaveFormOid());
 					newCell = row.createCell(1);
@@ -344,11 +367,13 @@ public class ExcelReportGenerator {
 					newCell = row.createCell(3);
 					newCell.setCellValue(cccForm.getTotalQuestionsChecked());
 					CellStyle cellStyle = workbook.createCellStyle(); // Create new style
+					CellStyle cellStyle2 = workbook.createCellStyle();
 					cellStyle.setWrapText(true);
 					for (int j = 0; j < cccForm.getQuestions().size(); j++) {
 						int colNum2 = formStartColumn;
 						CCCQuestion question = cccForm.getQuestions().get(j);
 						row = sheet2.createRow(rowNum++);
+						groupTripletCells(row, cell_leftBorder_Style);
 						// Printing columns before Coded data column
 						Map<String, String> formFields1 = returnFormFieldsPart1(question);
 						row = returnFilledRow(formFields1, row, colNum2, cellStyle);
@@ -364,7 +389,7 @@ public class ExcelReportGenerator {
 						int newColNum = raveFieldDataTypeCol;
 						// Printing columns after Coded data column
 						Map<String, String> formFields2 = returnFormFieldsPart2(question);
-						row = returnFilledRow(formFields2, row, newColNum, null);
+						row = returnFilledRow(formFields2, row, newColNum, cell_leftBorder_Style);
 						if (rowNumAfterCD > rowNum)
 							rowNum = rowNumAfterCD;
 					}
@@ -519,9 +544,14 @@ public class ExcelReportGenerator {
 		// excel sheet
 		for (Map.Entry<String, String> formField : formFields.entrySet()) {
 			newCell = row.createCell(colNum++);
-			newCell.setCellValue(formField.getValue());
-			if (cellStyle != null)
-				newCell.setCellStyle(cellStyle);
+			newCell.setCellValue(formField.getValue());			
+			if (cellStyle != null) {
+				if (newCell.getColumnIndex() == borderStartColumn1 || newCell.getColumnIndex() == borderStartColumn2 || newCell.getColumnIndex() == raveFieldDataTypeCol) {
+					cellStyle.setBorderLeft(BorderStyle.THIN);	
+					newCell.setCellStyle(cellStyle);
+					}
+				}
+
 		}
 		return row;
 	}
@@ -551,6 +581,8 @@ public class ExcelReportGenerator {
 			colNum = codedDataColStart;
 			newCell = row.createCell(colNum++);
 			newCell.setCellValue(raveCodedData.get(m));
+			cellStyle.setBorderLeft(BorderStyle.THIN);	
+			newCell.setCellStyle(cellStyle);
 			newCell = row.createCell(colNum++);
 			if (codedDataResult.isEmpty())
 				newCell.setCellValue("Cell empty");
@@ -570,6 +602,8 @@ public class ExcelReportGenerator {
 			}
 			newCell = row.createCell(colNum++);
 			newCell.setCellValue(raveUserString.get(m));
+			cellStyle.setBorderLeft(BorderStyle.THIN);	
+			newCell.setCellStyle(cellStyle);			
 			newCell = row.createCell(colNum++);
 			if (question.getPvResults() != null && !question.getPvResults().isEmpty()) {
 				newCell.setCellValue(question.getPvResults().get(m));
@@ -577,7 +611,8 @@ public class ExcelReportGenerator {
 				newCell.setCellValue("");
 			}
 			newCell = row.createCell(colNum++);
-			newCell.setCellStyle(cellStyle);
+			//cellStyle2.setBorderRight(BorderStyle.THIN);
+			newCell.setCellStyle(cell_rightBorder_Style);
 			// Adding Allowable CDE text choices (in case of not match)
 			if (question.getAllowableCdeTextChoices() != null && !question.getAllowableCdeTextChoices().isEmpty()) {
 				String allowabeCdeTextChoices = question.getAllowableCdeTextChoices().get(m);
@@ -589,9 +624,11 @@ public class ExcelReportGenerator {
 				newCell.setCellValue(allowabeCdeTextChoices);
 			} else {
 				newCell.setCellValue("");
-			}
-			if (m != raveCodedData.size() - 1)
+			}			
+			if (m != raveCodedData.size() - 1) {
 				row = sheet.createRow(rowNum++);
+				groupTripletCells(row, cell_leftBorder_Style);
+				}
 		}
 		colNumbers.put("ColNum", colNum);
 		colNumbers.put("RowNum", rowNum);
@@ -939,5 +976,16 @@ public class ExcelReportGenerator {
 		newCell.setHyperlink(sheetLink);
 		newCell.setCellStyle(hlink_style);
 	}
+	
+	
+	private static void groupTripletCells (Row row, CellStyle leftBorderStyle) {
+		row.createCell(borderStartColumn1).setCellStyle(leftBorderStyle);
+		row.createCell(borderStartColumn2).setCellStyle(leftBorderStyle);
+		row.createCell(codedDataColStart).setCellStyle(leftBorderStyle);
+		row.createCell(borderStartColumn3).setCellStyle(leftBorderStyle);
+		row.createCell(raveFieldDataTypeCol).setCellStyle(leftBorderStyle);
+	}	
+	
+	
 
 }
