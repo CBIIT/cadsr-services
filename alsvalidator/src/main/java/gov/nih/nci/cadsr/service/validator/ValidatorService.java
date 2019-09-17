@@ -674,7 +674,7 @@ public class ValidatorService {
 		String errorMessage = null;
 		// Appending to the message if there is more than one error.
 		if (questionMessage!=null) 
-			errorMessage = questionMessage +"\n"+ newMessage;
+			errorMessage = questionMessage +"\n\n"+ newMessage;
 		else 
 			errorMessage = newMessage;
 		return errorMessage;
