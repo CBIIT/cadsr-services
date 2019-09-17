@@ -48,10 +48,11 @@ public class ExcelReportGenerator {
 	private static final String raveProtocolNumLbl = "Rave Protocol number ";
 	private static final String reportDateLbl = "Date Validated ";
 	private static final String formCountLbl = "# Forms in protocol ";
+	private static final String formsCheckedLbl = "# Forms in protocol Checked";
 	private static final String totalQuestCongLbl = "# Total Questions Congruent ";
-	private static final String totalQuestCheckLbl = "# Total Questions Checked ";
+	private static final String totalQuestCheckLbl = "# Total Questions Checked in %d forms";
 	private static final String totalQuestWarnLbl = "# Total Questions with Warnings ";
-	private static final String totalQuestErrorLbl = "# Total Questions with Errors ";
+	private static final String totalQuestErrorLbl = "# Total Questions with Errors in %d forms";
 	private static final String totalunassociatedQuestLbl = "# Total Questions without associated CDE ";
 	private static final String reqQuestMissLbl = "# Required NRDS Questions missing ";
 	private static final String reqNrdsQuestCongLbl = "# Required NRDS Questions Congruent ";
@@ -449,10 +450,11 @@ public class ExcelReportGenerator {
 		summaryLabels.put(raveProtocolNumLbl, cccReport.getRaveProtocolNumber());
 		summaryLabels.put(reportDateLbl, cccReport.getReportDate());
 		summaryLabels.put(formCountLbl, String.valueOf(cccReport.getTotalFormsCount()));
-		summaryLabels.put(totalQuestCheckLbl, String.valueOf(cccReport.getCountQuestionsChecked()));
+		summaryLabels.put(formsCheckedLbl, String.valueOf(cccReport.getCccForms().size()));
+		summaryLabels.put(String.format(totalQuestCheckLbl, cccReport.getCccForms().size()), String.valueOf(cccReport.getCountQuestionsChecked()));
 		summaryLabels.put(totalQuestCongLbl, String.valueOf(cccReport.getCountCongruentQuestions()));
 		summaryLabels.put(totalQuestWarnLbl, String.valueOf(cccReport.getCountQuestionsWithWarnings()));
-		summaryLabels.put(totalQuestErrorLbl, String.valueOf(cccReport.getCountQuestionsWithErrors()));
+		summaryLabels.put(String.format(totalQuestErrorLbl, cccReport.getCccForms().size()), String.valueOf(cccReport.getCountQuestionsWithErrors()));
 		summaryLabels.put(totalunassociatedQuestLbl, String.valueOf(cccReport.getCountQuestionsWithoutCde()));
 		summaryLabels.put(reqQuestMissLbl, String.valueOf(cccReport.getCountNrdsMissing()));
 		summaryLabels.put(reqNrdsQuestCongLbl, String.valueOf(cccReport.getCountNrdsCongruent()));
