@@ -284,7 +284,7 @@ public class ValidatorServiceIT {
 	 */	
 	@Test
 	public void testSetPvCheckerResultAllowableCdeValues() {		
-		String expectedResult = "No|Not a Serious Adverse Event|LA32-8|Exception|1 - No";
+		String expectedResult = "1 - No|Exception|LA32-8|No|Not a Serious Adverse Event";
 		question.getRaveCodedData().add("No");
 		question.getRaveUserString().add("NO");
 		Map pvVmMap = new HashMap<String, List<String>>();
