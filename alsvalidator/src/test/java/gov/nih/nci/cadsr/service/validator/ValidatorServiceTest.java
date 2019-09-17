@@ -104,7 +104,7 @@ public class ValidatorServiceTest {
 	 */	
 	@Test
 	public void testAssignQuestionErrorMessage2() {
-		String expectedResult = "Error Message1.\nError Message2.\nError Message3.";
+		String expectedResult = "Error Message1.\n\nError Message2.\n\nError Message3.";
 		String newMessage1 = "Error Message1.";
 		String newMessage2 = "Error Message2.";
 		String newMessage3 = "Error Message3.";
