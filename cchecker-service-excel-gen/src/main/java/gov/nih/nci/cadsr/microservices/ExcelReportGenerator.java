@@ -158,6 +158,7 @@ public class ExcelReportGenerator {
 	private static CellStyle header_lbl_style_2;
 	private static CellStyle header_lbl_style_leftB;
 	private static CellStyle cell_leftBorder_Style;
+	private static CellStyle cell_Style_wrap;	
 	private static CellStyle cell_rightBorder_Style;
 	private static Font hlink_font;
 	private static Font header_lbl_font;
@@ -213,6 +214,8 @@ public class ExcelReportGenerator {
 		cell_rightBorder_Style = workbook.createCellStyle();
 		cell_leftBorder_Style.setBorderLeft(BorderStyle.THIN);
 		cell_rightBorder_Style.setBorderRight(BorderStyle.THIN);
+		cell_Style_wrap = workbook.createCellStyle();
+		cell_Style_wrap.setWrapText(true);
 
 		// Adding labels for each value (row) displayed in the summary page of
 		// the report
@@ -342,7 +345,7 @@ public class ExcelReportGenerator {
 					newCell.setCellStyle(header_lbl_style_2);
 					newCell = row.createCell(6);
 					linkToSheet(newCell, backToSummary, summaryLbl);
-					groupTripletCells(row, cell_leftBorder_Style);					
+					groupTripletCellsWithBorders(row);					
 					row = sheet2.createRow(rowNum++);
 					int colNum = 0;
 					// Print row headers in the form sheet
@@ -357,7 +360,7 @@ public class ExcelReportGenerator {
 					}
 					colNum = 0;
 					row = sheet2.createRow(rowNum++);
-					groupTripletCells(row, cell_leftBorder_Style);
+					groupTripletCellsWithBorders(row);
 					newCell = row.createCell(0);
 					newCell.setCellValue(cccForm.getRaveFormOid());
 					newCell = row.createCell(1);
@@ -373,7 +376,7 @@ public class ExcelReportGenerator {
 						int colNum2 = formStartColumn;
 						CCCQuestion question = cccForm.getQuestions().get(j);
 						row = sheet2.createRow(rowNum++);
-						groupTripletCells(row, cell_leftBorder_Style);
+						groupTripletCellsWithBorders(row);
 						// Printing columns before Coded data column
 						Map<String, String> formFields1 = returnFormFieldsPart1(question);
 						row = returnFilledRow(formFields1, row, colNum2, cellStyle);
@@ -546,9 +549,11 @@ public class ExcelReportGenerator {
 			newCell = row.createCell(colNum++);
 			newCell.setCellValue(formField.getValue());			
 			if (cellStyle != null) {
-				if (newCell.getColumnIndex() == borderStartColumn1 || newCell.getColumnIndex() == borderStartColumn2 || newCell.getColumnIndex() == raveFieldDataTypeCol) {
-					cellStyle.setBorderLeft(BorderStyle.THIN);	
-					newCell.setCellStyle(cellStyle);
+				if (newCell.getColumnIndex() == borderStartColumn1 || newCell.getColumnIndex() == borderStartColumn2 || newCell.getColumnIndex() == raveFieldDataTypeCol) {	
+						newCell.setCellStyle(cell_leftBorder_Style);
+					}
+				if (newCell.getColumnIndex() == (borderStartColumn1 - 1) || newCell.getColumnIndex() == (borderStartColumn2 - 1)) {
+						newCell.setCellStyle(cell_Style_wrap);
 					}
 				}
 
@@ -611,7 +616,6 @@ public class ExcelReportGenerator {
 				newCell.setCellValue("");
 			}
 			newCell = row.createCell(colNum++);
-			//cellStyle2.setBorderRight(BorderStyle.THIN);
 			newCell.setCellStyle(cell_rightBorder_Style);
 			// Adding Allowable CDE text choices (in case of not match)
 			if (question.getAllowableCdeTextChoices() != null && !question.getAllowableCdeTextChoices().isEmpty()) {
@@ -627,7 +631,7 @@ public class ExcelReportGenerator {
 			}			
 			if (m != raveCodedData.size() - 1) {
 				row = sheet.createRow(rowNum++);
-				groupTripletCells(row, cell_leftBorder_Style);
+				groupTripletCellsWithBorders(row);
 				}
 		}
 		colNumbers.put("ColNum", colNum);
@@ -977,15 +981,18 @@ public class ExcelReportGenerator {
 		newCell.setCellStyle(hlink_style);
 	}
 	
-	
-	private static void groupTripletCells (Row row, CellStyle leftBorderStyle) {
-		row.createCell(borderStartColumn1).setCellStyle(leftBorderStyle);
-		row.createCell(borderStartColumn2).setCellStyle(leftBorderStyle);
-		row.createCell(codedDataColStart).setCellStyle(leftBorderStyle);
-		row.createCell(borderStartColumn3).setCellStyle(leftBorderStyle);
-		row.createCell(raveFieldDataTypeCol).setCellStyle(leftBorderStyle);
+	/**
+	 * Adds left borders to columns that are triplets in terms of the report - [ALS value, Result, caDSR value]
+	 * 
+	 * @param row
+	 * 
+	 */	
+	private static void groupTripletCellsWithBorders (Row row) {
+		row.createCell(borderStartColumn1).setCellStyle(cell_leftBorder_Style);
+		row.createCell(borderStartColumn2).setCellStyle(cell_leftBorder_Style);
+		row.createCell(codedDataColStart).setCellStyle(cell_leftBorder_Style);
+		row.createCell(borderStartColumn3).setCellStyle(cell_leftBorder_Style);
+		row.createCell(raveFieldDataTypeCol).setCellStyle(cell_leftBorder_Style);
 	}	
-	
-	
 
 }
