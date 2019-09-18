@@ -537,13 +537,90 @@ public class ReportGeneratorFeed implements ReportOutput {
 		cccReport.setMissingSdtmCdeList(missingSdtmCdesList);
 		cccReport.setCountCdashMissing(missingCdashCdesList.size());
 		cccReport.setCountSdtmMissing(missingSdtmCdesList.size());
-		
+		//FORMBUILD-636
+		calculateCdiscReportTotals(cccReport);
 		requestStatusMap.remove(sessionId);
 		//this is a feasibility implementation; 
 		//we assume that just one request with this session ID can be running.
 		//TODO change to a more sophisticated approach if two validation requests can be running using the same session ID.
 		requestRunningMap.remove(sessionId);
 		return cccReport;
+	}
+	
+	protected void calculateCdiscReportTotals(final CCCReport cccReport) {
+		List<CCCForm> cccforms = cccReport.getCccForms();
+		int countCdashWithErrors = 0;
+		int countCdashWithWarnings = 0;
+		int countSdtmWithErrors = 0;
+		int countSdtmWithWarnings = 0;
+		for (CCCForm cccForm : cccforms) {
+			List<CCCQuestion> cccQuestions = cccForm.getQuestions();
+			for (CCCQuestion cccQuestion : cccQuestions) {
+				if (questionBelongsTo(cccQuestion, categoryCdashList)) {
+					if (congStatus_errors.equals(cccQuestion.getQuestionCongruencyStatus())) {
+						countCdashWithErrors++;
+					}
+					else if (congStatus_warn.equals(cccQuestion.getQuestionCongruencyStatus())) {
+						countCdashWithWarnings++;
+					}
+				}
+				if (questionBelongsTo(cccQuestion, categorySdtmList)) {
+					if (congStatus_errors.equals(cccQuestion.getQuestionCongruencyStatus())) {
+						countSdtmWithErrors++;
+					}
+					else if (congStatus_warn.equals(cccQuestion.getQuestionCongruencyStatus())){
+						countSdtmWithWarnings++;
+					}
+				}
+			}
+		}
+		cccReport.setCountCdashWithErrors(countCdashWithErrors);
+		cccReport.setCountSdtmWithErrors(countSdtmWithErrors);
+		cccReport.setCountCdashWithWarnings(countCdashWithWarnings);
+		cccReport.setCountSdtmWithWarnings(countSdtmWithWarnings);
+	}
+	
+	protected static boolean questionBelongsTo(final CCCQuestion cccQuestion, final List<CategoryNrds> categoryList) {
+		int cdeId = parsePublicId(cccQuestion.getCdePublicId());
+		float deVersion = parseVersion(cccQuestion.getCdeVersion());
+		CategoryNrds categoryNrds = new CategoryNrds();
+		categoryNrds.setCdeId(cdeId);
+		categoryNrds.setDeVersion(deVersion);
+		if (categoryList.contains(categoryNrds)) {
+			return true;
+		}
+		else
+			return false;
+	}
+	
+	/**
+	 * 
+	 * @param cdePublicId String
+	 * @return parsed int or 0 if cdePublicId is not integer
+	 */
+	public static final int parsePublicId(String cdePublicId) {
+		if (! StringUtils.isNumeric(cdePublicId)) return 0;
+		try {
+			return Integer.parseInt(cdePublicId);
+		}
+		catch(NumberFormatException ex) {
+			return 0;
+		}
+	}
+	
+	/**
+	 * 
+	 * @param cdeVersion String
+	 * @return parsed float or 0 if cdeVersion is not float
+	 */
+	public static final float parseVersion(String cdeVersion) {
+		if (StringUtils.isBlank(cdeVersion)) return 0;
+		try {
+			return Float.parseFloat(cdeVersion);
+		}
+		catch(NumberFormatException ex) {
+			return 0;
+		}
 	}
 	
 	protected ALSError getErrorInstance() {
@@ -1190,6 +1267,8 @@ public class ReportGeneratorFeed implements ReportOutput {
             categoryNrds.setDeName(searchNode.getLongName());
             categoryNrds.setDeVersion(new Float(searchNode.getVersion()));
             categoryNrds.setCdeId(searchNode.getPublicId());
+            //FORMBUILD-635 add PreferredQuestionText
+            categoryNrds.setDeQuestion(searchNode.getPreferredQuestionText());
             return categoryNrds;
         }).collect(Collectors.toList());
 		return result;

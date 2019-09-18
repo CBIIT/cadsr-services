@@ -62,6 +62,18 @@ int countNrdsWithErrors;
 int countCdashMissing;
 int countSdtmMissing;
 
+//FORMBUILD-636
+/*
+Required CDASH x.x Questions with warnings
+Required CDASH x.x Questions with errors.
+Required SDTM x.x Questions with warnings
+Required SDTM x.x Questions with errors.
+ */
+int countCdashWithWarnings;
+int countCdashWithErrors;
+int countSdtmWithWarnings;
+int countSdtmWithErrors;
+
 List<CCCForm> cccForms = new ArrayList<CCCForm>();
 List<NrdsCde> nrdsCdeList = new ArrayList<NrdsCde>();
 List<NrdsCde> missingNrdsCdeList = new ArrayList<NrdsCde>();
@@ -310,6 +322,38 @@ public int getCountSdtmMissing() {
 
 public void setCountSdtmMissing(int countSdtmMissing) {
 	this.countSdtmMissing = countSdtmMissing;
+}
+//FORMBUILD-636
+public int getCountCdashWithWarnings() {
+	return countCdashWithWarnings;
+}
+
+public void setCountCdashWithWarnings(int countCdashWithWarnings) {
+	this.countCdashWithWarnings = countCdashWithWarnings;
+}
+
+public int getCountCdashWithErrors() {
+	return countCdashWithErrors;
+}
+
+public void setCountCdashWithErrors(int countCdashWithErrors) {
+	this.countCdashWithErrors = countCdashWithErrors;
+}
+
+public int getCountSdtmWithWarnings() {
+	return countSdtmWithWarnings;
+}
+
+public void setCountSdtmWithWarnings(int countSdtmWithWarnings) {
+	this.countSdtmWithWarnings = countSdtmWithWarnings;
+}
+
+public int getCountSdtmWithErrors() {
+	return countSdtmWithErrors;
+}
+
+public void setCountSdtmWithErrors(int countSdtmWithErrors) {
+	this.countSdtmWithErrors = countSdtmWithErrors;
 }
 
 public List<CCCForm> getCccForms() {
