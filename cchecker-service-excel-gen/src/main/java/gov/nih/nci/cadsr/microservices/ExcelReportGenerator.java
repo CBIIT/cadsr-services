@@ -80,15 +80,7 @@ public class ExcelReportGenerator {
 	private static final String nrds_missing_cde_tab_name = "NRDS CDEs Missing";
 	//FORMBUILD-621
 	private static final String reqCdashMissLbl = "# CDISC/CDASH 2.0 CDEs Classified Missing ";
-	// FORMBUILD-636
-	private static final String reqCdashQuestWarnLbl = "# CDISC/CDASH 2.0 Questions with warnings ";
-	// FORMBUILD-636
-	private static final String reqCdashQuestErrorLbl = "# CDISC/CDASH 2.0 Questions with errors ";
 	private static final String reqSdtmMissLbl = "# CDISC/SDTM 3.3 CDEs Classified Missing ";
-	// FORMBUILD-636
-	private static final String reqSdtmQuestWarnLbl = "# CDISC/SDTM 3.3 Questions with warnings ";
-	// FORMBUILD-636
-	private static final String reqSdtmQuestErrorLbl = "# CDISC/SDTM 3.3 Questions with errors ";	
 	private static final String cdash_missing_cde_sheet_name = "CDASH 2.0 CDEs Missing";
 	private static final String sdtm_missing_cde_sheet_name = "SDTM 3.3 CDEs Missing";
 	private static final String cdash_missing_cde_header = "CDISC/CDASH 2.0 CDEs missing from the ALS file";
@@ -270,25 +262,9 @@ public class ExcelReportGenerator {
 			} else if (reqCdashMissLbl.equals(lblKey)) {
 					// Link to the CDASH missing CDEs sheet
 					linkToSheet(cell, (String) lblKey, cdash_missing_cde_sheet_name);
-			// FORMBUILD-636		
-			} else if (reqCdashQuestWarnLbl.equals(lblKey)) {
-				// Link to the CDASH missing CDEs sheet
-				linkToSheet(cell, (String) lblKey, cdash_missing_cde_sheet_name);
-			// FORMBUILD-636				
-			} else if (reqCdashQuestErrorLbl.equals(lblKey)) {
-				// Link to the CDASH missing CDEs sheet
-				linkToSheet(cell, (String) lblKey, cdash_missing_cde_sheet_name);					
 			} else if (reqSdtmMissLbl.equals(lblKey)) {
 				// Link to the SDTM missing CDEs sheet
 				linkToSheet(cell, (String) lblKey, sdtm_missing_cde_sheet_name);
-			// FORMBUILD-636				
-			} else if (reqSdtmQuestWarnLbl.equals(lblKey)) {
-				// Link to the SDTM missing CDEs sheet
-				linkToSheet(cell, (String) lblKey, sdtm_missing_cde_sheet_name);
-			// FORMBUILD-636				
-			} else if (reqSdtmQuestErrorLbl.equals(lblKey)) {
-				// Link to the SDTM missing CDEs sheet
-				linkToSheet(cell, (String) lblKey, sdtm_missing_cde_sheet_name);				
 			} else if ((nciStdCondCongLbl.equals(lblKey) || nciStdCondErrorLbl.equals(lblKey)
 					|| nciStdCondQuestLbl.equals(lblKey) || nciStdCondWarnLbl.equals(lblKey))
 					&& isCheckStdCrfCdeChecked) {
@@ -486,15 +462,7 @@ public class ExcelReportGenerator {
 		summaryLabels.put(reqNrdsQuestErrorLbl, String.valueOf(cccReport.getCountNrdsWithErrors()));
 		//FORMBUILD-621
 		summaryLabels.put(reqCdashMissLbl, String.valueOf(cccReport.getCountCdashMissing()));
-		//FORMBUILD-636
-		summaryLabels.put(reqCdashQuestWarnLbl, String.valueOf(cccReport.getCountCdashWithWarnings()));
-		//FORMBUILD-636
-		summaryLabels.put(reqCdashQuestErrorLbl, String.valueOf(cccReport.getCountCdashWithErrors()));		
 		summaryLabels.put(reqSdtmMissLbl, String.valueOf(cccReport.getCountSdtmMissing()));
-		//FORMBUILD-636
-		summaryLabels.put(reqSdtmQuestWarnLbl, String.valueOf(cccReport.getCountSdtmWithWarnings()));
-		//FORMBUILD-636
-		summaryLabels.put(reqSdtmQuestErrorLbl, String.valueOf(cccReport.getCountSdtmWithErrors()));		
 		summaryLabels.put(nciStdManQuestLbl, String.valueOf(cccReport.getCountManCrfMissing()));
 		summaryLabels.put(nciStdManCongLbl, String.valueOf(cccReport.getCountManCrfCongruent()));
 		summaryLabels.put(nciStdManErrorLbl, String.valueOf(cccReport.getCountManCrfWithErrors()));
