@@ -57,6 +57,12 @@ int countNrdsMissing;
 int countNrdsWithWarnings;
 int countNrdsWithErrors;
 
+// FORMBUILD-636 
+int countNciCongruent;
+int countNciMissing;
+int countNciWithWarnings;
+int countNciWithErrors;
+
 //FORMBUILD-621
 //CDASH and SDTM classified missing
 int countCdashMissing;
@@ -307,6 +313,40 @@ public int getCountNrdsWithErrors() {
 public void setCountNrdsWithErrors(int countNrdsWithErrors) {
 	this.countNrdsWithErrors = countNrdsWithErrors;
 }
+
+// FORMBUILD-636
+public int getCountNciCongruent() {
+	return countNciCongruent;
+}
+
+public void setCountNciCongruent(int countNciCongruent) {
+	this.countNciCongruent = countNciCongruent;
+}
+
+public int getCountNciMissing() {
+	return countNciMissing;
+}
+
+public void setCountNciMissing(int countNciMissing) {
+	this.countNciMissing = countNciMissing;
+}
+
+public int getCountNciWithWarnings() {
+	return countNciWithWarnings;
+}
+
+public void setCountNciWithWarnings(int countNciWithWarnings) {
+	this.countNciWithWarnings = countNciWithWarnings;
+}
+
+public int getCountNciWithErrors() {
+	return countNciWithErrors;
+}
+
+public void setCountNciWithErrors(int countNciWithErrors) {
+	this.countNciWithErrors = countNciWithErrors;
+}
+
 //FORMBUILD-621
 public int getCountCdashMissing() {
 	return countCdashMissing;

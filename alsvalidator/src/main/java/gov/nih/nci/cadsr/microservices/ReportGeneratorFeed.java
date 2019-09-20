@@ -1047,6 +1047,13 @@ public class ReportGeneratorFeed implements ReportOutput {
 		report.setCountOptCrfCongruent(optCrfCong);
 		report.setCountOptCrfwWithWarnings(optCrfWarn);
 		report.setCountOptCrfWithErrors(optCrfErr);
+		
+		// FORMBUILD-636
+		report.setCountNciMissing(stdManMissingCount + report.getCountNrdsMissing());
+		report.setCountManCrfCongruent(manCrfCong + report.getCountNrdsCongruent());
+		report.setCountNciWithWarnings(manCrfWarn + report.getCountNrdsWithWarnings());
+		report.setCountNciWithErrors(manCrfErr + report.getCountNrdsWithErrors());
+		
 		return report;
 	}
 	
