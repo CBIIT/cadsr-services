@@ -188,3 +188,7 @@ content: "» "
     color:#1C5E86;
     text-transform:capitalize;
   }
+
+  .fileName {
+    font-size:150% !important;
+  }
