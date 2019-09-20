@@ -1,5 +1,9 @@
 <h1>
-   Medidata RAVE ALS Form List
+   Medidata RAVE ALS Form List <span *ngIf="(formListData | async)?.formsList.length"> for {{userName}}</span>
+</h1>
+
+<h1 class="fileName" *ngIf="(formListData | async)?.formsList.length">
+        Filename: {{fileName}}
 </h1>
 
 
@@ -11,6 +15,7 @@
 <div class="alert alert-danger" role="alert" *ngIf="errorMessage">
   {{errorMessage}}
 </div>
+
 <ng-container *ngIf="(formListData |  async)?.formsList.length">
     <table id="formListButtons">
         <tr>

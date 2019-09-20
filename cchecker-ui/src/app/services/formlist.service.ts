@@ -38,6 +38,15 @@ export class FormListService {
     return this.checkedItems.asObservable();
   };
 
+  getFileName = () => {
+    return sessionStorage.getItem('file');
+  }
+  
+  getUserName = () => {
+    return sessionStorage.getItem('name');
+
+  }
+
   // gets checked status of record //
   getCheckedStatus = record => this.checkedItems.value.indexOf(record.formName) > -1;
   

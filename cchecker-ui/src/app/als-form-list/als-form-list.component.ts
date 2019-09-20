@@ -17,6 +17,8 @@ export class AlsFormListComponent implements OnInit {
   errorMessage:String;  
   formValidationStatus:Number=1;
   formListData:Observable<Object>;
+  fileName:String;
+  userName:String;
   validating:Boolean;
   validItemsLength:Observable<Object>;
   checkFormsService;
@@ -28,6 +30,8 @@ export class AlsFormListComponent implements OnInit {
   ngOnInit() {
     this.checkedItems = this.formListService.getCheckedItems(); // get checked items as observable //
     this.formListData = this.formListService.getFormListData(); // get form data as observable //
+    this.fileName = this.formListService.getFileName(); // get filename data as string //
+    this.userName = this.formListService.getUserName(); // get username data as string //
     this.validating = false;
     this.validItemsLength = Object.assign([],this.formListData.source['value']['formsList'].filter((r) => r.isValid ).map((e) => e.formName)).length; // get valid item value //
     if (this.formListService.getValidationStatus()) {
