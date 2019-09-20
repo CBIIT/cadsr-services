@@ -112,15 +112,15 @@
                <td>{{r.countCdashWithErrors}}</td>
             </tr>
             <tr>
-               <td># Required SDTM 3.3 CDEs Questions missing </td>
+               <td># Required SDTM 3.3 Questions missing </td>
                <td>{{r.countSdtmMissing}}</td>
             </tr>
             <tr>
-               <td># Required SDTM 3.3 CDEs Questions with warnings </td>
+               <td># Required SDTM 3.3 Questions with warnings </td>
                <td>{{r.countSdtmWithWarnings}}</td>
             </tr>
             <tr>
-               <td># Required SDTM 3.3 CDEs Questions with errors </td>
+               <td># Required SDTM 3.3 Questions with errors </td>
                <td>{{r.countSdtmWithErrors}}</td>
             </tr>
             <tr>
@@ -276,7 +276,7 @@
             </table>           
        </ng-template>
    </ngb-tab>
-   <ngb-tab *ngIf="reportData.isCheckStdCrfCdeChecked">
+   <!--<ngb-tab *ngIf="reportData.isCheckStdCrfCdeChecked">
        <ng-template ngbTabTitle>Standard CRF Optional Missing</ng-template>
        <ng-template ngbTabContent>
            <div class="tableHeader">CDEs in Standard Template "Optional" Modules Not Used</div>
@@ -307,7 +307,7 @@
                 </tbody>
             </table>            
        </ng-template>
-   </ngb-tab>      
+   </ngb-tab> -->      
 
    <ngb-tab id="raveForm" *ngIf="showFormTab">
       <ng-template ngbTabTitle>{{tabName}}</ng-template>

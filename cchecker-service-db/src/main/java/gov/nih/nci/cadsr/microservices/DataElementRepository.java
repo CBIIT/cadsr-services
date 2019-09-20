@@ -215,7 +215,7 @@ public class DataElementRepository {
      * @return SQL string
      */
     protected String retrieveCategoryCdeListQuery() {
-		return "SELECT * from SBREXT.MDSR_STANDARD_FORM_CDE_AGR";
+		return "SELECT * from SBREXT.MDSR_STANDARD_FORM_CDE_AGR where MODULE_TYPE = 'Mandatory';";
 	}
     protected String retrieveNrdsCdeListQuery() {
 		return "SELECT CDE_ID, de.VERSION DE_VERSION, de.LONG_NAME DE_NAME, de.QUESTION DE_QUESTION FROM sbr.data_elements_view de "
