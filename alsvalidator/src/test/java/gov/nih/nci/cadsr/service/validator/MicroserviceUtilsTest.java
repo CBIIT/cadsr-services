@@ -1,8 +1,10 @@
-package gov.nih.nci.cadsr.microservices;
+package gov.nih.nci.cadsr.service.validator;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+
+import gov.nih.nci.cadsr.service.validator.MicroserviceUtils;
 
 public class MicroserviceUtilsTest {
 	final static String ignored = ".,:;\"'?-()";
@@ -10,6 +12,10 @@ public class MicroserviceUtilsTest {
 	public void testTwoDifferentStrings() {
 		assertFalse("failed on different strings", MicroserviceUtils.compareWithIgnore("cadsr Str", "als Str"));
 	}
+	@Test
+	public void testTwoDifferentStringsWarn() {
+		assertTrue("failed on different strings", MicroserviceUtils.compareWithIgnore("Primary Diagnosis Disease Group", "Primary diagnosis disease group:"));
+	}	
 	@Test
 	public void testSamePunct1() {
 		assertTrue("failed of different punc 1", MicroserviceUtils.compareWithIgnore("cadsr Str" + ignored, "cadsr Str"));
@@ -77,7 +83,9 @@ public class MicroserviceUtilsTest {
 	public void testSecondEmpty() {
 		assertFalse("failed of empty", MicroserviceUtils.compareWithIgnore(ignored, 
 			"   "));
-	}	
+	}
+
+	
 	/*
 	FORMBUILD-651 exclude the following common sentence punctuation:
 	period - .

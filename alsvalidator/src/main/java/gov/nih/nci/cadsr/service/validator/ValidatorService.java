@@ -274,7 +274,14 @@ public class ValidatorService {
 
 		if (!rdDocTextList.isEmpty() && rdDocTextList.contains(question.getRaveFieldLabel())) {
 			question.setRaveFieldLabelResult(matchString);
-		} else {
+		} 
+		else if (MicroserviceUtils.compareListWithIgnore(rdDocTextList, question.getRaveFieldLabel())) {
+			//FORMBUILD-651
+			question.setRaveFieldLabelResult(warningString);
+			question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg6, rdDocTextList)));
+			question.setQuestionCongruencyStatus(congStatus_warn);
+		}
+		else {
 			question.setRaveFieldLabelResult(errorString);
 			question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg6, rdDocTextList)));
 			question.setQuestionCongruencyStatus(congStatus_errors);

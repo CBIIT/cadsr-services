@@ -1,7 +1,9 @@
 /*
  * Copyright (C) Frederick National Laboratory for Cancer Research. - All rights reserved.
  */
-package gov.nih.nci.cadsr.microservices;
+package gov.nih.nci.cadsr.service.validator;
+
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -71,5 +73,23 @@ public class MicroserviceUtils {
 		return processed;
 		
 	}
+	//FORMBUILD-651
 
+	/**
+	 * When the Rave Field Label and the CDE Question Text term/words and ORDER match 
+	 * excluding case and/or punctuation, 
+	 * change from Error to Warning.
+	 * 
+	 * @param rdDocTextList
+	 * @param raveFieldLabel
+	 * @return boolean
+	 */
+	public static boolean compareListWithIgnore(List<String> rdDocTextList, String raveFieldLabel) {
+		for (String testAllowed : rdDocTextList) {
+			if (compareWithIgnore(testAllowed, raveFieldLabel)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }
