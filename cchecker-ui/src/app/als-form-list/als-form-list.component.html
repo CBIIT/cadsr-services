@@ -1,9 +1,9 @@
 <h1>
    Medidata RAVE ALS Form List
 </h1>
-<div *ngIf="validating">
-    <button (click)="cancelValidation()" class="btn btn-primary" [disabled]="!validating">Cancel Validation</button>
-</div>
+
+
+
 <div class="alert alert-danger" role="alert" *ngIf="!(formListData | async)?.formsList.length">
     Please upload a file with form data.
 </div>
@@ -11,11 +11,17 @@
 <div class="alert alert-danger" role="alert" *ngIf="errorMessage">
   {{errorMessage}}
 </div>
-
 <ng-container *ngIf="(formListData |  async)?.formsList.length">
-    <div>
-        <button [disabled]="!(checkedItems | async)?.length || validating" class="btn btn-primary" (click)="checkForms()">Check Form<span *ngIf="(checkedItems | async)?.length>1">s</span></button>
-    </div>
+    <table id="formListButtons">
+        <tr>
+            <td>
+                <button [disabled]="!(checkedItems | async)?.length || validating" class="btn btn-primary" (click)="checkForms()">Check Form<span *ngIf="(checkedItems | async)?.length>1">s</span></button>
+            </td>
+            <td *ngIf="validating" class="td">
+                    <button (click)="cancelValidation()" class="btn btn-primary" [disabled]="!validating">Cancel Validation</button>
+            </td>
+        </tr>
+    </table>
   <div class="help_text">Select one or more forms to check and click "Check Form(s)".</div><br />
     <div class="formCriteriaCheckboxes" style="border-bottom:1px solid #000">
         <div style="display:none">
@@ -33,6 +39,9 @@
     </div><Br />
     <div *ngIf="validating">
         <app-progress-bar [statusMessage]="'Validating Form ' + getCurrentForm() + ' of ' + (checkedItems | async)?.length" [type]="'busy'" [percentage]="100"></app-progress-bar><br />
+    </div>
+    <div class="formsSelected" *ngIf="(checkedItems | async)?.length">
+            {{(checkedItems | async)?.length}} form<span *ngIf="(checkedItems | async)?.length>1">s</span> selected
     </div>
 
     <table cellspacing="0" cellpadding="0" margin="0"class="alsFormList">
