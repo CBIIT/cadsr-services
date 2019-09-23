@@ -77,7 +77,7 @@ public class ExcelReportGenerator {
 	private static final String nciStdOptErrorLbl = "# NCI Standard Template Optional Modules Questions With Errors ";
 	private static final String nciStdOptWarnLbl = "# NCI Standard Template Optional Modules Questions With Warnings ";
 	private static final int formStartColumn = 4;
-	// FORMBUILD-636
+	// FORMBUILD-648
 	private static final int borderStartColumn1 = 10;
 	private static final int borderStartColumn2 = 13;
 	private static final int borderStartColumn3 = 19;
@@ -396,14 +396,14 @@ public class ExcelReportGenerator {
 					for (String rowHeader : rowHeaders) {
 						newCell = row.createCell(colNum++);
 						newCell.setCellValue(rowHeader);
-						// FORMBUILD-636
+						// FORMBUILD-648
 						if (newCell.getColumnIndex() == borderStartColumn1 || newCell.getColumnIndex() == borderStartColumn2 || newCell.getColumnIndex() == codedDataColStart || newCell.getColumnIndex() == borderStartColumn3 
 								|| newCell.getColumnIndex() == raveFieldDataTypeCol || newCell.getColumnIndex() == borderStartColumn4 || newCell.getColumnIndex() == borderStartColumn5 || newCell.getColumnIndex() == borderStartColumn6 ) {
 							newCell.setCellStyle(header_lbl_style_leftB);
 						} else { 
 							newCell.setCellStyle(header_lbl_style_2);							
 						}
-						// FORMBUILD-636
+						// FORMBUILD-648
 						row.createCell(borderStartColumn7).setCellStyle(header_lbl_style_leftB);
 					}
 					colNum = 0;
@@ -424,6 +424,7 @@ public class ExcelReportGenerator {
 						int colNum2 = formStartColumn;
 						CCCQuestion question = cccForm.getQuestions().get(j);
 						row = sheet2.createRow(rowNum++);
+						// FORMBUILD-648
 						groupTripletCellsWithBorders(row);
 						// Printing columns before Coded data column
 						Map<String, String> formFields1 = returnFormFieldsPart1(question);
@@ -441,7 +442,7 @@ public class ExcelReportGenerator {
 						// Printing columns after Coded data column
 						Map<String, String> formFields2 = returnFormFieldsPart2(question);
 						row = returnFilledRow(formFields2, row, newColNum, cell_leftBorder_Style);
-						// FORMBUILD-636
+						// FORMBUILD-648
 						groupTripletCellsWithBorders(row);
 						if (rowNumAfterCD > rowNum)
 							rowNum = rowNumAfterCD;
@@ -613,6 +614,7 @@ public class ExcelReportGenerator {
 		for (Map.Entry<String, String> formField : formFields.entrySet()) {
 			newCell = row.createCell(colNum++);
 			newCell.setCellValue(formField.getValue());			
+			// FORMBUILD-648
 			if (cellStyle != null) {
 				if (newCell.getColumnIndex() == borderStartColumn1 || newCell.getColumnIndex() == borderStartColumn2 || newCell.getColumnIndex() == raveFieldDataTypeCol) {	
 						newCell.setCellStyle(cell_leftBorder_Style);
@@ -681,6 +683,7 @@ public class ExcelReportGenerator {
 				newCell.setCellValue("");
 			}
 			newCell = row.createCell(colNum++);
+			// FORMBUILD-648
 			newCell.setCellStyle(cell_rightBorder_Style);
 			// Adding Allowable CDE text choices (in case of not match)
 			if (question.getAllowableCdeTextChoices() != null && !question.getAllowableCdeTextChoices().isEmpty()) {
@@ -696,6 +699,7 @@ public class ExcelReportGenerator {
 			}			
 			if (m != raveCodedData.size() - 1) {
 				row = sheet.createRow(rowNum++);
+				// FORMBUILD-648
 				groupTripletCellsWithBorders(row);
 				}
 		}
@@ -1046,7 +1050,7 @@ public class ExcelReportGenerator {
 		newCell.setCellStyle(hlink_style);
 	}
 	
-	// FORMBUILD-636
+	// FORMBUILD-648
 	/**
 	 * Adds left borders to columns that are triplets in terms of the report - [ALS value, Result, caDSR value]
 	 * 
