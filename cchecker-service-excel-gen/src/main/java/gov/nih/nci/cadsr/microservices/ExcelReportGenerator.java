@@ -77,11 +77,16 @@ public class ExcelReportGenerator {
 	private static final String nciStdOptErrorLbl = "# NCI Standard Template Optional Modules Questions With Errors ";
 	private static final String nciStdOptWarnLbl = "# NCI Standard Template Optional Modules Questions With Warnings ";
 	private static final int formStartColumn = 4;
+	// FORMBUILD-636
 	private static final int borderStartColumn1 = 10;
 	private static final int borderStartColumn2 = 13;
 	private static final int borderStartColumn3 = 19;
 	private static final int raveFieldDataTypeCol = 22;
 	private static final int codedDataColStart = 16;
+	private static final int borderStartColumn4 = 25;
+	private static final int borderStartColumn5 = 28;
+	private static final int borderStartColumn6 = 31;
+	private static final int borderStartColumn7 = 34;	
 	private static final String matching_nrds_cdes_tab_name = "NRDS CDEs in ALS";
 	private static final String nrds_missing_cde_tab_name = "NRDS CDEs Missing";
 	//FORMBUILD-621
@@ -391,11 +396,15 @@ public class ExcelReportGenerator {
 					for (String rowHeader : rowHeaders) {
 						newCell = row.createCell(colNum++);
 						newCell.setCellValue(rowHeader);
-						if (newCell.getColumnIndex() == borderStartColumn1 || newCell.getColumnIndex() == borderStartColumn2 || newCell.getColumnIndex() == codedDataColStart || newCell.getColumnIndex() == borderStartColumn3 || newCell.getColumnIndex() == raveFieldDataTypeCol) {
-							newCell.setCellStyle(header_lbl_style_leftB); 
+						// FORMBUILD-636
+						if (newCell.getColumnIndex() == borderStartColumn1 || newCell.getColumnIndex() == borderStartColumn2 || newCell.getColumnIndex() == codedDataColStart || newCell.getColumnIndex() == borderStartColumn3 
+								|| newCell.getColumnIndex() == raveFieldDataTypeCol || newCell.getColumnIndex() == borderStartColumn4 || newCell.getColumnIndex() == borderStartColumn5 || newCell.getColumnIndex() == borderStartColumn6 ) {
+							newCell.setCellStyle(header_lbl_style_leftB);
 						} else { 
-							newCell.setCellStyle(header_lbl_style_2);							 
+							newCell.setCellStyle(header_lbl_style_2);							
 						}
+						// FORMBUILD-636
+						row.createCell(borderStartColumn7).setCellStyle(header_lbl_style_leftB);
 					}
 					colNum = 0;
 					row = sheet2.createRow(rowNum++);
@@ -432,6 +441,8 @@ public class ExcelReportGenerator {
 						// Printing columns after Coded data column
 						Map<String, String> formFields2 = returnFormFieldsPart2(question);
 						row = returnFilledRow(formFields2, row, newColNum, cell_leftBorder_Style);
+						// FORMBUILD-636
+						groupTripletCellsWithBorders(row);
 						if (rowNumAfterCD > rowNum)
 							rowNum = rowNumAfterCD;
 					}
@@ -1035,6 +1046,7 @@ public class ExcelReportGenerator {
 		newCell.setCellStyle(hlink_style);
 	}
 	
+	// FORMBUILD-636
 	/**
 	 * Adds left borders to columns that are triplets in terms of the report - [ALS value, Result, caDSR value]
 	 * 
@@ -1047,6 +1059,10 @@ public class ExcelReportGenerator {
 		row.createCell(codedDataColStart).setCellStyle(cell_leftBorder_Style);
 		row.createCell(borderStartColumn3).setCellStyle(cell_leftBorder_Style);
 		row.createCell(raveFieldDataTypeCol).setCellStyle(cell_leftBorder_Style);
+		row.createCell(borderStartColumn4).setCellStyle(cell_leftBorder_Style);
+		row.createCell(borderStartColumn5).setCellStyle(cell_leftBorder_Style);
+		row.createCell(borderStartColumn6).setCellStyle(cell_leftBorder_Style);
+		row.createCell(borderStartColumn7).setCellStyle(cell_leftBorder_Style);
 	}	
 
 }
