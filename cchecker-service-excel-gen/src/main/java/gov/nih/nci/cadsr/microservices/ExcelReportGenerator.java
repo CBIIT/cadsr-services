@@ -1096,15 +1096,14 @@ public class ExcelReportGenerator {
 	 * 
 	 */	
 	private static void groupTripletCellsWithBorders (Row row) {
-		row.createCell(borderStartColumn1).setCellStyle(cell_leftBorder_Style);
-		row.createCell(borderStartColumn2).setCellStyle(cell_leftBorder_Style);
-		row.createCell(codedDataColStart).setCellStyle(cell_leftBorder_Style);
-		row.createCell(borderStartColumn3).setCellStyle(cell_leftBorder_Style);
-		row.createCell(raveFieldDataTypeCol).setCellStyle(cell_leftBorder_Style);
-		row.createCell(borderStartColumn4).setCellStyle(cell_leftBorder_Style);
-		row.createCell(borderStartColumn5).setCellStyle(cell_leftBorder_Style);
-		row.createCell(borderStartColumn6).setCellStyle(cell_leftBorder_Style);
-		row.createCell(borderStartColumn7).setCellStyle(cell_leftBorder_Style);
+		Integer[] borderColumns = { borderStartColumn1,  borderStartColumn2, codedDataColStart, borderStartColumn3, raveFieldDataTypeCol, borderStartColumn4, borderStartColumn5, borderStartColumn6, borderStartColumn7};		
+		for (Integer colIndx : borderColumns) {
+			Cell bCell = row.getCell(colIndx);
+			if (bCell == null) {
+				bCell = row.createCell(colIndx);
+			} 
+			bCell.setCellStyle(cell_leftBorder_Style);			
+		}
 	}	
 
 }
