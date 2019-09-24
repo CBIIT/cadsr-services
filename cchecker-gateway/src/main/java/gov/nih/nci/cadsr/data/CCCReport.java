@@ -81,6 +81,7 @@ int countSdtmWithWarnings;
 int countSdtmWithErrors;
 
 List<CCCForm> cccForms = new ArrayList<CCCForm>();
+int selectedFormsCount = 0;
 List<NrdsCde> nrdsCdeList = new ArrayList<NrdsCde>();
 List<NrdsCde> missingNrdsCdeList = new ArrayList<NrdsCde>();
 List<CdeMissing> missingCdashCdeList = new ArrayList<>();
@@ -450,6 +451,14 @@ public Boolean getIsCheckStdCrfCdeChecked() {
 
 public void setIsCheckStdCrfCdeChecked(Boolean isCheckStdCrfCdeChecked) {
 	this.isCheckStdCrfCdeChecked = isCheckStdCrfCdeChecked;
+}
+
+public int getSelectedFormsCount() {
+	return selectedFormsCount;
+}
+
+public void setSelectedFormsCount(int selectedFormsCount) {
+	this.selectedFormsCount = selectedFormsCount;
 }
 
 public CCCError getCccError() {

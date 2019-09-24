@@ -539,6 +539,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 		cccReport.setCountSdtmMissing(missingSdtmCdesList.size());
 		//FORMBUILD-636
 		calculateCdiscReportTotals(cccReport);
+		cccReport.setSelectedFormsCount(cccReport.getCccForms().size());
 		requestStatusMap.remove(sessionId);
 		//this is a feasibility implementation; 
 		//we assume that just one request with this session ID can be running.
@@ -866,6 +867,8 @@ public class ReportGeneratorFeed implements ReportOutput {
 		NrdsCde nrds = new NrdsCde();
 		nrds.setCdeIdVersion(nrdsDb.getCdeId()+"v"+nrdsDb.getDeVersion());
 		nrds.setCdeName(nrdsDb.getDeName());
+		// FORMBUILD-635
+		nrds.setPreferredQuestionText(nrdsDb.getDeQuestion());
 		return nrds;
 	}	
 	/**
@@ -911,6 +914,8 @@ public class ReportGeneratorFeed implements ReportOutput {
 		stdCrdCde.setIdVersion(stdCrfCdeDb.getFormId());
 		stdCrdCde.setTemplateName(stdCrfCdeDb.getFormName());
 		stdCrdCde.setStdTemplateType(stdCrfCdeDb.getModuleType());
+		// FORMBUILD-635
+		stdCrdCde.setPreferredQuestionText(stdCrfCdeDb.getDeQuestion());		
 		return stdCrdCde;
 	}	
 	

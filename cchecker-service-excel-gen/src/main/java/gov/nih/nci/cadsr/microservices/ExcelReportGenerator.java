@@ -88,7 +88,7 @@ public class ExcelReportGenerator {
 	private static final int borderStartColumn6 = 31;
 	private static final int borderStartColumn7 = 34;	
 	private static final String matching_nrds_cdes_tab_name = "NRDS CDEs in ALS";
-	private static final String nrds_missing_cde_tab_name = "NRDS CDEs Missing";
+	private static final String nrds_missing_cde_tab_name = "NCI Questions Missing";
 	//FORMBUILD-621
 	private static final String reqCdashMissLbl = "# Required CDASH 2.0 Questions missing ";
 	// FORMBUILD-636
@@ -106,7 +106,7 @@ public class ExcelReportGenerator {
 	private static final String sdtm_missing_cde_header = "CDISC/SDTM 3.3 CDEs missing from the ALS file";
 	private static final String[] classifiedMissingRowHeaders = { "CDE IDVersion", "CDE Name" };
 	//
-	private static final String nrds_missing_cde_header = "NRDS CDEs missing from the ALS file";
+	private static final String nrds_missing_cde_header = "Required NCI Questions missing from the ALS file";
 	private static final String matching_nrds_cdes_header = "NRDS CDEs included in Protocol Forms with Warnings or Errors";
 	private static final String congStatus_Congruent = "CONGRUENT";
 	private static final int cell_max_limit = 32767;
@@ -139,7 +139,7 @@ public class ExcelReportGenerator {
 	private static final String[] tabNames = { stdCrfManMiss_tab_name, stdCrfOptMiss_tab_name,
 			stdCrfCondMiss_tab_name };
 	private static final String cdeStdCrfMissingmsg = "CDEs in Standard Template \"%s\" Modules Not Used";
-	private static final String[] crfRowHeaders = { "CDE IDVersion", "CDE Name", "Template Name", "CRF ID Version" };
+	private static final String[] crfRowHeaders = { "CDE IDVersion", "CDE Long Name", "Template Name", "CRF ID Version", "Preferred Question Text", "Type" };
 	private static final String[] nrdsRowHeaders = { "Rave Form OID", "RAVE Field Order", "RAVE Field Label",
 			"CDE ID Version", "CDE Name", "Result", "Message" };
 	private static final String fieldOrderLbl = "Field Order";
@@ -451,16 +451,19 @@ public class ExcelReportGenerator {
 			}
 		}
 		buildNrdsTab(workbook, cccReport.getNrdsCdeList());
-		buildMissingNrdsCdesTab(workbook, cccReport.getMissingNrdsCdeList());
+		// FORMBUILD-635
+		boolean isCheckStdCrfCdeChecked = cccReport.getIsCheckStdCrfCdeChecked() != null ? 
+		cccReport.getIsCheckStdCrfCdeChecked() : false;//this is to avoid NullPointerException
+		buildMissingNrdsCdesTab(workbook, cccReport.getMissingNrdsCdeList(), cccReport.getMissingStandardCrfCdeList(), isCheckStdCrfCdeChecked);
 		//FORMBUILD-621
 		buildMissingCdesTab(workbook, cccReport.getMissingCdashCdeList(), cdash_missing_cde_sheet_name, cdash_missing_cde_header);
 		buildMissingCdesTab(workbook, cccReport.getMissingSdtmCdeList(), sdtm_missing_cde_sheet_name, sdtm_missing_cde_header);
 		//
-		boolean isCheckStdCrfCdeChecked = cccReport.getIsCheckStdCrfCdeChecked() != null ? 
+		/*boolean isCheckStdCrfCdeChecked = cccReport.getIsCheckStdCrfCdeChecked() != null ? 
 				cccReport.getIsCheckStdCrfCdeChecked() : false;//this is to avoid NullPointerException
 		if (isCheckStdCrfCdeChecked) {
 			buildStdCrfMissingTabs(workbook, cccReport.getMissingStandardCrfCdeList());
-		}
+		}*/
 		FileOutputStream outputStream = null;
 		try {
 			outputStream = new FileOutputStream(OUTPUT_XLSX_FILE_PATH);
@@ -500,11 +503,11 @@ public class ExcelReportGenerator {
 		summaryLabels.put(raveProtocolNumLbl, cccReport.getRaveProtocolNumber());
 		summaryLabels.put(reportDateLbl, cccReport.getReportDate());
 		summaryLabels.put(formCountLbl, String.valueOf(cccReport.getTotalFormsCount()));
-		summaryLabels.put(formsCheckedLbl, String.valueOf(cccReport.getCccForms().size()));
-		summaryLabels.put(String.format(totalQuestCheckLbl, cccReport.getCccForms().size()), String.valueOf(cccReport.getCountQuestionsChecked()));
+		summaryLabels.put(formsCheckedLbl, String.valueOf(cccReport.getSelectedFormsCount()));
+		summaryLabels.put(String.format(totalQuestCheckLbl, cccReport.getSelectedFormsCount()), String.valueOf(cccReport.getCountQuestionsChecked()));
 		summaryLabels.put(totalQuestCongLbl, String.valueOf(cccReport.getCountCongruentQuestions()));
 		summaryLabels.put(totalQuestWarnLbl, String.valueOf(cccReport.getCountQuestionsWithWarnings()));
-		summaryLabels.put(String.format(totalQuestErrorLbl, cccReport.getCccForms().size()), String.valueOf(cccReport.getCountQuestionsWithErrors()));
+		summaryLabels.put(String.format(totalQuestErrorLbl, cccReport.getSelectedFormsCount()), String.valueOf(cccReport.getCountQuestionsWithErrors()));
 		summaryLabels.put(totalunassociatedQuestLbl, String.valueOf(cccReport.getCountQuestionsWithoutCde()));
 		/*summaryLabels.put(reqQuestMissLbl, String.valueOf(cccReport.getCountNrdsMissing()));
 		summaryLabels.put(reqNrdsQuestCongLbl, String.valueOf(cccReport.getCountNrdsCongruent()));
@@ -791,7 +794,7 @@ public class ExcelReportGenerator {
 	 * @param missingNrdsCdeList
 	 * @return XSSFWorkbook
 	 */
-	public static Workbook buildMissingNrdsCdesTab(Workbook workbook, List<NrdsCde> missingNrdsCdeList) {
+	public static Workbook buildMissingNrdsCdesTab(Workbook workbook, List<NrdsCde> missingNrdsCdeList, List<StandardCrfCde> stdCrfCdeList, Boolean IsCrfChecked) {
 		final String[] nrdsRowHeaders = crfRowHeaders;
 		Sheet sheet = workbook.createSheet(nrds_missing_cde_tab_name);
 		Row row;
@@ -805,10 +808,17 @@ public class ExcelReportGenerator {
 		final int widthOfFormName = 100 * 256;
 		final int idxOfFormId = 3;
 		final int widthOfFormId = 20 * 256;// in characters
+		// FORMBUILD-635
+		final int idxOfPqt = 4;
+		final int widthOfPqt = 100 * 256;
+		final int idxOfType = 5;
+		final int widthOfType = 20 * 256;// in characters		
 		sheet.setColumnWidth(idxOfCdeId, widthOfCdeId);
 		sheet.setColumnWidth(idxOfCdeName, widthOfCdeName);
 		sheet.setColumnWidth(idxOfFormName, widthOfFormName);
 		sheet.setColumnWidth(idxOfFormId, widthOfFormId);
+		sheet.setColumnWidth(idxOfPqt, widthOfPqt);
+		sheet.setColumnWidth(idxOfType, widthOfType);		
 		int rowNum = 0;
 		row = sheet.createRow(rowNum++);
 		Cell newCell = row.createCell(0);
@@ -836,8 +846,36 @@ public class ExcelReportGenerator {
 			newCell.setCellValue(cde.getCdeIdVersion());
 			newCell = row.createCell(colNum++);
 			newCell.setCellValue(cde.getCdeName());
+			// FORMBUILD-635
+			newCell = row.createCell(colNum++);
+			newCell = row.createCell(colNum++);
+			newCell = row.createCell(colNum++);
+			newCell.setCellValue(cde.getPreferredQuestionText());
+			newCell = row.createCell(colNum++);
+			newCell.setCellValue("NRDS");
 		}
-
+		// FORMBUILD-635
+		// Print the missing Std CRF Mandatory CDEs
+		if (IsCrfChecked) {
+			for (StandardCrfCde cde : stdCrfCdeList) {
+				if (cde.getStdTemplateType().equalsIgnoreCase(templateTypes[0])) {
+					colNum = 0;
+					row = sheet.createRow(rowNum++);
+					newCell = row.createCell(colNum++);
+					newCell.setCellValue(cde.getCdeIdVersion());
+					newCell = row.createCell(colNum++);
+					newCell.setCellValue(cde.getCdeName());
+					newCell = row.createCell(colNum++);
+					newCell.setCellValue(cde.getTemplateName());
+					newCell = row.createCell(colNum++);
+					newCell.setCellValue(cde.getIdVersion());
+					newCell = row.createCell(colNum++);
+					newCell.setCellValue(cde.getPreferredQuestionText());
+					newCell = row.createCell(colNum++);
+					newCell.setCellValue("Std CRF");
+				}
+			}		
+		}
 		return workbook;
 	}
 	/**

@@ -10,6 +10,7 @@ String cdeIdVersion;
 String cdeName;
 String templateName;
 String idVersion;
+String preferredQuestionText;
 
 public String getStdTemplateType() {
 	return stdTemplateType;
@@ -40,6 +41,12 @@ public String getIdVersion() {
 }
 public void setIdVersion(String idVersion) {
 	this.idVersion = idVersion;
+}
+public String getPreferredQuestionText() {
+	return preferredQuestionText;
+}
+public void setPreferredQuestionText(String preferredQuestionText) {
+	this.preferredQuestionText = preferredQuestionText;
 }
 
 }
