@@ -45,12 +45,14 @@ public class ValidatorService {
 	private static final String msg2 = "CDE has been retired.";
 	private static final String msg3 = "Newer version of CDE exists: {%.1f}.";
 	private static final String msg4 = "Value domain Max Length too short. PVs MaxLength is {%d} , caDSR MaxLength is {%d}.";
-	private static final String msg5 = "This CDE is not enumerated but question in input file has Coded Data (Permissible values) - %s.";
-	private static final String msg6 = "Question Text in input file does not match available CDE question text(s) - %s.";
+	// FORMBUILD-647	
+	private static final String msg5 = "This CDE is non-enumerated but question in input file has Coded Data.";
+	private static final String msg6 = "Question Text does not match available CDE question text(s).";
 	private static final String msg7 = "Control Type {%s} isn't compatible with the corresponding mapping for Value domain type {%s}.";
 	private static final String msg8 = "Missing Control Type in the ALS input data.";
-	private static final String msg9 = "Rave User String matches with neither PV Value nor VM Long Name nor VM Alternate Name.";
-	private static final String msg10 = "The Coded data {%s} for the question do not belong to the corresponding Value domain.";
+	// FORMBUILD-647
+	private static final String msg9 = "Some Rave user strings match neither PV Value nor any VM names.";
+	private static final String msg10 = "Some Coded Data are not found in the corresponding CDE Value Domain.";
 	private static final String msg11 = "Data type {%s} from ALS input data doesn't match with the corresponding Value Domain's data type {%s}.";
 	private static final String msg12 = "Unit of Measure {%s} from ALS input data doesn't match with the corresponding Value Domain's UOM {%s}.";
 	private static final String msg13 = "Format {%s} doesn't match with the corresponding Value Domain's format {%s}.";
@@ -278,12 +280,14 @@ public class ValidatorService {
 		else if (MicroserviceUtils.compareListWithIgnore(rdDocTextList, question.getRaveFieldLabel())) {
 			//FORMBUILD-651
 			question.setRaveFieldLabelResult(warningString);
-			question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg6, rdDocTextList)));
+			// FORMBUILD-647
+			question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg6));
 			question.setQuestionCongruencyStatus(congStatus_warn);
 		}
 		else {
 			question.setRaveFieldLabelResult(errorString);
-			question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg6, rdDocTextList)));
+			// FORMBUILD-647
+			question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg6));
 			question.setQuestionCongruencyStatus(congStatus_errors);
 		}
 		// Setting the concatenated string of AQTs and PQTs into CDE permitted question text choices
@@ -328,8 +332,9 @@ public class ValidatorService {
 				// When RAVE control type is Non-Enumerated & VD type is N (Non-enumerated)
 				if (isNonEnumerated(question.getRaveControlType().toUpperCase()) && "N".equalsIgnoreCase(vdType)) {
 					question.setControlTypeResult(matchString);
+					// FORMBUILD-647
 					if (!question.getRaveCodedData().isEmpty()) {
-						question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg5, question.getRaveCodedData())));
+						question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg5));
 					}
 					// When RAVE control type is Enumerated & VD type is E (Enumerated)
 				} else if ((!isNonEnumerated(question.getRaveControlType().toUpperCase())) && "E".equalsIgnoreCase(vdType)) {
@@ -455,8 +460,9 @@ public class ValidatorService {
 					cdResult.add(matchString);
 				} else {
 					cdResult.add(errorString);
+					// FORMBUILD-647
 					if ((question.getMessage()!=null) && (question.getMessage().indexOf(msg10) == -1))
-						question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg10, question.getRaveCodedData())));
+						question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg10));
 					question.setQuestionCongruencyStatus(congStatus_errors);
 				}
 			}
