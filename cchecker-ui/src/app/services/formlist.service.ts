@@ -50,6 +50,9 @@ export class FormListService {
   // gets checked status of record //
   getCheckedStatus = record => this.checkedItems.value.indexOf(record.formName) > -1;
   
+  // gets cancel status. used to check if form valication is being canceled //
+  getCancelButtonStatus = () => this.getSessionDataItem('cancelButtonStatus')
+
   // gets valid items length as observable //
   getValidItemsLength = () => this.validItemsLength.asObservable();
 
@@ -99,6 +102,9 @@ export class FormListService {
     this.setSessionDataItem('checkedItems',ci); // set checkedItems in session //
   };
 
+  // sets cancel status. used to check if form valication is being canceled //
+  setCancelButtonStatus = val => this.setSessionDataItem('cancelButtonStatus',val)
+  
   // sets checkUom, checkStdCrfCde and mustDisplayException checkboxes at bottom of page //
   setFormListOptionCheckbox(event):void {
     const fld = this.formListData.getValue();

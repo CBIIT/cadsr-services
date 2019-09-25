@@ -3,9 +3,10 @@ import { RestService } from '../services/rest.service';
 import { FormListService } from '../services/formlist.service';
 import { Observable } from 'rxjs';
 import { ReportService } from '../services/report.service'
-import { Router } from '../../../node_modules/@angular/router';
+import { Router, ChildActivationStart } from '../../../node_modules/@angular/router';
 import { HttpEventType }  from '@angular/common/http';
 import { NgControlStatus } from '@angular/forms';
+import { looseIdentical } from '@angular/core/src/util';
 
 @Component({
   selector: 'app-als-form-list',
@@ -19,15 +20,16 @@ export class AlsFormListComponent implements OnInit {
   formListData:Observable<Object>;
   fileName:String;
   userName:String;
-  validating:Boolean;
+  validating:Boolean;  
   validItemsLength:Observable<Object>;
   checkFormsService;
   feedService;
-
+  cancelButtonStatus:Boolean;
   constructor(private formListService:FormListService, private restService:RestService, private reportService:ReportService, private router:Router) {
   }
 
   ngOnInit() {
+    this.cancelButtonStatus = this.formListService.getCancelButtonStatus();
     this.checkedItems = this.formListService.getCheckedItems(); // get checked items as observable //
     this.formListData = this.formListService.getFormListData(); // get form data as observable //
     this.fileName = this.formListService.getFileName(); // get filename data as string //
@@ -41,6 +43,8 @@ export class AlsFormListComponent implements OnInit {
   };
 
   cancelValidation() {
+    this.formListService.setCancelButtonStatus(true);
+    this.cancelButtonStatus = true;
     this.restService.cancelValidation(this.formListData.source['value'].sessionid).subscribe(
       data => {
         console.log(data);
@@ -55,6 +59,7 @@ export class AlsFormListComponent implements OnInit {
     }
   // check forms (validate) and go to report page //
   checkForms() {
+    this.formListService.setCancelButtonStatus(false);
     let checkedItems:String[];
     this.errorMessage = null;
     let formListData:Object;
@@ -83,6 +88,7 @@ export class AlsFormListComponent implements OnInit {
           this.validating = false;
         },
         () => {
+          this.formListService.setCancelButtonStatus(false);
           this.validating = false;
           this.formListService.setValidationStatus(false);
           this.router.navigateByUrl('/report')
@@ -144,4 +150,6 @@ export class AlsFormListComponent implements OnInit {
       this.feedService.unsubscribe();
     };
   }
+
+  
 };
