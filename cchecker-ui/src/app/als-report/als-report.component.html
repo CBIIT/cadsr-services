@@ -176,18 +176,20 @@
                 <tr *ngFor="let missingNrds of reportData.missingNrdsCdeList">
                   <td>{{missingNrds.cdeIdVersion}}</td>
                   <td>{{missingNrds.cdeName}}</td>
+                  <td>{{missingNrds.preferredQuestionText}}</td>
+                  <td>NRDS</td>                  
                   <td>{{missingNrds.templateName}}</td>
                   <td>{{missingNrds.idVersion}}</td>
-                  <td>{{missingNrds.preferredQuestionText}}</td>
-                  <td>NRDS</td>
+
                 </tr>
                 <tr *ngFor="let missing of reportData.missingStandardCrfCdeList | reportFilter: 'stdTemplateType':'Mandatory'">
                   <td>{{missing.cdeIdVersion}}</td>
                   <td>{{missing.cdeName}}</td>
-                  <td>{{missing.templateName}}</td>
-                  <td>{{missing.idVersion}}</td>
                   <td>{{missing.preferredQuestionText}}</td>
                   <td>Std CRF</td>
+                  <td>{{missing.templateName}}</td>
+                  <td>{{missing.idVersion}}</td>
+
               </tr>                
             </tbody>            
         </table>
