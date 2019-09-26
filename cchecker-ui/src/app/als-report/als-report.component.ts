@@ -103,9 +103,11 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
     this.dtCrfOptions = Object.assign({
       columns:[
         {width:"125px", cellType:"th", title:"CDE IDVersion"},
-        {width:"225px", cellType:"th", title:"CDE Name"},
+        {width:"225px", cellType:"th", title:"CDE Long Name"},
         {width:"225px", cellType:"th",title:"Template Name"},
-        {width:"225px", cellType:"th", title:"CRF ID Version"}
+        {width:"125px", cellType:"th", title:"CRF ID Version"},
+        {width:"225px", cellType:"th", title:"Preferred Question Text"},
+        {width:"150px", cellType:"th", title:"Type"}
       ],
       scrollY:350,
       scroller:true,

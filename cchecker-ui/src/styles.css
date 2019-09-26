@@ -192,3 +192,7 @@ content: "» "
   .fileName {
     font-size:150% !important;
   }
+
+  #summary td{
+    text-transform:capitalize
+   }

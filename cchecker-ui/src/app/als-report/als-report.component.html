@@ -39,7 +39,7 @@
    <ngb-tabset type="pills" ([ngModel])="tabs" #tabs>
    <ngb-tab title="Summary" *ngIf="reportData.cccForms.length">
       <ng-template ngbTabContent>
-         <table datatable [dtOptions]="dtSummaryOptions" class="display compact" [hidden]="!reportData.cccForms.length" *ngIf="reportData as r">
+         <table id="summary" datatable [dtOptions]="dtSummaryOptions" class="display compact" [hidden]="!reportData.cccForms.length" *ngIf="reportData as r">
          <thead>
             <tr>
                <th>CDE Congruency Checker Report for {{r.reportOwner}}</th>
@@ -84,19 +84,19 @@
                <td>{{r.countQuestionsWithoutCde}}</td>
             </tr>
             <tr>
-               <td># Required NRDS Questions missing  </td>
+               <td># Required NCI Questions missing  </td>
                <td>{{r.countNrdsMissing}}</td>
             </tr>
             <tr>
-               <td># Required NRDS Questions Congruent </td>
+               <td># Required NCI Questions Congruent </td>
                <td>{{r.countNrdsCongruent}}</td>
             </tr>
             <tr>
-               <td># Required NRDS Questions With Warnings </td>
+               <td># Required NCI Questions With Warnings </td>
                <td>{{r.countNrdsWithWarnings}}</td>
             </tr>
             <tr>
-               <td># Required NRDS Questions With Errors </td>
+               <td># Required NCI Questions With Errors </td>
                <td>{{r.countNrdsWithErrors}}</td>
             </tr>
             <tr>
@@ -123,55 +123,6 @@
                <td># Required SDTM 3.3 Questions with errors </td>
                <td>{{r.countSdtmWithErrors}}</td>
             </tr>
-            <tr>
-               <td># NCI Standard Template Mandatory Modules Questions missing from Protocol  </td>
-               <td>{{r.countManCrfMissing}}</td>
-            </tr>
-            <tr>
-               <td># NCI Standard Template Mandatory Modules Questions Congruent </td>
-               <td>{{r.countManCrfCongruent}}</td>
-            </tr>
-            <tr>
-               <td># NCI Standard Template Mandatory Modules Questions With Errors </td>
-               <td>{{r.countManCrfWithErrors}}</td>
-            </tr>
-            <tr>
-               <td># NCI Standard Template Mandatory Modules Questions With Warnings </td>
-               <td>{{r.countManCrfwWithWarnings}}</td>
-            </tr>
-            <tr>
-               <td># NCI Standard Template Conditional Modules Questions missing from Protocol </td>
-               <td>{{r.countCondCrfMissing}}</td>
-            </tr>
-            <tr>
-               <td># NCI Standard Template Conditional Modules Questions Congruent </td>
-               <td>{{r.countCondCrfCongruent}}</td>
-            </tr>
-            <tr>
-               <td># NCI Standard Template Conditional Modules Questions With Errors </td>
-               <td>{{r.countCondCrfWithErrors}}</td>
-            </tr>
-            <tr>
-               <td># NCI Standard Template Conditional Modules Questions With Warnings </td>
-               <td>{{r.countCondCrfwWithWarnings}}</td>
-            </tr>
-            <tr>
-               <td># NCI Standard Template Optional Modules Questions missing from Protocol  </td>
-               <td>{{r.countOptCrfMissing}}</td>
-            </tr>
-            <tr>
-               <td># NCI Standard Template Optional Modules Questions Congruent </td>
-               <td>{{r.countCondCrfCongruent}}</td>
-            </tr>
-            <tr>
-               <td># NCI Standard Template Optional Modules Questions With Errors </td>
-               <td>{{r.countOptCrfWithErrors}}</td>
-            </tr>
-            <tr>
-               <td># NCI Standard Template Optional Modules Questions With Warnings </td>
-               <td>{{r.countOptCrfwWithWarnings}}</td>
-            </tr>
-
             
          </tbody>
          </table>
@@ -216,16 +167,28 @@
        </ng-template>
    </ngb-tab>
    <ngb-tab *ngIf="reportData.cccForms.length">
-       <ng-template ngbTabTitle>NRDS CDEs Missing</ng-template>
+       <ng-template ngbTabTitle>NCI Questions issing</ng-template>
        <ng-template ngbTabContent>
-         <div class="tableHeader">NRDS CDEs missing from the ALS file</div>
+         <div class="tableHeader">NCI Questions missing from the ALS file</div>
 
-        <table datatable [dtOptions]="dtNrdsOptionsMissing" class="display compact">
+        <table datatable [dtOptions]="dtCrfOptions" class="display compact">
             <tbody>
                 <tr *ngFor="let missingNrds of reportData.missingNrdsCdeList">
-                    <td>{{missingNrds.cdeIdVersion}}</td>
-                    <td>{{missingNrds.cdeName}}</td>
+                  <td>{{missingNrds.cdeIdVersion}}</td>
+                  <td>{{missingNrds.cdeName}}</td>
+                  <td>{{missingNrds.templateName}}</td>
+                  <td>{{missingNrds.idVersion}}</td>
+                  <td>{{missingNrds.preferredQuestionText}}</td>
+                  <td>NRDS</td>
                 </tr>
+                <tr *ngFor="let missing of reportData.missingStandardCrfCdeList | reportFilter: 'stdTemplateType':'Mandatory'">
+                  <td>{{missing.cdeIdVersion}}</td>
+                  <td>{{missing.cdeName}}</td>
+                  <td>{{missing.templateName}}</td>
+                  <td>{{missing.idVersion}}</td>
+                  <td>{{missing.preferredQuestionText}}</td>
+                  <td>Std CRF</td>
+              </tr>                
             </tbody>            
         </table>
        </ng-template>
@@ -260,7 +223,8 @@
         </table>
        </ng-template>
    </ngb-tab>
-   <ngb-tab *ngIf="reportData.isCheckStdCrfCdeChecked">
+   
+   <!-- <ngb-tab *ngIf="reportData.cccForms.length">
        <ng-template ngbTabTitle>Standard CRF Mandatory Missing</ng-template>
        <ng-template ngbTabContent>
            <div class="tableHeader">CDEs in Standard Template "Mandatory" Modules Not Used</div>
@@ -276,38 +240,7 @@
             </table>           
        </ng-template>
    </ngb-tab>
-   <!--<ngb-tab *ngIf="reportData.isCheckStdCrfCdeChecked">
-       <ng-template ngbTabTitle>Standard CRF Optional Missing</ng-template>
-       <ng-template ngbTabContent>
-           <div class="tableHeader">CDEs in Standard Template "Optional" Modules Not Used</div>
-            <table datatable [dtOptions]="dtCrfOptions" class="display compact">
-                <tbody>
-                    <tr *ngFor="let missing of reportData.missingStandardCrfCdeList | reportFilter: 'stdTemplateType':'Optional'">
-                        <td>{{missing.cdeIdVersion}}</td>
-                        <td>{{missing.cdeName}}</td>
-                        <td>{{missing.templateName}}</td>
-                        <td>{{missing.idVersion}}</td>
-                    </tr>
-                </tbody>
-            </table>              
-       </ng-template>
-   </ngb-tab>   
-   <ngb-tab *ngIf="reportData.isCheckStdCrfCdeChecked">
-       <ng-template ngbTabTitle>Standard CRF Conditional Missing</ng-template>
-       <ng-template ngbTabContent>
-           <div class="tableHeader">CDEs in Standard Template "Conditional" Modules Not Used</div>
-            <table datatable [dtOptions]="dtCrfOptions" class="display compact">
-                <tbody>
-                    <tr *ngFor="let missing of reportData.missingStandardCrfCdeList | reportFilter: 'stdTemplateType':'Conditional'">
-                        <td>{{missing.cdeIdVersion}}</td>
-                        <td>{{missing.cdeName}}</td>
-                        <td>{{missing.templateName}}</td>
-                        <td>{{missing.idVersion}}</td>
-                    </tr>
-                </tbody>
-            </table>            
-       </ng-template>
-   </ngb-tab> -->      
+     -->
 
    <ngb-tab id="raveForm" *ngIf="showFormTab">
       <ng-template ngbTabTitle>{{tabName}}</ng-template>
