@@ -196,3 +196,17 @@ content: "» "
   #summary td{
     text-transform:capitalize
    }
+
+   .borderright {
+    border-right:1px solid #212529;
+  }
+  
+  
+  .borderleft {
+    border-left:1px solid #212529;
+  }
+
+
+.lowercase {
+  text-transform:lowercase;
+}

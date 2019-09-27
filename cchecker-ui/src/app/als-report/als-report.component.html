@@ -68,7 +68,7 @@
                <td>{{r.selectedFormsCount}}</td>
             </tr>            
             <tr>
-               <td># Total Questions Checked </td>
+               <td># Total Questions Checked in {{r.selectedFormsCount}} forms</td>
                <td>{{r.countQuestionsChecked}}</td>
             </tr>
             <tr>
@@ -80,7 +80,7 @@
                <td>{{r.countQuestionsWithWarnings}}</td>
             </tr>
             <tr>
-               <td># Total Questions with Errors </td>
+               <td># Total Questions with Errors in {{r.selectedFormsCount}} forms</td>
                <td>{{r.countQuestionsWithErrors}}</td>
             </tr>
             <tr>
@@ -104,27 +104,27 @@
                <td>{{r.countNrdsWithErrors}}</td>
             </tr>
             <tr>
-               <td># Required CDASH 2.0 Questions missing </td>
+               <td># Required CDASH <span class="lowercase"><span class="lowercase">x.x</span></span> Questions missing </td>
                <td>{{r.countCdashMissing}}</td>
             </tr>
             <tr>
-               <td># Required CDASH 2.0 Questions with warnings </td>
+               <td># Required CDASH <span class="lowercase">x.x</span> Questions with warnings </td>
                <td>{{r.countCdashWithWarnings}}</td>
             </tr>
             <tr>
-               <td># Required CDASH 2.0 Questions with errors </td>
+               <td># Required CDASH <span class="lowercase">x.x</span> Questions with errors </td>
                <td>{{r.countCdashWithErrors}}</td>
             </tr>
             <tr>
-               <td># Required SDTM 3.3 Questions missing </td>
+               <td># Required SDTM <span class="lowercase">x.x</span> Questions missing </td>
                <td>{{r.countSdtmMissing}}</td>
             </tr>
             <tr>
-               <td># Required SDTM 3.3 Questions with warnings </td>
+               <td># Required SDTM <span class="lowercase">x.x</span> Questions with warnings </td>
                <td>{{r.countSdtmWithWarnings}}</td>
             </tr>
             <tr>
-               <td># Required SDTM 3.3 Questions with errors </td>
+               <td># Required SDTM <span class="lowercase">x.x</span> Questions with errors </td>
                <td>{{r.countSdtmWithErrors}}</td>
             </tr>
             
@@ -200,9 +200,9 @@
        </ng-template>
    </ngb-tab>
    <ngb-tab *ngIf="reportData.cccForms.length">
-       <ng-template ngbTabTitle>CDISC/CDASH 2.0 CDEs Missing</ng-template>
+       <ng-template ngbTabTitle>CDISC/CDASH <span class="lowercase">x.x</span> CDEs Missing</ng-template>
        <ng-template ngbTabContent>
-         <div class="tableHeader">CDISC/CDASH 2.0 CDEs missing from the ALS file</div>
+         <div class="tableHeader">CDISC/CDASH <span class="lowercase">x.x</span> CDEs missing from the ALS file</div>
 
         <table datatable [dtOptions]="dtNrdsOptionsMissing" class="display compact">
             <tbody>
@@ -215,9 +215,9 @@
        </ng-template>
    </ngb-tab>
    <ngb-tab *ngIf="reportData.cccForms.length">
-       <ng-template ngbTabTitle>CDISC/SDTM 3.3 CDEs Missing</ng-template>
+       <ng-template ngbTabTitle>CDISC/SDTM <span class="lowercase">x.x</span> CDEs Missing</ng-template>
        <ng-template ngbTabContent>
-         <div class="tableHeader">CDISC/SDTM 3.3 CDEs missing from the ALS file</div>
+         <div class="tableHeader">CDISC/SDTM <span class="lowercase">x.x</span> CDEs missing from the ALS file</div>
 
         <table datatable [dtOptions]="dtNrdsOptionsMissing" class="display compact">
             <tbody>
@@ -316,16 +316,16 @@
                   <td>{{question.nciCategory}}</td>
                   <td>{{question.questionCongruencyStatus}}</td>
                   <td>{{question.message}}</td>
-                  <td>{{question.raveFieldLabel}}</td>
+                  <td class="borderleft">{{question.raveFieldLabel}}</td>
                   <td>{{question.raveFieldLabelResult}}</td>
-                  <td>{{question.cdePermitQuestionTextChoices}}</td>
+                  <td class="borderright">{{question.cdePermitQuestionTextChoices}}</td>
                   <td>{{question.raveControlType}}</td>
                   <td>{{question.controlTypeResult}}</td>
-                  <td>{{question.cdeValueDomainType}}</td>
+                  <td class="borderright">{{question.cdeValueDomainType}}</td>
                   <td><span *ngFor="let line of question.raveCodedData">{{line}}<br /></span></td>
                   <td><span *ngFor="let line of question.codedDataResult">{{line}}<br /></span></td>
-                  <td style="max-width:300px;word-wrap:break-word">{{question.allowableCdeValue}}</td>
-                  <td colspan="3">
+                  <td class="borderright" style="max-width:300px;word-wrap:break-word">{{question.allowableCdeValue}}</td>
+                  <td colspan="3" class="borderright">
                      <table class="colspan">
                         <tr *ngFor="let line of question.raveUserString; let i = index">
                               <td class="raveUserString">{{line}}</td>
@@ -340,16 +340,16 @@
                   <!-- <td><span *ngFor="let line of question.allowableCdeTextChoices">{{line}}<br /></span></td> -->
                   <td>{{question.raveFieldDataType}}</td>
                   <td>{{question.datatypeCheckerResult}}</td>
-                  <td>{{question.cdeDataType}}</td>
+                  <td class="borderright">{{question.cdeDataType}}</td>
                   <td>{{question.raveUOM}}</td>
                   <td>{{question.uomCheckerResult}}</td>
-                  <td>{{question.cdeUOM}}</td>
+                  <td class="borderright">{{question.cdeUOM}}</td>
                   <td>{{question.raveLength}}</td>
                   <td>{{question.lengthCheckerResult}}</td>
-                  <td>{{question.cdeMaxLength}}</td>
+                  <td class="borderright">{{question.cdeMaxLength}}</td>
                   <td>{{question.raveDisplayFormat}}</td>
                   <td>{{question.formatCheckerResult}}</td>
-                  <td>{{question.cdeDisplayFormat}}</td>
+                  <td class="borderright">{{question.cdeDisplayFormat}}</td>
                </tr>
             </tbody>
          </table>
