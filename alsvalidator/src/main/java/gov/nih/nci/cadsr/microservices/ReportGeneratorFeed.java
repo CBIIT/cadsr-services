@@ -359,6 +359,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 				}
 				CCCQuestion question = new CCCQuestion();
 					totalQuestCount++;
+					question.setSequenceNumber(alsField.getSequenceNumber());
 					question.setFieldOrder(alsField.getOrdinal());
 					question.setRaveFormOId(alsField.getFormOid());
 					String draftFieldName = alsField.getDraftFieldName();

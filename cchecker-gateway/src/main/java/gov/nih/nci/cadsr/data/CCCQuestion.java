@@ -9,6 +9,8 @@ import java.util.List;
 public class CCCQuestion {	
 
 String raveFormOId;
+//FORMBUILD-652
+Integer sequenceNumber;
 String fieldOrder;
 String cdePublicId;
 String cdeVersion;
@@ -46,6 +48,12 @@ public String getRaveFormOId() {
 }
 public void setRaveFormOId(String raveFormOId) {
 	this.raveFormOId = raveFormOId;
+}
+public Integer getSequenceNumber() {
+	return sequenceNumber;
+}
+public void setSequenceNumber(Integer sequenceNumber) {
+	this.sequenceNumber = sequenceNumber;
 }
 public String getFieldOrder() {
 	return fieldOrder;

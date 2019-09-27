@@ -123,8 +123,9 @@ public class ExcelReportGenerator {
 			24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34 };
 	private static final Integer[] longColumnsforForm = { 9, 10, 12, 16, 18, 19, 21 };
 	private static final String croppedStringText = "// CONTENT CROPPED TO 32,700 CHARACTERS. // \n ";
+	// FORMBUILD-652	
 	private static final String[] rowHeaders = { "Rave Form OID", "caDSR Form ID", "Version",
-			"Total Number Of Questions Checked", "Field Order", "CDE Public ID", "CDE Version", "NCI Category",
+			"Total Number Of Questions Checked", "Sequence #", "ALS Ordinal #", "CDE PID", "NCI Category",
 			"Question Congruency Status", "Message", "Rave Field Label", "Rave Field Label Result",
 			"CDE Permitted Question Text Choices", "Rave Control Type", "Control Type Checker Result",
 			"CDE Value Domain Type", "Rave Coded Data", "Coded Data Result", "Allowable CDE  Value", "Rave User String",
@@ -139,12 +140,16 @@ public class ExcelReportGenerator {
 	private static final String[] tabNames = { stdCrfManMiss_tab_name, stdCrfOptMiss_tab_name,
 			stdCrfCondMiss_tab_name };
 	private static final String cdeStdCrfMissingmsg = "CDEs in Standard Template \"%s\" Modules Not Used";
-	private static final String[] crfRowHeaders = { "CDE IDVersion", "CDE Long Name", "Template Name", "CRF ID Version", "Preferred Question Text", "Type" };
+	private static final String[] crfRowHeaders = { "CDE IDVersion", "CDE Long Name", "Preferred Question Text", "Type", "Template Name", "CRF ID Version" };
 	private static final String[] nrdsRowHeaders = { "Rave Form OID", "RAVE Field Order", "RAVE Field Label",
 			"CDE ID Version", "CDE Name", "Result", "Message" };
-	private static final String fieldOrderLbl = "Field Order";
+	// FORMBUILD-652	
+	private static final String seqNumLbl = "Sequence #";
+	private static final String fieldOrderLbl = "ALS Ordinal #";
 	private static final String cdeIdLbl = "CDE Public ID";
 	private static final String cdeVersion = "CDE Version";
+	// FORMBUILD-652	
+	private static final String cdePidVerLbl = "CDE PID";
 	private static final String nciCategoryLbl = "NCI Category";
 	private static final String questionCongStatusLbl = "Question Congruency Status";
 	private static final String msgLbl = "Message";
@@ -426,6 +431,9 @@ public class ExcelReportGenerator {
 						row = sheet2.createRow(rowNum++);
 						// FORMBUILD-648
 						groupTripletCellsWithBorders(row);
+						// FORMBUILD-652
+						newCell = row.createCell(4);
+						newCell.setCellValue("");						
 						// Printing columns before Coded data column
 						Map<String, String> formFields1 = returnFormFieldsPart1(question);
 						row = returnFilledRow(formFields1, row, colNum2, cellStyle);
@@ -554,9 +562,16 @@ public class ExcelReportGenerator {
 	 */
 	public static Map<String, String> returnFormFieldsPart1(CCCQuestion question) {
 		Map<String, String> formFields = new LinkedHashMap<String, String>();
+		// FORMBUILD-652		
+		formFields.put(seqNumLbl, question.getSequenceNumber().toString());
 		formFields.put(fieldOrderLbl, question.getFieldOrder());
-		formFields.put(cdeIdLbl, question.getCdePublicId());
-		formFields.put(cdeVersion, question.getCdeVersion());
+		if (question.getCdePublicId()!=null && question.getCdeVersion()!=null)
+			formFields.put(cdePidVerLbl, question.getCdePublicId()+"v"+question.getCdeVersion());
+		else 
+			formFields.put(cdePidVerLbl, "");
+		// FORMBUILD-652
+		/* formFields.put(cdeIdLbl, question.getCdePublicId());
+		 formFields.put(cdeVersion, question.getCdeVersion()); */
 		formFields.put(nciCategoryLbl, question.getNciCategory());
 		formFields.put(questionCongStatusLbl, question.getQuestionCongruencyStatus());
 		String message = question.getMessage();
@@ -592,7 +607,7 @@ public class ExcelReportGenerator {
 		formFields.put(raveLengthLbl, question.getRaveLength());
 		formFields.put(lengthCheckerResultLbl, question.getLengthCheckerResult());
 		if (question.getCdeMaxLength()!=null)
-			formFields.put(cdeMaxLengthLbl, (question.getCdeMaxLength()).toString());
+			formFields.put(cdeMaxLengthLbl, question.getCdeMaxLength().toString());
 		else 
 			formFields.put(cdeMaxLengthLbl, "");
 		formFields.put(raveDisplayFormatLbl, question.getRaveDisplayFormat());
@@ -846,13 +861,13 @@ public class ExcelReportGenerator {
 			newCell.setCellValue(cde.getCdeIdVersion());
 			newCell = row.createCell(colNum++);
 			newCell.setCellValue(cde.getCdeName());
+			newCell = row.createCell(colNum++);			
 			// FORMBUILD-635
-			newCell = row.createCell(colNum++);
-			newCell = row.createCell(colNum++);
-			newCell = row.createCell(colNum++);
 			newCell.setCellValue(cde.getPreferredQuestionText());
 			newCell = row.createCell(colNum++);
 			newCell.setCellValue("NRDS");
+			newCell = row.createCell(colNum++);
+			newCell = row.createCell(colNum++);			
 		}
 		// FORMBUILD-635
 		// Print the missing Std CRF Mandatory CDEs
@@ -866,13 +881,13 @@ public class ExcelReportGenerator {
 					newCell = row.createCell(colNum++);
 					newCell.setCellValue(cde.getCdeName());
 					newCell = row.createCell(colNum++);
-					newCell.setCellValue(cde.getTemplateName());
-					newCell = row.createCell(colNum++);
-					newCell.setCellValue(cde.getIdVersion());
-					newCell = row.createCell(colNum++);
 					newCell.setCellValue(cde.getPreferredQuestionText());
 					newCell = row.createCell(colNum++);
 					newCell.setCellValue("Std CRF");
+					newCell = row.createCell(colNum++);
+					newCell.setCellValue(cde.getTemplateName());
+					newCell = row.createCell(colNum++);
+					newCell.setCellValue(cde.getIdVersion());					
 				}
 			}		
 		}

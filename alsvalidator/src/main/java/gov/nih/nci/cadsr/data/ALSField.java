@@ -10,6 +10,8 @@ public class ALSField {
 	
 String formOid;
 String fieldOid;
+// FORMBUILD-652
+Integer sequenceNumber;
 String ordinal;
 String draftFieldName;
 String dataFormat;
@@ -36,6 +38,12 @@ public String getFieldOid() {
 }
 public void setFieldOid(String fieldOid) {
 	this.fieldOid = fieldOid;
+}
+public Integer getSequenceNumber() {
+	return sequenceNumber;
+}
+public void setSequenceNumber(Integer sequenceNumber) {
+	this.sequenceNumber = sequenceNumber;
 }
 public String getOrdinal() {
 	return ordinal;

@@ -283,6 +283,8 @@ public class AlsParser implements Parser {
 		ALSField field;
 		Iterator<Row> rowIterator = sheet.rowIterator();
 		Row row = rowIterator.next();
+		int sequence = 0;
+		String formOid = null;
 		while (rowIterator.hasNext()) {
 			row = rowIterator.next();
 			field = getAlsFieldInstance();
@@ -310,6 +312,17 @@ public class AlsParser implements Parser {
 					}
 				}
 			}
+			// FORMBUILD-652
+			if (formOid == null ) {//the first form
+				formOid = field.getFormOid();
+			} else {// Resetting the question sequence for each form 
+				if (!formOid.equals(field.getFormOid())) {
+					sequence = 0;
+					formOid = field.getFormOid();
+				}
+			}
+			// FORMBUILD-652
+			field.setSequenceNumber(sequence);
 			field.setOrdinal(row.getCell(cell_fieldOrdinal) != null ? dataFormatter.formatCellValue(row.getCell(cell_fieldOrdinal)) : null);
 			try {
 				Integer.parseInt(field.getOrdinal());
@@ -344,6 +357,8 @@ public class AlsParser implements Parser {
 				}
 			}
 			fields.add(field);
+			// FORMBUILD-652
+			sequence++;
 		}
 		if (cccError.getAlsErrors().size() > 0) {
 			alsData.setCccError(cccError);
