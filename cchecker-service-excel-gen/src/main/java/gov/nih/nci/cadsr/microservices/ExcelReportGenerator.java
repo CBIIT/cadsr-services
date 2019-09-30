@@ -51,18 +51,18 @@ public class ExcelReportGenerator {
 	private static final String formsCheckedLbl = "# Forms in protocol Checked";
 	private static final String totalQuestCongLbl = "# Total Questions Congruent ";
 	private static final String totalQuestCheckLbl = "# Total Questions Checked in %d forms";
-	private static final String totalQuestWarnLbl = "# Total Questions with Warnings ";
-	private static final String totalQuestErrorLbl = "# Total Questions with Errors in %d forms";
-	private static final String totalunassociatedQuestLbl = "# Total Questions without associated CDE ";
-	private static final String reqQuestMissLbl = "# Required NRDS Questions missing ";
+	private static final String totalQuestWarnLbl = "# Total Questions With Warnings ";
+	private static final String totalQuestErrorLbl = "# Total Questions With Errors in %d forms";
+	private static final String totalunassociatedQuestLbl = "# Total Questions Without Associated CDE ";
+	private static final String reqQuestMissLbl = "# Required NRDS Questions Missing ";
 	private static final String reqNrdsQuestCongLbl = "# Required NRDS Questions Congruent ";
 	private static final String reqNrdsQuestWarnLbl = "# Required NRDS Questions With Warnings ";
 	private static final String reqNrdsQuestErrorLbl = "# Required NRDS Questions With Errors ";
 	// FORMBUILD-636
-	private static final String reqNciQuestMissLbl = "# Required NCI Questions missing ";
-	private static final String reqNciQuestCongLbl = "# Required NCI Questions congruent ";
-	private static final String reqNciQuestWarnLbl = "# Required NCI Questions with warnings ";
-	private static final String reqNciQuestErrorLbl = "# Required NCI Questions with errors ";	
+	private static final String reqNciQuestMissLbl = "# Required NCI Questions Missing ";
+	private static final String reqNciQuestCongLbl = "# Required NCI Questions Congruent ";
+	private static final String reqNciQuestWarnLbl = "# Required NCI Questions With Warnings ";
+	private static final String reqNciQuestErrorLbl = "# Required NCI Questions With Errors ";	
 	
 	private static final String nciStdManQuestLbl = "# NCI Standard Template Mandatory Modules Questions missing from Protocol ";
 	private static final String nciStdManCongLbl = "# NCI Standard Template Mandatory Modules Questions Congruent ";
@@ -90,21 +90,21 @@ public class ExcelReportGenerator {
 	private static final String matching_nrds_cdes_tab_name = "NRDS CDEs in ALS";
 	private static final String nrds_missing_cde_tab_name = "NCI Questions Missing";
 	//FORMBUILD-621
-	private static final String reqCdashMissLbl = "# Required CDASH 2.0 Questions missing ";
+	private static final String reqCdashMissLbl = "# Required CDASH x.x Questions Missing ";
 	// FORMBUILD-636
-	private static final String reqCdashQuestWarnLbl = "# Required CDASH 2.0 Questions with warnings ";
+	private static final String reqCdashQuestWarnLbl = "# Required CDASH x.x Questions With Warnings ";
 	// FORMBUILD-636
-	private static final String reqCdashQuestErrorLbl = "# Required CDASH 2.0 Questions with errors ";
-	private static final String reqSdtmMissLbl = "# Required SDTM 3.3 Questions missing ";
+	private static final String reqCdashQuestErrorLbl = "# Required CDASH x.x Questions With Errors ";
+	private static final String reqSdtmMissLbl = "# Required SDTM x.x Questions Missing ";
 	// FORMBUILD-636
-	private static final String reqSdtmQuestWarnLbl = "# Required SDTM 3.3 Questions with warnings ";
+	private static final String reqSdtmQuestWarnLbl = "# Required SDTM x.x Questions With Warnings ";
 	// FORMBUILD-636
-	private static final String reqSdtmQuestErrorLbl = "# Required SDTM 3.3 Questions with errors ";	
-	private static final String cdash_missing_cde_sheet_name = "CDASH 2.0 CDEs Missing";
-	private static final String sdtm_missing_cde_sheet_name = "SDTM 3.3 CDEs Missing";
-	private static final String cdash_missing_cde_header = "CDISC/CDASH 2.0 CDEs missing from the ALS file";
-	private static final String sdtm_missing_cde_header = "CDISC/SDTM 3.3 CDEs missing from the ALS file";
-	private static final String[] classifiedMissingRowHeaders = { "CDE IDVersion", "CDE Name" };
+	private static final String reqSdtmQuestErrorLbl = "# Required SDTM x.x Questions With Errors ";	
+	private static final String cdash_missing_cde_sheet_name = "CDASH x.x CDEs Missing";
+	private static final String sdtm_missing_cde_sheet_name = "SDTM x.x CDEs Missing";
+	private static final String cdash_missing_cde_header = "CDASH x.x CDEs missing from the ALS file";
+	private static final String sdtm_missing_cde_header = "SDTM x.x CDEs missing from the ALS file";
+	private static final String[] classifiedMissingRowHeaders = { "CDE IDVersion", "CDE Name", "Preferred Question Text" };
 	//
 	private static final String nrds_missing_cde_header = "Required NCI Questions missing from the ALS file";
 	private static final String matching_nrds_cdes_header = "NRDS CDEs included in Protocol Forms with Warnings or Errors";
@@ -945,6 +945,8 @@ public class ExcelReportGenerator {
 			newCell.setCellValue(cde.getCdeIdVersion());
 			newCell = row.createCell(colNum++);
 			newCell.setCellValue(cde.getCdeName());
+			newCell = row.createCell(colNum++);
+			newCell.setCellValue(cde.getPreQuestionText());
 		}
 
 		return workbook;

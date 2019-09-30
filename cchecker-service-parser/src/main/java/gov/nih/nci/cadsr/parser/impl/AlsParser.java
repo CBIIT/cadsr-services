@@ -317,7 +317,11 @@ public class AlsParser implements Parser {
 				formOid = field.getFormOid();
 			} else {// Resetting the question sequence for each form 
 				if (!formOid.equals(field.getFormOid())) {
-					sequence = 0;
+					if (formOId_als.equalsIgnoreCase(field.getFieldOid())) {
+						sequence = 0; // FORM OID row becomes question 0
+					} else {
+						sequence = 1; // Resetting question sequence to 1 for those forms without Form OID row 
+					}
 					formOid = field.getFormOid();
 				}
 			}

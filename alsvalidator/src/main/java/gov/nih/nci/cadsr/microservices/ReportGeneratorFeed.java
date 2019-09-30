@@ -882,6 +882,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 		CdeMissing cdeMissing = new CdeMissing();
 		cdeMissing.setCdeIdVersion(nrdsDb.getCdeId()+"v"+nrdsDb.getDeVersion());
 		cdeMissing.setCdeName(nrdsDb.getDeName());
+		cdeMissing.setPreQuestionText(nrdsDb.getDeQuestion());
 		return cdeMissing;
 	}
 	/**
