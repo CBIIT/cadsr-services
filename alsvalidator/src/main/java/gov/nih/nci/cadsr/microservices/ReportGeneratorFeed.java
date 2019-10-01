@@ -41,6 +41,7 @@ import gov.nih.nci.cadsr.data.CategoryCde;
 import gov.nih.nci.cadsr.data.CategoryNrds;
 import gov.nih.nci.cadsr.data.CdeMissing;
 import gov.nih.nci.cadsr.data.CdeStdCrfData;
+import gov.nih.nci.cadsr.data.FeedFormStatus;
 import gov.nih.nci.cadsr.data.NrdsCde;
 import gov.nih.nci.cadsr.data.StandardCrfCde;
 import gov.nih.nci.cadsr.report.CdeFormInfo;
@@ -119,10 +120,15 @@ public class ReportGeneratorFeed implements ReportOutput {
 	public void setCdeServiceDetails(CdeServiceDetails cdeServiceDetails) {
 		this.cdeServiceDetails = cdeServiceDetails;
 	}
-
+	//TODO we can remove requestStatusMap and keep only currentFormMap when UI starts using FeedFormStatus instead of form number in feed service
 	//we will keep here a status of requests: sessionID-form processed number
 	private ConcurrentMap<String, String> requestStatusMap = new ConcurrentHashMap<>();
-	//we will keep here a status of requests: sessionID-form processed number
+	
+	//FORMBUILD-633 indicate X of X Questions 
+	private ConcurrentMap<String, FeedFormStatus> currentFormMap = new ConcurrentHashMap<>();
+	private static final FeedFormStatus feedStatusZero = new FeedFormStatus();
+	
+	//FORMBUILD-641 Add ability to Cancel the validation
 	private ConcurrentMap<String, String> requestRunningMap = new ConcurrentHashMap<>();
 	
 	public String feedRequestStatus(String sessionId) {
@@ -130,6 +136,36 @@ public class ReportGeneratorFeed implements ReportOutput {
 		if (feedNumber == null) feedNumber = "0";
 		return feedNumber;
 	}
+	
+	//FORMBUILD-633
+	/**
+	 * Provide current request status based on sessionId.
+	 * 
+	 * @param sessionId
+	 * @return FeedFormStatus
+	 */
+	public FeedFormStatus currentRequestStatus(String sessionId) {
+		FeedFormStatus feedForm = currentFormMap.get(sessionId);
+		if (feedForm == null) feedForm = feedStatusZero;
+		return feedForm;
+	}
+	/**
+	 * Returns ALS Form name by OID
+	 * 
+	 * @param String oid
+	 * @param List<ALSForm> formsList
+	 * @return String
+	 */		
+	protected static String findFormNameByFormOid(String oid, List<ALSForm> formsList) {
+		for (ALSForm alsForm : formsList) {
+			if (alsForm.getFormOid().equalsIgnoreCase(oid)) {
+					return alsForm.getDraftFormName();
+			}
+		}
+		return "";
+	}
+	
+	//FORMBUILD-641
 	public void cancelValidate(String sessionId) {
 		requestRunningMap.remove(sessionId);
 		logger.info("cancelValidate: " + sessionId);
@@ -311,11 +347,12 @@ public class ReportGeneratorFeed implements ReportOutput {
 		Map<CdeFormInfo, CdeDetails> formCdeDetailsMap = new HashMap<>();
 		
 		int feedFormNumber = 1;//this is to feed to UI
+		int countValidatedQuestions = 0;
 		
 		// Running through the list of CDEs/Questions (Fields sheet) to identify & 
 		// assign them into forms that they belong to
 		for (ALSField alsField : alsData.getFields()) {
-			if (! requestRunningMap.containsKey(sessionId)){
+			if (! requestRunningMap.containsKey(sessionId)){//FORMBUILD-641 cancel validation
 				//the request has been cancelled
 				logger.warn("The request has been cancelled for session: " + sessionId + ", owner: " + alsData.getReportOwner() + ", file: " + alsData.getFileName());
 				break;
@@ -323,9 +360,18 @@ public class ReportGeneratorFeed implements ReportOutput {
 			Boolean cdeServiceCall = true;
 			if (selForms.contains(alsField.getFormOid())) {
 				if (formOid == null ) {//the first form
-					requestStatusMap.put(sessionId, ""+feedFormNumber);
-					logger.debug("Current form to feed map, session: " + sessionId + ", form: " + feedFormNumber + ", FormOid:" + alsField.getFormOid());
 					formOid = alsField.getFormOid();
+					
+					if (StringUtils.isNotBlank(sessionId)) {//feed status code
+						//TODO remove requestStatusMap when feed is changed in UI
+						requestStatusMap.put(sessionId, ""+feedFormNumber);
+						logger.debug("Current form to feed map, session: " + sessionId + ", form: " + feedFormNumber + ", FormOid:" + formOid);
+						
+						//FORMBUILD-633
+						FeedFormStatus feedFormStatus = createFeedFormStatus(countValidatedQuestions, alsField.getDraftFieldName(), feedFormNumber);
+						currentFormMap.put(sessionId, feedFormStatus);
+						logger.debug("Current form to feed map, session: " + sessionId + ", form: " + feedFormStatus + ", FormOid:" + formOid);
+					}
 					cdeFormInfoList = cdeFormInfoMap.get(formOid);
 					formCdeDetailsMap = execAsync(cdeFormInfoList);
 				}
@@ -337,10 +383,18 @@ public class ReportGeneratorFeed implements ReportOutput {
 								form.setQuestions(questionsList); 
 								form = setFormCongruencyStatus(form);
 							}
+							countValidatedQuestions += questionsList.size();
 							feedFormNumber++;
-							if (StringUtils.isNotBlank(sessionId)) {
+							
+							if (StringUtils.isNotBlank(sessionId)) {//feed status code
+								//TODO remove requestStatusMap when feed is changed in UI
 								requestStatusMap.put(sessionId, ""+feedFormNumber);
 								logger.debug("Current form to feed map, session: " + sessionId + ", form: " + feedFormNumber);
+								//FORMBUILD-633
+								String alsFormName = findFormNameByFormOid(alsField.getFormOid(), alsData.getForms());
+								FeedFormStatus feedFormStatus = createFeedFormStatus(countValidatedQuestions, alsFormName, feedFormNumber);
+								currentFormMap.put(sessionId, feedFormStatus);
+								logger.debug("Current form to feed map, session: " + sessionId + ", form: " + feedFormStatus + ", FormOid:" + formOid);
 							}
 							form.setRaveFormOid(formOid);
 							// Total Questions for the form (incl. FORM_OID questions)
@@ -348,6 +402,13 @@ public class ReportGeneratorFeed implements ReportOutput {
 							// Total number of questions that were checked, after ignoring FORM_OID questions
 							form.setTotalQuestionsChecked(countQuestChecked);
 							formsList.add(form);
+							//FORMBUILD-633
+							if (StringUtils.isNotBlank(sessionId)) {//feed status code
+								countValidatedQuestions+= countQuestChecked;
+								FeedFormStatus feedFormStatus = createFeedFormStatus(countValidatedQuestions, form.getFormName(), feedFormNumber);
+								currentFormMap.put(sessionId, feedFormStatus);
+								logger.debug("Current form to feed map, session: " + sessionId + ", form: " + feedFormStatus + ", FormOid:" + formOid);
+							}
 							totalQuestCount = 0;
 							countQuestChecked = 0;
 							formOid = alsField.getFormOid();
@@ -541,14 +602,26 @@ public class ReportGeneratorFeed implements ReportOutput {
 		//FORMBUILD-636
 		calculateCdiscReportTotals(cccReport);
 		cccReport.setSelectedFormsCount(cccReport.getCccForms().size());
+		//TODO remove requestStatusMap when feed is changed in UI
 		requestStatusMap.remove(sessionId);
-		//this is a feasibility implementation; 
+		//FORMBUILD-633
+		currentFormMap.remove(sessionId);
+		//FORMBUILD-641 cancel request
 		//we assume that just one request with this session ID can be running.
 		//TODO change to a more sophisticated approach if two validation requests can be running using the same session ID.
 		requestRunningMap.remove(sessionId);
 		return cccReport;
 	}
 	
+	//FORMBUILD-633 feed to include the number of Questions
+	private FeedFormStatus createFeedFormStatus(int countValidatedQuestions, String draftFieldName, int feedFormNumber) {
+		FeedFormStatus feedFormStatus = new FeedFormStatus();
+		feedFormStatus.setCountValidatedQuestions(countValidatedQuestions);
+		feedFormStatus.setCurrFormNumber(feedFormNumber);
+		feedFormStatus.setCurrFormName(draftFieldName);
+		return feedFormStatus;
+	}
+
 	protected void calculateCdiscReportTotals(final CCCReport cccReport) {
 		List<CCCForm> cccforms = cccReport.getCccForms();
 		int countCdashWithErrors = 0;

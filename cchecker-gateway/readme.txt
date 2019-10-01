@@ -76,12 +76,17 @@ returns Save as Excel object
 or 400 - wrong ID format
 or 404 - not found
 **********feedcheckstatus************
-Feed Validation status
+Feed Validation status (deprecated)
 /feedcheckstatus/{sessionid}
 Use an existed UID as a cookie and as a URL path parameter for testing this service.
 Example:
 curl -v --cookie "_cchecker=005BE648-0924-491B-AF22-C02AEF415FB8" http://localhost:8080/gateway/feedcheckstatus/A9D4DF89-7680-48F5-8E0E-7094567944D1
 return SSE with current form number
+
+/feedvalidatestatus/{sessionid}
+curl -v --cookie "_cchecker=005BE648-0924-491B-AF22-C02AEF415FB8" http://localhost:8080/gateway/feedvalidatestatus/38015E6C-439A-45A9-9D78-0674202D9BEE
+return SSE with JSON. Example:
+{"currFormName":"Specimen Transmittal","currFormNumber":67,"countValidatedQuestions":758}
 **********cancelvalidation************
 Cancels previous Validation status
 /cancelvalidation/{sessionid}

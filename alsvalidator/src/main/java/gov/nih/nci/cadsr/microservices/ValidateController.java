@@ -29,6 +29,7 @@ import gov.nih.nci.cadsr.data.ALSError;
 import gov.nih.nci.cadsr.data.ALSForm;
 import gov.nih.nci.cadsr.data.CCCError;
 import gov.nih.nci.cadsr.data.CCCReport;
+import gov.nih.nci.cadsr.data.FeedFormStatus;
 import gov.nih.nci.cadsr.data.ValidateParamWrapper;
 
 @RestController
@@ -54,6 +55,15 @@ public class ValidateController {
 		String formUndervalidation = reportGeneratorFeed.feedRequestStatus(idseq);
 		//logger.debug("feedValidateStatus called: " + idseq + ", current form: " + formUndervalidation);
 		return new ResponseEntity<String>(formUndervalidation, HttpStatus.OK);
+	}
+	//FORMBUILD-633
+	@CrossOrigin
+	@GetMapping("/rest/feedvalidateform/{idseq}")
+	public ResponseEntity<?> feedValidateFormStatus(HttpServletRequest request,
+			@PathVariable("idseq") String idseq) {
+		FeedFormStatus formUndervalidation = reportGeneratorFeed.currentRequestStatus(idseq);
+		//logger.debug("feedValidateStatus called: " + idseq + ", current form: " + formUndervalidation);
+		return new ResponseEntity<FeedFormStatus>(formUndervalidation, HttpStatus.OK);
 	}
 	@CrossOrigin
 	@GetMapping("/rest/cancelvalidate/{idseq}")

@@ -37,9 +37,14 @@ checkCRF=true/false
 displayExceptions=true/false
 
 
-To call feed current form number:
+To call feed current form number (deprecated):
 http://localhost:4805/rest/validateservice/feedvalidateformnumber/8519163A-ECB2-40C4-B229-5C13E0F4279B
 curl -X GET -i http://localhost:4805/rest/feedvalidateformnumber/8519163A-ECB2-40C4-B229-5C13E0F4279B
+
+To call feed current form
+curl -X GET -i -v http://localhost:4805/rest/feedvalidateform/8519163A-ECB2-40C4-B229-5C13E0F4279B
+Response is JSON as
+{"currFormName":"Specimen Transmittal","currFormNumber":67,"countValidatedQuestions":758}
 
 To call cancel current form validation:
 http://localhost:4805/rest/validateservice/cancelrequest/8519163A-ECB2-40C4-B229-5C13E0F4279B
