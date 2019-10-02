@@ -885,7 +885,8 @@ public class ReportGeneratorFeed implements ReportOutput {
 		String[] versionTokens = version.split("\\_");
 		version = versionTokens[0] + "." + versionTokens[1];
 		question.setCdePublicId(id.trim());
-		question.setCdeVersion(version);		
+		question.setCdeVersion(version);
+		question.setCdePidVersion(question.getCdePublicId()+"v"+question.getCdeVersion());
 		return question;
 	}
 	
@@ -1155,7 +1156,15 @@ public class ReportGeneratorFeed implements ReportOutput {
 								}
 							}
 						}
-					}					
+					} else if (congStatus_congruent.equals(tempQuestion.getQuestionCongruencyStatus())) {
+						if (report.getIsCheckStdCrfCdeChecked()) {
+							if (tempQuestion.getNciCategory()!=null) {
+								if (tempQuestion.getNciCategory().indexOf(mandatory_crf) > -1) {
+									manCrfCong++;	
+								}
+							}
+						}
+					}				
 				}
 			}
 		}
@@ -1178,7 +1187,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 		
 		// FORMBUILD-636
 		report.setCountNciMissing(stdManMissingCount + report.getCountNrdsMissing());
-		report.setCountManCrfCongruent(manCrfCong + report.getCountNrdsCongruent());
+		report.setCountNciCongruent(manCrfCong + report.getCountNrdsCongruent());
 		report.setCountNciWithWarnings(manCrfWarn + report.getCountNrdsWithWarnings());
 		report.setCountNciWithErrors(manCrfErr + report.getCountNrdsWithErrors());
 		

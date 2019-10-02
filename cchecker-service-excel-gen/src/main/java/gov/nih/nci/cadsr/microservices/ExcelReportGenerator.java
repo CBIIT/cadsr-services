@@ -142,7 +142,7 @@ public class ExcelReportGenerator {
 	private static final String cdeStdCrfMissingmsg = "CDEs in Standard Template \"%s\" Modules Not Used";
 	private static final String[] crfRowHeaders = { "CDE IDVersion", "CDE Long Name", "Preferred Question Text", "Type", "Template Name", "CRF ID Version" };
 	private static final String[] nrdsRowHeaders = { "Rave Form OID", "RAVE Field Order", "RAVE Field Label",
-			"CDE ID Version", "CDE Long Name", "Result", "Message" };
+			"CDE ID Version", "CDE Long Name", "Result", "Message", "Type" };
 	// FORMBUILD-652	
 	private static final String seqNumLbl = "Sequence #";
 	private static final String fieldOrderLbl = "ALS Ordinal #";
@@ -565,10 +565,7 @@ public class ExcelReportGenerator {
 		// FORMBUILD-652		
 		formFields.put(seqNumLbl, question.getSequenceNumber().toString());
 		formFields.put(fieldOrderLbl, question.getFieldOrder());
-		if (question.getCdePublicId()!=null && question.getCdeVersion()!=null)
-			formFields.put(cdePidVerLbl, question.getCdePublicId()+"v"+question.getCdeVersion());
-		else 
-			formFields.put(cdePidVerLbl, "");
+		formFields.put(cdePidVerLbl, question.getCdePidVersion());
 		// FORMBUILD-652
 		/* formFields.put(cdeIdLbl, question.getCdePublicId());
 		 formFields.put(cdeVersion, question.getCdeVersion()); */
@@ -822,7 +819,7 @@ public class ExcelReportGenerator {
 			newCell = row.createCell(colNum++);
 			newCell.setCellValue(stdCrfCde.getMessage());
 			newCell = row.createCell(colNum++);
-			newCell.setCellValue("Std CRF Mandatory");
+			newCell.setCellValue("Std CRF");
 		}		
 
 		return workbook;

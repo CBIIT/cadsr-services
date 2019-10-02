@@ -14,6 +14,7 @@ Integer sequenceNumber;
 String fieldOrder;
 String cdePublicId;
 String cdeVersion;
+String cdePidVersion;   // Combined Public ID & Version
 String nciCategory;
 String questionCongruencyStatus;
 String message;
@@ -72,6 +73,12 @@ public String getCdeVersion() {
 }
 public void setCdeVersion(String cdeVersion) {
 	this.cdeVersion = cdeVersion;
+}
+public String getCdePidVersion() {
+	return cdePidVersion;
+}
+public void setCdePidVersion(String cdePidVersion) {
+	this.cdePidVersion = cdePidVersion;
 }
 public String getNciCategory() {
 	return nciCategory;
