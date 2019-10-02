@@ -386,16 +386,15 @@ public class ReportGeneratorFeed implements ReportOutput {
 								form.setQuestions(questionsList); 
 								form = setFormCongruencyStatus(form);
 							}
-							countValidatedQuestions += questionsList.size();
 							feedFormNumber++;
 							
 							if (StringUtils.isNotBlank(sessionId)) {//feed status code
 								//TODO remove requestStatusMap when feed is changed in UI
 								requestStatusMap.put(sessionId, ""+feedFormNumber);
 								logger.debug("Current form to feed map, session: " + sessionId + ", form: " + feedFormNumber);
-								//FORMBUILD-633
-								String alsFormName = findFormNameByFormOid(alsField.getFormOid(), alsData.getForms());
-								FeedFormStatus feedFormStatus = createFeedFormStatus(countValidatedQuestions, alsFormName, feedFormNumber);
+								//FORMBUILD-633 
+								countValidatedQuestions+=countQuestChecked;
+								FeedFormStatus feedFormStatus = createFeedFormStatus(countValidatedQuestions, form.getFormName(), feedFormNumber);
 								currentFormMap.put(sessionId, feedFormStatus);
 								logger.debug("Current form to feed map, session: " + sessionId + ", form: " + feedFormStatus + ", FormOid:" + formOid);
 							}
@@ -407,7 +406,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 							formsList.add(form);
 							totalQuestCount = 0;
 							countQuestChecked = 0;
-							formOid = alsField.getFormOid();
+							formOid = alsField.getFormOid();//new current form
 							form = new CCCForm();
 							questionsList = new ArrayList<CCCQuestion>();
 							cdeFormInfoList = cdeFormInfoMap.get(formOid);//new form
