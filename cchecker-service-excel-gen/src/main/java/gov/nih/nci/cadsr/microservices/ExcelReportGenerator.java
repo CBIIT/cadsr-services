@@ -104,7 +104,7 @@ public class ExcelReportGenerator {
 	private static final String sdtm_missing_cde_sheet_name = "SDTM x.x CDEs Missing";
 	private static final String cdash_missing_cde_header = "CDASH x.x CDEs missing from the ALS file";
 	private static final String sdtm_missing_cde_header = "SDTM x.x CDEs missing from the ALS file";
-	private static final String[] classifiedMissingRowHeaders = { "CDE IDVersion", "CDE Name", "Preferred Question Text" };
+	private static final String[] classifiedMissingRowHeaders = { "CDE IDVersion", "CDE Long Name", "Preferred Question Text" };
 	//
 	private static final String nrds_missing_cde_header = "Required NCI Questions missing from the ALS file";
 	private static final String matching_nrds_cdes_header = "NCI Questions included in Protocol Forms with Warnings or Errors";
