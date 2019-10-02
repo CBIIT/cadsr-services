@@ -370,7 +370,8 @@ public class ReportGeneratorFeed implements ReportOutput {
 						logger.debug("Current form to feed map, session: " + sessionId + ", form: " + feedFormNumber + ", FormOid:" + formOid);
 						
 						//FORMBUILD-633
-						FeedFormStatus feedFormStatus = createFeedFormStatus(countValidatedQuestions, alsField.getDraftFieldName(), feedFormNumber);
+						String alsFormName = findFormNameByFormOid(formOid, alsData.getForms());
+						FeedFormStatus feedFormStatus = createFeedFormStatus(countValidatedQuestions, alsFormName, feedFormNumber);
 						currentFormMap.put(sessionId, feedFormStatus);
 						logger.debug("Current form to feed map, session: " + sessionId + ", form: " + feedFormStatus + ", FormOid:" + formOid);
 					}
@@ -404,13 +405,6 @@ public class ReportGeneratorFeed implements ReportOutput {
 							// Total number of questions that were checked, after ignoring FORM_OID questions
 							form.setTotalQuestionsChecked(countQuestChecked);
 							formsList.add(form);
-							//FORMBUILD-633
-							if (StringUtils.isNotBlank(sessionId)) {//feed status code
-								countValidatedQuestions+= countQuestChecked;
-								FeedFormStatus feedFormStatus = createFeedFormStatus(countValidatedQuestions, form.getFormName(), feedFormNumber);
-								currentFormMap.put(sessionId, feedFormStatus);
-								logger.debug("Current form to feed map, session: " + sessionId + ", form: " + feedFormStatus + ", FormOid:" + formOid);
-							}
 							totalQuestCount = 0;
 							countQuestChecked = 0;
 							formOid = alsField.getFormOid();
