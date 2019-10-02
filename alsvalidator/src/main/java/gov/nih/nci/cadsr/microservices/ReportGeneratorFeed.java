@@ -330,6 +330,8 @@ public class ReportGeneratorFeed implements ReportOutput {
 		int totalNrdsError = 0;		
 
 		List<NrdsCde> nrdsCdeList = new ArrayList<NrdsCde>();
+		// FORMBUILD-636
+		List<StandardCrfCde> matchingStdCrfCdeList = new ArrayList<StandardCrfCde>();
 		List<StandardCrfCde> standardCrfCdeList = new ArrayList<StandardCrfCde>();
 		List<CCCQuestion> questionsList = new ArrayList<CCCQuestion>();
 		List<CCCQuestion> congQuestionsList = new ArrayList<CCCQuestion>();
@@ -468,7 +470,10 @@ public class ReportGeneratorFeed implements ReportOutput {
 							// updating the NCI category to the question
 							question = updateNciCategory(checkStdCrfCde, cdeCrfData, question, cdeDetails);
 							nrdsCdeList = getNrdsCdeList(question, cdeDetails, nrdsCdeList);
-							
+							// FORMBUILD-636
+							if (checkStdCrfCde) {
+								matchingStdCrfCdeList = getStdManCrfCdeList(question, cdeDetails, matchingStdCrfCdeList); 
+							}
 							//FORMBUILD-621
 							addToReportCdeList(question, cdeDetails, reportCdeList);
 							
@@ -576,6 +581,8 @@ public class ReportGeneratorFeed implements ReportOutput {
 		cccReport.setNrdsCdeList(nrdsCdeList);
 		if (checkStdCrfCde) {		
 			cccReport.setMissingStandardCrfCdeList(missingStdCrfCdeList);
+			// FORMBUILD-636
+			cccReport.setStdCrfCdeList(matchingStdCrfCdeList);
 		}
 		cccReport.setCountCongruentQuestions(congQuestionsList.size());
 		cccReport = computeFormsAndQuestionsCount(cccReport);
@@ -742,6 +749,26 @@ public class ReportGeneratorFeed implements ReportOutput {
 	}		
 		return nrdsCdeList;
 	}	
+	
+	
+	// FORMBUILD-636	
+	/**
+	 * Assigning the CDE to the CDEs list based on the question's NCI category - Std CRF Mandatory 
+	 * @param question
+	 * @param cdeDetails
+	 * @param nrdsCdeList
+	 * @return List<NrdsCde>
+	 */
+	protected static List<StandardCrfCde> getStdManCrfCdeList (CCCQuestion question, CdeDetails cdeDetails, List<StandardCrfCde> standardCrfCdeList) {
+	if (cdeDetails.getDataElement()!=null)  {
+	if (mandatory_crf.equalsIgnoreCase(question.getNciCategory())) {
+		standardCrfCdeList.add(buildStdCrfCde(question,
+				cdeDetails.getDataElement().getDataElementDetails().getLongName()));
+		}
+	}		
+		return standardCrfCdeList;
+	}		
+	
 	
 	//FORMBUILD-621
 	/**
@@ -931,6 +958,27 @@ public class ReportGeneratorFeed implements ReportOutput {
 	}
 	
 	
+	// FORMBUILD-636	
+	/**
+	 * Populate a Standard CRF CDE - Mandatory 
+	 * @param CCCQuestion
+	 * @param string
+	 * @return Return StandardCrfCde for a question
+	 * 
+	 */
+	protected static StandardCrfCde buildStdCrfCde(CCCQuestion question, String cdeName) {
+		StandardCrfCde stdCrf = new StandardCrfCde();
+		stdCrf.setRaveFormOid(question.getRaveFormOId());
+		stdCrf.setCdeIdVersion(question.getCdePublicId() + "v" + question.getCdeVersion());
+		stdCrf.setCdeName(cdeName);
+		stdCrf.setRaveFieldLabel(question.getRaveFieldLabel());
+		stdCrf.setRaveFieldOrder(question.getFieldOrder());
+		stdCrf.setResult(question.getQuestionCongruencyStatus());
+		stdCrf.setMessage(question.getMessage());
+		return stdCrf;
+	}	
+	
+	
 	/**
 	 * Populate a missing NRDS CDE from a NRDS 
 	 * @param nrdsDb
@@ -962,7 +1010,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 	 * Populate a Standard CRF CDE
 	 * @param cdeCrfData
 	 * @param cdeName
-	 * @return Return NrdsCde for a question
+	 * @return Return StandardCrfCde for a question
 	 * 
 	 */
 	protected static StandardCrfCde buildCrfCde(CdeStdCrfData cdeCrfData, String cdeName) {

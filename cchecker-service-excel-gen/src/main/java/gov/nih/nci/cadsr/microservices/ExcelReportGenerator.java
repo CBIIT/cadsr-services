@@ -87,7 +87,7 @@ public class ExcelReportGenerator {
 	private static final int borderStartColumn5 = 28;
 	private static final int borderStartColumn6 = 31;
 	private static final int borderStartColumn7 = 34;	
-	private static final String matching_nrds_cdes_tab_name = "NRDS CDEs in ALS";
+	private static final String matching_nrds_cdes_tab_name = "NCI Questions in ALS";
 	private static final String nrds_missing_cde_tab_name = "NCI Questions Missing";
 	//FORMBUILD-621
 	private static final String reqCdashMissLbl = "# Required CDASH x.x Questions Missing ";
@@ -107,7 +107,7 @@ public class ExcelReportGenerator {
 	private static final String[] classifiedMissingRowHeaders = { "CDE IDVersion", "CDE Name", "Preferred Question Text" };
 	//
 	private static final String nrds_missing_cde_header = "Required NCI Questions missing from the ALS file";
-	private static final String matching_nrds_cdes_header = "NRDS CDEs included in Protocol Forms with Warnings or Errors";
+	private static final String matching_nrds_cdes_header = "NCI Questions included in Protocol Forms with Warnings or Errors";
 	private static final String congStatus_Congruent = "CONGRUENT";
 	private static final int cell_max_limit = 32767;
 	private static final int cell_write_limit = 32700;
@@ -142,7 +142,7 @@ public class ExcelReportGenerator {
 	private static final String cdeStdCrfMissingmsg = "CDEs in Standard Template \"%s\" Modules Not Used";
 	private static final String[] crfRowHeaders = { "CDE IDVersion", "CDE Long Name", "Preferred Question Text", "Type", "Template Name", "CRF ID Version" };
 	private static final String[] nrdsRowHeaders = { "Rave Form OID", "RAVE Field Order", "RAVE Field Label",
-			"CDE ID Version", "CDE Name", "Result", "Message" };
+			"CDE ID Version", "CDE Long Name", "Result", "Message" };
 	// FORMBUILD-652	
 	private static final String seqNumLbl = "Sequence #";
 	private static final String fieldOrderLbl = "ALS Ordinal #";
@@ -458,7 +458,7 @@ public class ExcelReportGenerator {
 				}
 			}
 		}
-		buildNrdsTab(workbook, cccReport.getNrdsCdeList());
+		buildNrdsTab(workbook, cccReport.getNrdsCdeList(), cccReport.getStdCrfCdeList());
 		// FORMBUILD-635
 		boolean isCheckStdCrfCdeChecked = cccReport.getIsCheckStdCrfCdeChecked() != null ? 
 		cccReport.getIsCheckStdCrfCdeChecked() : false;//this is to avoid NullPointerException
@@ -733,7 +733,7 @@ public class ExcelReportGenerator {
 	 * @param nrdsCdeList
 	 * @return XSSFWorkbook
 	 */
-	public static Workbook buildNrdsTab(Workbook workbook, List<NrdsCde> nrdsCdeList) {
+	public static Workbook buildNrdsTab(Workbook workbook, List<NrdsCde> nrdsCdeList, List<StandardCrfCde> stdCrfCdeList) {
 		Row row;
 		Sheet sheet = workbook.createSheet(matching_nrds_cdes_tab_name);
 		// Setting fixed column widths for cells
@@ -796,7 +796,34 @@ public class ExcelReportGenerator {
 			newCell.setCellValue(cde.getResult());
 			newCell = row.createCell(colNum++);
 			newCell.setCellValue(cde.getMessage());
+			// FORMBUILD-636
+			newCell = row.createCell(colNum++);
+			newCell.setCellValue("NRDS");			
 		}
+		
+		// FORMBUILD-636
+		// Print the ALS CDEs matching with the Standard CRF Mandatory CDEs
+		for (StandardCrfCde stdCrfCde : stdCrfCdeList) {
+			colNum = 0;
+			row = sheet.createRow(rowNum++);
+			newCell = row.createCell(colNum++);
+			newCell.setCellValue(stdCrfCde.getRaveFormOid());
+			newCell = row.createCell(colNum++);
+			newCell.setCellValue(stdCrfCde.getRaveFieldOrder());
+			newCell = row.createCell(colNum++);
+			newCell.setCellStyle(cellStyle);
+			newCell.setCellValue(stdCrfCde.getRaveFieldLabel());
+			newCell = row.createCell(colNum++);
+			newCell.setCellValue(stdCrfCde.getCdeIdVersion());
+			newCell = row.createCell(colNum++);
+			newCell.setCellValue(stdCrfCde.getCdeName());
+			newCell = row.createCell(colNum++);
+			newCell.setCellValue(stdCrfCde.getResult());
+			newCell = row.createCell(colNum++);
+			newCell.setCellValue(stdCrfCde.getMessage());
+			newCell = row.createCell(colNum++);
+			newCell.setCellValue("Std CRF Mandatory");
+		}		
 
 		return workbook;
 	}

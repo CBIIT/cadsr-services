@@ -12,6 +12,13 @@ String templateName;
 String idVersion;
 String preferredQuestionText;
 
+// FORMBUILD-636
+String raveFormOid;
+String raveFieldOrder;
+String raveFieldLabel;
+String result; // ERRORS/WARNINGS
+String message;
+
 public String getStdTemplateType() {
 	return stdTemplateType;
 }
@@ -47,6 +54,36 @@ public String getPreferredQuestionText() {
 }
 public void setPreferredQuestionText(String preferredQuestionText) {
 	this.preferredQuestionText = preferredQuestionText;
+}
+public String getRaveFormOid() {
+	return raveFormOid;
+}
+public void setRaveFormOid(String raveFormOid) {
+	this.raveFormOid = raveFormOid;
+}
+public String getRaveFieldOrder() {
+	return raveFieldOrder;
+}
+public void setRaveFieldOrder(String raveFieldOrder) {
+	this.raveFieldOrder = raveFieldOrder;
+}
+public String getRaveFieldLabel() {
+	return raveFieldLabel;
+}
+public void setRaveFieldLabel(String raveFieldLabel) {
+	this.raveFieldLabel = raveFieldLabel;
+}
+public String getResult() {
+	return result;
+}
+public void setResult(String result) {
+	this.result = result;
+}
+public String getMessage() {
+	return message;
+}
+public void setMessage(String message) {
+	this.message = message;
 }
 
 }

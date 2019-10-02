@@ -83,6 +83,8 @@ int countSdtmWithErrors;
 List<CCCForm> cccForms = new ArrayList<CCCForm>();
 int selectedFormsCount = 0;
 List<NrdsCde> nrdsCdeList = new ArrayList<NrdsCde>();
+//FORMBUILD-636
+List<StandardCrfCde> stdCrfCdeList = new ArrayList<StandardCrfCde>();
 List<NrdsCde> missingNrdsCdeList = new ArrayList<NrdsCde>();
 List<CdeMissing> missingCdashCdeList = new ArrayList<>();
 List<CdeMissing> missingSdtmCdeList = new ArrayList<>();
@@ -411,6 +413,14 @@ public List<NrdsCde> getNrdsCdeList() {
 
 public void setNrdsCdeList(List<NrdsCde> nrdsCdeList) {
 	this.nrdsCdeList = nrdsCdeList;
+}
+
+public List<StandardCrfCde> getStdCrfCdeList() {
+	return stdCrfCdeList;
+}
+
+public void setStdCrfCdeList(List<StandardCrfCde> stdCrfCdeList) {
+	this.stdCrfCdeList = stdCrfCdeList;
 }
 
 public List<NrdsCde> getMissingNrdsCdeList() {
