@@ -7,6 +7,7 @@ public class FeedFormStatus {
 	private String currFormName;
 	private int currFormNumber;
 	private int countValidatedQuestions;
+	private int countSelectedQuestions;
 	public String getCurrFormName() {
 		return currFormName;
 	}
@@ -25,10 +26,18 @@ public class FeedFormStatus {
 	public void setCountValidatedQuestions(int countValidatedQuestions) {
 		this.countValidatedQuestions = countValidatedQuestions;
 	}
+	public int getCountSelectedQuestions() {
+		return countSelectedQuestions;
+	}
+	public void setCountSelectedQuestions(int countSelectedQuestions) {
+		this.countSelectedQuestions = countSelectedQuestions;
+	}
+
 	@Override
 	public String toString() {
 		return "FeedFormStatus [currFormName=" + currFormName + ", currFormNumber=" + currFormNumber
-				+ ", countValidatedQuestions=" + countValidatedQuestions + "]";
+				+ ", countValidatedQuestions=" + countValidatedQuestions + ", countSelectedQuestions="
+				+ countSelectedQuestions + "]";
 	}
 	@Override
 	public int hashCode() {
