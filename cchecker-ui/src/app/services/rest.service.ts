@@ -65,7 +65,7 @@ export class RestService {
 
   // gets validation status //
   validateFeedStatus(sessionid) {
-    return this.http.get(`${this.REST_API}/gateway/feedcheckstatus/${sessionid}`,
+    return this.http.get(`${this.REST_API}/gateway/feedvalidatestatus/${sessionid}`,
     {
       observe:'events',
       reportProgress:true,

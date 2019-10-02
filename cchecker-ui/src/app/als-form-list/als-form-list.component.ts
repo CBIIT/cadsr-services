@@ -16,7 +16,7 @@ import { looseIdentical } from '@angular/core/src/util';
 export class AlsFormListComponent implements OnInit {
   checkedItems:Observable<String[]>;
   errorMessage:String;  
-  formValidationStatus:Number=1;
+  formValidationStatus:Object={currFormName: "", currFormNumber: 1, countValidatedQuestions: 0, countSelectedQuestions:0};
   formListData:Observable<Object>;
   fileName:String;
   userName:String;
@@ -105,8 +105,9 @@ export class AlsFormListComponent implements OnInit {
         if (e.type === HttpEventType.DownloadProgress) {
           let currentForm = e['partialText'].split('\n\n').filter(val => val!='' && val != 'data:').pop();
           if (currentForm) {
-            this.formValidationStatus = currentForm.replace('data:','');
+            this.formValidationStatus = JSON.parse(currentForm.replace('data:',''));
           }
+          console.log(currentForm)
 
         }
       },
@@ -122,7 +123,13 @@ export class AlsFormListComponent implements OnInit {
   };
 
   // gets current form for validation progress message //
-  getCurrentForm = () => `${this.formValidationStatus}`;
+  getCurrentForm = () => `${this.formValidationStatus['currFormNumber']}`;
+
+  // gets current question count that has been validated //
+  getCurrentQuestion = () => `${this.formValidationStatus['countValidatedQuestions']}`;  
+
+  // gets current question count that has been validated //
+  getTotalQuestions = () => `${this.formValidationStatus['countSelectedQuestions']}`;  
 
   // gets checkd status of record //
   getCheckedStatus = record => this.formListService.getCheckedStatus(record);

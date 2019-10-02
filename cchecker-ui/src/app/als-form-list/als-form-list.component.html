@@ -42,7 +42,7 @@
         </div>  
     </div><Br />
     <div *ngIf="validating">
-        <app-progress-bar [statusMessage]="'Validating Form ' + getCurrentForm() + ' of ' + (checkedItems | async)?.length" [type]="'busy'" [percentage]="100"></app-progress-bar><br />
+        <app-progress-bar [statusMessage]="'Validating Form ' + getCurrentForm() + ' of ' + (checkedItems | async)?.length + '<br />Questions ' + getCurrentQuestion() + ' of ' + getTotalQuestions() + ' have been validated.'" [type]="'busy'" [percentage]="100"></app-progress-bar><br />
     </div>
     <div *ngIf="cancelButtonStatus">
         <app-progress-bar [statusMessage]="'Cancelation in Progress'" [type]="'busy'" [percentage]="100"></app-progress-bar><br />
