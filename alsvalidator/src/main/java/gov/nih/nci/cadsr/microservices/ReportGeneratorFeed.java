@@ -394,7 +394,8 @@ public class ReportGeneratorFeed implements ReportOutput {
 								logger.debug("Current form to feed map, session: " + sessionId + ", form: " + feedFormNumber);
 								//FORMBUILD-633 
 								countValidatedQuestions+=countQuestChecked;
-								FeedFormStatus feedFormStatus = createFeedFormStatus(countValidatedQuestions, form.getFormName(), feedFormNumber);
+								String alsFormName = findFormNameByFormOid(alsField.getFormOid(), alsData.getForms());
+								FeedFormStatus feedFormStatus = createFeedFormStatus(countValidatedQuestions, alsFormName, feedFormNumber);
 								currentFormMap.put(sessionId, feedFormStatus);
 								logger.debug("Current form to feed map, session: " + sessionId + ", form: " + feedFormStatus + ", FormOid:" + formOid);
 							}
