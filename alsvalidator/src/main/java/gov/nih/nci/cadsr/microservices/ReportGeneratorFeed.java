@@ -1149,16 +1149,17 @@ public class ReportGeneratorFeed implements ReportOutput {
 								}
 							}
 						}
-					} else if (congStatus_congruent.equals(tempQuestion.getQuestionCongruencyStatus())) {
-						if (report.getIsCheckStdCrfCdeChecked()) {
-							if (tempQuestion.getNciCategory()!=null) {
-								if (tempQuestion.getNciCategory().indexOf(mandatory_crf) > -1) {
-									manCrfCong++;	
-								}
-							}
-						}
-					}				
+					}					
 				}
+			}
+		}
+
+		// FORMBUILD-636
+		for (StandardCrfCde crfCde : report.getStdCrfCdeList()) {
+			if (report.getIsCheckStdCrfCdeChecked()) {
+				if (congStatus_congruent.equals(crfCde.getResult())) {
+					manCrfCong++;
+				} 
 			}
 		}
 
