@@ -296,73 +296,75 @@ public class AlsParser implements Parser {
 			// DefaultValue
 			
 			field.setFormOid(row.getCell(cell_field_formOid) != null ? dataFormatter.formatCellValue(row.getCell(cell_field_formOid)) : null);
-			field.setDataDictionaryName(row.getCell(cell_fieldDataDictionaryName) != null ? dataFormatter.formatCellValue(row.getCell(cell_fieldDataDictionaryName)) : null);
-			field.setUnitDictionaryName(row.getCell(cell_fieldUnitDictionaryName) != null ? dataFormatter.formatCellValue(row.getCell(cell_fieldUnitDictionaryName)) : null);
-			field.setFieldOid(row.getCell(cell_fieldOid) != null ? dataFormatter.formatCellValue(row.getCell(cell_fieldOid)) : null);
-			if (formOId_als.equalsIgnoreCase(field.getFieldOid())) {
-				field.setDefaultValue(row.getCell(cell_fieldDefaultValue) != null ? dataFormatter.formatCellValue(row.getCell(cell_fieldDefaultValue)) : (row.getCell(cell_draftFieldName) != null 
-						? dataFormatter.formatCellValue(row.getCell(cell_draftFieldName)) : null));
-				if (field.getDefaultValue() != null) {
-					String[] splitFormId = extractIdVersion(field.getDefaultValue());
-					// Split form oid and version
-					if (NumberUtils.isCreatable(splitFormId[0]) && NumberUtils.isCreatable(splitFormId[1])
-							&& NumberUtils.isCreatable(splitFormId[2])) {
-							field.setFormPublicId(splitFormId[0]);
-							field.setVersion(splitFormId[1] + "." + splitFormId[2]);
+			if (field.getFormOid()!=null && !(field.getFormOid().isEmpty())) { // Avoiding blank rows
+				field.setDataDictionaryName(row.getCell(cell_fieldDataDictionaryName) != null ? dataFormatter.formatCellValue(row.getCell(cell_fieldDataDictionaryName)) : null);
+				field.setUnitDictionaryName(row.getCell(cell_fieldUnitDictionaryName) != null ? dataFormatter.formatCellValue(row.getCell(cell_fieldUnitDictionaryName)) : null);
+				field.setFieldOid(row.getCell(cell_fieldOid) != null ? dataFormatter.formatCellValue(row.getCell(cell_fieldOid)) : null);
+				if (formOId_als.equalsIgnoreCase(field.getFieldOid())) {
+					field.setDefaultValue(row.getCell(cell_fieldDefaultValue) != null ? dataFormatter.formatCellValue(row.getCell(cell_fieldDefaultValue)) : (row.getCell(cell_draftFieldName) != null 
+							? dataFormatter.formatCellValue(row.getCell(cell_draftFieldName)) : null));
+					if (field.getDefaultValue() != null) {
+						String[] splitFormId = extractIdVersion(field.getDefaultValue());
+						// Split form oid and version
+						if (NumberUtils.isCreatable(splitFormId[0]) && NumberUtils.isCreatable(splitFormId[1])
+								&& NumberUtils.isCreatable(splitFormId[2])) {
+								field.setFormPublicId(splitFormId[0]);
+								field.setVersion(splitFormId[1] + "." + splitFormId[2]);
+						}
 					}
 				}
-			}
-			// FORMBUILD-652
-			if (formOid == null ) {//the first form
-				formOid = field.getFormOid();
-			} else {// Resetting the question sequence for each form 
-				if (!formOid.equals(field.getFormOid())) {
-					if (formOId_als.equalsIgnoreCase(field.getFieldOid())) {
-						sequence = 0; // FORM OID row becomes question 0
-					} else {
-						sequence = 1; // Resetting question sequence to 1 for those forms without Form OID row 
-					}
+				// FORMBUILD-652
+				if (formOid == null) {//the first form
 					formOid = field.getFormOid();
+				} else {// Resetting the question sequence for each form 
+					if (!formOid.equals(field.getFormOid())) {
+						if (formOId_als.equalsIgnoreCase(field.getFieldOid())) {
+							sequence = 0; // FORM OID row becomes question 0
+						} else {
+							sequence = 1; // Resetting question sequence to 1 for those forms without Form OID row 
+						}
+						formOid = field.getFormOid();
+					}
 				}
-			}
-			// FORMBUILD-652
-			field.setSequenceNumber(sequence);
-			field.setOrdinal(row.getCell(cell_fieldOrdinal) != null ? dataFormatter.formatCellValue(row.getCell(cell_fieldOrdinal)) : null);
-			try {
-				Integer.parseInt(field.getOrdinal());
-			} catch (NumberFormatException e) {
-				cccError = addParsingValidationMsg(cccError, ordinal_str, fieldsSheetName, row.getRowNum() + 1, cell_fieldOrdinal, errorSeverity_warn, err_msg_24, 
-						field.getFormOid(), field.getFieldOid(), field.getDataDictionaryName(), field.getUnitDictionaryName());
-			}
-			field.setDraftFieldName(row.getCell(cell_draftFieldName) != null ? dataFormatter.formatCellValue(row.getCell(cell_draftFieldName)) : null);
-			if (field.getDraftFieldName()!=null) {
-			if (!(field.getDraftFieldName().indexOf(publicid_prefix) > -1
-					&& field.getDraftFieldName().indexOf(version_prefix) > -1)) {
-				cccError = addParsingValidationMsg(cccError, draftFieldName_str, fieldsSheetName, row.getRowNum() + 1, cell_draftFieldName, errorSeverity_warn, err_msg_21, 
-						field.getFormOid(), field.getFieldOid(), field.getDataDictionaryName(), field.getUnitDictionaryName());
-				} else {
-						String[] splitCdeIdVersion = extractIdVersion(field.getDraftFieldName());
-						// Split cde public ID and version
-						if (!(NumberUtils.isCreatable(splitCdeIdVersion[0]) && NumberUtils.isCreatable(splitCdeIdVersion[1])
-								&& NumberUtils.isCreatable(splitCdeIdVersion[2]))) {
-								cccError = addParsingValidationMsg(cccError, draftFieldName_str, fieldsSheetName, row.getRowNum() + 1, cell_draftFieldName, errorSeverity_error, err_msg_23, 
-									field.getFormOid(), field.getFieldOid(), field.getDataDictionaryName(), field.getUnitDictionaryName());
-							}
-			}
-			}
-			field.setDataFormat(row.getCell(cell_fieldDataFormat) != null ? dataFormatter.formatCellValue(row.getCell(cell_fieldDataFormat)) : null);
-			String controlType = row.getCell(cell_fieldControlType) != null ? dataFormatter.formatCellValue(row.getCell(cell_fieldControlType)) : null;
-			field.setControlType(controlType);
-			field.setPreText(row.getCell(cell_fieldPreText) != null ? stripHtml(dataFormatter.formatCellValue((row.getCell(cell_fieldPreText)))) : null);
-			field.setFixedUnit(row.getCell(cell_fieldFixedUnit) != null ? dataFormatter.formatCellValue(row.getCell(cell_fieldFixedUnit)) : null);
-			for (ALSForm form : alsData.getForms()) {
-				if (field.getFormOid()!= null && field.getFormOid().equalsIgnoreCase(form.getFormOid())) {
-					form.getFields().add(field);
+				// FORMBUILD-652
+				field.setSequenceNumber(sequence);
+				field.setOrdinal(row.getCell(cell_fieldOrdinal) != null ? dataFormatter.formatCellValue(row.getCell(cell_fieldOrdinal)) : null);
+				try {
+					Integer.parseInt(field.getOrdinal());
+				} catch (NumberFormatException e) {
+					cccError = addParsingValidationMsg(cccError, ordinal_str, fieldsSheetName, row.getRowNum() + 1, cell_fieldOrdinal, errorSeverity_warn, err_msg_24, 
+							field.getFormOid(), field.getFieldOid(), field.getDataDictionaryName(), field.getUnitDictionaryName());
 				}
+				field.setDraftFieldName(row.getCell(cell_draftFieldName) != null ? dataFormatter.formatCellValue(row.getCell(cell_draftFieldName)) : null);
+				if (field.getDraftFieldName()!=null) {
+				if (!(field.getDraftFieldName().indexOf(publicid_prefix) > -1
+						&& field.getDraftFieldName().indexOf(version_prefix) > -1)) {
+					cccError = addParsingValidationMsg(cccError, draftFieldName_str, fieldsSheetName, row.getRowNum() + 1, cell_draftFieldName, errorSeverity_warn, err_msg_21, 
+							field.getFormOid(), field.getFieldOid(), field.getDataDictionaryName(), field.getUnitDictionaryName());
+					} else {
+							String[] splitCdeIdVersion = extractIdVersion(field.getDraftFieldName());
+							// Split cde public ID and version
+							if (!(NumberUtils.isCreatable(splitCdeIdVersion[0]) && NumberUtils.isCreatable(splitCdeIdVersion[1])
+									&& NumberUtils.isCreatable(splitCdeIdVersion[2]))) {
+									cccError = addParsingValidationMsg(cccError, draftFieldName_str, fieldsSheetName, row.getRowNum() + 1, cell_draftFieldName, errorSeverity_error, err_msg_23, 
+										field.getFormOid(), field.getFieldOid(), field.getDataDictionaryName(), field.getUnitDictionaryName());
+								}
+				}
+				}
+				field.setDataFormat(row.getCell(cell_fieldDataFormat) != null ? dataFormatter.formatCellValue(row.getCell(cell_fieldDataFormat)) : null);
+				String controlType = row.getCell(cell_fieldControlType) != null ? dataFormatter.formatCellValue(row.getCell(cell_fieldControlType)) : null;
+				field.setControlType(controlType);
+				field.setPreText(row.getCell(cell_fieldPreText) != null ? stripHtml(dataFormatter.formatCellValue((row.getCell(cell_fieldPreText)))) : null);
+				field.setFixedUnit(row.getCell(cell_fieldFixedUnit) != null ? dataFormatter.formatCellValue(row.getCell(cell_fieldFixedUnit)) : null);
+				for (ALSForm form : alsData.getForms()) {
+					if (field.getFormOid()!= null && field.getFormOid().equalsIgnoreCase(form.getFormOid())) {
+						form.getFields().add(field);
+					}
+				}
+				fields.add(field);
+				// FORMBUILD-652
+				sequence++;
 			}
-			fields.add(field);
-			// FORMBUILD-652
-			sequence++;
 		}
 		if (cccError.getAlsErrors().size() > 0) {
 			alsData.setCccError(cccError);
