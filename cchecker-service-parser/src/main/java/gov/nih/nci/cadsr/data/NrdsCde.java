@@ -10,8 +10,10 @@ String raveFieldOrder;
 String raveFieldLabel;
 String cdeIdVersion;
 String cdeName;
+String preferredQuestionText;
 String result; // ERRORS/WARNINGS
 String message;
+String type;
 
 public String getRaveFormOid() {
 	return raveFormOid;
@@ -43,6 +45,12 @@ public String getCdeName() {
 public void setCdeName(String cdeName) {
 	this.cdeName = cdeName;
 }
+public String getPreferredQuestionText() {
+	return preferredQuestionText;
+}
+public void setPreferredQuestionText(String preferredQuestionText) {
+	this.preferredQuestionText = preferredQuestionText;
+}
 public String getResult() {
 	return result;
 }
@@ -54,6 +62,12 @@ public String getMessage() {
 }
 public void setMessage(String message) {
 	this.message = message;
+}
+public String getType() {
+	return type;
+}
+public void setType(String type) {
+	this.type = type;
 }
 
 }

@@ -104,7 +104,7 @@ public class ExcelReportGenerator {
 	private static final String sdtm_missing_cde_sheet_name = "SDTM x.x CDEs Missing";
 	private static final String cdash_missing_cde_header = "CDASH x.x CDEs missing from the ALS file";
 	private static final String sdtm_missing_cde_header = "SDTM x.x CDEs missing from the ALS file";
-	private static final String[] classifiedMissingRowHeaders = { "CDE IDVersion", "CDE Long Name", "Preferred Question Text" };
+	private static final String[] classifiedMissingRowHeaders = { "CDE PID", "CDE Long Name", "Preferred Question Text" };
 	//
 	private static final String nrds_missing_cde_header = "Required NCI Questions missing from the ALS file";
 	private static final String matching_nrds_cdes_header = "NCI Questions included in Protocol Forms with Warnings or Errors";
@@ -140,9 +140,9 @@ public class ExcelReportGenerator {
 	private static final String[] tabNames = { stdCrfManMiss_tab_name, stdCrfOptMiss_tab_name,
 			stdCrfCondMiss_tab_name };
 	private static final String cdeStdCrfMissingmsg = "CDEs in Standard Template \"%s\" Modules Not Used";
-	private static final String[] crfRowHeaders = { "CDE IDVersion", "CDE Long Name", "Preferred Question Text", "Type", "Template Name", "CRF ID Version" };
+	private static final String[] crfRowHeaders = { "CDE PID", "CDE Long Name", "Preferred Question Text", "Type", "Template Name", "CRF PID" };
 	private static final String[] nrdsRowHeaders = { "Rave Form OID", "RAVE Field Order", "RAVE Field Label",
-			"CDE ID Version", "CDE Long Name", "Result", "Message", "Type" };
+			"CDE PID", "CDE Long Name", "Result", "Message", "Type" };
 	// FORMBUILD-652	
 	private static final String seqNumLbl = "Sequence #";
 	private static final String fieldOrderLbl = "ALS Ordinal #";
@@ -774,7 +774,7 @@ public class ExcelReportGenerator {
 		CellStyle cellStyle = workbook.createCellStyle();
 		cellStyle.setWrapText(true);
 		colNum = 0;
-		// Print the ALS CDEs matching with the NRDS CDEs
+		// Print the ALS CDEs matching with the NRDS CDEs & Std CRF Mandatory CDEs
 		for (NrdsCde cde : nrdsCdeList) {
 			colNum = 0;
 			row = sheet.createRow(rowNum++);
@@ -795,33 +795,8 @@ public class ExcelReportGenerator {
 			newCell.setCellValue(cde.getMessage());
 			// FORMBUILD-636
 			newCell = row.createCell(colNum++);
-			newCell.setCellValue("NRDS");			
+			newCell.setCellValue(cde.getType());
 		}
-		
-		// FORMBUILD-636
-		// Print the ALS CDEs matching with the Standard CRF Mandatory CDEs
-		for (StandardCrfCde stdCrfCde : stdCrfCdeList) {
-			colNum = 0;
-			row = sheet.createRow(rowNum++);
-			newCell = row.createCell(colNum++);
-			newCell.setCellValue(stdCrfCde.getRaveFormOid());
-			newCell = row.createCell(colNum++);
-			newCell.setCellValue(stdCrfCde.getRaveFieldOrder());
-			newCell = row.createCell(colNum++);
-			newCell.setCellStyle(cellStyle);
-			newCell.setCellValue(stdCrfCde.getRaveFieldLabel());
-			newCell = row.createCell(colNum++);
-			newCell.setCellValue(stdCrfCde.getCdeIdVersion());
-			newCell = row.createCell(colNum++);
-			newCell.setCellValue(stdCrfCde.getCdeName());
-			newCell = row.createCell(colNum++);
-			newCell.setCellValue(stdCrfCde.getResult());
-			newCell = row.createCell(colNum++);
-			newCell.setCellValue(stdCrfCde.getMessage());
-			newCell = row.createCell(colNum++);
-			newCell.setCellValue("Std CRF");
-		}		
-
 		return workbook;
 	}
 

@@ -13,6 +13,7 @@ String cdeName;
 String preferredQuestionText;
 String result; // ERRORS/WARNINGS
 String message;
+String type;
 
 public String getRaveFormOid() {
 	return raveFormOid;
@@ -61,6 +62,12 @@ public String getMessage() {
 }
 public void setMessage(String message) {
 	this.message = message;
+}
+public String getType() {
+	return type;
+}
+public void setType(String type) {
+	this.type = type;
 }
 
 }

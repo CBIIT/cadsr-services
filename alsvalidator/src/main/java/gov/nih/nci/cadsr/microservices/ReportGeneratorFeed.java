@@ -60,6 +60,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 	private static String parse_errors_warn = "WARNING";	
 	private static String congStatus_congruent = "CONGRUENT";
 	private static String nrds_cde = "NRDS";
+	private static String stdCrf_cde = "Std CRF";
 	private static String mandatory_crf = "Mandatory";
 	private static String optional_crf = "Optional";
 	private static String conditional_crf = "Conditional";
@@ -463,11 +464,11 @@ public class ReportGeneratorFeed implements ReportOutput {
 							
 							// updating the NCI category to the question
 							question = updateNciCategory(checkStdCrfCde, cdeCrfData, question, cdeDetails);
-							nrdsCdeList = getNrdsCdeList(question, cdeDetails, nrdsCdeList);
+							nrdsCdeList = getNrdsCdeList(checkStdCrfCde, question, cdeDetails, nrdsCdeList);
 							// FORMBUILD-636
-							if (checkStdCrfCde) {
+							/*if (checkStdCrfCde) {
 								matchingStdCrfCdeList = getStdManCrfCdeList(question, cdeDetails, matchingStdCrfCdeList); 
-							}
+							}*/
 							//FORMBUILD-621
 							addToReportCdeList(question, cdeDetails, reportCdeList);
 							
@@ -734,13 +735,22 @@ public class ReportGeneratorFeed implements ReportOutput {
 	 * @param nrdsCdeList
 	 * @return List<NrdsCde>
 	 */
-	protected static List<NrdsCde> getNrdsCdeList (CCCQuestion question, CdeDetails cdeDetails, List<NrdsCde> nrdsCdeList) {
+	protected static List<NrdsCde> getNrdsCdeList (Boolean checkStdCrfCde, CCCQuestion question, CdeDetails cdeDetails, List<NrdsCde> nrdsCdeList) {
 	if (cdeDetails.getDataElement()!=null)  {
-	if (nrds_cde.equalsIgnoreCase(question.getNciCategory())) {
-		nrdsCdeList.add(buildNrdsCde(question,
-				cdeDetails.getDataElement().getDataElementDetails().getLongName()));
-		}
-	}		
+		if (question.getNciCategory()!=null) {
+			List<String> categories = new ArrayList<String>();
+			categories.add(nrds_cde);
+			if (checkStdCrfCde) {
+				categories.add(mandatory_crf);
+			}
+			for (String category : categories) {
+				if (question.getNciCategory().indexOf(category) > -1) {
+					nrdsCdeList.add(buildNrdsCde(question,
+							cdeDetails.getDataElement().getDataElementDetails().getLongName()));
+				}								
+			}
+		}	
+	}
 		return nrdsCdeList;
 	}	
 	
@@ -755,9 +765,11 @@ public class ReportGeneratorFeed implements ReportOutput {
 	 */
 	protected static List<StandardCrfCde> getStdManCrfCdeList (CCCQuestion question, CdeDetails cdeDetails, List<StandardCrfCde> standardCrfCdeList) {
 	if (cdeDetails.getDataElement()!=null)  {
-	if (mandatory_crf.equalsIgnoreCase(question.getNciCategory())) {
-		standardCrfCdeList.add(buildStdCrfCde(question,
-				cdeDetails.getDataElement().getDataElementDetails().getLongName()));
+		if (question.getNciCategory()!=null) {
+			if (mandatory_crf.equalsIgnoreCase(question.getNciCategory()) || question.getNciCategory().indexOf(mandatory_crf) > -1) {
+				standardCrfCdeList.add(buildStdCrfCde(question,
+						cdeDetails.getDataElement().getDataElementDetails().getLongName()));
+			}
 		}
 	}		
 		return standardCrfCdeList;
@@ -949,6 +961,17 @@ public class ReportGeneratorFeed implements ReportOutput {
 		nrds.setRaveFieldOrder(question.getFieldOrder());
 		nrds.setResult(question.getQuestionCongruencyStatus());
 		nrds.setMessage(question.getMessage());
+		String category = question.getNciCategory();
+		if (category!=null) {
+			if (category.indexOf(mandatory_crf) > -1 && category.indexOf(nrds_cde) > -1) {
+				category = nrds_cde+", "+stdCrf_cde;
+			} else if (nrds_cde.equalsIgnoreCase(category)) {
+				category = nrds_cde;
+			} else if (mandatory_crf.equalsIgnoreCase(category)) {
+				category = stdCrf_cde;
+			}
+		}
+		nrds.setType(category);
 		return nrds;
 	}
 	
