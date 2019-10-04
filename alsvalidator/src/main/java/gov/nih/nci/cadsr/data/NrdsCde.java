@@ -13,6 +13,7 @@ String cdeName;
 String preferredQuestionText;
 String result; // ERRORS/WARNINGS
 String message;
+//FORMBUILD-636
 String type;
 
 public String getRaveFormOid() {
