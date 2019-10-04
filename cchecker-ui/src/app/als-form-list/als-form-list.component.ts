@@ -16,8 +16,9 @@ import { looseIdentical } from '@angular/core/src/util';
 export class AlsFormListComponent implements OnInit {
   checkedItems:Observable<String[]>;
   errorMessage:String;  
-  formValidationStatus:Object={currFormName: "", currFormNumber: 1, countValidatedQuestions: 0, countSelectedQuestions:0};
+  formValidationStatus:Object={currFormName: "", currFormNumber: 1, countValidatedQuestions: 0};
   formListData:Observable<Object>;
+  totalQuestionCount:Number;
   fileName:String;
   userName:String;
   validating:Boolean;  
@@ -40,6 +41,9 @@ export class AlsFormListComponent implements OnInit {
       this.validating = true;
       this.getFeedService();
     };
+
+    this.totalQuestionCount=this.getTotalQuestionCount();
+
   };
 
   cancelValidation() {
@@ -63,6 +67,7 @@ export class AlsFormListComponent implements OnInit {
     let checkedItems:String[];
     this.errorMessage = null;
     let formListData:Object;
+    this.totalQuestionCount=this.getTotalQuestionCount();
     this.checkedItems.subscribe(data=>checkedItems=data).unsubscribe();
     this.formListData.subscribe(data=>formListData=data).unsubscribe();
     this.validating = true;
@@ -107,7 +112,6 @@ export class AlsFormListComponent implements OnInit {
           if (currentForm) {
             this.formValidationStatus = JSON.parse(currentForm.replace('data:',''));
           }
-          console.log(currentForm)
 
         }
       },
@@ -125,11 +129,32 @@ export class AlsFormListComponent implements OnInit {
   // gets current form for validation progress message //
   getCurrentForm = () => `${this.formValidationStatus['currFormNumber']}`;
 
-  // gets current question count that has been validated //
-  getCurrentQuestion = () => `${this.formValidationStatus['countValidatedQuestions']}`;  
+  // gets current form for validation progress message //
+  getCurrentFormName = () => `${this.formValidationStatus['currFormName']}`; 
 
   // gets current question count that has been validated //
-  getTotalQuestions = () => `${this.formValidationStatus['countSelectedQuestions']}`;  
+  getCurrentQuestionCount = () => {
+    if (this.formValidationStatus['countValidatedQuestions']!=0) {
+      return ' - [Questions ' + this.formValidationStatus['countValidatedQuestions'] + '/' + this.totalQuestionCount + '] (' + this.formValidationStatus['currFormName'] + ')';
+    }
+    else {
+      return '';
+    }
+  }
+
+  // gets total question count of selected items //
+  getTotalQuestionCount = () => {
+    let qc = 0;
+    let ci = JSON.parse(sessionStorage.getItem('checkedItems'));
+    for (var x=0; x<ci.length; x++) {
+      this.formListData.source['value']['formsList'].filter(function(item) {
+        if (item['formName']==ci[x]) {
+          qc+=item['questionsCount']
+        }
+      });
+    }
+    return qc
+  }
 
   // gets checkd status of record //
   getCheckedStatus = record => this.formListService.getCheckedStatus(record);
