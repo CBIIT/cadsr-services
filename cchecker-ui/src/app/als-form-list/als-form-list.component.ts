@@ -134,7 +134,7 @@ export class AlsFormListComponent implements OnInit {
 
   // gets current question count that has been validated //
   getCurrentQuestionCount = () => {
-    if (this.formValidationStatus['countValidatedQuestions']!=0) {
+    if (this.formValidationStatus['currFormName']!='') {
       return ' - [Questions ' + this.formValidationStatus['countValidatedQuestions'] + '/' + this.totalQuestionCount + '] (' + this.formValidationStatus['currFormName'] + ')';
     }
     else {
