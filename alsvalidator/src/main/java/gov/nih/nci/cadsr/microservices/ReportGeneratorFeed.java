@@ -464,11 +464,8 @@ public class ReportGeneratorFeed implements ReportOutput {
 							
 							// updating the NCI category to the question
 							question = updateNciCategory(checkStdCrfCde, cdeCrfData, question, cdeDetails);
-							nrdsCdeList = getNrdsCdeList(checkStdCrfCde, question, cdeDetails, nrdsCdeList);
 							// FORMBUILD-636
-							/*if (checkStdCrfCde) {
-								matchingStdCrfCdeList = getStdManCrfCdeList(question, cdeDetails, matchingStdCrfCdeList); 
-							}*/
+							nrdsCdeList = getNrdsCdeList(checkStdCrfCde, question, cdeDetails, nrdsCdeList);
 							//FORMBUILD-621
 							addToReportCdeList(question, cdeDetails, reportCdeList);
 							
@@ -738,17 +735,18 @@ public class ReportGeneratorFeed implements ReportOutput {
 	protected static List<NrdsCde> getNrdsCdeList (Boolean checkStdCrfCde, CCCQuestion question, CdeDetails cdeDetails, List<NrdsCde> nrdsCdeList) {
 	if (cdeDetails.getDataElement()!=null)  {
 		if (question.getNciCategory()!=null) {
-			List<String> categories = new ArrayList<String>();
-			categories.add(nrds_cde);
-			if (checkStdCrfCde) {
-				categories.add(mandatory_crf);
-			}
-			for (String category : categories) {
-				if (question.getNciCategory().indexOf(category) > -1) {
-					nrdsCdeList.add(buildNrdsCde(question,
-							cdeDetails.getDataElement().getDataElementDetails().getLongName()));
-				}								
-			}
+			// FORMBUILD-636
+				if (!congStatus_congruent.equalsIgnoreCase(question.getQuestionCongruencyStatus())) {
+					if (question.getNciCategory().indexOf(nrds_cde) > -1 || nrds_cde.equalsIgnoreCase(question.getNciCategory())) {
+						nrdsCdeList.add(buildNrdsCde(question,
+								cdeDetails.getDataElement().getDataElementDetails().getLongName()));
+					} else if (mandatory_crf.equalsIgnoreCase(question.getNciCategory())) {
+						if (checkStdCrfCde) {
+							nrdsCdeList.add(buildNrdsCde(question,
+									cdeDetails.getDataElement().getDataElementDetails().getLongName()));
+						}						
+					}
+				}
 		}	
 	}
 		return nrdsCdeList;

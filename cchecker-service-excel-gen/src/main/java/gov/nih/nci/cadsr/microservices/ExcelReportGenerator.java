@@ -125,7 +125,7 @@ public class ExcelReportGenerator {
 	private static final String croppedStringText = "// CONTENT CROPPED TO 32,700 CHARACTERS. // \n ";
 	// FORMBUILD-652	
 	private static final String[] rowHeaders = { "Rave Form OID", "caDSR Form ID", "Version",
-			"Total Number Of Questions Checked", "Sequence #", "ALS Ordinal #", "CDE PID", "NCI Category",
+			"Total Number Of Questions Checked", "Sequence #", "Rave Ordinal #", "CDE PID", "NCI Category",
 			"Question Congruency Status", "Message", "Rave Field Label", "Rave Field Label Result",
 			"CDE Permitted Question Text Choices", "Rave Control Type", "Control Type Checker Result",
 			"CDE Value Domain Type", "Rave Coded Data", "Coded Data Result", "Allowable CDE  Value", "Rave User String",
@@ -145,7 +145,7 @@ public class ExcelReportGenerator {
 			"CDE PID", "CDE Long Name", "Result", "Message", "Type" };
 	// FORMBUILD-652	
 	private static final String seqNumLbl = "Sequence #";
-	private static final String fieldOrderLbl = "ALS Ordinal #";
+	private static final String fieldOrderLbl = "Rave Ordinal #";
 	private static final String cdeIdLbl = "CDE Public ID";
 	private static final String cdeVersion = "CDE Version";
 	// FORMBUILD-652	
