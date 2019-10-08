@@ -127,13 +127,14 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
     // options for NRDS tables //
     this.dtNrdsOptions = Object.assign({
       columns:[
-        {width:"15%",cellType:"th", title:"Rave Form OID"},
-        {width:"15%",cellType:"th", title:"RAVE Field Order"},
-        {width:"15%",cellType:"th", title:"RAVE Field Label"},
-        {width:"15%",cellType:"th", title:"CDE PID"},
-        {width:"15%",cellType:"th", title:"CDE Name"},
-        {width:"15%",cellType:"th", title:"Result"},
-        {width:"10%",cellType:"th", title:"Message"}
+        {width:"13%",cellType:"th", title:"Rave Form OID"},
+        {width:"13%",cellType:"th", title:"RAVE Field Order"},
+        {width:"13%",cellType:"th", title:"RAVE Field Label"},
+        {width:"13%",cellType:"th", title:"CDE PID"},
+        {width:"13%",cellType:"th", title:"CDE Long Name"},
+        {width:"13%",cellType:"th", title:"Result"},
+        {width:"10%",cellType:"th", title:"Message"},
+        {width:"12%",cellType:"th", title:"Message"}
       ],
       scrollY:350,
       scroller:true
@@ -144,7 +145,8 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
     this.dtNrdsOptionsMissing = Object.assign({
       columns:[
         {width:"35%",cellType:"th", title:"CDE PID"},
-        {width:"65%",cellType:"th", title:"CDE Name"}
+        {width:"25%",cellType:"th", title:"CDE Long Name"},
+        {width:"40%",cellType:"th", title:"Preferred Question Text"}
       ],
       scrollY:350,
       scroller:true
