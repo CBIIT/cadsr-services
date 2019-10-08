@@ -134,7 +134,7 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
         {width:"13%",cellType:"th", title:"CDE Long Name"},
         {width:"13%",cellType:"th", title:"Result"},
         {width:"10%",cellType:"th", title:"Message"},
-        {width:"12%",cellType:"th", title:"Message"}
+        {width:"12%",cellType:"th", title:"Type"}
       ],
       scrollY:350,
       scroller:true
