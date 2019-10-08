@@ -146,13 +146,16 @@ export class AlsFormListComponent implements OnInit {
   getTotalQuestionCount = () => {
     let qc = 0;
     let ci = JSON.parse(sessionStorage.getItem('checkedItems'));
-    for (var x=0; x<ci.length; x++) {
-      this.formListData.source['value']['formsList'].filter(function(item) {
-        if (item['formName']==ci[x]) {
-          qc+=item['questionsCount']
-        }
-      });
+    if (ci) {
+      for (var x=0; x<ci.length; x++) {
+        this.formListData.source['value']['formsList'].filter(function(item) {
+          if (item['formName']==ci[x]) {
+            qc+=item['questionsCount']
+          }
+        });
+      }
     }
+
     return qc
   }
 
