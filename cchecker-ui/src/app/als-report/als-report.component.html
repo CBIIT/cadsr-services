@@ -276,9 +276,9 @@
          <table datatable [dtOptions]="dtFormOptions" [dtTrigger]="dtTrigger" class="display compact">
             <thead>
                <tr>
-                  <th>Field Order</th>
-                  <th>CDE Public ID</th>
-                  <th>CDE Version</th>
+                  <th>Sequence #</th>
+                  <th>ALS Ordinal #</th>
+                  <th>CDE PID</th>
                   <th>NCI Category</th>
                   <th>Question Congruency Status</th>
                   <th>Message</th>
@@ -310,9 +310,9 @@
             </thead>
             <tbody>
                <tr *ngFor="let question of raveForm.questions">
+                  <td>{{question.sequenceNumber}}</td>
                   <td>{{question.fieldOrder}}</td>
-                  <td>{{question.cdePublicId}}</td>
-                  <td>{{question.cdeVersion}}</td>
+                  <td>{{question.cdePidVersion}}</td>
                   <td>{{question.nciCategory}}</td>
                   <td>{{question.questionCongruencyStatus}}</td>
                   <td>{{question.message}}</td>

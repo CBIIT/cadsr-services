@@ -102,12 +102,12 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
     // options for standard crf module tables //
     this.dtCrfOptions = Object.assign({
       columns:[
-        {width:"125px", cellType:"th", title:"CDE IDVersion"},
+        {width:"125px", cellType:"th", title:"CDE PID"},
         {width:"225px", cellType:"th", title:"CDE Long Name"},
         {width:"225px", cellType:"th", title:"Preferred Question Text"},
         {width:"150px", cellType:"th", title:"Type"},        
         {width:"225px", cellType:"th",title:"Template Name"},
-        {width:"125px", cellType:"th", title:"CRF ID Version"}
+        {width:"125px", cellType:"th", title:"CRF PID"}
       ],
       scrollY:350,
       scroller:true,
@@ -117,7 +117,7 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // options for rave form page //
     this.dtFormOptions= Object.assign({
-      columns: [{width:"70px"},{width:"80px"},{width:"80px"},{width:"80px"},{width:"170px"},{width:"300px"},{width:"200px"},{width:"200px"},{width:"250px"},{width:"120px"},{width:"170px"},{width:"150px"},{width:"150px"},{width:"150px"},{width:"300px"},{width:"150px"},{width:"120px"},{width:"260px"},{width:"120px"},{width:"160px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"150px"},{width:"150px"},{width:"120px"},{width:"150px"},{width:"120px"}],
+      columns: [{width:"70px"},{width:"70px"},{width:"160px"},{width:"80px"},{width:"170px"},{width:"300px"},{width:"200px"},{width:"200px"},{width:"250px"},{width:"120px"},{width:"170px"},{width:"150px"},{width:"150px"},{width:"150px"},{width:"300px"},{width:"150px"},{width:"120px"},{width:"260px"},{width:"120px"},{width:"160px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"120px"},{width:"150px"},{width:"150px"},{width:"120px"},{width:"150px"},{width:"120px"}],
       scrollX:true,
       scrollY:300,
       scroller:true
@@ -130,7 +130,7 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
         {width:"15%",cellType:"th", title:"Rave Form OID"},
         {width:"15%",cellType:"th", title:"RAVE Field Order"},
         {width:"15%",cellType:"th", title:"RAVE Field Label"},
-        {width:"15%",cellType:"th", title:"CDE ID Version"},
+        {width:"15%",cellType:"th", title:"CDE PID"},
         {width:"15%",cellType:"th", title:"CDE Name"},
         {width:"15%",cellType:"th", title:"Result"},
         {width:"10%",cellType:"th", title:"Message"}
@@ -143,7 +143,7 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
     // options for NRDS tables //
     this.dtNrdsOptionsMissing = Object.assign({
       columns:[
-        {width:"35%",cellType:"th", title:"CDE ID Version"},
+        {width:"35%",cellType:"th", title:"CDE PID"},
         {width:"65%",cellType:"th", title:"CDE Name"}
       ],
       scrollY:350,
