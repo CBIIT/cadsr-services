@@ -260,7 +260,7 @@
                <tbody>
                   <tr>
                      <th>Rave Form OID</th>
-                     <td>{{raveForm.raveFormOid}} (caDSR CRF {{raveForm.formPublicId}}v{{raveForm.formVersion}})</td>
+                     <td>{{raveForm.raveFormOid}} <span *ngIf="raveForm.formPublicId">(caDSR CRF {{raveForm.formPublicId}}v{{raveForm.formVersion}})</span></td>
                   </tr>
                   <tr>
                      <th>Total Number of Questions Checked</th>
