@@ -1,355 +1,357 @@
 <h1>
-   Medidata RAVE ALS Report
-</h1>
-<div class="alert alert-danger" role="alert" *ngIf="loaded && !reportData.cccForms.length">
-   Please select forms and try again.
-</div>
-
-<div class="alert alert-danger" role="alert" *ngIf="errorMessage" [innerHTML]="errorMessage">
-</div>
-
-<div class="alert alert-success" role="alert" *ngIf="statusMessage">
-   {{statusMessage}}
-</div>
-
-<div *ngIf="!loaded">
-   <app-progress-bar [statusMessage]="'Loading Report'" [type]="'busy'" [percentage]="100"></app-progress-bar>
-</div>
-
-<form #f="ngForm">
-
-   <div>
-      <div *ngIf="isGenerating">
-         <app-progress-bar [statusMessage]="'Generating Excel Report'" [type]="'busy'" [percentage]="100"></app-progress-bar><br />
-      </div>      
-      <span class="reportHeader">
-      <button class="btn btn-primary" [disabled]="isGenerating" (click)="generateExcel()" *ngIf="reportData['cccForms'].length">Generate Excel</button>
-      </span>
-      <span class="reportHeader" [hidden]="!reportData.cccForms.length">
-         <label for="raveFormOid">Rave Form</label>
-         <select name="raveForm" id="raveFormOid" ngModel (change)="changeForm(f.value.raveForm,0)"  #localRaveOid>
-         <option value="" disabled>Select a form</option>
-         <option *ngFor="let form of reportData['cccForms'] | formListsort:'raveFormOid'" [ngValue]="form">
-         {{form.formName}}
-         </option>
-         </select>
-      </span>
+      Medidata RAVE ALS Report
+   </h1>
+   <div class="alert alert-danger" role="alert" *ngIf="loaded && !reportData.cccForms.length">
+      Please select forms and try again.
    </div>
-   <br />
-   <ngb-tabset type="pills" ([ngModel])="tabs" #tabs>
-   <ngb-tab title="Summary" *ngIf="reportData.cccForms.length">
-      <ng-template ngbTabContent>
-         <table id="summary" datatable [dtOptions]="dtSummaryOptions" class="display compact" [hidden]="!reportData.cccForms.length" *ngIf="reportData as r">
-         <thead>
-            <tr>
-               <th>CDE Congruency Checker Report for {{r.reportOwner}}</th>
-               <th></th>
-            </tr>
-         </thead>
-         <tbody>
-            <tr>
-               <td>Rave Protocol name </td>
-               <td>{{r.raveProtocolName}}</td>
-            </tr>
-            <tr>
-               <td>Rave Protocol number </td>
-               <td>{{r.raveProtocolNumber}}</td>
-            </tr>
-            <tr>
-               <td>Date Validated </td>
-               <td>{{r.reportDate}}</td>
-            </tr>
-            <tr>
-               <td># Forms in protocol </td>
-               <td>{{r.totalFormsCount}}</td>
-            </tr>
-            <tr>
-               <td># Forms in protocol checked</td>
-               <td>{{r.selectedFormsCount}}</td>
-            </tr>            
-            <tr>
-               <td># Total Questions Checked in {{r.selectedFormsCount}} forms</td>
-               <td>{{r.countQuestionsChecked}}</td>
-            </tr>
-            <tr>
-               <td># Total Questions Congruent </td>
-               <td>{{r.countCongruentQuestions}}</td>
-            </tr>
-            <tr>
-               <td># Total Questions with Warnings </td>
-               <td>{{r.countQuestionsWithWarnings}}</td>
-            </tr>
-            <tr>
-               <td># Total Questions with Errors in {{r.selectedFormsCount}} forms</td>
-               <td>{{r.countQuestionsWithErrors}}</td>
-            </tr>
-            <tr>
-               <td># Total Questions without associated CDE </td>
-               <td>{{r.countQuestionsWithoutCde}}</td>
-            </tr>
-            <tr>
-               <td># Required NCI Questions missing  </td>
-               <td>{{r.countNciMissing}}</td>
-            </tr>
-            <tr>
-               <td># Required NCI Questions Congruent </td>
-               <td>{{r.countNciCongruent}}</td>
-            </tr>
-            <tr>
-               <td># Required NCI Questions With Warnings </td>
-               <td>{{r.countNciWithWarnings}}</td>
-            </tr>
-            <tr>
-               <td># Required NCI Questions With Errors </td>
-               <td>{{r.countNciWithErrors}}</td>
-            </tr>
-            <tr>
-               <td># Required CDASH <span class="lowercase"><span class="lowercase">x.x</span></span> Questions missing </td>
-               <td>{{r.countCdashMissing}}</td>
-            </tr>
-            <tr>
-               <td># Required CDASH <span class="lowercase">x.x</span> Questions with warnings </td>
-               <td>{{r.countCdashWithWarnings}}</td>
-            </tr>
-            <tr>
-               <td># Required CDASH <span class="lowercase">x.x</span> Questions with errors </td>
-               <td>{{r.countCdashWithErrors}}</td>
-            </tr>
-            <tr>
-               <td># Required SDTM <span class="lowercase">x.x</span> Questions missing </td>
-               <td>{{r.countSdtmMissing}}</td>
-            </tr>
-            <tr>
-               <td># Required SDTM <span class="lowercase">x.x</span> Questions with warnings </td>
-               <td>{{r.countSdtmWithWarnings}}</td>
-            </tr>
-            <tr>
-               <td># Required SDTM <span class="lowercase">x.x</span> Questions with errors </td>
-               <td>{{r.countSdtmWithErrors}}</td>
-            </tr>
-            
-         </tbody>
-         </table>
-         <br />
-        <div class="tableHeader" [hidden]="!reportData.cccForms.length">
-            Report Summary - Click on Form Name to expand results
-        </div>
-        <table datatable [dtOptions]="dtSummaryOptions" class="display compact" *ngIf="reportData as r" [hidden]="!reportData.cccForms.length">
-            <thead>
-                <tr>
-                    <th>Form</th>
-                    <th>Validation Result</th>
-                </tr>
-            </thead>      
-            <tbody>
-                <tr *ngFor="let form of r.cccForms">
-                    <td><a href="#" name="form" (click)="changeForm(form,f)">{{form.formName}}</a></td>
-                    <td>{{form.congruencyStatus}}</td>
-                </tr>
-            </tbody>                
-        </table>  
-      </ng-template>
-   </ngb-tab>
-   <ngb-tab *ngIf="reportData.cccForms.length">
-       <ng-template ngbTabTitle>NCI Questions in ALS</ng-template>
-       <ng-template ngbTabContent>
-         <div class="tableHeader">NCI Questions included in Protocol Forms with Warnings or Errors</div>
-
-        <table datatable [dtOptions]="dtNrdsOptions" class="display compact">
-            <tbody>
-                <tr *ngFor="let missingNrds of reportData.nrdsCdeList">
-                    <td>{{missingNrds.raveFormOid}}</td>
-                    <td>{{missingNrds.raveFieldOrder}}</td>
-                    <td>{{missingNrds.raveFieldLabel}}</td>
-                    <td>{{missingNrds.cdeIdVersion}}</td>
-                    <td>{{missingNrds.cdeName}}</td>
-                    <td>{{missingNrds.result}}</td>
-                    <td>{{missingNrds.message}}</td>
-                    <td>{{missingNrds.type}}</td>
-                </tr>
-            </tbody>            
-        </table>        
-       </ng-template>
-   </ngb-tab>
-   <ngb-tab *ngIf="reportData.cccForms.length">
-       <ng-template ngbTabTitle>NCI Questions Missing</ng-template>
-       <ng-template ngbTabContent>
-         <div class="tableHeader">NCI Questions missing from the ALS file</div>
-
-        <table datatable [dtOptions]="dtCrfOptions" class="display compact">
-            <tbody>
-                <tr *ngFor="let missingNrds of reportData.missingNrdsCdeList">
-                  <td>{{missingNrds.cdeIdVersion}}</td>
-                  <td>{{missingNrds.cdeName}}</td>
-                  <td>{{missingNrds.preferredQuestionText}}</td>
-                  <td>NRDS</td>                  
-                  <td>{{missingNrds.templateName}}</td>
-                  <td>{{missingNrds.idVersion}}</td>
-
-                </tr>
-                <tr *ngFor="let missing of reportData.missingStandardCrfCdeList | reportFilter: 'stdTemplateType':'Mandatory'">
-                  <td>{{missing.cdeIdVersion}}</td>
-                  <td>{{missing.cdeName}}</td>
-                  <td>{{missing.preferredQuestionText}}</td>
-                  <td>Std CRF</td>
-                  <td>{{missing.templateName}}</td>
-                  <td>{{missing.idVersion}}</td>
-
-              </tr>                
-            </tbody>            
-        </table>
-       </ng-template>
-   </ngb-tab>
-   <ngb-tab *ngIf="reportData.cccForms.length">
-       <ng-template ngbTabTitle>CDISC/CDASH <span class="lowercase">x.x</span> CDEs Missing</ng-template>
-       <ng-template ngbTabContent>
-         <div class="tableHeader">CDISC/CDASH <span class="lowercase">x.x</span> CDEs missing from the ALS file</div>
-
-        <table datatable [dtOptions]="dtNrdsOptionsMissing" class="display compact">
-            <tbody>
-                <tr *ngFor="let missingCdashs of reportData.missingCdashCdeList">
-                    <td>{{missingCdashs.cdeIdVersion}}</td>
-                    <td>{{missingCdashs.cdeName}}</td>
-                    <td>{{missingCdashs.preQuestionText}}</td>
-                </tr>
-            </tbody>
-        </table>
-       </ng-template>
-   </ngb-tab>
-   <ngb-tab *ngIf="reportData.cccForms.length">
-       <ng-template ngbTabTitle>CDISC/SDTM <span class="lowercase">x.x</span> CDEs Missing</ng-template>
-       <ng-template ngbTabContent>
-         <div class="tableHeader">CDISC/SDTM <span class="lowercase">x.x</span> CDEs missing from the ALS file</div>
-
-        <table datatable [dtOptions]="dtNrdsOptionsMissing" class="display compact">
-            <tbody>
-                <tr *ngFor="let missingSdtms of reportData.missingSdtmCdeList">
-                    <td>{{missingSdtms.cdeIdVersion}}</td>
-                    <td>{{missingSdtms.cdeName}}</td>
-                    <td>{{missingSdtms.preQuestionText}}</td>
-                </tr>
-            </tbody>
-        </table>
-       </ng-template>
-   </ngb-tab>
    
-   <!-- <ngb-tab *ngIf="reportData.cccForms.length">
-       <ng-template ngbTabTitle>Standard CRF Mandatory Missing</ng-template>
-       <ng-template ngbTabContent>
-           <div class="tableHeader">CDEs in Standard Template "Mandatory" Modules Not Used</div>
-            <table datatable [dtOptions]="dtCrfOptions" class="display compact">
-                <tbody>
-                    <tr *ngFor="let missing of reportData.missingStandardCrfCdeList | reportFilter: 'stdTemplateType':'Mandatory'">
-                        <td>{{missing.cdeIdVersion}}</td>
-                        <td>{{missing.cdeName}}</td>
-                        <td>{{missing.templateName}}</td>
-                        <td>{{missing.idVersion}}</td>
-                    </tr>
-                </tbody>
-            </table>           
-       </ng-template>
-   </ngb-tab>
-     -->
-
-   <ngb-tab id="raveForm" *ngIf="showFormTab">
-      <ng-template ngbTabTitle>{{tabName}}</ng-template>
-      <ng-template ngbTabContent>
-         <div><B>VIEW OF EXPANDED RESULTS {{raveForm.formName}}</B></div>
-         <table datatable [dtOptions]="dtFormSummaryOptions" class="display compact">
-            <tbody>
-               <tr>
-                  <th>Rave Form OID</th>
-                  <td>{{raveForm.raveFormOid}} ({{raveForm.formPublicId}}v{{raveForm.formVersion}})</td>
-               </tr>
-               <tr>
-                  <th>Total Number of Questions Checked</th>
-                  <td>{{raveForm.totalQuestionsChecked}}</td>
-               </tr>
-            </tbody>
-         </table>
-         <br />
-         <table datatable [dtOptions]="dtFormOptions" [dtTrigger]="dtTrigger" class="display compact">
+   <div class="alert alert-danger" role="alert" *ngIf="errorMessage" [innerHTML]="errorMessage">
+   </div>
+   
+   <div class="alert alert-success" role="alert" *ngIf="statusMessage">
+      {{statusMessage}}
+   </div>
+   
+   <div *ngIf="!loaded">
+      <app-progress-bar [statusMessage]="'Loading Report'" [type]="'busy'" [percentage]="100"></app-progress-bar>
+   </div>
+   
+   <form #f="ngForm">
+   
+      <div>
+         <div *ngIf="isGenerating">
+            <app-progress-bar [statusMessage]="'Generating Excel Report'" [type]="'busy'" [percentage]="100"></app-progress-bar><br />
+         </div>      
+         <span class="reportHeader">
+         <button class="btn btn-primary" [disabled]="isGenerating" (click)="generateExcel()" *ngIf="reportData['cccForms'].length">Generate Excel</button>
+         </span>
+         <span class="reportHeader" [hidden]="!reportData.cccForms.length">
+            <label for="raveFormOid">Rave Form</label>
+            <select name="raveForm" id="raveFormOid" ngModel (change)="changeForm(f.value.raveForm,0)"  #localRaveOid>
+            <option value="" disabled>Select a form</option>
+            <option *ngFor="let form of reportData['cccForms'] | formListsort:'raveFormOid'" [ngValue]="form">
+            {{form.formName}}
+            </option>
+            </select>
+         </span>
+      </div>
+      <br />
+      <ngb-tabset type="pills" ([ngModel])="tabs" #tabs>
+      <ngb-tab title="Summary" *ngIf="reportData.cccForms.length">
+         <ng-template ngbTabContent>
+            <table id="summary" datatable [dtOptions]="dtSummaryOptions" class="display compact" [hidden]="!reportData.cccForms.length" *ngIf="reportData as r">
             <thead>
                <tr>
-                  <th>Sequence #</th>
-                  <th>Rave Ordinal #</th>
-                  <th>CDE PID</th>
-                  <th>NCI Category</th>
-                  <th>Question Congruency Status</th>
-                  <th>Message</th>
-                  <th>Rave Field Label</th>
-                  <th>Rave Field Label Result</th>
-                  <th>CDE Permitted Question Text Choices</th>
-                  <th>Rave Control Type</th>
-                  <th>Control Type Checker Result</th>
-                  <th>CDE Value Domain Type</th>
-                  <th>Rave Coded Data</th>
-                  <th>Coded Data Result</th>
-                  <th>Allowable CDE Value</th>
-                  <th>Rave User String</th>
-                  <th>PV  Result</th>
-                  <th>Allowable CDE  Value Meaning Text Choices</th>
-                  <th>Rave Field Data Type</th>
-                  <th>Data Type Checker Result</th>
-                  <th>CDE Data Type</th>
-                  <th>Rave UOM</th>
-                  <th>UOM Checker Result</th>
-                  <th>CDE UOM</th>
-                  <th>Rave Length</th>
-                  <th>Length Checker Result</th>
-                  <th>CDE Maximum Length</th>
-                  <th>Rave Display Format</th>
-                  <th>Format Checker Result</th>
-                  <th>CDE Display Format</th>
+                  <th>CDE Congruency Checker Report for {{r.reportOwner}}</th>
+                  <th></th>
                </tr>
             </thead>
             <tbody>
-               <tr *ngFor="let question of raveForm.questions">
-                  <td>{{question.sequenceNumber}}</td>
-                  <td>{{question.fieldOrder}}</td>
-                  <td>{{question.cdePidVersion}}</td>
-                  <td>{{question.nciCategory}}</td>
-                  <td>{{question.questionCongruencyStatus}}</td>
-                  <td>{{question.message}}</td>
-                  <td class="borderleft">{{question.raveFieldLabel}}</td>
-                  <td>{{question.raveFieldLabelResult}}</td>
-                  <td class="borderright">{{question.cdePermitQuestionTextChoices}}</td>
-                  <td>{{question.raveControlType}}</td>
-                  <td>{{question.controlTypeResult}}</td>
-                  <td class="borderright">{{question.cdeValueDomainType}}</td>
-                  <td><span *ngFor="let line of question.raveCodedData">{{line}}<br /></span></td>
-                  <td><span *ngFor="let line of question.codedDataResult">{{line}}<br /></span></td>
-                  <td class="borderright" style="max-width:300px;word-wrap:break-word">{{question.allowableCdeValue}}</td>
-                  <td colspan="3" class="borderright">
-                     <table class="colspan">
-                        <tr *ngFor="let line of question.raveUserString; let i = index">
-                              <td class="raveUserString">{{line}}</td>
-                              <td class="pvResult">{{question.pvResults[i]}}</td>
-                              <td class="textChoices">{{question.allowableCdeTextChoices[i]}}</td>
-                           </tr>
-                     </table>
-                  </td>
-                  <!-- <td>{{i}}<span *ngFor="let line of question.pvResults">{{line}}<br /></span></td> -->
-                  <td style="display: none;">Invisible Cell to get around lack of colpsan</td>
-                  <td style="display: none;">Invisible Cell to get around lack of colpsan</td>
-                  <!-- <td><span *ngFor="let line of question.allowableCdeTextChoices">{{line}}<br /></span></td> -->
-                  <td>{{question.raveFieldDataType}}</td>
-                  <td>{{question.datatypeCheckerResult}}</td>
-                  <td class="borderright">{{question.cdeDataType}}</td>
-                  <td>{{question.raveUOM}}</td>
-                  <td>{{question.uomCheckerResult}}</td>
-                  <td class="borderright">{{question.cdeUOM}}</td>
-                  <td>{{question.raveLength}}</td>
-                  <td>{{question.lengthCheckerResult}}</td>
-                  <td class="borderright">{{question.cdeMaxLength}}</td>
-                  <td>{{question.raveDisplayFormat}}</td>
-                  <td>{{question.formatCheckerResult}}</td>
-                  <td class="borderright">{{question.cdeDisplayFormat}}</td>
+               <tr>
+                  <td>Rave Protocol name </td>
+                  <td>{{r.raveProtocolName}}</td>
                </tr>
+               <tr>
+                  <td>Rave Protocol number </td>
+                  <td>{{r.raveProtocolNumber}}</td>
+               </tr>
+               <tr>
+                  <td>Date Validated </td>
+                  <td>{{r.reportDate}}</td>
+               </tr>
+               <tr>
+                  <td># Forms in protocol </td>
+                  <td>{{r.totalFormsCount}}</td>
+               </tr>
+               <tr>
+                  <td># Forms in protocol checked</td>
+                  <td>{{r.selectedFormsCount}}</td>
+               </tr>            
+               <tr>
+                  <td># Total Questions Checked in {{r.selectedFormsCount}} forms</td>
+                  <td>{{r.countQuestionsChecked}}</td>
+               </tr>
+               <tr>
+                  <td># Total Questions Congruent </td>
+                  <td>{{r.countCongruentQuestions}}</td>
+               </tr>
+               <tr>
+                  <td># Total Questions with Warnings </td>
+                  <td>{{r.countQuestionsWithWarnings}}</td>
+               </tr>
+               <tr>
+                  <td># Total Questions with Errors in {{r.selectedFormsCount}} forms</td>
+                  <td>{{r.countQuestionsWithErrors}}</td>
+               </tr>
+               <tr>
+                  <td># Total Questions without associated CDE </td>
+                  <td>{{r.countQuestionsWithoutCde}}</td>
+               </tr>
+               <tr>
+                  <td># Required NCI Questions missing  </td>
+                  <td>{{r.countNciMissing}}</td>
+               </tr>
+               <tr>
+                  <td># Required NCI Questions Congruent </td>
+                  <td>{{r.countNciCongruent}}</td>
+               </tr>
+               <tr>
+                  <td># Required NCI Questions With Warnings </td>
+                  <td>{{r.countNciWithWarnings}}</td>
+               </tr>
+               <tr>
+                  <td># Required NCI Questions With Errors </td>
+                  <td>{{r.countNciWithErrors}}</td>
+               </tr>
+               <tr>
+                  <td># Required CDASH <span class="lowercase"><span class="lowercase">x.x</span></span> Questions missing </td>
+                  <td>{{r.countCdashMissing}}</td>
+               </tr>
+               <tr>
+                  <td># Required CDASH <span class="lowercase">x.x</span> Questions with warnings </td>
+                  <td>{{r.countCdashWithWarnings}}</td>
+               </tr>
+               <tr>
+                  <td># Required CDASH <span class="lowercase">x.x</span> Questions with errors </td>
+                  <td>{{r.countCdashWithErrors}}</td>
+               </tr>
+               <tr>
+                  <td># Required SDTM <span class="lowercase">x.x</span> Questions missing </td>
+                  <td>{{r.countSdtmMissing}}</td>
+               </tr>
+               <tr>
+                  <td># Required SDTM <span class="lowercase">x.x</span> Questions with warnings </td>
+                  <td>{{r.countSdtmWithWarnings}}</td>
+               </tr>
+               <tr>
+                  <td># Required SDTM <span class="lowercase">x.x</span> Questions with errors </td>
+                  <td>{{r.countSdtmWithErrors}}</td>
+               </tr>
+               
             </tbody>
-         </table>
-      </ng-template>
-   </ngb-tab>
-   </ngb-tabset>
-</form>
-
+            </table>
+            <br />
+           <div class="tableHeader" [hidden]="!reportData.cccForms.length">
+               Report Summary - Click on Form Name to expand results
+           </div>
+           <table datatable [dtOptions]="dtSummaryOptions" class="display compact" *ngIf="reportData as r" [hidden]="!reportData.cccForms.length">
+               <thead>
+                   <tr>
+                       <th>Form</th>
+                       <th>Validation Result</th>
+                   </tr>
+               </thead>      
+               <tbody>
+                   <tr *ngFor="let form of r.cccForms">
+                       <td><a href="#" name="form" (click)="changeForm(form,f)">{{form.formName}}</a></td>
+                       <td>{{form.congruencyStatus}}</td>
+                   </tr>
+               </tbody>                
+           </table>  
+         </ng-template>
+      </ngb-tab>
+      <ngb-tab *ngIf="reportData.cccForms.length">
+          <ng-template ngbTabTitle>NCI Questions in ALS</ng-template>
+          <ng-template ngbTabContent>
+            <div class="tableHeader">NCI Questions included in Protocol Forms with Warnings or Errors</div>
+   
+           <table datatable [dtOptions]="dtNrdsOptions" class="display compact">
+               <tbody>
+                   <tr *ngFor="let missingNrds of reportData.nrdsCdeList">
+                       <td>{{missingNrds.raveFormOid}}</td>
+                       <td>{{missingNrds.raveFieldOrder}}</td>
+                       <td>{{missingNrds.raveFieldLabel}}</td>
+                       <td>{{missingNrds.cdeIdVersion}}</td>
+                       <td>{{missingNrds.cdeName}}</td>
+                       <td>{{missingNrds.result}}</td>
+                       <td>{{missingNrds.message}}</td>
+                       <td>{{missingNrds.type}}</td>
+                   </tr>
+               </tbody>            
+           </table>        
+          </ng-template>
+      </ngb-tab>
+      <ngb-tab *ngIf="reportData.cccForms.length">
+          <ng-template ngbTabTitle>NCI Questions Missing</ng-template>
+          <ng-template ngbTabContent>
+            <div class="tableHeader">NCI Questions missing from the ALS file</div>
+   
+           <table datatable [dtOptions]="dtCrfOptions" class="display compact">
+               <tbody>
+                   <tr *ngFor="let missingNrds of reportData.missingNrdsCdeList">
+                     <td>{{missingNrds.cdeIdVersion}}</td>
+                     <td>{{missingNrds.cdeName}}</td>
+                     <td>{{missingNrds.preferredQuestionText}}</td>
+                     <td>NRDS</td>                  
+                     <td>{{missingNrds.templateName}}</td>
+                     <td>{{missingNrds.idVersion}}</td>
+   
+                   </tr>
+                   <tr *ngFor="let missing of reportData.missingStandardCrfCdeList | reportFilter: 'stdTemplateType':'Mandatory'">
+                     <td>{{missing.cdeIdVersion}}</td>
+                     <td>{{missing.cdeName}}</td>
+                     <td>{{missing.preferredQuestionText}}</td>
+                     <td>Std CRF</td>
+                     <td>{{missing.templateName}}</td>
+                     <td>{{missing.idVersion}}</td>
+   
+                 </tr>                
+               </tbody>            
+           </table>
+          </ng-template>
+      </ngb-tab>
+      <ngb-tab *ngIf="reportData.cccForms.length">
+          <ng-template ngbTabTitle>CDISC/CDASH <span class="lowercase">x.x</span> CDEs Missing</ng-template>
+          <ng-template ngbTabContent>
+            <div class="tableHeader">CDISC/CDASH <span class="lowercase">x.x</span> CDEs missing from the ALS file</div>
+   
+           <table datatable [dtOptions]="dtNrdsOptionsMissing" class="display compact">
+               <tbody>
+                   <tr *ngFor="let missingCdashs of reportData.missingCdashCdeList">
+                       <td>{{missingCdashs.cdeIdVersion}}</td>
+                       <td>{{missingCdashs.cdeName}}</td>
+                       <td>{{missingCdashs.preQuestionText}}</td>
+                   </tr>
+               </tbody>
+           </table>
+          </ng-template>
+      </ngb-tab>
+      <ngb-tab *ngIf="reportData.cccForms.length">
+          <ng-template ngbTabTitle>CDISC/SDTM <span class="lowercase">x.x</span> CDEs Missing</ng-template>
+          <ng-template ngbTabContent>
+            <div class="tableHeader">CDISC/SDTM <span class="lowercase">x.x</span> CDEs missing from the ALS file</div>
+   
+           <table datatable [dtOptions]="dtNrdsOptionsMissing" class="display compact">
+               <tbody>
+                   <tr *ngFor="let missingSdtms of reportData.missingSdtmCdeList">
+                       <td>{{missingSdtms.cdeIdVersion}}</td>
+                       <td>{{missingSdtms.cdeName}}</td>
+                       <td>{{missingSdtms.preQuestionText}}</td>
+                   </tr>
+               </tbody>
+           </table>
+          </ng-template>
+      </ngb-tab>
+      
+      <!-- <ngb-tab *ngIf="reportData.cccForms.length">
+          <ng-template ngbTabTitle>Standard CRF Mandatory Missing</ng-template>
+          <ng-template ngbTabContent>
+              <div class="tableHeader">CDEs in Standard Template "Mandatory" Modules Not Used</div>
+               <table datatable [dtOptions]="dtCrfOptions" class="display compact">
+                   <tbody>
+                       <tr *ngFor="let missing of reportData.missingStandardCrfCdeList | reportFilter: 'stdTemplateType':'Mandatory'">
+                           <td>{{missing.cdeIdVersion}}</td>
+                           <td>{{missing.cdeName}}</td>
+                           <td>{{missing.templateName}}</td>
+                           <td>{{missing.idVersion}}</td>
+                       </tr>
+                   </tbody>
+               </table>           
+          </ng-template>
+      </ngb-tab>
+        -->
+   
+      <ngb-tab id="raveForm" *ngIf="showFormTab">
+         <ng-template ngbTabTitle>{{tabName}}</ng-template>
+         <ng-template ngbTabContent>
+            <div><B>VIEW OF EXPANDED RESULTS {{raveForm.formName}}</B></div>
+            <div class="help_text">Form structure is not checked against caDSR CRFs</div>
+            <table datatable [dtOptions]="dtFormSummaryOptions" class="display compact">
+               <tbody>
+                  <tr>
+                     <th>Rave Form OID</th>
+                     <td>{{raveForm.raveFormOid}} (caDSR CRF {{raveForm.formPublicId}}v{{raveForm.formVersion}})</td>
+                  </tr>
+                  <tr>
+                     <th>Total Number of Questions Checked</th>
+                     <td>{{raveForm.totalQuestionsChecked}}</td>
+                  </tr>
+               </tbody>
+            </table>
+            <br />
+            <table datatable [dtOptions]="dtFormOptions" [dtTrigger]="dtTrigger" class="display compact">
+               <thead>
+                  <tr>
+                     <th>Sequence #</th>
+                     <th>Rave Ordinal #</th>
+                     <th>CDE PID</th>
+                     <th>NCI Category</th>
+                     <th>Question Congruency Status</th>
+                     <th>Message</th>
+                     <th>Rave Field Label</th>
+                     <th>Rave Field Label Result</th>
+                     <th>CDE Permitted Question Text Choices</th>
+                     <th>Rave Control Type</th>
+                     <th>Control Type Checker Result</th>
+                     <th>CDE Value Domain Type</th>
+                     <th>Rave Coded Data</th>
+                     <th>Coded Data Result</th>
+                     <th>Allowable CDE Value</th>
+                     <th>Rave User String</th>
+                     <th>PV  Result</th>
+                     <th>Allowable CDE  Value Meaning Text Choices</th>
+                     <th>Rave Field Data Type</th>
+                     <th>Data Type Checker Result</th>
+                     <th>CDE Data Type</th>
+                     <th>Rave UOM</th>
+                     <th>UOM Checker Result</th>
+                     <th>CDE UOM</th>
+                     <th>Rave Length</th>
+                     <th>Length Checker Result</th>
+                     <th>CDE Maximum Length</th>
+                     <th>Rave Display Format</th>
+                     <th>Format Checker Result</th>
+                     <th>CDE Display Format</th>
+                  </tr>
+               </thead>
+               <tbody>
+                  <tr *ngFor="let question of raveForm.questions">
+                     <td>{{question.sequenceNumber}}</td>
+                     <td>{{question.fieldOrder}}</td>
+                     <td>{{question.cdePidVersion}}</td>
+                     <td>{{question.nciCategory}}</td>
+                     <td>{{question.questionCongruencyStatus}}</td>
+                     <td>{{question.message}}</td>
+                     <td class="borderleft">{{question.raveFieldLabel}}</td>
+                     <td>{{question.raveFieldLabelResult}}</td>
+                     <td class="borderright">{{question.cdePermitQuestionTextChoices}}</td>
+                     <td>{{question.raveControlType}}</td>
+                     <td>{{question.controlTypeResult}}</td>
+                     <td class="borderright">{{question.cdeValueDomainType}}</td>
+                     <td><span *ngFor="let line of question.raveCodedData">{{line}}<br /></span></td>
+                     <td><span *ngFor="let line of question.codedDataResult">{{line}}<br /></span></td>
+                     <td class="borderright" style="max-width:300px;word-wrap:break-word">{{question.allowableCdeValue}}</td>
+                     <td colspan="3" class="borderright">
+                        <table class="colspan">
+                           <tr *ngFor="let line of question.raveUserString; let i = index">
+                                 <td class="raveUserString">{{line}}</td>
+                                 <td class="pvResult">{{question.pvResults[i]}}</td>
+                                 <td class="textChoices">{{question.allowableCdeTextChoices[i]}}</td>
+                              </tr>
+                        </table>
+                     </td>
+                     <!-- <td>{{i}}<span *ngFor="let line of question.pvResults">{{line}}<br /></span></td> -->
+                     <td style="display: none;">Invisible Cell to get around lack of colpsan</td>
+                     <td style="display: none;">Invisible Cell to get around lack of colpsan</td>
+                     <!-- <td><span *ngFor="let line of question.allowableCdeTextChoices">{{line}}<br /></span></td> -->
+                     <td>{{question.raveFieldDataType}}</td>
+                     <td>{{question.datatypeCheckerResult}}</td>
+                     <td class="borderright">{{question.cdeDataType}}</td>
+                     <td>{{question.raveUOM}}</td>
+                     <td>{{question.uomCheckerResult}}</td>
+                     <td class="borderright">{{question.cdeUOM}}</td>
+                     <td>{{question.raveLength}}</td>
+                     <td>{{question.lengthCheckerResult}}</td>
+                     <td class="borderright">{{question.cdeMaxLength}}</td>
+                     <td>{{question.raveDisplayFormat}}</td>
+                     <td>{{question.formatCheckerResult}}</td>
+                     <td class="borderright">{{question.cdeDisplayFormat}}</td>
+                  </tr>
+               </tbody>
+            </table>
+         </ng-template>
+      </ngb-tab>
+      </ngb-tabset>
+   </form>
+   
+   
