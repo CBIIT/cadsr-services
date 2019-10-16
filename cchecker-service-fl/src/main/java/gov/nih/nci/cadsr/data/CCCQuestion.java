@@ -9,9 +9,12 @@ import java.util.List;
 public class CCCQuestion {	
 
 String raveFormOId;
+//FORMBUILD-652
+Integer sequenceNumber;
 String fieldOrder;
 String cdePublicId;
 String cdeVersion;
+String cdePidVersion;   // Combined Public ID & Version
 String nciCategory;
 String questionCongruencyStatus;
 String message;
@@ -47,6 +50,12 @@ public String getRaveFormOId() {
 public void setRaveFormOId(String raveFormOId) {
 	this.raveFormOId = raveFormOId;
 }
+public Integer getSequenceNumber() {
+	return sequenceNumber;
+}
+public void setSequenceNumber(Integer sequenceNumber) {
+	this.sequenceNumber = sequenceNumber;
+}
 public String getFieldOrder() {
 	return fieldOrder;
 }
@@ -64,6 +73,12 @@ public String getCdeVersion() {
 }
 public void setCdeVersion(String cdeVersion) {
 	this.cdeVersion = cdeVersion;
+}
+public String getCdePidVersion() {
+	return cdePidVersion;
+}
+public void setCdePidVersion(String cdePidVersion) {
+	this.cdePidVersion = cdePidVersion;
 }
 public String getNciCategory() {
 	return nciCategory;

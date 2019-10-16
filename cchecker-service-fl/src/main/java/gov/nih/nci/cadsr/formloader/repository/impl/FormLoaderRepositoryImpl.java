@@ -145,24 +145,24 @@ public class FormLoaderRepositoryImpl implements FormLoaderRepository {
 	@Transactional(readOnly=true)
 	public List<QuestionTransferObject> getQuestionsByPublicIds(List<String> publicIds) {
 		if (publicIds == null || publicIds.size() == 0) {
-			logger.debug("getQuestionsByPublicIds(): Question public id list is null or empty. Unable to querry db.");
+			logger.trace("getQuestionsByPublicIds(): Question public id list is null or empty. Unable to querry db.");
 			return null;
 		}
 			
 		List<QuestionTransferObject> questions = questionV2Dao.getQuestionsByPublicIds(publicIds);
-		logger.debug("getQuestionsByPublicId(): Dao returns " + questions.size() + " questions.");
+		logger.trace("getQuestionsByPublicId(): Dao returns " + questions.size() + " questions." + publicIds);
 		return questions;
 	}
 	
 	@Transactional(readOnly=true)
 	public List<DataElementTransferObject> getCDEByPublicId(String cdePublicId) {
 		if (cdePublicId == null || cdePublicId.length() == 0) {
-			logger.debug("getCDEByPublicId(): Question's CDE public id is null or empty. Unable to querry db.");
+			logger.trace("getCDEByPublicId(): Question's CDE public id is null or empty. Unable to querry db.");
 			return null;
 		}
 		
 		List<DataElementTransferObject> des = questionV2Dao.getCdesByPublicId(cdePublicId);
-		logger.debug("getCDEByPublicId(): Dao returns " + des.size() + " CDEs");
+		logger.trace("getCDEByPublicId(): Dao returns " + des.size() + " CDEs");
 		
 		return des;
 	}
@@ -202,7 +202,7 @@ public class FormLoaderRepositoryImpl implements FormLoaderRepository {
 	@Transactional(readOnly=true)
 	public HashMap<String, List<ReferenceDocumentTransferObject>> getReferenceDocsByCdePublicIds(List<String> cdePublicIds) {
 		if (cdePublicIds == null || cdePublicIds.size() == 0) {
-			logger.debug("getReferenceDocsByCdePublicIds(): cde public id list is null or empty. Unable to querry db.");
+			logger.trace("getReferenceDocsByCdePublicIds(): cde public id list is null or empty. Unable to querry db.");
 			return null;
 		}
 		
@@ -210,7 +210,7 @@ public class FormLoaderRepositoryImpl implements FormLoaderRepository {
 				questionV2Dao.getReferenceDocumentsByCdePublicIds(cdePublicIds);
 				
 				
-		logger.debug("getReferenceDocsByCdePublicIds(): Dao returns " + deRefDocs.size() + " CDE reference docs.");
+		logger.trace("getReferenceDocsByCdePublicIds(): Dao returns " + deRefDocs.size() + " CDE reference docs.");
 		
 		return deRefDocs;
 	}
@@ -231,7 +231,7 @@ public class FormLoaderRepositoryImpl implements FormLoaderRepository {
 		else
 			msg += "a value domain obj with " + pValues.size() + " permissible values";
 		
-		logger.debug(msg);
+		logger.trace(msg);
 		return pValues;
 	}
 	
@@ -297,7 +297,7 @@ public class FormLoaderRepositoryImpl implements FormLoaderRepository {
 		fvv.setCreatedBy(moduledto.getCreatedBy());
 		fvv.setQuestion(newQuestdto);
 		fvv.setVpIdseq(vValue.getVdPermissibleValueSeqid());	//JR417 vValue vdPermissibleValueSeqid can not be empty (fixed in this ticket)!
-		logger.debug("FormLoaderRepositoryImpl.java#translateIntoValidValueDto vValue.getVdPermissibleValueSeqid() can not be empty! *** vdPVIdSeq [" + vValue.getVdPermissibleValueSeqid() + "]");
+		logger.trace("FormLoaderRepositoryImpl.java#translateIntoValidValueDto vValue.getVdPermissibleValueSeqid() can not be empty! *** vdPVIdSeq [" + vValue.getVdPermissibleValueSeqid() + "]");
 		
 		//FORMBUILD-448 inserting a valid value finally inserts a record in SBR.ADMIN_COMPONENTS_VIEW which has a unique key on the combination of
 		//Version, Preferred name and Context. For this to work, Preferred Name is being set as a uniquely generated ID to cover cases where 
@@ -320,7 +320,7 @@ public class FormLoaderRepositoryImpl implements FormLoaderRepository {
 		fvv.setFormValueMeaningText(vValue.getMeaningText());
 		fvv.setFormValueMeaningIdVersion(vValue.getPreferredName());
 		fvv.setFormValueMeaningDesc(vValue.getDescription());
-		logger.debug("FormLoaderRepositoryImpl.java#translateIntoValidValueDto JR417 *** the three fields of fvv have to be populated! *** fvv [" + fvv + "]");
+		logger.trace("FormLoaderRepositoryImpl.java#translateIntoValidValueDto JR417 *** the three fields of fvv have to be populated! *** fvv [" + fvv + "]");
 		//JR417	end
 		
 		fvv.setVersion(Float.valueOf("1.0"));

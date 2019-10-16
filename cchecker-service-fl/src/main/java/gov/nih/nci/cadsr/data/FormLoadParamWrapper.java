@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2019 FNLCR - All rights reserved.
+ * Copyright (C) 2019 Frederick National Laboratory for Cancer Research - All rights reserved.
  */
 package gov.nih.nci.cadsr.data;
 
@@ -7,8 +7,8 @@ import java.util.List;
 
 public class FormLoadParamWrapper {
 	
-	private List<String> selForms;
 	private String contextName;
+	private List<String> selForms;
 
 	public List<String> getSelForms() {
 		return selForms;
@@ -28,7 +28,9 @@ public class FormLoadParamWrapper {
 	
 	@Override
 	public String toString() {
-		return "FormLoadParamWrapper [selForms=" + selForms + ", contextName=" + contextName + "]";
+		int size = (selForms != null) ? selForms.size() : 0;
+		return "FormLoadParamWrapper [number of forms=" 
+				+ size + ", selForms=" + selForms + ", contextName=" + contextName + "]";
 	}
 
 }

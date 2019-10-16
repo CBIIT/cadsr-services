@@ -7,3 +7,5 @@
 .settings
 downloanv*.xml
 *.launch
+.factorypath
+.springBeans

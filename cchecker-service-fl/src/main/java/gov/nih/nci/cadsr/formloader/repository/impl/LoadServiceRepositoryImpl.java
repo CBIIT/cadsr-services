@@ -37,10 +37,8 @@ import gov.nih.nci.ncicb.cadsr.common.dto.ProtocolTransferObjectExt;
 import gov.nih.nci.ncicb.cadsr.common.dto.QuestionTransferObject;
 import gov.nih.nci.ncicb.cadsr.common.dto.RefdocTransferObjectExt;
 import gov.nih.nci.ncicb.cadsr.common.dto.ReferenceDocumentTransferObject;
-import gov.nih.nci.ncicb.cadsr.common.dto.ValueMeaningV2TransferObject;
 import gov.nih.nci.ncicb.cadsr.common.exception.DMLException;
 import gov.nih.nci.ncicb.cadsr.common.resource.Instruction;
-import gov.nih.nci.ncicb.cadsr.common.resource.ValueMeaningV2;
 import gov.nih.nci.ncicb.cadsr.common.util.StringUtils;
 import gov.nih.nci.ncicb.cadsr.common.util.ValueHolder;
 @ConditionalOnBean(name = "dataSource")
@@ -212,7 +210,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 	
 	@Transactional
 	protected void createFormInstructions(FormDescriptor form, FormV2TransferObject formdto) {
-		logger.debug("Creating instructions for form");
+		logger.trace("Creating instructions for form");
 		String instructString = form.getHeaderInstruction();
 		if (instructString == null || instructString.length() == 0)
 			return;
@@ -226,7 +224,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 		if (formInstruction != null)
 			formInstructionV2Dao.createFooterInstruction(formInstruction, formdto.getFormIdseq());
 		
-		logger.debug("Done creating instructions for form");
+		logger.debug("Done creating instructions for form " + formdto.getLongName());
 	}
 	
 	/**
@@ -295,7 +293,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 		List<ContactCommunicationV2TransferObject> contacts = form.getContactCommnunications();
 		
 		if (contacts == null || contacts.size() == 0) {
-			logger.debug("Form " + form.getPublicId() + " has no contact. Do nothing");
+			logger.trace("Form " + form.getPublicId() + " has no contact. Do nothing");
 			return;
 		}
 		
@@ -315,7 +313,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 	@Transactional
 	protected void processRefdocs(FormDescriptor form, List<RefdocTransferObjectExt> refdocs) {
 		if (refdocs == null) {
-			logger.error("Null refdocs list passed in to processRefdocs(). Do nothing");
+			logger.trace("Null refdocs list passed in to processRefdocs(). Do nothing");
 			return;
 		}
 		
@@ -387,7 +385,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 	protected void processDesignations(FormDescriptor form, List<DesignationTransferObjectExt> designations) {
 		
 		if (designations == null) {
-			logger.debug("Null designation list passed in to processDesignations(). Do nothing");
+			logger.trace("Null designation list passed in to processDesignations(). Do nothing");
 			return;
 		}
 		
@@ -425,7 +423,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 	@Transactional
 	protected void processDefinitions(FormDescriptor form, List<DefinitionTransferObjectExt> definitions) {
 		if (definitions == null) {
-			logger.debug("Null definiion list passed in to processDefinitions(). Do nothing");
+			logger.trace("Null definiion list passed in to processDefinitions(). Do nothing");
 			return;
 		}
 		
@@ -446,7 +444,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 		List<ClassificationTransferObject> classifications = form.getClassifications();
 		
 		if (classifications == null || classifications.size() == 0) {
-			logger.debug("Form " + form.getPublicId() + " has no classifications to be loaded.");
+			logger.trace("Form " + form.getPublicId() + " has no classifications to be loaded.");
 		}
 		else
 		{
@@ -576,7 +574,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 	
 	@Transactional
 	protected void createModulesInForm(FormDescriptor form, FormV2TransferObject formdto) {
-		logger.debug("Start creating modules for form");
+		logger.debug("Start creating modules for form " + formdto.getLongName());
 		List<ModuleDescriptor> modules = form.getModules();
 		
 		//modules = FormLoaderHelper.handleModuleRepeat(modules);  //JR366 not needed
@@ -636,7 +634,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 		String strPublicId = question.getCdePublicId();
 		
 		if (strPublicId == null) {
-			logger.info("getMatchingDataElement: question.getCdePublicId returns null");
+			logger.trace("getMatchingDataElement: question.getCdePublicId returns null");
 			return matchedCde;
 		}
 		else if (! StringUtils.isInteger(strPublicId)) {
@@ -669,11 +667,11 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 		logger.debug("Creating questions for module: " + module.getLongName());
 		List<QuestionDescriptor> questions = module.getQuestions();
 		if ((questions == null) || (questions.size() == 0)) {
-			logger.debug("Module has no question");
+			logger.trace("Module has no question");
 			return;
 		}
 		else {
-			logger.info("Amount of module questions: " + (questions.size()));
+			logger.debug("Amount of module questions: " + (questions.size()));
 		}
 		
 		int idx = 0;
@@ -691,20 +689,13 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 			//FORMBUILD-529 associate the correct CDE and then use that CDE for setting Question Text
 			DataElementTransferObject matchingCde = getMatchingDataElement(question, cdeDtos);
 			
-			// 07/11/19 - santhanamv - Added the data element to the Question Transfer Object - Might need change if need be - Begin
-			if (matchingCde!=null) {
-				questdto.setDataElement(matchingCde);
-			}
-
-			// 07/11/19 - santhanamv - Added the data element to the Question Transfer Object - Might need change if need be - End
-			
 			QuestionHelper.handleEmptyQuestionText(questdto, matchingCde);
 
 			//better to call createQuestionComponents, which is not implement.
 			QuestionTransferObject newQuestdto = (QuestionTransferObject)this.questionV2Dao.createQuestionComponent(questdto);
 			String seqid = newQuestdto.getQuesIdseq();
 			
-			logger.debug("Created a question: " + seqid);
+			logger.debug("Created a question: " + seqid + ", quest LongName: " + questdto.getLongName());
 			question.setQuestionSeqId(seqid);
 			retrievePublicIdForQuestion(seqid, question, questdto);
 			
@@ -712,7 +703,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 			
 			createQuestionValidValues(question, form, newQuestdto, moduledto, formdto, pvDtos);		//JR417 entry point
 		}
-		logger.debug("Done creating questions for module");
+		logger.trace("Done creating questions for module");
 	}
 	
 	/**
@@ -730,7 +721,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 		List<QuestionDescriptor.ValidValue>  validValues = question.getValidValues();
 		
 		int idx = 0;
-		logger.debug("LoadServiceRepositoryImpl.java#createQuestionValidValues");
+		logger.trace("LoadServiceRepositoryImpl.java#createQuestionValidValues");
 		for (QuestionDescriptor.ValidValue vValue : validValues) {
 			if (vValue.isSkip()) { 
 				logger.debug("LoadServiceRepositoryImpl.java#createQuestionValidValues vValue " + vValue.getMeaningText() + " vpIdSeq [" + vValue.getVdPermissibleValueSeqid() + "] skipped!");
@@ -742,12 +733,9 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 			//FORMBUILD-424, 425 : Following block of code to be done in validation step and get the correct PV and set values for Meaning Text and Description
 			//JR417 begin
 			//get the correct vv's pvdto and set vv's vdPermissibleValueSeqid
-			
-			// 07/08/19 - santhanamv - Uncommented this block of code to associate Coded data from ALS to the valid values from the database, when the form is created. - Begin 
-			
-			PermissibleValueV2TransferObject pv = null;
-			 try {
-			 pv = FormLoaderHelper.getValidValuePV(vValue, pvDtos);
+			/*PermissibleValueV2TransferObject pv = null;
+			 * try {
+			 pv = FormLoaderHelper.getValidValuePV(vValue, pvDtos, repository);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -761,8 +749,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 				//FORMBUILD-448 following is redundant code as the PV already has the correct VMs associated with it. 
 				if(pvVM != null) {
 					vValue.setPreferredName(pvVM.getPublicId() + "v" + pvVM.getVersion());
-					logger.debug("pv value[" + pv.getValue() + "] vValue getPreferredName[" + vValue.getPreferredName() + "] ");
-					vValue.setDescription(pvVM.getPreferredDefinition());
+					System.out.println("*********** pv value[" + pv.getValue() + "] vValue getPreferredName[" + vValue.getPreferredName() + "] ***********");
 					ValueMeaningV2TransferObject vm = new ValueMeaningV2TransferObject();
 					vm.setPublicId(pvVM.getPublicId()); //this is also the preferred name for some reason
 					vm.setVersion(pvVM.getVersion());
@@ -776,9 +763,7 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 				}
 			} //what happend if it is null? do we need to check?
 			//JR417 end
-			
-			// 07/08/19 - santhanamv - Uncommented this block of code to associate Coded data from ALS to the valid values from the database, when the form is created. - End
-		
+			*/
 			FormValidValueTransferObject fvv = translateIntoValidValueDto(vValue, newQuestdto, moduledto, formdto, idx);	 //JR417 vValue's vdpvseqid / vp_idseq is NOT empty anymore (fixed in this ticket)
 			
 			fvv.setDisplayOrder(idx);
