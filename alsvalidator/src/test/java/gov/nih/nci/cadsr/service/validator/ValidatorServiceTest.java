@@ -1,6 +1,6 @@
 package gov.nih.nci.cadsr.service.validator;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -395,13 +395,29 @@ public class ValidatorServiceTest {
 	}	
 	
 	/**
-	 * Testing anb Enumerated ALS control type - example 4 (Checkbox)
-	 */												
+	 * Testing an Enumerated ALS control type - example 4 (Checkbox)
+	 */
 	@Test
 	public void testIsNonEnumeratedE4() {
 		Boolean expectedResult = false;
 		Boolean actualResult = ValidatorService.isNonEnumerated("CheckBox");
 		assertEquals(expectedResult, actualResult);
 	}
+	
+	/**
+	 * Testing the maintenance of non-duplicate items
+	 */	
+	@Test
+	public void testReturnOrderedNonDuplicateVMs() {
+		List<String> allowableCdeTextChoicesList = Arrays.asList("VM1", "VM2", "VM2", "VM3");
+		List<String> retAllowableCdeTextChoicesList = ValidatorService.returnOrderedNonDuplicateVMs(allowableCdeTextChoicesList);
+		String[] expecteds = {"VM1", "VM2", "VM3"};
+		String[] actuals = new String[3];
+		for (int i = 0; i < retAllowableCdeTextChoicesList.size(); i++) {
+			actuals[i] = retAllowableCdeTextChoicesList.get(i);
+		}
+		assertArrayEquals(expecteds, actuals);
+	}
+	
 	
 }
