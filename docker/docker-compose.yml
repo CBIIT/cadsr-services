@@ -8,6 +8,7 @@ services:
     environment:
       REST_API: $REST_API
       configuration: $configuration
+      BRANCH_OR_TAG: $BRANCH_OR_TAG
     networks:
       app_net:
         ipv4_address: 172.18.239.10
@@ -28,6 +29,7 @@ services:
       db_url: $db_url
       db_user: $db_user
       db_credential: $db_credential
+      BRANCH_OR_TAG: $BRANCH_OR_TAG
 networks:
   app_net:
     driver: bridge
