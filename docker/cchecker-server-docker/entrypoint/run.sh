@@ -61,7 +61,7 @@ echo "done building cchecker-service-excel-gen, cchecker-service-excel-gen servi
 # build and run the cchecker fl service #
 echo "entering cchecker-service-fl directory"
 cd ../cchecker-service-fl
-echo "building cchecher-service-fl"
+echo "building cchecker-service-fl"
 mvn clean package
 mv target/cchecker-service-fl*.jar target/cchecker-service-fl.jar
 java -jar target/cchecker-service-fl.jar &
