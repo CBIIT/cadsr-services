@@ -1125,16 +1125,24 @@ public class ReportGeneratorFeed implements ReportOutput {
 		int condCrfWarn = 0;
 		int condCrfErr = 0;
 		
+		// Getting all the NRDS CDEs to compare against Std CRF CDEs to eliminate common CDEs 
+		List<String> nrdsCdeIds = new ArrayList<String>();
+		for (NrdsCde cde : report.getMissingNrdsCdeList()) {
+			nrdsCdeIds.add(cde.getCdeIdVersion());
+		}
+		
 		// If the Standard CRF CDEs are not included in congruency checking 
 		// based on user's choice then they're excluded from the summary count
 		if (report.getIsCheckStdCrfCdeChecked()) {
 			for (StandardCrfCde cde : report.getMissingStandardCrfCdeList()) {
-				if (mandatory_crf.equals(cde.getStdTemplateType())) 
-					stdManMissingCount++;
-				else if (conditional_crf.equals(cde.getStdTemplateType()))
-					stdCondMissingCount++;
-				else if (optional_crf.equals(cde.getStdTemplateType()))
-					stdOptMissingCount++;
+				if (!(nrdsCdeIds.contains(cde.getCdeIdVersion()))) {
+					if (mandatory_crf.equals(cde.getStdTemplateType())) 
+						stdManMissingCount++;
+					else if (conditional_crf.equals(cde.getStdTemplateType()))
+						stdCondMissingCount++;
+					else if (optional_crf.equals(cde.getStdTemplateType()))
+						stdOptMissingCount++;
+				}
 			}
 		}
 		
