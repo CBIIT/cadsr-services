@@ -223,10 +223,10 @@ public class ValidatorService {
 	protected static CCCQuestion checkCdeVersions(CdeDetails cdeDetails, CCCQuestion question) {
 		//Checking for different versions of CDEs
 		Boolean newerVersionExists = false;
-		Float latestVersion = null;
+		Float latestVersion = Float.valueOf(question.getCdeVersion());
 		if (cdeDetails.getDataElement()!=null) {
 			for (OtherVersion otherVersion : cdeDetails.getDataElement().getOtherVersions()) {
-				if (otherVersion.getVersion() >  Float.valueOf(question.getCdeVersion())) {
+				if (otherVersion.getVersion() >  Float.valueOf(latestVersion)) {
 					newerVersionExists = true;
 					latestVersion = otherVersion.getVersion();
 				}					
