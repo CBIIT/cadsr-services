@@ -224,18 +224,19 @@ public class ValidatorService {
 		//Checking for different versions of CDEs
 		Boolean newerVersionExists = false;
 		Float latestVersion = Float.valueOf(question.getCdeVersion());
+		float latestVersionVal = latestVersion.floatValue();
 		if (cdeDetails.getDataElement()!=null) {
 			for (OtherVersion otherVersion : cdeDetails.getDataElement().getOtherVersions()) {
-				if (otherVersion.getVersion() >  Float.valueOf(latestVersion)) {
+				if (otherVersion.getVersion() >  latestVersionVal) {
 					newerVersionExists = true;
-					latestVersion = otherVersion.getVersion();
+					latestVersionVal = otherVersion.getVersion();
 				}					
 			}
 			
 			// If a RAVE ALS version of the CDE is older than the latest CDE version available, 
 			// then report a WARNING with an error message.
 			if (newerVersionExists) {
-				question.setMessage(assignQuestionErrorMessage(question.getMessage(),String.format(msg3, latestVersion)));
+				question.setMessage(assignQuestionErrorMessage(question.getMessage(),String.format(msg3, latestVersionVal)));
 				if (question.getQuestionCongruencyStatus()==null)
 					question.setQuestionCongruencyStatus(congStatus_warn);
 			} 
