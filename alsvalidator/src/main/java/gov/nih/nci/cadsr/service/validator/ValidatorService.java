@@ -414,9 +414,15 @@ public class ValidatorService {
 			question.setPvResults(pvCheckerResultsList);
 			// Allowable CDE Text Choices built from the PV value meanings list
 			question.setAllowableCdeTextChoices(allowCdesList);
+			String errMsg = assignQuestionErrorMessage(question.getMessage(), msg9);
 			if (!isMatch) {
-				if((question.getMessage() != null) && (question.getMessage().indexOf(msg9) == -1))
-					question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg9));
+				if(question.getMessage() != null) {
+					if (question.getMessage().indexOf(msg9) == -1) {			
+						question.setMessage(errMsg); 
+					}
+				} else {
+					question.setMessage(errMsg);
+				}
 				question.setQuestionCongruencyStatus(congStatus_errors);
 			}
 		}
@@ -462,8 +468,14 @@ public class ValidatorService {
 				} else {
 					cdResult.add(errorString);
 					// FORMBUILD-647
-					if ((question.getMessage()!=null) && (question.getMessage().indexOf(msg10) == -1))
-						question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg10));
+					String errMsg = assignQuestionErrorMessage(question.getMessage(), msg10);
+					if (question.getMessage()!=null) {
+						if (question.getMessage().indexOf(msg10) == -1) { 
+							question.setMessage(errMsg);
+						}
+					} else {
+						question.setMessage(errMsg);
+					}
 					question.setQuestionCongruencyStatus(congStatus_errors);
 				}
 			}
