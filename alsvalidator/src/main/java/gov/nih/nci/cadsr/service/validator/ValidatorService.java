@@ -401,8 +401,9 @@ public class ValidatorService {
 				String pvValue = codedDataList.get(userDataStringList.indexOf(userDataString));
 				// Obtaining the PV value meanings list for comparison with User Data String
 				List<String> pvVmList = pvVmMap.get(pvValue);				
-				if (pvVmList!=null) {
-					if (pvVmList.contains(userDataString)) {
+				if (pvVmList!=null) {//this means that coded data matched one of allowed PV values
+					//userDataString is in a prepared allowed value list, or userDataString is equal to its coded data when the code data matched to a PV value
+					if ((pvVmList.contains(userDataString)) || (userDataString.equals(pvValue))) {
 						pvCheckerResultsList.add(matchString);
 						allowCdesList.add("");
 					} else {
