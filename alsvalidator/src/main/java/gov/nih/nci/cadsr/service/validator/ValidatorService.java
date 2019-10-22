@@ -352,6 +352,12 @@ public class ValidatorService {
 							question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg7, errorVal.toArray())));
 							question.setQuestionCongruencyStatus(congStatus_errors); 
 						}
+					
+					// Checking for Rave Coded data in the event of Control Type conflict - VS
+					if (!question.getRaveCodedData().isEmpty() && "N".equalsIgnoreCase(vdType)) {						
+						question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg5));
+					}
+					
 					// Introducing Not Checked status for those data types that are not part of the 
 					// designated data types that will be verified against the CDE
 					if (notCheckedString.equals(result) && question.getQuestionCongruencyStatus()==null)
