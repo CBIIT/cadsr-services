@@ -397,7 +397,6 @@ public class ValidatorService {
 				List<String> pvVmList = pvVmMap.get(pvValue);				
 				if (pvVmList!=null) {
 					if (pvVmList.contains(userDataString)) {
-						isMatch = true;
 						pvCheckerResultsList.add(matchString);
 						allowCdesList.add("");
 					} else {
