@@ -113,7 +113,7 @@ public class ValidatorService {
 			List<String> pvVmList = new ArrayList<String>();
 			Map<String, List<String>> pvVmMap =  new HashMap<String, List<String>>();
 			int pvMaxLen = 0;
-			int vdMaxLen = 0;
+			Integer vdMaxLen = null;
 			String allowableCdes = "";
 			
 			//Obtaining Value Domain's Max Length for comparison
@@ -171,10 +171,9 @@ public class ValidatorService {
 			
 			// Removing this validation after discussing with the team, as it doesn't serve a significant purpose
 			// Comparing RAVE Length (FixedUnit) with the caDSR PVs Max length
-			/*if (vdMaxLen != 0)
-				question = checkCdeMaxLength (question, pvMaxLen, vdMaxLen, computeRaveLength(question.getRaveLength()));*/
-			if (vdMaxLen != 0)
-				question.setCdeMaxLength(vdMaxLen);
+			/*if (vdMaxLen != null)
+				question = checkCdeMaxLength (question, pvMaxLen, vdMaxLen, computeRaveLength(question.getRaveLength()));*/ 
+			question.setCdeMaxLength(vdMaxLen);
 			
 			//Comparing the ALS RAVE Data Format with caDSR Value Domain Display Format
 			// Not Checking for Format, based on Customer's feedback
