@@ -14,9 +14,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import gov.nih.nci.cadsr.dao.model.AlternateNameUiModel;
 import gov.nih.nci.cadsr.dao.model.PermissibleValuesModel;
@@ -172,8 +172,9 @@ public class ValidatorService {
 			// Removing this validation after discussing with the team, as it doesn't serve a significant purpose
 			// Comparing RAVE Length (FixedUnit) with the caDSR PVs Max length
 			/*if (vdMaxLen != 0)
-				question = checkCdeMaxLength (question, pvMaxLen, vdMaxLen, computeRaveLength(question.getRaveLength()));*/ 
-			question.setCdeMaxLength(vdMaxLen);
+				question = checkCdeMaxLength (question, pvMaxLen, vdMaxLen, computeRaveLength(question.getRaveLength()));*/
+			if (vdMaxLen != 0)
+				question.setCdeMaxLength(vdMaxLen);
 			
 			//Comparing the ALS RAVE Data Format with caDSR Value Domain Display Format
 			// Not Checking for Format, based on Customer's feedback
@@ -329,7 +330,7 @@ public class ValidatorService {
 			it's an error. (we will provide the team with a list of the mappings between the Rave Datatypes 
 			and caDSR datatypes ,the names are not the same). */ 
 			
-			if (question.getRaveControlType()!=null) {
+			if (!(StringUtils.isEmpty(question.getRaveControlType()))) {
 				// When RAVE control type is Non-Enumerated & VD type is N (Non-enumerated)
 				if (isNonEnumerated(question.getRaveControlType().toUpperCase()) && "N".equalsIgnoreCase(vdType)) {
 					question.setControlTypeResult(matchString);
@@ -616,7 +617,7 @@ public class ValidatorService {
 		errorVal.add(vdDisplayFormat);
 		Boolean result = false;
 		//if CDE VD has no data format (null or empty), we consider this validation is OK
-		if (org.apache.commons.lang3.StringUtils.isBlank(vdDisplayFormat)) {
+		if (StringUtils.isBlank(vdDisplayFormat)) {
 			result = true;
 		}
 		else //we compare VD data format with anything received from ALS including empty
@@ -668,8 +669,11 @@ public class ValidatorService {
 	protected static int computeRaveLength (String raveLength) {
 		int raveLengthInt = 0;
 		if (raveLength!=null && raveLength.trim().length() > 0 && !"%".equals(raveLength)) {
-			raveLength = raveLength.toLowerCase();
-			// Looking for "Characters" to ignore it for length computation using pattern matching
+			raveLength = raveLength.toLowerCase();			
+			int patternHolderCharCount = StringUtils.countMatches(raveLength, patternHolderChar);
+			int patternHolderNumCount = StringUtils.countMatches(raveLength, patternHolderNum);
+
+			// Looking for "Characters" to ignore them for length computation using pattern matching
 			if (raveLength.indexOf(characters_string) > -1) {
 				Pattern pattern = Pattern.compile("\\d+");
 				Matcher matcher = pattern.matcher(raveLength);
@@ -677,11 +681,11 @@ public class ValidatorService {
 					raveLength = matcher.group();
 				}
 				// Looking for "dddd.." pattern to compute length
-			} else if (StringUtils.countOccurrencesOf(raveLength, patternHolderChar) > 1) {
-				raveLength = String.valueOf(StringUtils.countOccurrencesOf(raveLength, patternHolderChar));
+			} else if (patternHolderCharCount > 1) {
+				raveLength = String.valueOf(patternHolderCharCount);
 				// Looking for "9999.." pattern to compute length
-			} else if (StringUtils.countOccurrencesOf(raveLength, patternHolderNum) > 1) {
-				raveLength = String.valueOf(StringUtils.countOccurrencesOf(raveLength, patternHolderNum));
+			} else if (patternHolderNumCount > 1) {
+				raveLength = String.valueOf(patternHolderNumCount);
 			}	
 		} else {
 			raveLength = "0";
