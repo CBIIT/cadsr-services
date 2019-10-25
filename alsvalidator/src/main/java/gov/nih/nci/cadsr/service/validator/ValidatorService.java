@@ -399,6 +399,9 @@ public class ValidatorService {
 			for (String userDataString : userDataStringList) {
 				// Getting the Coded Data value for the corresponding User Data String from RAVE ALS
 				String pvValue = codedDataList.get(userDataStringList.indexOf(userDataString));
+				
+				//Identifying & Replacing the '@@' or '##' patterns in pv value 
+				pvValue = codedDataReplace(pvValue);
 				// Obtaining the PV value meanings list for comparison with User Data String
 				List<String> pvVmList = pvVmMap.get(pvValue);				
 				if (pvVmList!=null) {//this means that coded data matched one of allowed PV values
@@ -444,10 +447,6 @@ public class ValidatorService {
 	 */
 	protected static CCCQuestion setCodedDataCheckerResult (List<String> pvList, CCCQuestion question) {
 		List<String> cdResult = new ArrayList<String>();
-		String at_str = "@@";
-		String hash_str = "##";		
-		String comma_str = ",";
-		String semicolon_str = ";";
 		
 		/* Compare each CodedData value to all of the Value Domain's PermissibleValue.value
 			Exceptions: If it does not match one of the CDEs PV Value, "ERROR"
@@ -462,13 +461,8 @@ public class ValidatorService {
 		if (!pvList.isEmpty()) {
 			for (String codedData : question.getRaveCodedData()) {
 				// Identifying and replacing the @@ and ## patterns
-				// with ',' and ';' respectively 
-				if (codedData!=null) {
-					if (codedData.indexOf(at_str) > -1)
-						codedData = replacePattern(codedData, at_str, comma_str);
-					if (codedData.indexOf(hash_str) > -1)
-						codedData = replacePattern(codedData, hash_str, semicolon_str);
-				}
+				// with ',' and ';' respectively
+				codedData = codedDataReplace(codedData);
 				if (pvList.contains(codedData)) {
 					cdResult.add(matchString);
 				} else {
@@ -797,7 +791,27 @@ public class ValidatorService {
 			stringWithPattern = matcher.replaceAll(replacement);
 		}
 		return stringWithPattern;
-	}	
+	}
+	
+	/**
+	 * Replaces the '##' or '@@' pattern in Coded Data
+	 * @param codedData
+	 * @return String
+	 */				
+	protected static String codedDataReplace (String codedData) {
+		String at_str = "@@";
+		String hash_str = "##";		
+		String comma_str = ",";
+		String semicolon_str = ";";		
+		if (codedData!=null) {
+			if (codedData.indexOf(at_str) > -1)
+				codedData = replacePattern(codedData, at_str, comma_str);
+			if (codedData.indexOf(hash_str) > -1)
+				codedData = replacePattern(codedData, hash_str, semicolon_str);
+		}
+		return codedData;
+	}
+	
 	
 	/**
 	 * Data Type comparison
