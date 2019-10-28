@@ -795,14 +795,15 @@ public class GatewayBootController {
 
 		return emitter;
 	}
+	//TODO remove the method feedCheckStatus; superseded by feedCheckForm
 	/**
 	 * Returns form under validation number.
 	 * 
 	 * @param idseq not null
 	 * @return SseEmitter
 	 */
-	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
-	@GetMapping("/feedcheckstatus/{idseq}")
+//	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
+//	@GetMapping("/feedcheckstatus/{idseq}")
 	public ResponseBodyEmitter feedCheckStatus(HttpServletRequest request, @PathVariable("idseq") String idseq) {
 		logger.debug("feedcheckstatus called with session: " + idseq);
 

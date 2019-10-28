@@ -123,7 +123,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 	}
 	//TODO we can remove requestStatusMap and keep only currentFormMap when UI starts using FeedFormStatus instead of form number in feed service
 	//we will keep here a status of requests: sessionID-form processed number
-	private ConcurrentMap<String, String> requestStatusMap = new ConcurrentHashMap<>();
+	//private ConcurrentMap<String, String> requestStatusMap = new ConcurrentHashMap<>();
 	
 	//FORMBUILD-633 indicate X of X Questions 
 	private ConcurrentMap<String, FeedFormStatus> currentFormMap = new ConcurrentHashMap<>();
@@ -131,13 +131,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 	
 	//FORMBUILD-641 Add ability to Cancel the validation
 	private ConcurrentMap<String, String> requestRunningMap = new ConcurrentHashMap<>();
-	
-	public String feedRequestStatus(String sessionId) {
-		String feedNumber = requestStatusMap.get(sessionId);
-		if (feedNumber == null) feedNumber = "0";
-		return feedNumber;
-	}
-	
+
 	//FORMBUILD-633
 	/**
 	 * Provide current request status based on sessionId.
@@ -367,10 +361,6 @@ public class ReportGeneratorFeed implements ReportOutput {
 					formOid = alsField.getFormOid();
 					
 					if (StringUtils.isNotBlank(sessionId)) {//feed status code
-						//TODO remove requestStatusMap when feed is changed in UI
-						requestStatusMap.put(sessionId, ""+feedFormNumber);
-						logger.debug("Current form to feed map, session: " + sessionId + ", form: " + feedFormNumber + ", FormOid:" + formOid);
-						
 						//FORMBUILD-633
 						String alsFormName = findFormNameByFormOid(formOid, alsData.getForms());
 						FeedFormStatus feedFormStatus = createFeedFormStatus(countValidatedQuestions, alsFormName, feedFormNumber);
@@ -391,9 +381,6 @@ public class ReportGeneratorFeed implements ReportOutput {
 							feedFormNumber++;
 							
 							if (StringUtils.isNotBlank(sessionId)) {//feed status code
-								//TODO remove requestStatusMap when feed is changed in UI
-								requestStatusMap.put(sessionId, ""+feedFormNumber);
-								logger.debug("Current form to feed map, session: " + sessionId + ", form: " + feedFormNumber);
 								//FORMBUILD-633 
 								countValidatedQuestions+=countQuestChecked;
 								String alsFormName = findFormNameByFormOid(alsField.getFormOid(), alsData.getForms());
@@ -607,8 +594,6 @@ public class ReportGeneratorFeed implements ReportOutput {
 		//FORMBUILD-636
 		calculateCdiscReportTotals(cccReport);
 		cccReport.setSelectedFormsCount(cccReport.getCccForms().size());
-		//TODO remove requestStatusMap when feed is changed in UI
-		requestStatusMap.remove(sessionId);
 		//FORMBUILD-633
 		currentFormMap.remove(sessionId);
 		//FORMBUILD-641 cancel request
