@@ -328,7 +328,8 @@ public class ReportGeneratorFeed implements ReportOutput {
 		int countQuestChecked = 0;
 		int totalNrdsCong = 0;
 		int totalNrdsWarn = 0;
-		int totalNrdsError = 0;		
+		int totalNrdsError = 0;
+		int totalCountNciCong = 0;
 
 		List<NrdsCde> nrdsCdeList = new ArrayList<NrdsCde>();
 		// FORMBUILD-636
@@ -482,7 +483,11 @@ public class ReportGeneratorFeed implements ReportOutput {
 							
 							if (question.getQuestionCongruencyStatus() != null) {
 								if (congStatus_congruent.equals(question.getQuestionCongruencyStatus())) {
-									congQuestionsList.add(question);	
+									congQuestionsList.add(question);
+									
+									if (StringUtils.isNotBlank(question.getNciCategory()) && (question.getNciCategory().indexOf(mandatory_crf) > -1 || question.getNciCategory().indexOf(nrds_cde) > -1)) {
+										totalCountNciCong++;	
+									}
 								} else {
 									questionsList.add(question);
 								}										
@@ -567,6 +572,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 		cccReport.setCountNrdsCongruent(totalNrdsCong);
 		cccReport.setCountNrdsWithErrors(totalNrdsError);
 		cccReport.setCountNrdsWithWarnings(totalNrdsWarn);
+		cccReport.setCountNciCongruent(totalCountNciCong);
 		cccReport.setMissingNrdsCdeList(missingNrdsCdesList);
 		cccReport.setCountNrdsMissing(missingNrdsCdesList.size());
 		
@@ -1147,7 +1153,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 		}
 		
 		for (CCCForm tempForm : report.getCccForms()) {
-			for (CCCQuestion tempQuestion : tempForm.getQuestions()) {
+			for (CCCQuestion tempQuestion : tempForm.getQuestions()) {				
 				if (tempQuestion.getQuestionCongruencyStatus()!=null) {
 					if (congStatus_warn.equals(tempQuestion.getQuestionCongruencyStatus())) {
 						countQuestWarn++;
@@ -1179,7 +1185,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 								}
 							}
 						}
-					}					
+					}				
 				}
 			}
 		}
@@ -1199,7 +1205,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 		report.setCountManCrfMissing(stdManMissingCount);
 		report.setCountOptCrfMissing(stdOptMissingCount);
 		report.setCountCondCrfMissing(stdCondMissingCount);
-		report.setCountManCrfCongruent(manCrfCong);
+		//report.setCountManCrfCongruent(manCrfCong);
 		report.setCountManCrfwWithWarnings(manCrfWarn);
 		report.setCountManCrfWithErrors(manCrfErr);
 		report.setCountCondCrfCongruent(condCrfCong);
@@ -1211,7 +1217,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 		
 		// FORMBUILD-636
 		report.setCountNciMissing(stdManMissingCount + report.getCountNrdsMissing());
-		report.setCountNciCongruent(manCrfCong + report.getCountNrdsCongruent());
+		//report.setCountNciCongruent(manCrfCong + report.getCountNrdsCongruent());
 		report.setCountNciWithWarnings(manCrfWarn + report.getCountNrdsWithWarnings());
 		report.setCountNciWithErrors(manCrfErr + report.getCountNrdsWithErrors());
 		
