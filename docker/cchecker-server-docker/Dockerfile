@@ -10,10 +10,10 @@ RUN wget https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.20/bin/apache-tomc
     && cd apache-tomcat/webapps && rm -rf examples docs host-manager manager ROOT/*  && cd ../.. \
     && mv apache-tomcat /usr/local/apache-tomcat
 
-RUN wget https://archive.apache.org/dist/maven/maven-3/3.5.4/binaries/apache-maven-3.5.4-bin.tar.gz \
-    && tar xvfz apache-maven-3.5.4-bin.tar.gz \
-    && mv apache-maven-3.5.4 /opt \
-    && ln -s /opt/apache-maven-3.5.4 /opt/apache-maven
+RUN wget https://archive.apache.org/dist/maven/maven-3/3.6.0/binaries/apache-maven-3.6.0-bin.tar.gz \
+    && tar xvfz apache-maven-3.6.0-bin.tar.gz \
+    && mv apache-maven-3.6.0 /opt \
+    && ln -s /opt/apache-maven-3.6.0 /opt/apache-maven
 
 ENV PATH=/opt/apache-maven/bin:$PATH
 ENV JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk
