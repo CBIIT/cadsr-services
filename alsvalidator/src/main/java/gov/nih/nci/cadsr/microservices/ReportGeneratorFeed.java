@@ -326,6 +326,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 		int totalCountNciCong = 0;
 
 		List<NrdsCde> nrdsCdeList = new ArrayList<NrdsCde>();
+		List<NrdsCde> missingNciList = new ArrayList<NrdsCde>();
 		// FORMBUILD-636
 		List<StandardCrfCde> matchingStdCrfCdeList = new ArrayList<StandardCrfCde>();
 		List<StandardCrfCde> standardCrfCdeList = new ArrayList<StandardCrfCde>();
@@ -454,6 +455,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 							question = updateNciCategory(checkStdCrfCde, cdeCrfData, question, cdeDetails);
 							// FORMBUILD-636
 							nrdsCdeList = getNrdsCdeList(checkStdCrfCde, question, cdeDetails, nrdsCdeList);
+							missingNciList = getMissingNciCdeList(checkStdCrfCde, question, cdeDetails, missingNciList);
 							//FORMBUILD-621
 							addToReportCdeList(question, cdeDetails, reportCdeList);
 							
@@ -534,7 +536,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 		//}
 		// categoryNrdsList and categoryCdeList will be reduced to those CDEs that are missing
 		List<CategoryCde> missingCdeStd = createMissingCategoryCdeList(standardCrfCdeList);
-		List<CategoryNrds> missingCategoryNrdsList = createMissingNrdsCategoryNrdsList(nrdsCdeList);
+		List<CategoryNrds> missingCategoryNrdsList = createMissingNrdsCategoryNrdsList(missingNciList);
 		
 		for (CategoryNrds cde : missingCategoryNrdsList) {
 			missingNrdsCdesList.add(buildMissingNrdsCde(cde));
@@ -743,6 +745,30 @@ public class ReportGeneratorFeed implements ReportOutput {
 		return nrdsCdeList;
 	}	
 	
+	/**
+	 * Assigning the CDE to the Missing NRDS CDEs list based on the question's NCI category 
+	 * @param question
+	 * @param cdeDetails
+	 * @param missingNciList
+	 * @return List<NrdsCde>
+	 */
+	protected static List<NrdsCde> getMissingNciCdeList (Boolean checkStdCrfCde, CCCQuestion question, CdeDetails cdeDetails, List<NrdsCde> missingNciList) {
+	if (cdeDetails.getDataElement()!=null)  {
+		if (question.getNciCategory()!=null) {
+			// FORMBUILD-636
+					if (question.getNciCategory().indexOf(nrds_cde) > -1 || nrds_cde.equalsIgnoreCase(question.getNciCategory())) {
+						missingNciList.add(buildNrdsCde(question,
+								cdeDetails.getDataElement().getDataElementDetails().getLongName()));
+					} else if (mandatory_crf.equalsIgnoreCase(question.getNciCategory())) {
+						if (checkStdCrfCde) {
+							missingNciList.add(buildNrdsCde(question,
+									cdeDetails.getDataElement().getDataElementDetails().getLongName()));
+						}						
+					}
+		}	
+	}
+		return missingNciList;
+	}		
 	
 	// FORMBUILD-636	
 	/**
