@@ -11,6 +11,8 @@ RUN npm install -g @angular/cli \
 WORKDIR /usr/lib/node_modules/npm
 RUN npm install --save-dev https-proxy-agent@2.2.4
 RUN rm /usr/lib/node_modules/@angular/cli/node_modules/agent-base/test/*
+RUN rm /usr/lib/node_modules/@angular/cli/node_modules/http-proxy-agent/test/*
+
 ENV abc=123
 ADD conf/httpd.conf /etc/httpd/conf
 ADD conf/.htaccess /etc/httpd/conf.d
