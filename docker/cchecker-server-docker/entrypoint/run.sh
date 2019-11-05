@@ -73,19 +73,5 @@ echo "done starting crond"
 echo "entering apache-tomcat directory"
 echo "starting tomcat"
 cd /usr/local/apache-tomcat
-./bin/catalina.sh run &
+./bin/catalina.sh run
 echo "done starting tomcat"
-
-while [ ! -d "/usr/local/apache-tomcat/log" ]
-  do
-  echo "Waiting for tomcat to start"
-  sleep 1
-done
-echo "changing permissions on apache-tomcat log directory"
-chmod 777 -R /usr/local/apache-tomcat/log
-echo "changing permissions on apache-tomcat log file"
-chmod 777 -R /usr/local/apache-tomcat/log/*
-
-echo "starting nginx web server"
-nginx -g 'daemon off;'
-echo "done starting nginx web server"

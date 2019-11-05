@@ -2,7 +2,6 @@ FROM ncidockerhub.nci.nih.gov/cbiit/centos7_base
 MAINTAINER Shaun Einolf
 
 RUN yum -y update && yum -y install cronie git java-1.8.0-openjdk-devel sudo util-linux wget epel-release
-RUN yum -y install nginx
 
 WORKDIR /tmp
 RUN wget https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.20/bin/apache-tomcat-9.0.20.tar.gz \
@@ -23,7 +22,6 @@ RUN mkdir -p /local/content/cchecker /logs
 
 COPY entrypoint/run.sh /usr/bin/
 COPY assets/crondelete /etc/cron.d/crondelete
-COPY assets/nginx.conf /etc/nginx
 COPY assets/web.xml /usr/local/apache-tomcat/conf
 COPY assets/error.html /usr/local/apache-tomcat/webapps/ROOT
 COPY assets/index.html /logs
@@ -31,5 +29,5 @@ COPY assets/index.html /logs
 RUN chmod 0644 /etc/cron.d/crondelete
 RUN crontab /etc/cron.d/crondelete
 
-EXPOSE 8080 8082
+EXPOSE 8080
 ENTRYPOINT "/usr/bin/run.sh"
