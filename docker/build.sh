@@ -21,8 +21,6 @@ docker push ncidockerhub.nci.nih.gov/cadsrdocker/cchecker-server:latest
 
 echo "removing unused images from system"
 docker rmi temp_ui:latest
-docker rmi ncidockerhub.nci.nih.gov/cadsrdocker/cchecker-ui:$TAG
 docker rmi temp_server:latest
-docker rmi ncidockerhub.nci.nih.gov/cadsrdocker/cchecker-server:$TAG
 
 docker image prune -f
