@@ -9,6 +9,7 @@ public class CategoryCde implements Comparable {
     private String moduleType;
     private String formId;
     private String formName;
+    private String deQuestion;
 	public int getCdeId() {
 		return cdeId;
 	}
@@ -47,10 +48,17 @@ public class CategoryCde implements Comparable {
 		this.formName = formName;
 	}	
 	
+	public String getDeQuestion() {
+		return deQuestion;
+	}
+	public void setDeQuestion(String deQuestion) {
+		this.deQuestion = deQuestion;
+	}
+
 	@Override
 	public String toString() {
 		return "CategoryCde [cdeId=" + cdeId + ", deVersion=" + deVersion + ", deName=" + deName + ", moduleType="
-				+ moduleType + ", formId=" + formId + ", formName=" + formName + "]";
+				+ moduleType + ", formId=" + formId + ", formName=" + formName + ", deQuestion=" + deQuestion + "]";
 	}
 	
 	@Override

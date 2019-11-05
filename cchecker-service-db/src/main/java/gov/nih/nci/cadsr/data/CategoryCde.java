@@ -2,13 +2,14 @@ package gov.nih.nci.cadsr.data;
 /*
  * Copyright 2018 Leidos Biomedical Research, Inc.
  */
-public class CategoryCde implements Comparable<Object> {
+public class CategoryCde implements Comparable {
     private int cdeId;
     private float deVersion;
     private String deName;
     private String moduleType;
     private String formId;
     private String formName;
+    private String deQuestion;
 	public int getCdeId() {
 		return cdeId;
 	}
@@ -47,10 +48,17 @@ public class CategoryCde implements Comparable<Object> {
 		this.formName = formName;
 	}	
 	
+	public String getDeQuestion() {
+		return deQuestion;
+	}
+	public void setDeQuestion(String deQuestion) {
+		this.deQuestion = deQuestion;
+	}
+
 	@Override
 	public String toString() {
 		return "CategoryCde [cdeId=" + cdeId + ", deVersion=" + deVersion + ", deName=" + deName + ", moduleType="
-				+ moduleType + ", formId=" + formId + ", formName=" + formName + "]";
+				+ moduleType + ", formId=" + formId + ", formName=" + formName + ", deQuestion=" + deQuestion + "]";
 	}
 	
 	@Override

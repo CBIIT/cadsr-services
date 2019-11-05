@@ -59,8 +59,9 @@ width:910px;
 display:block;
 }
 
-#main #component h2 {
-margin-bottom:25px;
+#main #component h1 {
+    margin-bottom:25px;
+    font-size:220%;
 }
 
 #main div {
@@ -146,4 +147,66 @@ vertical-align:top!important;
 
 .help_text::before {
 content: "» "
+}
+
+.filetype_line2 {
+  padding-left:9px;
+}
+
+
+.display.compact .colspan tr{
+    background-color:transparent !important;
+  }
+  .display.compact .colspan td {
+    padding:0px;
+  }
+
+  .display.compact .colspan td.raveUserString{
+    width:156px !important;
+    padding-right:5px !important;
+  }
+
+  .display.compact .colspan td.pvResult{
+    width:134px !important;
+  }
+
+  .display.compact .colspan td.raveUserString{
+    width:150px;
+  }
+
+  #formListButtons {
+    width:870px;
+  }
+  
+  #formListButtons td {
+    width:100px;
+  }
+
+  .formsSelected {
+    padding-bottom:8px;
+    font-weight:bold;
+    color:#1C5E86;
+    text-transform:capitalize;
+  }
+
+  .fileName {
+    font-size:150% !important;
+  }
+
+  #summary td{
+    text-transform:capitalize
+   }
+
+   .borderright {
+    border-right:1px solid #212529;
+  }
+  
+  
+  .borderleft {
+    border-left:1px solid #212529;
+  }
+
+
+.lowercase {
+  text-transform:lowercase;
 }

@@ -8,13 +8,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import gov.nih.nci.cadsr.dao.model.AlternateNameUiModel;
 import gov.nih.nci.cadsr.dao.model.PermissibleValuesModel;
@@ -43,12 +45,14 @@ public class ValidatorService {
 	private static final String msg2 = "CDE has been retired.";
 	private static final String msg3 = "Newer version of CDE exists: {%.1f}.";
 	private static final String msg4 = "Value domain Max Length too short. PVs MaxLength is {%d} , caDSR MaxLength is {%d}.";
-	private static final String msg5 = "This CDE is not enumerated but question in input file has Coded Data (Permissible values) - %s.";
-	private static final String msg6 = "Question Text in input file does not match available CDE question text(s) - %s.";
+	// FORMBUILD-647	
+	private static final String msg5 = "This CDE is non-enumerated but question in input file has Coded Data.";
+	private static final String msg6 = "Question Text does not match available CDE question text(s).";
 	private static final String msg7 = "Control Type {%s} isn't compatible with the corresponding mapping for Value domain type {%s}.";
 	private static final String msg8 = "Missing Control Type in the ALS input data.";
-	private static final String msg9 = "Rave User String matches with neither PV Value nor VM Long Name nor VM Alternate Name.";
-	private static final String msg10 = "The Coded data {%s} for the question do not belong to the corresponding Value domain.";
+	// FORMBUILD-647
+	private static final String msg9 = "Some Rave user strings match neither PV Value nor any VM names.";
+	private static final String msg10 = "Some Coded Data are not found in the corresponding CDE Value Domain.";
 	private static final String msg11 = "Data type {%s} from ALS input data doesn't match with the corresponding Value Domain's data type {%s}.";
 	private static final String msg12 = "Unit of Measure {%s} from ALS input data doesn't match with the corresponding Value Domain's UOM {%s}.";
 	private static final String msg13 = "Format {%s} doesn't match with the corresponding Value Domain's format {%s}.";
@@ -109,7 +113,7 @@ public class ValidatorService {
 			List<String> pvVmList = new ArrayList<String>();
 			Map<String, List<String>> pvVmMap =  new HashMap<String, List<String>>();
 			int pvMaxLen = 0;
-			int vdMaxLen = 0;
+			Integer vdMaxLen = null;
 			String allowableCdes = "";
 			
 			//Obtaining Value Domain's Max Length for comparison
@@ -167,7 +171,7 @@ public class ValidatorService {
 			
 			// Removing this validation after discussing with the team, as it doesn't serve a significant purpose
 			// Comparing RAVE Length (FixedUnit) with the caDSR PVs Max length
-			/*if (vdMaxLen != 0)
+			/*if (vdMaxLen != null)
 				question = checkCdeMaxLength (question, pvMaxLen, vdMaxLen, computeRaveLength(question.getRaveLength()));*/ 
 			question.setCdeMaxLength(vdMaxLen);
 			
@@ -219,19 +223,20 @@ public class ValidatorService {
 	protected static CCCQuestion checkCdeVersions(CdeDetails cdeDetails, CCCQuestion question) {
 		//Checking for different versions of CDEs
 		Boolean newerVersionExists = false;
-		Float latestVersion = null;
+		Float latestVersion = Float.valueOf(question.getCdeVersion());
+		float latestVersionVal = latestVersion.floatValue();
 		if (cdeDetails.getDataElement()!=null) {
 			for (OtherVersion otherVersion : cdeDetails.getDataElement().getOtherVersions()) {
-				if (otherVersion.getVersion() >  Float.valueOf(question.getCdeVersion())) {
+				if (otherVersion.getVersion() >  latestVersionVal) {
 					newerVersionExists = true;
-					latestVersion = otherVersion.getVersion();
+					latestVersionVal = otherVersion.getVersion();
 				}					
 			}
 			
 			// If a RAVE ALS version of the CDE is older than the latest CDE version available, 
 			// then report a WARNING with an error message.
 			if (newerVersionExists) {
-				question.setMessage(assignQuestionErrorMessage(question.getMessage(),String.format(msg3, latestVersion)));
+				question.setMessage(assignQuestionErrorMessage(question.getMessage(),String.format(msg3, latestVersionVal)));
 				if (question.getQuestionCongruencyStatus()==null)
 					question.setQuestionCongruencyStatus(congStatus_warn);
 			} 
@@ -272,9 +277,18 @@ public class ValidatorService {
 
 		if (!rdDocTextList.isEmpty() && rdDocTextList.contains(question.getRaveFieldLabel())) {
 			question.setRaveFieldLabelResult(matchString);
-		} else {
+		} 
+		else if (MicroserviceUtils.compareListWithIgnore(rdDocTextList, question.getRaveFieldLabel())) {
+			//FORMBUILD-651
+			question.setRaveFieldLabelResult(warningString);
+			// FORMBUILD-647
+			question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg6));
+			question.setQuestionCongruencyStatus(congStatus_warn);
+		}
+		else {
 			question.setRaveFieldLabelResult(errorString);
-			question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg6, rdDocTextList)));
+			// FORMBUILD-647
+			question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg6));
 			question.setQuestionCongruencyStatus(congStatus_errors);
 		}
 		// Setting the concatenated string of AQTs and PQTs into CDE permitted question text choices
@@ -315,12 +329,13 @@ public class ValidatorService {
 			it's an error. (we will provide the team with a list of the mappings between the Rave Datatypes 
 			and caDSR datatypes ,the names are not the same). */ 
 			
-			if (question.getRaveControlType()!=null) {
+			if (!(StringUtils.isEmpty(question.getRaveControlType()))) {
 				// When RAVE control type is Non-Enumerated & VD type is N (Non-enumerated)
 				if (isNonEnumerated(question.getRaveControlType().toUpperCase()) && "N".equalsIgnoreCase(vdType)) {
 					question.setControlTypeResult(matchString);
+					// FORMBUILD-647
 					if (!question.getRaveCodedData().isEmpty()) {
-						question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg5, question.getRaveCodedData())));
+						question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg5));
 					}
 					// When RAVE control type is Enumerated & VD type is E (Enumerated)
 				} else if ((!isNonEnumerated(question.getRaveControlType().toUpperCase())) && "E".equalsIgnoreCase(vdType)) {
@@ -337,6 +352,12 @@ public class ValidatorService {
 							question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg7, errorVal.toArray())));
 							question.setQuestionCongruencyStatus(congStatus_errors); 
 						}
+					
+					// Checking for Rave Coded data in the event of Control Type conflict - VS
+					if (!question.getRaveCodedData().isEmpty() && "N".equalsIgnoreCase(vdType)) {						
+						question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg5));
+					}
+					
 					// Introducing Not Checked status for those data types that are not part of the 
 					// designated data types that will be verified against the CDE
 					if (notCheckedString.equals(result) && question.getQuestionCongruencyStatus()==null)
@@ -378,11 +399,14 @@ public class ValidatorService {
 			for (String userDataString : userDataStringList) {
 				// Getting the Coded Data value for the corresponding User Data String from RAVE ALS
 				String pvValue = codedDataList.get(userDataStringList.indexOf(userDataString));
+				
+				//Identifying & Replacing the '@@' or '##' patterns in pv value 
+				pvValue = codedDataReplace(pvValue);
 				// Obtaining the PV value meanings list for comparison with User Data String
 				List<String> pvVmList = pvVmMap.get(pvValue);				
-				if (pvVmList!=null) {
-					if (pvVmList.contains(userDataString)) {
-						isMatch = true;
+				if (pvVmList!=null) {//this means that coded data matched one of allowed PV values
+					//userDataString is in a prepared allowed value list, or userDataString is equal to its coded data when the code data matched to a PV value
+					if ((pvVmList.contains(userDataString)) || (userDataString.equals(pvValue))) {
 						pvCheckerResultsList.add(matchString);
 						allowCdesList.add("");
 					} else {
@@ -399,9 +423,15 @@ public class ValidatorService {
 			question.setPvResults(pvCheckerResultsList);
 			// Allowable CDE Text Choices built from the PV value meanings list
 			question.setAllowableCdeTextChoices(allowCdesList);
+			String errMsg = assignQuestionErrorMessage(question.getMessage(), msg9);
 			if (!isMatch) {
-				if((question.getMessage() != null) && (question.getMessage().indexOf(msg9) == -1))
-					question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg9));
+				if(question.getMessage() != null) {
+					if (question.getMessage().indexOf(msg9) == -1) {			
+						question.setMessage(errMsg); 
+					}
+				} else {
+					question.setMessage(errMsg);
+				}
 				question.setQuestionCongruencyStatus(congStatus_errors);
 			}
 		}
@@ -417,10 +447,6 @@ public class ValidatorService {
 	 */
 	protected static CCCQuestion setCodedDataCheckerResult (List<String> pvList, CCCQuestion question) {
 		List<String> cdResult = new ArrayList<String>();
-		String at_str = "@@";
-		String hash_str = "##";		
-		String comma_str = ",";
-		String semicolon_str = ";";
 		
 		/* Compare each CodedData value to all of the Value Domain's PermissibleValue.value
 			Exceptions: If it does not match one of the CDEs PV Value, "ERROR"
@@ -435,19 +461,21 @@ public class ValidatorService {
 		if (!pvList.isEmpty()) {
 			for (String codedData : question.getRaveCodedData()) {
 				// Identifying and replacing the @@ and ## patterns
-				// with ',' and ';' respectively 
-				if (codedData!=null) {
-					if (codedData.indexOf(at_str) > -1)
-						codedData = replacePattern(codedData, at_str, comma_str);
-					if (codedData.indexOf(hash_str) > -1)
-						codedData = replacePattern(codedData, hash_str, semicolon_str);
-				}
+				// with ',' and ';' respectively
+				codedData = codedDataReplace(codedData);
 				if (pvList.contains(codedData)) {
 					cdResult.add(matchString);
 				} else {
 					cdResult.add(errorString);
-					if ((question.getMessage()!=null) && (question.getMessage().indexOf(msg10) == -1))
-						question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg10, question.getRaveCodedData())));
+					// FORMBUILD-647
+					String errMsg = assignQuestionErrorMessage(question.getMessage(), msg10);
+					if (question.getMessage()!=null) {
+						if (question.getMessage().indexOf(msg10) == -1) { 
+							question.setMessage(errMsg);
+						}
+					} else {
+						question.setMessage(errMsg);
+					}
 					question.setQuestionCongruencyStatus(congStatus_errors);
 				}
 			}
@@ -582,7 +610,7 @@ public class ValidatorService {
 		errorVal.add(vdDisplayFormat);
 		Boolean result = false;
 		//if CDE VD has no data format (null or empty), we consider this validation is OK
-		if (org.apache.commons.lang3.StringUtils.isBlank(vdDisplayFormat)) {
+		if (StringUtils.isBlank(vdDisplayFormat)) {
 			result = true;
 		}
 		else //we compare VD data format with anything received from ALS including empty
@@ -634,8 +662,11 @@ public class ValidatorService {
 	protected static int computeRaveLength (String raveLength) {
 		int raveLengthInt = 0;
 		if (raveLength!=null && raveLength.trim().length() > 0 && !"%".equals(raveLength)) {
-			raveLength = raveLength.toLowerCase();
-			// Looking for "Characters" to ignore it for length computation using pattern matching
+			raveLength = raveLength.toLowerCase();			
+			int patternHolderCharCount = StringUtils.countMatches(raveLength, patternHolderChar);
+			int patternHolderNumCount = StringUtils.countMatches(raveLength, patternHolderNum);
+
+			// Looking for "Characters" to ignore them for length computation using pattern matching
 			if (raveLength.indexOf(characters_string) > -1) {
 				Pattern pattern = Pattern.compile("\\d+");
 				Matcher matcher = pattern.matcher(raveLength);
@@ -643,11 +674,11 @@ public class ValidatorService {
 					raveLength = matcher.group();
 				}
 				// Looking for "dddd.." pattern to compute length
-			} else if (StringUtils.countOccurrencesOf(raveLength, patternHolderChar) > 1) {
-				raveLength = String.valueOf(StringUtils.countOccurrencesOf(raveLength, patternHolderChar));
+			} else if (patternHolderCharCount > 1) {
+				raveLength = String.valueOf(patternHolderCharCount);
 				// Looking for "9999.." pattern to compute length
-			} else if (StringUtils.countOccurrencesOf(raveLength, patternHolderNum) > 1) {
-				raveLength = String.valueOf(StringUtils.countOccurrencesOf(raveLength, patternHolderNum));
+			} else if (patternHolderNumCount > 1) {
+				raveLength = String.valueOf(patternHolderNumCount);
 			}	
 		} else {
 			raveLength = "0";
@@ -672,7 +703,7 @@ public class ValidatorService {
 		String errorMessage = null;
 		// Appending to the message if there is more than one error.
 		if (questionMessage!=null) 
-			errorMessage = questionMessage +"\n"+ newMessage;
+			errorMessage = questionMessage +"\n\n"+ newMessage;
 		else 
 			errorMessage = newMessage;
 		return errorMessage;
@@ -734,6 +765,7 @@ public class ValidatorService {
 	protected static String createAllowableTextChoices (List<String> pvVmList) {
 		StringBuffer allowableVmTextChoices = new StringBuffer();
 		// Building a list of Allowable CDE text choices (in case of a 'Not match' for PV checker)
+		pvVmList = returnOrderedNonDuplicateVMs(pvVmList);
 		for (String altName : pvVmList) {
 			if (allowableVmTextChoices.length() > 0)
 				allowableVmTextChoices.append("|"+altName);
@@ -759,7 +791,27 @@ public class ValidatorService {
 			stringWithPattern = matcher.replaceAll(replacement);
 		}
 		return stringWithPattern;
-	}	
+	}
+	
+	/**
+	 * Replaces the '##' or '@@' pattern in Coded Data
+	 * @param codedData
+	 * @return String
+	 */				
+	protected static String codedDataReplace (String codedData) {
+		String at_str = "@@";
+		String hash_str = "##";		
+		String comma_str = ",";
+		String semicolon_str = ";";		
+		if (codedData!=null) {
+			if (codedData.indexOf(at_str) > -1)
+				codedData = replacePattern(codedData, at_str, comma_str);
+			if (codedData.indexOf(hash_str) > -1)
+				codedData = replacePattern(codedData, hash_str, semicolon_str);
+		}
+		return codedData;
+	}
+	
 	
 	/**
 	 * Data Type comparison
@@ -844,6 +896,24 @@ public class ValidatorService {
 			return true;
 		else
 			return false;
-	}	
+	}
+	
+	
+	/**
+	 * Returning an ordered non-duplicate list of CDE text choices
+	 * @param allowableCdeTextChoicesList
+	 * @return List<String>
+	 */		
+	protected static List<String> returnOrderedNonDuplicateVMs(List<String> allowableCdeTextChoicesList) {
+		if (allowableCdeTextChoicesList!=null && allowableCdeTextChoicesList.size()>0) {
+			Set<String> allowCdesSet = new TreeSet<String>(); 
+			allowCdesSet.addAll(allowableCdeTextChoicesList);
+			List<String> tempChoicesList = new ArrayList<String>();
+			tempChoicesList.addAll(allowCdesSet);
+			return tempChoicesList; 
+		} else 
+			return allowableCdeTextChoicesList;
+		
+	}
 	
 }

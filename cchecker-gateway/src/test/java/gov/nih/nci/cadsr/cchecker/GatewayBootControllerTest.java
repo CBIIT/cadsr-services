@@ -162,7 +162,7 @@ public class GatewayBootControllerTest {
 		given(this.serviceParser.submitPostRequestParser(Mockito.any(), Mockito.any())).willThrow(new RestClientException("Test Exception"));
 
 		this.mockMvc.perform(multipart("/parseservice").file(excelFile))
-			.andExpect(content().string(new StringContains(UNEXPECTED_ERROR)))
+			.andExpect(content().string(new StringContains(false, UNEXPECTED_ERROR)))
 			.andExpect(status().is5xxServerError());
 	}
 	@Test
@@ -183,7 +183,7 @@ public class GatewayBootControllerTest {
 		given(this.serviceDb.submitPostRequestSaveAls(Mockito.any(ALSData.class), Mockito.any(), Mockito.any())).willThrow(new RestClientException("Test Exception"));
 
 		this.mockMvc.perform(multipart("/parseservice").file(excelFile))
-			.andExpect(content().string(new StringContains(UNEXPECTED_ERROR)))
+			.andExpect(content().string(new StringContains(false, UNEXPECTED_ERROR)))
 			.andExpect(status().is5xxServerError());
 	}
 	@Test
@@ -198,7 +198,7 @@ public class GatewayBootControllerTest {
 		given(this.serviceParser.submitPostRequestParser(Mockito.any(), Mockito.any())).willReturn(alsDataWrapper);
 
 		this.mockMvc.perform(multipart("/parseservice").file(excelFile))
-			.andExpect(content().string(new StringContains(ERROR_ON_PARSING_FILE)))
+			.andExpect(content().string(new StringContains(false, ERROR_ON_PARSING_FILE)))
 			.andExpect(status().is4xxClientError());
 	}
 	@Test
@@ -213,7 +213,7 @@ public class GatewayBootControllerTest {
 		given(this.serviceParser.submitPostRequestParser(Mockito.any(), Mockito.any())).willReturn(alsDataWrapper);
 
 		this.mockMvc.perform(multipart("/parseservice").file(excelFile))
-			.andExpect(content().string(new StringContains(ERROR_ON_PARSING_FILE)))
+			.andExpect(content().string(new StringContains(false, ERROR_ON_PARSING_FILE)))
 			.andExpect(status().isInternalServerError());
 	}
 	
@@ -282,7 +282,7 @@ public class GatewayBootControllerTest {
 				.contentType("application/json")
 				.content(createFormNameList())
 				.cookie(cookie))
-			.andExpect(content().string(new StringContains(UNEXPECTED_ERROR)))
+			.andExpect(content().string(new StringContains(false, UNEXPECTED_ERROR)))
 			.andExpect(status().is5xxServerError());
 	}	
 	@Test
@@ -292,7 +292,7 @@ public class GatewayBootControllerTest {
 				.contentType("application/json")
 				.content(createFormNameList())
 				)
-			.andExpect(content().string(new StringContains(GatewayBootController.SESSION_NOT_VALID)))
+			.andExpect(content().string(new StringContains(false, GatewayBootController.SESSION_NOT_VALID)))
 			.andExpect(status().is4xxClientError());
 	}
 	@Test
@@ -305,7 +305,7 @@ public class GatewayBootControllerTest {
 				.contentType("application/json")
 				.content(createFormNameList())
 				.cookie(cookie))
-			.andExpect(content().string(new StringContains(GatewayBootController.SESSION_DATA_NOT_FOUND)))
+			.andExpect(content().string(new StringContains(false, GatewayBootController.SESSION_DATA_NOT_FOUND)))
 			.andExpect(status().is5xxServerError());
 	}
 	//FIXME the tests commented to be fixed

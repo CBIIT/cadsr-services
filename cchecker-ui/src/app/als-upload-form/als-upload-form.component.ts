@@ -18,6 +18,7 @@ export class AlsUploadFormComponent implements OnInit {
   alsFile:FormData;
   name:String;
   isValidating:Boolean;
+  fileName:String;
 
   constructor(private router:Router, private restService:RestService, private formListService:FormListService) { 
   }
@@ -27,6 +28,7 @@ export class AlsUploadFormComponent implements OnInit {
     this.file = new FormData();
     const tFile = event.target.files[0];
     this.file.append('file', tFile, tFile.name);
+    this.fileName=tFile.name;
   };
   
   // user clicked submit validate form fields are valid and upload //
@@ -44,6 +46,7 @@ export class AlsUploadFormComponent implements OnInit {
   uploadFile = () =>  {
     this.restService.uploadAlsFile(this.file, this.name).subscribe(
       e => {
+
         if (e.type === HttpEventType.Response) {
           this.formListService.setFormListData(e.body);
         }
@@ -62,6 +65,7 @@ export class AlsUploadFormComponent implements OnInit {
         }
       },
       () => {
+        sessionStorage['name']=this.name, sessionStorage['file']=this.fileName;
         this.router.navigateByUrl('/forms')
       });
   };

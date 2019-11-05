@@ -42,6 +42,21 @@ public class DataElementRepository {
     
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
+    
+	@Transactional(readOnly=true)
+    public List<String> retrieveContextList() {
+        return jdbcTemplate.queryForList("select NAME from SBR.CONTEXTS_VIEW order by upper(NAME)",String.class);
+    }
+	/**
+	 * This test shall return one elements list for testing DB connection.
+	 * 
+	 * @return List<String>
+	 */
+	@Transactional(readOnly=true)
+    public List<String> retrieveTest() {
+        return jdbcTemplate.queryForList("select NAME from SBR.CONTEXTS_VIEW where name = 'NCI Standards'", String.class);
+    }
+	
     @Transactional(readOnly=true)
     public List<DataElements> findAll() {
         return getAll("select preferred_definition from SBR.DATA_ELEMENTS_VIEW where de_idseq = '99BA9DC8-2CC9-4E69-E034-080020C9C0E0'", DataElements.class);
@@ -215,10 +230,10 @@ public class DataElementRepository {
      * @return SQL string
      */
     protected String retrieveCategoryCdeListQuery() {
-		return "SELECT * from SBREXT.MDSR_STANDARD_FORM_CDE_AGR";
+		return "SELECT * from SBREXT.MDSR_STANDARD_FORM_CDE_AGR where MODULE_TYPE = 'Mandatory'";
 	}
     protected String retrieveNrdsCdeListQuery() {
-		return "SELECT CDE_ID, de.VERSION DE_VERSION, de.LONG_NAME DE_NAME FROM sbr.data_elements_view de "
+		return "SELECT CDE_ID, de.VERSION DE_VERSION, de.LONG_NAME DE_NAME, de.QUESTION DE_QUESTION FROM sbr.data_elements_view de "
 			+ "inner join sbr.contexts_view cnt on "
 			+ "de.CONTE_IDSEQ = cnt.CONTE_IDSEQ and cnt.NAME = 'NRDS' and de.ASL_NAME = 'RELEASED'";
 	}

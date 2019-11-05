@@ -3,8 +3,10 @@ import { RestService } from '../services/rest.service';
 import { FormListService } from '../services/formlist.service';
 import { Observable } from 'rxjs';
 import { ReportService } from '../services/report.service'
-import { Router } from '../../../node_modules/@angular/router';
+import { Router, ChildActivationStart } from '../../../node_modules/@angular/router';
 import { HttpEventType }  from '@angular/common/http';
+import { NgControlStatus } from '@angular/forms';
+import { looseIdentical } from '@angular/core/src/util';
 
 @Component({
   selector: 'app-als-form-list',
@@ -14,32 +16,58 @@ import { HttpEventType }  from '@angular/common/http';
 export class AlsFormListComponent implements OnInit {
   checkedItems:Observable<String[]>;
   errorMessage:String;  
-  formValidationStatus:Number=1;
+  formValidationStatus:Object={currFormName: "", currFormNumber: 1, countValidatedQuestions: 0};
   formListData:Observable<Object>;
-  validating:Boolean;
+  totalQuestionCount:Number;
+  fileName:String;
+  userName:String;
+  validating:Boolean;  
   validItemsLength:Observable<Object>;
   checkFormsService;
   feedService;
-
+  cancelButtonStatus:Boolean;
   constructor(private formListService:FormListService, private restService:RestService, private reportService:ReportService, private router:Router) {
   }
 
   ngOnInit() {
+    this.cancelButtonStatus = this.formListService.getCancelButtonStatus();
     this.checkedItems = this.formListService.getCheckedItems(); // get checked items as observable //
     this.formListData = this.formListService.getFormListData(); // get form data as observable //
+    this.fileName = this.formListService.getFileName(); // get filename data as string //
+    this.userName = this.formListService.getUserName(); // get username data as string //
     this.validating = false;
     this.validItemsLength = Object.assign([],this.formListData.source['value']['formsList'].filter((r) => r.isValid ).map((e) => e.formName)).length; // get valid item value //
     if (this.formListService.getValidationStatus()) {
       this.validating = true;
       this.getFeedService();
     };
+
+    this.totalQuestionCount=this.getTotalQuestionCount();
+
   };
 
+  cancelValidation() {
+    this.formListService.setCancelButtonStatus(true);
+    this.cancelButtonStatus = true;
+    this.restService.cancelValidation(this.formListData.source['value'].sessionid).subscribe(
+      data => {
+        console.log(data);
+      },
+      error => {
+        console.log(error)
+      },
+      () => {
+        console.log("DONE")
+      }
+    )
+    }
   // check forms (validate) and go to report page //
   checkForms() {
+    this.formListService.setCancelButtonStatus(false);
     let checkedItems:String[];
     this.errorMessage = null;
     let formListData:Object;
+    this.totalQuestionCount=this.getTotalQuestionCount();
     this.checkedItems.subscribe(data=>checkedItems=data).unsubscribe();
     this.formListData.subscribe(data=>formListData=data).unsubscribe();
     this.validating = true;
@@ -65,6 +93,7 @@ export class AlsFormListComponent implements OnInit {
           this.validating = false;
         },
         () => {
+          this.formListService.setCancelButtonStatus(false);
           this.validating = false;
           this.formListService.setValidationStatus(false);
           this.router.navigateByUrl('/report')
@@ -81,7 +110,7 @@ export class AlsFormListComponent implements OnInit {
         if (e.type === HttpEventType.DownloadProgress) {
           let currentForm = e['partialText'].split('\n\n').filter(val => val!='' && val != 'data:').pop();
           if (currentForm) {
-            this.formValidationStatus = currentForm.replace('data:','');
+            this.formValidationStatus = JSON.parse(currentForm.replace('data:',''));
           }
 
         }
@@ -98,7 +127,37 @@ export class AlsFormListComponent implements OnInit {
   };
 
   // gets current form for validation progress message //
-  getCurrentForm = () => `${this.formValidationStatus}`;
+  getCurrentForm = () => `${this.formValidationStatus['currFormNumber']}`;
+
+  // gets current form for validation progress message //
+  getCurrentFormName = () => `${this.formValidationStatus['currFormName']}`; 
+
+  // gets current question count that has been validated //
+  getCurrentQuestionCount = () => {
+    if (this.formValidationStatus['currFormName']!='') {
+      return ' - [Questions ' + this.formValidationStatus['countValidatedQuestions'] + '/' + this.totalQuestionCount + '] (' + this.formValidationStatus['currFormName'] + ')';
+    }
+    else {
+      return '';
+    }
+  }
+
+  // gets total question count of selected items //
+  getTotalQuestionCount = () => {
+    let qc = 0;
+    let ci = JSON.parse(sessionStorage.getItem('checkedItems'));
+    if (ci) {
+      for (var x=0; x<ci.length; x++) {
+        this.formListData.source['value']['formsList'].filter(function(item) {
+          if (item['formName']==ci[x]) {
+            qc+=item['questionsCount']
+          }
+        });
+      }
+    }
+
+    return qc
+  }
 
   // gets checkd status of record //
   getCheckedStatus = record => this.formListService.getCheckedStatus(record);
@@ -126,4 +185,6 @@ export class AlsFormListComponent implements OnInit {
       this.feedService.unsubscribe();
     };
   }
+
+  
 };

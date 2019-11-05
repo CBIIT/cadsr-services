@@ -691,6 +691,13 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 			//FORMBUILD-529 associate the correct CDE and then use that CDE for setting Question Text
 			DataElementTransferObject matchingCde = getMatchingDataElement(question, cdeDtos);
 			
+			// 07/11/19 - santhanamv - Added the data element to the Question Transfer Object - Might need change if need be - Begin
+			if (matchingCde!=null) {
+				questdto.setDataElement(matchingCde);
+			}
+
+			// 07/11/19 - santhanamv - Added the data element to the Question Transfer Object - Might need change if need be - End
+			
 			QuestionHelper.handleEmptyQuestionText(questdto, matchingCde);
 
 			//better to call createQuestionComponents, which is not implement.
@@ -735,6 +742,9 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 			//FORMBUILD-424, 425 : Following block of code to be done in validation step and get the correct PV and set values for Meaning Text and Description
 			//JR417 begin
 			//get the correct vv's pvdto and set vv's vdPermissibleValueSeqid
+			
+			// 07/08/19 - santhanamv - Uncommented this block of code to associate Coded data from ALS to the valid values from the database, when the form is created. - Begin 
+			
 			PermissibleValueV2TransferObject pv = null;
 			 try {
 			 pv = FormLoaderHelper.getValidValuePV(vValue, pvDtos);
@@ -766,6 +776,8 @@ public class LoadServiceRepositoryImpl extends FormLoaderRepositoryImpl {
 				}
 			} //what happend if it is null? do we need to check?
 			//JR417 end
+			
+			// 07/08/19 - santhanamv - Uncommented this block of code to associate Coded data from ALS to the valid values from the database, when the form is created. - End
 		
 			FormValidValueTransferObject fvv = translateIntoValidValueDto(vValue, newQuestdto, moduledto, formdto, idx);	 //JR417 vValue's vdpvseqid / vp_idseq is NOT empty anymore (fixed in this ticket)
 			

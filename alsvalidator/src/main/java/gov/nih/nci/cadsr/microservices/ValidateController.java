@@ -29,6 +29,7 @@ import gov.nih.nci.cadsr.data.ALSError;
 import gov.nih.nci.cadsr.data.ALSForm;
 import gov.nih.nci.cadsr.data.CCCError;
 import gov.nih.nci.cadsr.data.CCCReport;
+import gov.nih.nci.cadsr.data.FeedFormStatus;
 import gov.nih.nci.cadsr.data.ValidateParamWrapper;
 
 @RestController
@@ -47,13 +48,22 @@ public class ValidateController {
 	@Autowired
 	private RestTemplate restTemplate;
 	
+	//FORMBUILD-633
 	@CrossOrigin
-	@GetMapping("/rest/feedvalidateformnumber/{idseq}")
-	public ResponseEntity<?> feedValidateStatus(HttpServletRequest request,
+	@GetMapping("/rest/feedvalidateform/{idseq}")
+	public ResponseEntity<?> feedValidateFormStatus(HttpServletRequest request,
 			@PathVariable("idseq") String idseq) {
-		String formUndervalidation = reportGeneratorFeed.feedRequestStatus(idseq);
+		FeedFormStatus formUndervalidation = reportGeneratorFeed.currentRequestStatus(idseq);
 		//logger.debug("feedValidateStatus called: " + idseq + ", current form: " + formUndervalidation);
-		return new ResponseEntity<String>(formUndervalidation, HttpStatus.OK);
+		return new ResponseEntity<FeedFormStatus>(formUndervalidation, HttpStatus.OK);
+	}
+	@CrossOrigin
+	@GetMapping("/rest/cancelvalidate/{idseq}")
+	public ResponseEntity<?> cancelValidate(HttpServletRequest request,
+			@PathVariable("idseq") String idseq) {
+		logger.info("cancelvalidate request received: " + idseq);
+		reportGeneratorFeed.cancelValidate(idseq);
+		return new ResponseEntity<String>(idseq, HttpStatus.OK);
 	}
 	@PostMapping("/rest/validateservice")
 	public ResponseEntity<String> validateService(HttpServletRequest request, HttpServletResponse response,

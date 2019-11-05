@@ -66,6 +66,11 @@ curl -v http://localhost:4803/rest/retrievecategorycde
 7. Retrieve Category CDE List
 curl -v http://localhost:4803/rest/retrievecategorynrds
 
-5. Retrieve an existing report
+8. Retrieve an existing report
 curl -v http://localhost:4803/rest/retrievereporterror?_cchecker=235393B4-3676-4A79-871C-EE632D4E8279
 returns 404 if not found
+
+9. Test DB connection GET request
+curl -v http://localhost:4803/rest/retrievetest
+returns 200, "Content-Type", "text/plain", and expected response is a string 
+NCI Standards

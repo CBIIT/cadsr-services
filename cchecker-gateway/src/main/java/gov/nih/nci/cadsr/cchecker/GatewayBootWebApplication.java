@@ -40,12 +40,17 @@ public class GatewayBootWebApplication extends SpringBootServletInitializer {
 	static String CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL;
 	static String CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL;
 	static String CCHECKER_VALIDATE_SERVICE_URL;
+	//TODO remove
 	static String CCHECKER_FEED_VALIDATE_SERVICE_URL;
+	//FORMBUILD-633
+	static String CCHECKER_FEED_FORM_SERVICE_URL;
+	static String CCHECKER_CANCEL_VALIDATE_SERVICE_URL;
 	static String CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL;
 	//Save the uploaded file to this folder
 	static String UPLOADED_FOLDER;
 	static String ACCESS_CONTROL_ALLOW_ORIGIN_HEADER = "Access-Control-Allow-Origin";
 	static String ACCESS_CONTROL_ALLOW_ORIGIN;
+	static String CCHECKER_DB_SERVICE_TEST_URL;
 	
 	@Primary
 	@Bean
@@ -77,10 +82,15 @@ public class GatewayBootWebApplication extends SpringBootServletInitializer {
 		CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_ERROR = properties.getProperty("CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_ERROR");
 		CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL = properties.getProperty("CCHECKER_DB_SERVICE_URL_CREATE_REPORT_FULL");
 		CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL = properties.getProperty("CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL");
+		CCHECKER_DB_SERVICE_TEST_URL = properties.getProperty("CCHECKER_DB_SERVICE_TEST_URL");
 		CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL = properties.getProperty("CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL");
 		ACCESS_CONTROL_ALLOW_ORIGIN = properties.getProperty(ACCESS_CONTROL_ALLOW_ORIGIN_HEADER);
 		CCHECKER_VALIDATE_SERVICE_URL = properties.getProperty("CCHECKER_VALIDATE_SERVICE_URL");
+		//TODO remove
 		CCHECKER_FEED_VALIDATE_SERVICE_URL = properties.getProperty("CCHECKER_FEED_VALIDATE_SERVICE_URL");
+		//FORMBUILD-633
+		CCHECKER_FEED_FORM_SERVICE_URL = properties.getProperty("CCHECKER_FEED_FORM_SERVICE_URL");
+		CCHECKER_CANCEL_VALIDATE_SERVICE_URL = properties.getProperty("CCHECKER_CANCEL_VALIDATE_SERVICE_URL");
 		logger.info("!!! Loaded CChecker Gateway properties: " + properties);
 
         return application.sources(GatewayBootWebApplication.class);

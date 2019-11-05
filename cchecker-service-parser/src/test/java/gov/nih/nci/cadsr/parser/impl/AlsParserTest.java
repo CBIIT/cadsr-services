@@ -6,6 +6,7 @@ package gov.nih.nci.cadsr.parser.impl;
 import static org.junit.Assert.*;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -380,21 +381,22 @@ public class AlsParserTest {
 	 */	
 	@Test
 	public void testGetFields_getCde() throws IOException {
-		String[] expecteds = {"ENROLLMENT", "PRSN_GENDER_CD", "5", "Gender PID2721620_V1_0", "$1", "PERSON_GENDER_C_PID2721618_V1_0", "No Unit", "Text", "Gender", "(12 characters)"};
+		String[] expecteds = {"ENROLLMENT", "PRSN_GENDER_CD", "0", "5", "Gender PID2721620_V1_0", "$1", "PERSON_GENDER_C_PID2721618_V1_0", "No Unit", "Text", "Gender", "(12 characters)"};
 		createFieldsSheetInExcel("CDE ID");
 		List<ALSField> fieldsList = AlsParser.getFields(sheet, alsData, new CCCError()).getFields();
-		String[] actuals = new String[10];
+		String[] actuals = new String[11];
 		ALSField field = fieldsList.get(0);
 		actuals[0] = field.getFormOid();
 		actuals[1] = field.getFieldOid();
-		actuals[2] = field.getOrdinal();
-		actuals[3] = field.getDraftFieldName();
-		actuals[4] = field.getDataFormat();
-		actuals[5] = field.getDataDictionaryName();
-		actuals[6] = field.getUnitDictionaryName();
-		actuals[7] = field.getControlType();
-		actuals[8] = field.getPreText();
-		actuals[9] = field.getFixedUnit();	
+		actuals[2] = field.getSequenceNumber().toString();
+		actuals[3] = field.getOrdinal();
+		actuals[4] = field.getDraftFieldName();
+		actuals[5] = field.getDataFormat();
+		actuals[6] = field.getDataDictionaryName();
+		actuals[7] = field.getUnitDictionaryName();
+		actuals[8] = field.getControlType();
+		actuals[9] = field.getPreText();
+		actuals[10] = field.getFixedUnit();	
 		assertArrayEquals(expecteds, actuals);
 	}
 	
@@ -403,22 +405,23 @@ public class AlsParserTest {
 	 */	
 	@Test
 	public void testGetFields_getFormId() throws IOException {
-		String[] expecteds = {"ENROLLMENT", "FORM_OID", "5", "FORM_OID", "$1", "PERSON_GENDER_C_PID2721618_V1_0", "No Unit", "Text", "Gender", "(12 characters)", "PID3292959_V1_0"};
+		String[] expecteds = {"ENROLLMENT", "FORM_OID", "0", "5", "FORM_OID", "$1", "PERSON_GENDER_C_PID2721618_V1_0", "No Unit", "Text", "Gender", "(12 characters)", "PID3292959_V1_0"};
 		createFieldsSheetInExcel("FORM_OID");
 		List<ALSField> fieldsList = AlsParser.getFields(sheet, alsData, new CCCError()).getFields();
-		String[] actuals = new String[11];
+		String[] actuals = new String[12];
 		ALSField field = fieldsList.get(0);
 		actuals[0] = field.getFormOid();
 		actuals[1] = field.getFieldOid();
-		actuals[2] = field.getOrdinal();
-		actuals[3] = field.getDraftFieldName();
-		actuals[4] = field.getDataFormat();
-		actuals[5] = field.getDataDictionaryName();
-		actuals[6] = field.getUnitDictionaryName();
-		actuals[7] = field.getControlType();
-		actuals[8] = field.getPreText();
-		actuals[9] = field.getFixedUnit();
-		actuals[10] = field.getDefaultValue();
+		actuals[2] = field.getSequenceNumber().toString();		
+		actuals[3] = field.getOrdinal();
+		actuals[4] = field.getDraftFieldName();
+		actuals[5] = field.getDataFormat();
+		actuals[6] = field.getDataDictionaryName();
+		actuals[7] = field.getUnitDictionaryName();
+		actuals[8] = field.getControlType();
+		actuals[9] = field.getPreText();
+		actuals[10] = field.getFixedUnit();	
+		actuals[11] = field.getDefaultValue();
 		assertArrayEquals(expecteds, actuals);
 	}
 	
@@ -552,6 +555,6 @@ public class AlsParserTest {
 		udeExpected.setUnitString("DST");
 		ALSUnitDictionaryEntry udeActual = udeList.get(0);
 		assertEquals(udeExpected.getUnitString(), udeActual.getUnitString());
-	}		
+	}
 	
 }

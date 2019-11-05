@@ -55,6 +55,7 @@ import gov.nih.nci.cadsr.data.ALSData;
 import gov.nih.nci.cadsr.data.ALSError;
 import gov.nih.nci.cadsr.data.CCCError;
 import gov.nih.nci.cadsr.data.CCCReport;
+import gov.nih.nci.cadsr.data.FeedFormStatus;
 import gov.nih.nci.cadsr.data.FormsUiData;
 
 @Controller
@@ -70,6 +71,8 @@ public class GatewayBootController {
 	static String CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL;	
 	static String CCHECKER_VALIDATE_SERVICE_URL;
 	static String CCHECKER_FEED_VALIDATE_SERVICE_URL;
+	//FORMBUILD-633
+	static String CCHECKER_FEED_FORM_SERVICE_URL;
 	static String CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL;
 
 	private static String URL_RETRIEVE_ALS_FORMAT;
@@ -77,6 +80,7 @@ public class GatewayBootController {
 	private static String URL_RETRIEVE_REPORT_FULL_FORMAT;
 	private static String URL_GEN_EXCEL_REPORT_ERROR_FORMAT;
 	private static String URL_FEED_VALIDATE_STATUS_FORMAT;
+	private static String URL_FEED_VALIDATE_FORM_FORMAT;
 	public static final String MS_EXCEL_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 	public static final String TEXT_PLAIN_MIME_TYPE = "text/plain";
 	
@@ -90,7 +94,7 @@ public class GatewayBootController {
 	public static final String COOKIE_PATH = "/gateway";
 	
 	static final int timeBetweenFeeds = 2000;
-	static final int maxFeedRequests = 300;
+	static final int maxFeedRequests = 900;
 	static final String SESSION_NOT_VALID = "Session is not found or not valid: ";
 	static final String SESSION_DATA_NOT_FOUND = "Session data is not found based on: ";
 	static final String VALIDATE_SERVICE_URL_STR = "validateservice";
@@ -104,6 +108,8 @@ public class GatewayBootController {
 	}
 
 	private final static Logger logger = LoggerFactory.getLogger(GatewayBootController.class);
+	
+	private static final FeedFormStatus feedStatusZero = new FeedFormStatus();
 	
 	@Autowired
     private ServiceParser serviceParser;
@@ -216,6 +222,21 @@ public class GatewayBootController {
 		catch (Exception e) {
 			logger.error("retrieveFeedValidate error: " + e) ;
 			return "0";//we do not want to send an exception on feed to UI
+		}
+	}
+	/**
+	 * 
+	 * 
+	 * @param idseq - session cookie for a document under validation; not null. Format shall be checked before this call.
+	 * @return ALSData
+	 */
+	protected FeedFormStatus retrieveFeedForm(String idseq) {
+		try {
+			return retrieveData(idseq, URL_FEED_VALIDATE_FORM_FORMAT, FeedFormStatus.class);
+		}
+		catch (Exception e) {
+			logger.error("retrieveFeedForm error: " + e) ;
+			return feedStatusZero;//we do not want to send an exception on feed to UI
 		}
 	}
 	/**
@@ -579,7 +600,7 @@ public class GatewayBootController {
 		response.flushBuffer();
 	}
 	
-	private Cookie retrieveCookie(HttpServletRequest request) {
+	protected static Cookie retrieveCookie(HttpServletRequest request) {
 		Cookie[] cookieArr = request.getCookies();
 		Cookie sessionCookie = null;
 		if (cookieArr != null) {
@@ -700,6 +721,7 @@ public class GatewayBootController {
 		CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL = GatewayBootWebApplication.CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL;
 		CCHECKER_VALIDATE_SERVICE_URL = GatewayBootWebApplication.CCHECKER_VALIDATE_SERVICE_URL;
 		CCHECKER_FEED_VALIDATE_SERVICE_URL = GatewayBootWebApplication.CCHECKER_FEED_VALIDATE_SERVICE_URL;
+		CCHECKER_FEED_FORM_SERVICE_URL = GatewayBootWebApplication.CCHECKER_FEED_FORM_SERVICE_URL;
 		CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL = GatewayBootWebApplication.CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL;
 		ACCESS_CONTROL_ALLOW_ORIGIN = GatewayBootWebApplication.ACCESS_CONTROL_ALLOW_ORIGIN;
 		logger.debug("GatewayBootController CCHECKER_PARSER_URL: " + CCHECKER_PARSER_URL);
@@ -712,18 +734,21 @@ public class GatewayBootController {
 		logger.debug("GatewayBootController CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL: " + CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL);
 		logger.debug("GatewayBootController CCHECKER_VALIDATE_SERVICE_URL: " + CCHECKER_VALIDATE_SERVICE_URL);
 		logger.debug("GatewayBootController CCHECKER_FEED_VALIDATE_SERVICE_URL: " + CCHECKER_FEED_VALIDATE_SERVICE_URL);
+		logger.debug("GatewayBootController CCHECKER_FEED_FORM_SERVICE_URL: " + CCHECKER_FEED_FORM_SERVICE_URL);
 		logger.debug("GatewayBootController ACCESS_CONTROL_ALLOW_ORIGIN: " + ACCESS_CONTROL_ALLOW_ORIGIN);
 		URL_RETRIEVE_ALS_FORMAT = CCHECKER_DB_SERVICE_URL_RETRIEVE + "?" + sessionCookieName + "=%s";
 		URL_GEN_EXCEL_REPORT_ERROR_FORMAT = CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL + "?" + sessionCookieName + "=%s";
 		URL_RETRIEVE_REPORT_ERROR_FORMAT = CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_ERROR + "?" + sessionCookieName + "=%s";
 		URL_RETRIEVE_REPORT_FULL_FORMAT = CCHECKER_DB_SERVICE_URL_RETRIEVE_REPORT_FULL + "?" + sessionCookieName + "=%s";
 		URL_FEED_VALIDATE_STATUS_FORMAT = CCHECKER_FEED_VALIDATE_SERVICE_URL + "/%s";
+		URL_FEED_VALIDATE_FORM_FORMAT = CCHECKER_FEED_FORM_SERVICE_URL + "/%s";
 		logger.debug("GatewayBootController URL_RETRIEVE_ALS_FORMAT: " + URL_RETRIEVE_ALS_FORMAT);
 		logger.debug("GatewayBootController URL_RETRIEVE_REPORT_ERROR_FORMAT: " + URL_RETRIEVE_REPORT_ERROR_FORMAT);
 		logger.debug("GatewayBootController URL_RETRIEVE_REPORT_FULL_FORMAT: " + URL_RETRIEVE_REPORT_FULL_FORMAT);
 		logger.debug("GatewayBootController CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL: " + CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL);
 		logger.debug("GatewayBootController URL_GEN_EXCEL_REPORT_ERROR: " + URL_GEN_EXCEL_REPORT_ERROR_FORMAT);
 		logger.debug("GatewayBootController URL_FEED_VALIDATE_STATUS_FORMAT: " + URL_FEED_VALIDATE_STATUS_FORMAT);
+		logger.debug("GatewayBootController URL_FEED_VALIDATE_FORM_FORMAT: " + URL_FEED_VALIDATE_FORM_FORMAT);
 	}
 
 	//TODO Remove this test service
@@ -770,14 +795,15 @@ public class GatewayBootController {
 
 		return emitter;
 	}
+	//TODO remove the method feedCheckStatus; superseded by feedCheckForm
 	/**
 	 * Returns form under validation number.
 	 * 
 	 * @param idseq not null
 	 * @return SseEmitter
 	 */
-	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
-	@GetMapping("/feedcheckstatus/{idseq}")
+//	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
+//	@GetMapping("/feedcheckstatus/{idseq}")
 	public ResponseBodyEmitter feedCheckStatus(HttpServletRequest request, @PathVariable("idseq") String idseq) {
 		logger.debug("feedcheckstatus called with session: " + idseq);
 
@@ -796,6 +822,7 @@ public class GatewayBootController {
 		final SseEmitter emitter = new SseEmitter();
 
 		ExecutorService service = Executors.newSingleThreadExecutor();
+		String identity = "@" + Integer.toHexString(System.identityHashCode(service));
 		service.execute(() -> {
 			String resPre = "-1";//we expect to receive a form number
 			String res;
@@ -810,7 +837,7 @@ public class GatewayBootController {
 					res = retrieveFeedValidate(idseq);
 					if (logger.isDebugEnabled()) {
 						if (! StringUtils.equals(res, resPre))  {//reduce amount of logs
-							logger.debug("feedcheckstatus current form for session " + idseq + " is " + res);
+							logger.debug("feedcheckstatus current form for session " + idseq + " is " + res + ", executor: " + identity);
 							resPre = res;
 						}
 					}
@@ -822,20 +849,93 @@ public class GatewayBootController {
 						Thread.sleep(timeBetweenFeeds);
 					}
 					else {
-						logger.info("feedcheckstatus is over: " + idseq);
+						logger.info("feedcheckstatus is over: " + idseq +  ", executor: " + identity);
 						break;
 					}
 				} 
 				catch (Exception e) {
-					logger.error("Error in feedcheckstatus " + idseq + ", " + e);
+					logger.error("!!! Error in feedcheckstatus, exiting feed for: " + idseq + ", " + e + ", executor: " + identity);
 					//e.printStackTrace();
-					emitter.completeWithError(e);
-					return;
+					//we receive multiple Apache errors
+					//org.apache.catalina.connector.ClientAbortException: java.io.IOException: Connection reset by peer
+					//org.apache.catalina.connector.CoyoteAdapter.asyncDispatch Exception while processing an asynchronous request
+					//java.lang.IllegalStateException: Calling [asyncError()] is not valid for a request with Async state [MUST_DISPATCH]
+					//after this errors the service process does not continue well. Changing completeWithError (commented) to just finish.
+					//emitter.completeWithError(e);
+					//return;
+					break;
 				}
 			}
 			emitter.complete();
 		});
+		service.shutdown();
+		return emitter;
+	}
+	/**
+	 * Returns form under validation information.
+	 * 
+	 * @param idseq not null
+	 * @return SseEmitter with FeedFormStatus
+	 */
+	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
+	@GetMapping("/feedvalidatestatus/{idseq}")
+	public ResponseBodyEmitter feedCheckForm(HttpServletRequest request, @PathVariable("idseq") String idseq) {
+		logger.debug("feedvalidatestatus called with session: " + idseq);
 
+		Cookie cookie = retrieveCookie(request);
+
+		if ((cookie == null) || (!ParameterValidator.validateIdSeq(cookie.getValue()))) {
+			logger.error("feedvalidatestatus session cookie is not found or not valid");
+			return null;
+		}
+		
+		if (!ParameterValidator.validateIdSeq(idseq)) {
+			logger.error("feedvalidatestatus session ID is not valid: " + idseq);
+			return null;
+		}
+		
+		final SseEmitter emitter = new SseEmitter();
+
+		ExecutorService service = Executors.newSingleThreadExecutor();
+		String identity = "@" + Integer.toHexString(System.identityHashCode(service));
+		service.execute(() -> {
+			int resPre = -1;//we expect to receive a form number
+			FeedFormStatus res;
+			try {
+				Thread.sleep(timeBetweenFeeds*2);//delay to give validator some time to start
+			} catch (Exception e1) {
+				// Do nothing
+			}
+			//TODO make loop run until we got "0"
+			for (int i = 0; i < maxFeedRequests; i++) {//let's restrict not to risk endless cycle
+				try {
+					res = retrieveFeedForm(idseq);
+					if (logger.isDebugEnabled()) {
+						if (! (res.getCurrFormNumber() == resPre)) {//reduce amount of logs
+							logger.debug("feedcheckstatus current form for session " + idseq + " is " + res + ", executor: " + identity);
+							resPre = res.getCurrFormNumber();
+						}
+					}
+					if (res.getCurrFormNumber() != 0) {
+							emitter.send(res, MediaType.APPLICATION_JSON);
+							Thread.sleep(timeBetweenFeeds);
+					}
+					else if ((res.getCurrFormNumber() == 0) && (i < 1)) {//it looks like this request goes to validator sooner than the form validate
+						Thread.sleep(timeBetweenFeeds);
+					}
+					else {
+						logger.info("feedvalidatestatus is over: " + idseq +  ", executor: " + identity);
+						break;
+					}
+				} 
+				catch (Exception e) {
+					logger.error("!!! Error in feedvalidatestatus, exiting feed for: " + idseq + ", " + e + ", executor: " + identity);
+					break;
+				}
+			}
+			emitter.complete();
+		});
+		service.shutdown();
 		return emitter;
 	}
 }

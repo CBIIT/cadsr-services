@@ -4,6 +4,8 @@ public class CategoryNrds implements Comparable<Object>{
     private int cdeId;
     private float deVersion;
     private String deName;
+    private String deQuestion;
+
 	public int getCdeId() {
 		return cdeId;
 	}
@@ -22,10 +24,19 @@ public class CategoryNrds implements Comparable<Object>{
 	public void setDeName(String deName) {
 		this.deName = deName;
 	}
+	public String getDeQuestion() {
+		return deQuestion;
+	}
+	public void setDeQuestion(String deQuestion) {
+		this.deQuestion = deQuestion;
+	}
+
 	@Override
 	public String toString() {
-		return "CategoryNrds [cdeId=" + cdeId + ", deVersion=" + deVersion + ", deName=" + deName + "]";
+		return "CategoryNrds [cdeId=" + cdeId + ", deVersion=" + deVersion + ", deName=" + deName + ", deQuestion="
+				+ deQuestion + "]";
 	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -34,6 +45,7 @@ public class CategoryNrds implements Comparable<Object>{
 		result = prime * result + Float.floatToIntBits(deVersion);
 		return result;
 	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

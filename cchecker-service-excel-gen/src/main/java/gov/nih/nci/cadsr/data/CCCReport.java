@@ -57,13 +57,34 @@ int countNrdsMissing;
 int countNrdsWithWarnings;
 int countNrdsWithErrors;
 
+// FORMBUILD-636 
+int countNciCongruent;
+int countNciMissing;
+int countNciWithWarnings;
+int countNciWithErrors;
+
 //FORMBUILD-621
 //CDASH and SDTM classified missing
 int countCdashMissing;
 int countSdtmMissing;
 
+//FORMBUILD-636
+/*
+Required CDASH x.x Questions with warnings
+Required CDASH x.x Questions with errors.
+Required SDTM x.x Questions with warnings
+Required SDTM x.x Questions with errors.
+ */
+int countCdashWithWarnings;
+int countCdashWithErrors;
+int countSdtmWithWarnings;
+int countSdtmWithErrors;
+
 List<CCCForm> cccForms = new ArrayList<CCCForm>();
+int selectedFormsCount = 0;
 List<NrdsCde> nrdsCdeList = new ArrayList<NrdsCde>();
+//FORMBUILD-636
+List<StandardCrfCde> stdCrfCdeList = new ArrayList<StandardCrfCde>();
 List<NrdsCde> missingNrdsCdeList = new ArrayList<NrdsCde>();
 List<CdeMissing> missingCdashCdeList = new ArrayList<>();
 List<CdeMissing> missingSdtmCdeList = new ArrayList<>();
@@ -295,6 +316,40 @@ public int getCountNrdsWithErrors() {
 public void setCountNrdsWithErrors(int countNrdsWithErrors) {
 	this.countNrdsWithErrors = countNrdsWithErrors;
 }
+
+// FORMBUILD-636
+public int getCountNciCongruent() {
+	return countNciCongruent;
+}
+
+public void setCountNciCongruent(int countNciCongruent) {
+	this.countNciCongruent = countNciCongruent;
+}
+
+public int getCountNciMissing() {
+	return countNciMissing;
+}
+
+public void setCountNciMissing(int countNciMissing) {
+	this.countNciMissing = countNciMissing;
+}
+
+public int getCountNciWithWarnings() {
+	return countNciWithWarnings;
+}
+
+public void setCountNciWithWarnings(int countNciWithWarnings) {
+	this.countNciWithWarnings = countNciWithWarnings;
+}
+
+public int getCountNciWithErrors() {
+	return countNciWithErrors;
+}
+
+public void setCountNciWithErrors(int countNciWithErrors) {
+	this.countNciWithErrors = countNciWithErrors;
+}
+
 //FORMBUILD-621
 public int getCountCdashMissing() {
 	return countCdashMissing;
@@ -311,6 +366,38 @@ public int getCountSdtmMissing() {
 public void setCountSdtmMissing(int countSdtmMissing) {
 	this.countSdtmMissing = countSdtmMissing;
 }
+//FORMBUILD-636
+public int getCountCdashWithWarnings() {
+	return countCdashWithWarnings;
+}
+
+public void setCountCdashWithWarnings(int countCdashWithWarnings) {
+	this.countCdashWithWarnings = countCdashWithWarnings;
+}
+
+public int getCountCdashWithErrors() {
+	return countCdashWithErrors;
+}
+
+public void setCountCdashWithErrors(int countCdashWithErrors) {
+	this.countCdashWithErrors = countCdashWithErrors;
+}
+
+public int getCountSdtmWithWarnings() {
+	return countSdtmWithWarnings;
+}
+
+public void setCountSdtmWithWarnings(int countSdtmWithWarnings) {
+	this.countSdtmWithWarnings = countSdtmWithWarnings;
+}
+
+public int getCountSdtmWithErrors() {
+	return countSdtmWithErrors;
+}
+
+public void setCountSdtmWithErrors(int countSdtmWithErrors) {
+	this.countSdtmWithErrors = countSdtmWithErrors;
+}
 
 public List<CCCForm> getCccForms() {
 	return cccForms;
@@ -326,6 +413,14 @@ public List<NrdsCde> getNrdsCdeList() {
 
 public void setNrdsCdeList(List<NrdsCde> nrdsCdeList) {
 	this.nrdsCdeList = nrdsCdeList;
+}
+
+public List<StandardCrfCde> getStdCrfCdeList() {
+	return stdCrfCdeList;
+}
+
+public void setStdCrfCdeList(List<StandardCrfCde> stdCrfCdeList) {
+	this.stdCrfCdeList = stdCrfCdeList;
 }
 
 public List<NrdsCde> getMissingNrdsCdeList() {
@@ -366,6 +461,14 @@ public Boolean getIsCheckStdCrfCdeChecked() {
 
 public void setIsCheckStdCrfCdeChecked(Boolean isCheckStdCrfCdeChecked) {
 	this.isCheckStdCrfCdeChecked = isCheckStdCrfCdeChecked;
+}
+
+public int getSelectedFormsCount() {
+	return selectedFormsCount;
+}
+
+public void setSelectedFormsCount(int selectedFormsCount) {
+	this.selectedFormsCount = selectedFormsCount;
 }
 
 public CCCError getCccError() {

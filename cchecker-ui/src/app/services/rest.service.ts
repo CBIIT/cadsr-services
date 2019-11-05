@@ -14,6 +14,29 @@ export class RestService {
     this.REST_API = environment.REST_API;
   }
 
+  cancelValidation(sessionid) {
+    return this.http.get(`${this.REST_API}/gateway/cancelvalidation/${sessionid}`,
+    {
+      withCredentials:true,
+      observe:'response',
+      responseType: "json",
+    });
+  };
+
+  // validation service //
+  checkForms(checkedItems,formListData, sessionid){
+    const checkUom = formListData['checkUom'] ? 'true':'false';
+    const checkCRF = formListData['checkStdCrfCde'] ? 'true':'false';
+    const displayExceptions = formListData['mustDisplayException'] ? 'true':'false';
+    // return this.http.post(`${this.REST_API}/gateway/checkservice?checkCRF=${checkCRF}`,checkedItems,
+    return this.http.post(`${this.REST_API}/gateway/checkservice?checkCRF=${checkCRF}&sessionid=${sessionid}`,checkedItems,
+    {
+      withCredentials:true,
+      responseType: 'text'
+
+    })
+  };
+
   // generate excel report //
   generateExcel = (sessionid) => this.http.get(`${this.REST_API}/gateway/genexcelcheckreport/${sessionid}`,
   {
@@ -31,20 +54,6 @@ export class RestService {
     });
   };
 
-  // validation service //
-  checkForms(checkedItems,formListData, sessionid){
-    const checkUom = formListData['checkUom'] ? 'true':'false';
-    const checkCRF = formListData['checkStdCrfCde'] ? 'true':'false';
-    const displayExceptions = formListData['mustDisplayException'] ? 'true':'false';
-    // return this.http.post(`${this.REST_API}/gateway/checkservice?checkCRF=${checkCRF}`,checkedItems,
-    return this.http.post(`${this.REST_API}/gateway/checkservice?checkCRF=${checkCRF}&sessionid=${sessionid}`,checkedItems,
-    {
-      withCredentials:true,
-      responseType: 'text'
-
-    })
-  } ; 
-
   // upload file service //
   uploadAlsFile(file, name){
     return this.http.post(`${this.REST_API}/gateway/parseservice?owner=${name}`,file,
@@ -56,7 +65,7 @@ export class RestService {
 
   // gets validation status //
   validateFeedStatus(sessionid) {
-    return this.http.get(`${this.REST_API}/gateway/feedcheckstatus/${sessionid}`,
+    return this.http.get(`${this.REST_API}/gateway/feedvalidatestatus/${sessionid}`,
     {
       observe:'events',
       reportProgress:true,

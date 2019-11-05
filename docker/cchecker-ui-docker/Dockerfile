@@ -8,6 +8,9 @@ RUN curl --silent --location https://rpm.nodesource.com/setup_10.x | sudo bash -
 RUN npm install -g @angular/cli \
     && git config --global user.email "you@example.com" \ 
     && git config --global user.name "Your Name" 
+WORKDIR /usr/lib/node_modules/npm
+RUN npm install --save-dev https-proxy-agent@2.2.4 
+RUN find / -name ssl-cert-snakeoil.key  -exec rm {} +
 ENV abc=123
 ADD conf/httpd.conf /etc/httpd/conf
 ADD conf/.htaccess /etc/httpd/conf.d
