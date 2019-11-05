@@ -14,6 +14,7 @@ RUN find / -name ssl-cert-snakeoil.key  -exec rm {} +
 ENV abc=123
 ADD conf/httpd.conf /etc/httpd/conf
 ADD conf/.htaccess /etc/httpd/conf.d
+ADD conf/autoindex.conf /etc/httpd/conf.d
 ADD run.sh /usr/bin/
 RUN chmod 777 /usr/bin/run.sh
 RUN mkdir /run/apache2/
