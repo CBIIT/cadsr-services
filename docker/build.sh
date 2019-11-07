@@ -1,5 +1,5 @@
 #!/bin/bash
-TAG=$1
+TAG=${1/origin\//}"
 echo "Building ui image"
 docker build --no-cache ./cchecker-ui-docker -t ncidockerhub.nci.nih.gov/cadsrdocker/cchecker-ui:$TAG
 docker tag ncidockerhub.nci.nih.gov/cadsrdocker/cchecker-ui:$TAG ncidockerhub.nci.nih.gov/cadsrdocker/cchecker-ui:latest
