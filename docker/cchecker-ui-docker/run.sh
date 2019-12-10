@@ -22,7 +22,8 @@ if [ $configuration ]; then
   sed "s#REPLACEME#$REST_API#g" -i src/environments/environment.${configuration}.ts
   sed "s#VERSIONNUMBER#$version#g" -i src/environments/environment.${configuration}.ts  
   sed "s/timestamp:.*/timestamp: '$timestamp',/g" -i src/environments/environment.${configuration}.ts  
-  ng build -c=$configuration --output-path /var/www/html
+  #ng build -c=$configuration --output-path /var/www/html fix this
+  ng build --output-path /var/www/html
 else
   sed "s#VERSIONNUMBER#$version#g" -i src/environments/environment.${configuration}.ts
   sed "s/timestamp:.*/timestamp: '$timestamp',/g" -i src/environments/environment.ts
