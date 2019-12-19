@@ -59,21 +59,30 @@ CCheckerLoadFormService is running!
 
 5.A parsed ALS Excel file is expected to be in DB (ALSData java class instance).
 
-6. To run load form service a RESTful service call find an IDSEQ of a stored ALS created by 
+6. RESTFul API
+6a. To run load form service a RESTful service call find an IDSEQ of a stored ALS created by 
 CCheckerParserService, and run "curl" command POST request with _cchecker QUERY PARAMETER (IDSEQ value).
+"formloadlist.json" data file contains all services parameters. Parameter selForms is required. It has selected form names list. Context name and form names are case sensitive.
+Example:
+{
+	"contextName":"TEST",
+	"selForms": ["Literal Laboratory","Comments"]
+}
 
 curl -X POST -H "Content-Type: application/json" --data "@/local/content/cchecker/formloadlist.json" \
 http://localhost:4811/rest/loadforms?_cchecker=9AD561C1-0BF4-43FE-BC9D-09402D6824D6
 
-"formloadlist.json" file contains all parameters. Parameter selForms is required. It has selected form names list. Context name and form names are case sensitive.
+6b. To run generate XML Service
+curl -X POST -H "Content-Type: application/json" --data "@/local/content/cchecker/formloadlist31.json" http://localhost:4811/rest/formxml?_cchecker=1296201E-6DCA-4E4D-93F9-E0A377868A0F
+FL XML file is saved on the server REPORT directory in a file:
+FormLoader-<session>.xml
 Example:
-{
-	"contextName":"TEST",
-	"selForms": ["Literal Laboratory"]
-}
 
-7.The response ...
+FormLoader-1296201E-6DCA-4E4D-93F9-E0A377868A0F.xml
+
+7.The response
 The response sends the headers: ...
+It contains form name JSON array which looks similar to "selForms" in request data above.
 
 8. To create the application jar file use:
 >mvn clean package
@@ -82,6 +91,6 @@ or to skip tests
 >mvn package -DskipTests=true
 
 9.To run the application using jar file from the main project directory:
->java -jar target/cchecker-service-fl-0.0.1-SNAPSHOT.jar
+>java -jar target/cchecker-service-fl-1.0.0.jar
 or
 >mvn spring-boot:run

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 FNLCR. - All rights reserved.
+ * Copyright (C) 2019 Frederick National Laboratory for Cancer Research. - All rights reserved.
  */
 package gov.nih.nci.cadsr.microservices;
 

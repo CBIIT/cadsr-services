@@ -15,14 +15,14 @@ public class ALSData {
 String reportOwner; // From the user input through the browser
 String reportDate;
 String fileName;
-String filePath;
 
 ALSCrfDraft crfDraft = new ALSCrfDraft();
 List<ALSForm> forms = new ArrayList<ALSForm>();
 List<ALSField> fields = new ArrayList<ALSField>();
 Map<String, ALSDataDictionaryEntry> dataDictionaryEntries = new HashMap<String, ALSDataDictionaryEntry>();
 List<ALSUnitDictionaryEntry> unitDictionaryEntries = new ArrayList<ALSUnitDictionaryEntry>();
-CCCError cccError = new CCCError(); 
+CCCError cccError = new CCCError();
+FormsUiData formsUiData = new FormsUiData(); 
 
 
 public String getReportOwner() {
@@ -62,12 +62,6 @@ public String getFileName() {
 public void setFileName(String fileName) {
 	this.fileName = fileName;
 }
-public String getFilePath() {
-	return filePath;
-}
-public void setFilePath(String filePath) {
-	this.filePath = filePath;
-}
 public Map<String, ALSDataDictionaryEntry> getDataDictionaryEntries() {
 	return dataDictionaryEntries;
 }
@@ -85,6 +79,12 @@ public CCCError getCccError() {
 }
 public void setCccError(CCCError cccError) {
 	this.cccError = cccError;
+}
+public FormsUiData getFormsUiData() {
+	return formsUiData;
+}
+public void setFormsUiData(FormsUiData formsUiData) {
+	this.formsUiData = formsUiData;
 }
 
 

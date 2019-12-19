@@ -9,6 +9,7 @@ public class CategoryCde implements Comparable {
     private String moduleType;
     private String formId;
     private String formName;
+    private String deQuestion;
 	public int getCdeId() {
 		return cdeId;
 	}
@@ -47,12 +48,42 @@ public class CategoryCde implements Comparable {
 		this.formName = formName;
 	}	
 	
+	public String getDeQuestion() {
+		return deQuestion;
+	}
+	public void setDeQuestion(String deQuestion) {
+		this.deQuestion = deQuestion;
+	}
+
 	@Override
 	public String toString() {
 		return "CategoryCde [cdeId=" + cdeId + ", deVersion=" + deVersion + ", deName=" + deName + ", moduleType="
-				+ moduleType + ", formId=" + formId + ", formName=" + formName + "]";
+				+ moduleType + ", formId=" + formId + ", formName=" + formName + ", deQuestion=" + deQuestion + "]";
 	}
 	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + cdeId;
+		result = prime * result + Float.floatToIntBits(deVersion);
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		CategoryCde other = (CategoryCde) obj;
+		if (cdeId != other.cdeId)
+			return false;
+		if (Float.floatToIntBits(deVersion) != Float.floatToIntBits(other.deVersion))
+			return false;
+		return true;
+	}
 	@Override
 	public int compareTo(Object o) {
 		int res = 0;

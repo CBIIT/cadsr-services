@@ -74,3 +74,7 @@ returns 404 if not found
 curl -v http://localhost:4803/rest/retrievetest
 returns 200, "Content-Type", "text/plain", and expected response is a string 
 NCI Standards
+
+10. Retrieve caDSR Context Name List
+curl -v http://localhost:4803/rest/retrievecontexts
+

@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2019 FNLCR - All rights reserved.
+/*
+ * Copyright (C) 2019 Frederick National Laboratory for Cancer Research - All rights reserved.
  */
 package gov.nih.nci.cadsr.microservices;
 
@@ -89,8 +89,6 @@ public class ConverterFormService {
 		//question.setDisplayOrder(alsField.getOrdinal()); // Not present at the moment
 		if (alsField.getPreText()!=null && (!alsField.getPreText().isEmpty())) {
 			question.setQuestionText(alsField.getPreText()); 
-		} else {
-			question.setQuestionText(alsField.getFieldOid());
 		}
 		String[] idVersion = extractIdVersion(alsField.getDraftFieldName());
 		if (idVersion[0] != null) {

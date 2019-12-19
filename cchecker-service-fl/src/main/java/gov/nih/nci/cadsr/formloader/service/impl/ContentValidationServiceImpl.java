@@ -9,6 +9,7 @@ import java.util.TreeSet;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import gov.nih.nci.cadsr.formloader.domain.FormCollection;
@@ -16,6 +17,7 @@ import gov.nih.nci.cadsr.formloader.domain.FormDescriptor;
 import gov.nih.nci.cadsr.formloader.domain.ModuleDescriptor;
 import gov.nih.nci.cadsr.formloader.domain.QuestionDescriptor;
 import gov.nih.nci.cadsr.formloader.repository.impl.FormLoaderRepositoryImpl;
+import gov.nih.nci.cadsr.formloader.repository.impl.LoadServiceRepositoryImpl;
 import gov.nih.nci.cadsr.formloader.service.ContentValidationService;
 import gov.nih.nci.cadsr.formloader.service.common.FormLoaderHelper;
 import gov.nih.nci.cadsr.formloader.service.common.FormLoaderServiceException;
@@ -56,24 +58,30 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 	public void setRepository(FormLoaderRepositoryImpl repository) {
 		this.repository = repository;
 	}
+	
+	@Autowired
+	private LoadServiceRepositoryImpl loadServiceRepositoryImpl; // santhanamv 
 
 	@Override
 	public FormCollection validateXmlContent(FormCollection aCollection) 
 			throws FormLoaderServiceException {
 		
-		quickCheckOnCollection(aCollection);
+		// santhanamv - commented out methods that may not be necessary, to just get the questions validated
+		
+/*		quickCheckOnCollection(aCollection);
 		
 		String xmlPathName = FormLoaderHelper.checkInputFile(aCollection.getXmlPathOnServer(), aCollection.getXmlFileName());
 			
 		if (aCollection.isSelectAllForms()) 
-			aCollection.resetAllSelectFlag(true);
+			aCollection.resetAllSelectFlag(true); */
 		
 		List<FormDescriptor> formHeaders = aCollection.getForms();
-		determineLoadType(formHeaders);
+		/*determineLoadType(formHeaders);
 		 
-		validateFormInfo(xmlPathName, formHeaders, aCollection.getCreatedBy());
+		validateFormInfo(xmlPathName, formHeaders, aCollection.getCreatedBy()); */ // santhanamv - end
 		
-		validateQuestions(xmlPathName, formHeaders);
+		// santhanamv - xmlPathName is not required (temporarily disabled inside validateQuestions method) 		
+		validateQuestions("File path name", formHeaders); // validateQuestions(xmlPathName, formHeaders);
 		
 		aCollection.resetAllSelectFlag(false);
 		return aCollection;
@@ -133,7 +141,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 		}
 		
 		if (pidList.size() > 0) {
-			List<FormV2> formDtos = repository.getFormsForPublicIDs(pidList);
+			List<FormV2> formDtos = loadServiceRepositoryImpl.getFormsForPublicIDs(pidList);
 			HashMap<String, List<Float>> publicIdVersions = createFormExistingVersionMap(formDtos);
 			determineLoadTypeByVersion(formDescriptors, publicIdVersions);
 
@@ -156,7 +164,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 			if (!form.isSelected()) 
 				continue;
 			
-			this.repository.checkWorkflowStatusName(form);
+			this.loadServiceRepositoryImpl.checkWorkflowStatusName(form);
 			
 			if (!validContextName(form)) {
 				form.setLoadStatus(FormDescriptor.STATUS_CONTENT_VALIDATION_FAILED);
@@ -201,7 +209,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 				}
 				else
 				{
-					String csCsiIdSeq = this.repository.getClassificationSchemeItem(classification.getPublicID(), classification.getVersion(),
+					String csCsiIdSeq = this.loadServiceRepositoryImpl.getClassificationSchemeItem(classification.getPublicID(), classification.getVersion(),
 																				  classification.getCsiPublicID(), classification.getCsiVersion());
 					if (csCsiIdSeq == null || csCsiIdSeq.length() == 0 )
 					{
@@ -236,11 +244,11 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 				continue;
 			}
 			
-			String contextSeqid = this.repository.getContextSeqIdByName(proto.getContextName());
+			String contextSeqid = this.loadServiceRepositoryImpl.getContextSeqIdByName(proto.getContextName());
 			if (contextSeqid == null || contextSeqid.length() == 0)
 				contextSeqid = form.getContextSeqid();
 			
-			String protoSeqid = this.repository.getProtocolSeqidByPreferredName(preferredName, contextSeqid);
+			String protoSeqid = this.loadServiceRepositoryImpl.getProtocolSeqidByPreferredName(preferredName, contextSeqid);
 			if (protoSeqid != null && protoSeqid.length() > 0) {
 				proto.setConteIdseq(contextSeqid);
 				proto.setIdseq(protoSeqid);
@@ -285,7 +293,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 				continue;  
 			}
 			
-			if (!repository.designationTypeExists(des.getType())) {
+			if (!loadServiceRepositoryImpl.designationTypeExists(des.getType())) {
 				form.addMessage("Designation #" + idx + " has invalid type \"" + des.getType() + "\". Skip loading.");
 				continue;
 			}
@@ -332,12 +340,12 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 				continue;  
 			}
 			
-			if (!repository.isContactCommunicationTypeValid(type)) {
+			if (!loadServiceRepositoryImpl.isContactCommunicationTypeValid(type)) {
 				form.addMessage("ContactCommunication type [" + type + "] is invalid. Skip loading.");
 				continue;
 			}
 			
-			String orgSeqid = repository.getOrganizationSeqidByName(con.getOrganizationName());
+			String orgSeqid = loadServiceRepositoryImpl.getOrganizationSeqidByName(con.getOrganizationName());
 			if (orgSeqid == null || orgSeqid.length() == 0) {
 				form.addMessage("ContactCommunication #" + idx + " has invalid organization name [" + con.getOrganizationName() + "]. Skip loading.");
 				continue;
@@ -357,10 +365,10 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 			String[] pair = classificationPublicIdVersionPairs.get(i).split(",");
 			
 			if (i == 0) {
-				if (!this.repository.validClassificationScheme(pair[0], pair[1]))
+				if (!this.loadServiceRepositoryImpl.validClassificationScheme(pair[0], pair[1]))
 					return false;
 			} else {
-				if (!this.repository.validClassificationSchemeItem(pair[0], pair[1]))
+				if (!this.loadServiceRepositoryImpl.validClassificationSchemeItem(pair[0], pair[1]))
 					return false;
 			}
 		}
@@ -396,7 +404,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 				continue; 
 			}
 			
-			if (!repository.definitionTypeValid(def.getType())) {
+			if (!loadServiceRepositoryImpl.definitionTypeValid(def.getType())) {
 				form.addMessage("Definition #" + idx + " has invalid type \"" + def.getType() + "\". Skip loading.");
 				continue;
 			}
@@ -446,7 +454,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 	protected void verifyCredential(FormDescriptor form, String loggedinUser) {
 		if (form == null) return;
 		
-		if (!this.repository.hasLoadFormRight(form, loggedinUser, form.getContext())) {
+		if (!this.loadServiceRepositoryImpl.hasLoadFormRight(form, loggedinUser, form.getContext())) {
 			form.addMessage("Form Loader logged in user [" + loggedinUser + "] doesn't have load form right in context [" + 
 					form.getContext() + "]. Validation failed");
 			form.setLoadStatus(FormDescriptor.STATUS_CONTENT_VALIDATION_FAILED);
@@ -482,7 +490,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 			form.setDefaultWorkflowName();
 		}
 		
-		String contextSeqid = this.repository.getContextSeqIdByName(form.getContext());
+		String contextSeqid = this.loadServiceRepositoryImpl.getContextSeqIdByName(form.getContext());
 		if (contextSeqid == null || contextSeqid.length() == 0) {
 			form.addMessage("Context name in form [" + form.getContext() + "] is not valid. Unable to load form");
 			return false;
@@ -698,13 +706,13 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 	 * @param formHeaders
 	 */
 	protected void validateQuestions(String xmlPathName, List<FormDescriptor> formDescriptors) {
-		
-		List<FormDescriptor> forms = getFormQuestionsFromXml(xmlPathName, formDescriptors);
+		// santhanamv - start
+		/*List<FormDescriptor> forms = getFormQuestionsFromXml(xmlPathName, formDescriptors);
 		
 		if (forms == null) {
 			logger.error("form list is null. This should not happen");
 			return;
-		}
+		}*/ // santhanamv - end
 			
 		//First pass, collect question public ids and their cde ids so we could get necessary data from 
 		//database as a list (= less queries)
@@ -752,9 +760,9 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 //			HashMap<String, List<PermissibleValueV2TransferObject>> pvDtos = 
 //					repository.getPermissibleValuesByVdIds(vdSeqIds);	//JR417 pv has the vpIdseq and vm has the vmIdseq after this successful call!
 
-			logger.info("ContentValidationServiceImpl.java#validateQuestions before FormLoaderHelper.populateQuestionsPV");
-			ValueHolder vh = FormLoaderHelper.populateQuestionsPV(form, repository);
-			logger.info("ContentValidationServiceImpl.java#validateQuestions after FormLoaderHelper.populateQuestionsPV");
+			logger.trace("ContentValidationServiceImpl.java#validateQuestions before FormLoaderHelper.populateQuestionsPV");
+			ValueHolder vh = FormLoaderHelper.populateQuestionsPV(form, loadServiceRepositoryImpl); // santhanamv - repository was null here, so passing LoadServiceRepositoryImpl instead
+			logger.trace("ContentValidationServiceImpl.java#validateQuestions after FormLoaderHelper.populateQuestionsPV");
 			HashMap<String, List<ReferenceDocumentTransferObject>> refdocDtos = null;
 			HashMap<String, List<PermissibleValueV2TransferObject>> pvDtos = null;
 			try {
@@ -770,9 +778,9 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 			}
 			//JR417 end
 
-			logger.info("ContentValidationServiceImpl.java#validateQuestions before validateQuestionsInModules");
+			logger.trace("ContentValidationServiceImpl.java#validateQuestions before validateQuestionsInModules");
 			validateQuestionsInModules(modules, form, questDtos, cdeDtos, refdocDtos, pvDtos);		
-			logger.info("ContentValidationServiceImpl.java#validateQuestions after validateQuestionsInModules");
+			logger.trace("ContentValidationServiceImpl.java#validateQuestions after validateQuestionsInModules");
 			
 			form.setLoadStatus(FormDescriptor.STATUS_CONTENT_VALIDATED);
 			
@@ -786,12 +794,12 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 			HashMap<String, List<ReferenceDocumentTransferObject>> refdocDtos, HashMap<String, 
 			List<PermissibleValueV2TransferObject>> pvDtos) {
 		if (modules == null) {
-			logger.debug("Module list is null. Unable to validate questions.");
+			logger.trace("Module list is null. Unable to validate questions.");
 			return;
 		}
 		
 		for (ModuleDescriptor module : modules) {
-			logger.debug("Start validating questions for module [" + module.getPublicId() + "|" + 
+			logger.trace("Start validating questions for module [" + module.getPublicId() + "|" + 
 					module.getVersion() + "|" + module.getModuleSeqId()  + "]");
 			
 			//TODO: waiting on Denise to answer the question about "existing module" - 2014-01-27
@@ -799,12 +807,12 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 			List<QuestionDescriptor> questions = module.getQuestions();		
 			for (QuestionDescriptor question : questions) {
 				
-				logger.debug("Start validating question [" + question.getPublicId() + "|" + question.getVersion() + 
+				logger.trace("Start validating question [" + question.getPublicId() + "|" + question.getVersion() + 
 						"|" + question.getQuestionSeqId()  + "]");
 				validateQuestion(question, form, questDtos, cdeDtos, refdocDtos, pvDtos);
 			}
 			
-			logger.debug("Done validating questions for module [" + module.getPublicId() + "|" + module.getVersion() + 
+			logger.trace("Done validating questions for module [" + module.getPublicId() + "|" + module.getVersion() + 
 					"|" + module.getModuleSeqId()  + "]");
 		}
 	}
@@ -971,7 +979,7 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 		String vdseqid = matchingCde.getVdIdseq();
 		if (vdseqid != null)
 		{
-			ValueDomainV2 vd = repository.getValueDomainBySeqid(vdseqid);
+			ValueDomainV2 vd = loadServiceRepositoryImpl.getValueDomainBySeqid(vdseqid);
 			if (vd != null && "N".equalsIgnoreCase(vd.getVDType()) && 
 				question.getValidValues() != null && question.getValidValues().size() > 0)
 			{
@@ -996,7 +1004,7 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 		List<ReferenceDocumentTransferObject> rdDtos = refdocDtos.get("" + matchingCde.getPublicId() + "-" + matchingCde.getVersion());
 		verifyQuestionText(form, question, rdDtos, matchingCde);
 		
-		logger.debug("Done validating question against CDE");
+		logger.trace("Done validating question against CDE");
 	}
 	
 	
@@ -1011,7 +1019,7 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 		}
 			
 		//1. get vd from db with vdseqid
-		ValueDomainV2 vd = repository.getValueDomainBySeqid(vdseqid);
+		ValueDomainV2 vd = loadServiceRepositoryImpl.getValueDomainBySeqid(vdseqid);
 		if (vd == null) {
 			if (question.hasVDValueInDE())
 				question.setCdeSeqId(""); 
@@ -1049,7 +1057,7 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 	 * @param message
 	 */
 	protected void prepareQuestionForLoadWithoutValidation(FormDescriptor form, QuestionDescriptor question, String message) {
-		logger.debug(message);
+		logger.trace(message);
 		question.addMessage(message);
 		question.addInstruction(message);
 		question.setCdeSeqId(""); //disassociate cde if it's there.
@@ -1060,22 +1068,22 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 	protected String verifyPublicIdAndVersion(String publicid, String version) {
 		String errField = "";
 		if (publicid == null || publicid.length() == 0 ) {
-			errField = "public id";
+			errField = "public id null";
 		} else {
 			try {
 				int num = Integer.parseInt(publicid);
 			} catch (NumberFormatException ne) {
-				errField = "public id";
+				errField = "public id wrong: publicid";
 			}
 		}
 
 		if (version == null || version.length() == 0) {
-			errField += (errField.length() > 0) ? " and version" : "version";
+			errField += (errField.length() > 0) ? " and version null" : "version null";
 		} else {
 			try {
 				float ver = Float.parseFloat(version); 
 			} catch (NumberFormatException ne) {
-				errField += (errField.length() > 0) ? " and version" : "version";
+				errField += (errField.length() > 0) ? " and version wrong: " +  version : "version wrong: " + version;
 			}
 		}
 
@@ -1141,7 +1149,7 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 	protected List<ReferenceDocumentTransferObject> getReferenceDocsForCdeFromDB(String cdePublicId, String cdeVersion,
 			QuestionDescriptor question) {
 		
-		List<ReferenceDocumentTransferObject> refDocs = repository.getReferenceDocsForQuestionCde(cdePublicId, cdeVersion);
+		List<ReferenceDocumentTransferObject> refDocs = loadServiceRepositoryImpl.getReferenceDocsForQuestionCde(cdePublicId, cdeVersion);
 		 
 		if (refDocs == null || refDocs.size() == 0) {
 			logger.debug("Unable to load any reference document from db with CDE public id and version [" + cdePublicId +
@@ -1345,7 +1353,7 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 	
 	protected boolean ableToValidateByAlternatives(String valMeaningLongName, String vmSeqid) {
 
-		List<String> desNames = this.repository.getDesignationNamesByVmIds(vmSeqid);
+		List<String> desNames = this.loadServiceRepositoryImpl.getDesignationNamesByVmIds(vmSeqid);
 		if (desNames != null && desNames.size() > 0) {
 			for (String desName : desNames) {
 				desName = FormLoaderHelper.normalizeSpace(desName);
@@ -1357,7 +1365,7 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 	}
 	
 	protected boolean matchMeaningDefinitions(String valDesc, String vmSeqid) {
-		List<String> defTexts = this.repository.getDefinitionTextsByVmIds(vmSeqid);
+		List<String> defTexts = this.loadServiceRepositoryImpl.getDefinitionTextsByVmIds(vmSeqid);
 		if (defTexts != null && defTexts.size() > 0) {
 			for (String defTest : defTexts) {
 				defTest = FormLoaderHelper.normalizeSpace(defTest);

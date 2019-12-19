@@ -476,7 +476,7 @@ public class GatewayBootController {
 	 * @param sessionid not null
 	 * @return String URI to get validation report
 	 */
-	protected String buildLocationUri(URI url, String sessionid) {
+	protected static String buildLocationUri(URI url, String sessionid) {
 		String location;
 		
 		String path = String.format("%s://%s:%d%s", url.getScheme(), url.getHost(), url.getPort(), url.getPath());
@@ -673,7 +673,7 @@ public class GatewayBootController {
 	 * @return BufferedInputStream
 	 * @throws Exception
 	 */
-	protected BufferedInputStream openFileAsInputStream(String filePathString) throws Exception {
+	protected static BufferedInputStream openFileAsInputStream(String filePathString) throws Exception {
 		BufferedInputStream bis = null;
 		Path path = Paths.get(filePathString);
 		if (Files.exists(path)) {
@@ -690,7 +690,7 @@ public class GatewayBootController {
 		httpHeaders.setAccessControlAllowOrigin(ACCESS_CONTROL_ALLOW_ORIGIN);
 	}
 
-	protected HttpHeaders createHttpOkHeaders() {
+	protected static HttpHeaders createHttpOkHeaders() {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.add("Content-Type", "application/json");
 		// We have configured springframework CrossOrigin so we do not need this
@@ -698,7 +698,7 @@ public class GatewayBootController {
 		// httpHeaders.setAccessControlAllowOrigin(ACCESS_CONTROL_ALLOW_ORIGIN);
 		return httpHeaders;
 	}
-	protected HttpHeaders createHttpValidateHeaders(String contextTypeSting, String locationHeaderString) {
+	protected static HttpHeaders createHttpValidateHeaders(String contextTypeSting, String locationHeaderString) {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.add("Content-Type", contextTypeSting);
 		httpHeaders.add("Location", locationHeaderString);

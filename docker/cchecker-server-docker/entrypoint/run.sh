@@ -13,6 +13,7 @@ else
   ln -s /var/local/cadsr-services/cchecker-service-db/log/cchecker-db.log /logs/cchecker-db.log
   ln -s /var/local/cadsr-services/cchecker-service-excel-gen/log/cchecker-excel-gen.log /logs/cchecker-excel-gen.log
   ln -s /var/local/cadsr-services/cchecker-service-parser/log/cchecker-parser.log /logs/cchecker-parser.log
+  ln -s /var/local/cadsr-services/cchecker-service-fl/log/cchecker-fl.log /logs/cchecker-fl.log
   
 fi
 # pull up to date code #
@@ -56,6 +57,15 @@ mvn clean package
 mv target/cchecker-service-excel-gen*.jar target/cchecker-service-excel-gen.jar
 java -jar target/cchecker-service-excel-gen.jar &
 echo "done building cchecker-service-excel-gen, cchecker-service-excel-gen service started"
+
+# build and run the cchecker fl service #
+echo "entering cchecker-service-fl directory"
+cd ../cchecker-service-fl
+echo "building cchecker-service-fl"
+mvn clean package
+mv target/cchecker-service-fl*.jar target/cchecker-service-fl.jar
+java -jar target/cchecker-service-fl.jar &
+echo "done building cchecker-service-fl"
 
 # build and run the cchecker gateway #
 echo "entering cchecker-gateway directory"
