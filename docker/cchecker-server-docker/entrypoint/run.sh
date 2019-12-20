@@ -83,5 +83,5 @@ echo "done starting crond"
 echo "entering apache-tomcat directory"
 echo "starting tomcat"
 cd /usr/local/apache-tomcat
-./bin/catalina.sh run &
+./bin/catalina.sh run
 echo "done starting tomcat"
