@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>gov.nih.nci.cadsr</groupId>
 	<artifactId>cchecker-service-excel-gen</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<packaging>jar</packaging>
 	<name>cchecker-service-excel-gen</name>
 	<properties>
