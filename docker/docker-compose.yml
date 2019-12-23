@@ -2,19 +2,18 @@ version: '2'
 services:
   ui:
     container_name: cchecker-ui
-    image: ./cchecker-ui-docker 
+    image: ncidockerhub.nci.nih.gov/cadsrdocker/cchecker-ui:$tag
     ports:
      - "8081:80"
     environment:
       REST_API: $REST_API
       configuration: $configuration
-      BRANCH_OR_TAG: $BRANCH_OR_TAG
     networks:
       app_net:
         ipv4_address: 172.18.239.10
   server:
     container_name: cchecker-gateway
-    image: ./cchecker-server-docker
+    image: ncidockerhub.nci.nih.gov/cadsrdocker/cchecker-server:$tag
     ports:
      - "8080:8080"
      - "8082:8082"

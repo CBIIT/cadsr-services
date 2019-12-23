@@ -12,10 +12,6 @@ else
   cd cadsr-services
   git checkout $branchOrTag
 fi
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/cdevalidator-formxml-20191017
 echo $BRANCH_OR_TAG
 version=`xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" /root/cadsr-services/cchecker-gateway/pom.xml`
 cd /root/cadsr-services/cchecker-ui
