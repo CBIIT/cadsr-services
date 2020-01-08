@@ -14,7 +14,8 @@ import java.util.Set;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -24,8 +25,8 @@ import org.springframework.jdbc.core.support.JdbcDaoSupport;
 
 public abstract class AbstractDAOOperations extends JdbcDaoSupport
 {
-    private static Logger logger = Logger.getLogger( AbstractDAOOperations.class.getName() );
-    
+	private static Logger logger = LogManager.getLogger(AbstractDAOOperations.class.getName());
+
     protected static final int oracleIn1000 = 1000;
     
     @Autowired
