@@ -14,6 +14,7 @@ import { DataTablesModule } from 'angular-datatables';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ReportFilterPipe } from './report-filter.pipe';
 import { ContactComponent } from './contact/contact.component';
+import { CadsrXmlComponent } from './cadsr-xml/cadsr-xml.component';
 
 const APP_ROUTES: Routes = [
   // Default empty path
@@ -33,7 +34,8 @@ const APP_ROUTES: Routes = [
     NavigationComponent,
     ProgressBarComponent,
     ReportFilterPipe,
-    ContactComponent
+    ContactComponent,
+    CadsrXmlComponent
   ],
   imports: [
     BrowserModule,
