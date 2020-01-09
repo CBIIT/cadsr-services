@@ -48,14 +48,6 @@ public class ValidateController {
 	@Autowired
 	private RestTemplate restTemplate;
 	
-	@CrossOrigin
-	@GetMapping("/rest/feedvalidateformnumber/{idseq}")
-	public ResponseEntity<?> feedValidateStatus(HttpServletRequest request,
-			@PathVariable("idseq") String idseq) {
-		String formUndervalidation = reportGeneratorFeed.feedRequestStatus(idseq);
-		//logger.debug("feedValidateStatus called: " + idseq + ", current form: " + formUndervalidation);
-		return new ResponseEntity<String>(formUndervalidation, HttpStatus.OK);
-	}
 	//FORMBUILD-633
 	@CrossOrigin
 	@GetMapping("/rest/feedvalidateform/{idseq}")

@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2019 Frederick National Laboratory for Cancer Research - All rights reserved.
+ */
 package gov.nih.nci.cadsr.cchecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

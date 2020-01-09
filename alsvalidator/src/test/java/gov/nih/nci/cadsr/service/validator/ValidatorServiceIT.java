@@ -261,7 +261,28 @@ public class ValidatorServiceIT {
 		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question);
 		assertEquals(expectedResult, actualResult.getPvResults().get(0));
 	}
-	
+	@Test
+	public void testSetPvCheckerResultMatchCodedData() {
+		String expectedResult = "MATCH";
+		question.getRaveCodedData().add("LA10610-6");
+		question.getRaveUserString().add("LA10610-6");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("Black or African American");
+		pvVmList.add("BLACK OR AFRICAN AMERICAN");
+		pvVmMap.put("LA10610-6", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}
+	@Test
+	public void testSetPvCheckerResulErrorNoCodedData() {
+		String expectedResult = "ERROR";
+		question.getRaveCodedData().add("LA10610-6");
+		question.getRaveUserString().add("LA10610-6");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}	
 	/**
 	 * PV Checker result - ERROR (NON-MATCH)
 	 */	

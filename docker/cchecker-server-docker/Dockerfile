@@ -29,5 +29,5 @@ COPY assets/index.html /logs
 RUN chmod 0644 /etc/cron.d/crondelete
 RUN crontab /etc/cron.d/crondelete
 
-EXPOSE 8080 8082
+EXPOSE 8080
 ENTRYPOINT "/usr/bin/run.sh"

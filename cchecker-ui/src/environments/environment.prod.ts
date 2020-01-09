@@ -1,5 +1,5 @@
 export const environment = {
-  production: true,
+  production: false,
   REST_API:'REPLACEME',
   version: 'VERSIONNUMBER',
   timestamp: '',

@@ -123,7 +123,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 	}
 	//TODO we can remove requestStatusMap and keep only currentFormMap when UI starts using FeedFormStatus instead of form number in feed service
 	//we will keep here a status of requests: sessionID-form processed number
-	private ConcurrentMap<String, String> requestStatusMap = new ConcurrentHashMap<>();
+	//private ConcurrentMap<String, String> requestStatusMap = new ConcurrentHashMap<>();
 	
 	//FORMBUILD-633 indicate X of X Questions 
 	private ConcurrentMap<String, FeedFormStatus> currentFormMap = new ConcurrentHashMap<>();
@@ -131,13 +131,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 	
 	//FORMBUILD-641 Add ability to Cancel the validation
 	private ConcurrentMap<String, String> requestRunningMap = new ConcurrentHashMap<>();
-	
-	public String feedRequestStatus(String sessionId) {
-		String feedNumber = requestStatusMap.get(sessionId);
-		if (feedNumber == null) feedNumber = "0";
-		return feedNumber;
-	}
-	
+
 	//FORMBUILD-633
 	/**
 	 * Provide current request status based on sessionId.
@@ -328,9 +322,11 @@ public class ReportGeneratorFeed implements ReportOutput {
 		int countQuestChecked = 0;
 		int totalNrdsCong = 0;
 		int totalNrdsWarn = 0;
-		int totalNrdsError = 0;		
+		int totalNrdsError = 0;
+		int totalCountNciCong = 0;
 
 		List<NrdsCde> nrdsCdeList = new ArrayList<NrdsCde>();
+		List<NrdsCde> missingNciList = new ArrayList<NrdsCde>();
 		// FORMBUILD-636
 		List<StandardCrfCde> matchingStdCrfCdeList = new ArrayList<StandardCrfCde>();
 		List<StandardCrfCde> standardCrfCdeList = new ArrayList<StandardCrfCde>();
@@ -366,10 +362,6 @@ public class ReportGeneratorFeed implements ReportOutput {
 					formOid = alsField.getFormOid();
 					
 					if (StringUtils.isNotBlank(sessionId)) {//feed status code
-						//TODO remove requestStatusMap when feed is changed in UI
-						requestStatusMap.put(sessionId, ""+feedFormNumber);
-						logger.debug("Current form to feed map, session: " + sessionId + ", form: " + feedFormNumber + ", FormOid:" + formOid);
-						
 						//FORMBUILD-633
 						String alsFormName = findFormNameByFormOid(formOid, alsData.getForms());
 						FeedFormStatus feedFormStatus = createFeedFormStatus(countValidatedQuestions, alsFormName, feedFormNumber);
@@ -390,9 +382,6 @@ public class ReportGeneratorFeed implements ReportOutput {
 							feedFormNumber++;
 							
 							if (StringUtils.isNotBlank(sessionId)) {//feed status code
-								//TODO remove requestStatusMap when feed is changed in UI
-								requestStatusMap.put(sessionId, ""+feedFormNumber);
-								logger.debug("Current form to feed map, session: " + sessionId + ", form: " + feedFormNumber);
 								//FORMBUILD-633 
 								countValidatedQuestions+=countQuestChecked;
 								String alsFormName = findFormNameByFormOid(alsField.getFormOid(), alsData.getForms());
@@ -466,6 +455,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 							question = updateNciCategory(checkStdCrfCde, cdeCrfData, question, cdeDetails);
 							// FORMBUILD-636
 							nrdsCdeList = getNrdsCdeList(checkStdCrfCde, question, cdeDetails, nrdsCdeList);
+							missingNciList = getMissingNciCdeList(checkStdCrfCde, question, cdeDetails, missingNciList);
 							//FORMBUILD-621
 							addToReportCdeList(question, cdeDetails, reportCdeList);
 							
@@ -482,7 +472,11 @@ public class ReportGeneratorFeed implements ReportOutput {
 							
 							if (question.getQuestionCongruencyStatus() != null) {
 								if (congStatus_congruent.equals(question.getQuestionCongruencyStatus())) {
-									congQuestionsList.add(question);	
+									congQuestionsList.add(question);
+									
+									if (StringUtils.isNotBlank(question.getNciCategory()) && (question.getNciCategory().indexOf(mandatory_crf) > -1 || question.getNciCategory().indexOf(nrds_cde) > -1)) {
+										totalCountNciCong++;	
+									}
 								} else {
 									questionsList.add(question);
 								}										
@@ -542,7 +536,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 		//}
 		// categoryNrdsList and categoryCdeList will be reduced to those CDEs that are missing
 		List<CategoryCde> missingCdeStd = createMissingCategoryCdeList(standardCrfCdeList);
-		List<CategoryNrds> missingCategoryNrdsList = createMissingNrdsCategoryNrdsList(nrdsCdeList);
+		List<CategoryNrds> missingCategoryNrdsList = createMissingNrdsCategoryNrdsList(missingNciList);
 		
 		for (CategoryNrds cde : missingCategoryNrdsList) {
 			missingNrdsCdesList.add(buildMissingNrdsCde(cde));
@@ -567,6 +561,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 		cccReport.setCountNrdsCongruent(totalNrdsCong);
 		cccReport.setCountNrdsWithErrors(totalNrdsError);
 		cccReport.setCountNrdsWithWarnings(totalNrdsWarn);
+		cccReport.setCountNciCongruent(totalCountNciCong);
 		cccReport.setMissingNrdsCdeList(missingNrdsCdesList);
 		cccReport.setCountNrdsMissing(missingNrdsCdesList.size());
 		
@@ -601,8 +596,6 @@ public class ReportGeneratorFeed implements ReportOutput {
 		//FORMBUILD-636
 		calculateCdiscReportTotals(cccReport);
 		cccReport.setSelectedFormsCount(cccReport.getCccForms().size());
-		//TODO remove requestStatusMap when feed is changed in UI
-		requestStatusMap.remove(sessionId);
 		//FORMBUILD-633
 		currentFormMap.remove(sessionId);
 		//FORMBUILD-641 cancel request
@@ -752,6 +745,30 @@ public class ReportGeneratorFeed implements ReportOutput {
 		return nrdsCdeList;
 	}	
 	
+	/**
+	 * Assigning the CDE to the Missing NRDS CDEs list based on the question's NCI category 
+	 * @param question
+	 * @param cdeDetails
+	 * @param missingNciList
+	 * @return List<NrdsCde>
+	 */
+	protected static List<NrdsCde> getMissingNciCdeList (Boolean checkStdCrfCde, CCCQuestion question, CdeDetails cdeDetails, List<NrdsCde> missingNciList) {
+	if (cdeDetails.getDataElement()!=null)  {
+		if (question.getNciCategory()!=null) {
+			// FORMBUILD-636
+					if (question.getNciCategory().indexOf(nrds_cde) > -1 || nrds_cde.equalsIgnoreCase(question.getNciCategory())) {
+						missingNciList.add(buildNrdsCde(question,
+								cdeDetails.getDataElement().getDataElementDetails().getLongName()));
+					} else if (mandatory_crf.equalsIgnoreCase(question.getNciCategory())) {
+						if (checkStdCrfCde) {
+							missingNciList.add(buildNrdsCde(question,
+									cdeDetails.getDataElement().getDataElementDetails().getLongName()));
+						}						
+					}
+		}	
+	}
+		return missingNciList;
+	}		
 	
 	// FORMBUILD-636	
 	/**
@@ -1125,21 +1142,29 @@ public class ReportGeneratorFeed implements ReportOutput {
 		int condCrfWarn = 0;
 		int condCrfErr = 0;
 		
+		// Getting all the NRDS CDEs to compare against Std CRF CDEs to eliminate common CDEs 
+		List<String> nrdsCdeIds = new ArrayList<String>();
+		for (NrdsCde cde : report.getMissingNrdsCdeList()) {
+			nrdsCdeIds.add(cde.getCdeIdVersion());
+		}
+		
 		// If the Standard CRF CDEs are not included in congruency checking 
 		// based on user's choice then they're excluded from the summary count
 		if (report.getIsCheckStdCrfCdeChecked()) {
 			for (StandardCrfCde cde : report.getMissingStandardCrfCdeList()) {
-				if (mandatory_crf.equals(cde.getStdTemplateType())) 
-					stdManMissingCount++;
-				else if (conditional_crf.equals(cde.getStdTemplateType()))
-					stdCondMissingCount++;
-				else if (optional_crf.equals(cde.getStdTemplateType()))
-					stdOptMissingCount++;
+				if (!(nrdsCdeIds.contains(cde.getCdeIdVersion()))) {
+					if (mandatory_crf.equals(cde.getStdTemplateType())) 
+						stdManMissingCount++;
+					else if (conditional_crf.equals(cde.getStdTemplateType()))
+						stdCondMissingCount++;
+					else if (optional_crf.equals(cde.getStdTemplateType()))
+						stdOptMissingCount++;
+				}
 			}
 		}
 		
 		for (CCCForm tempForm : report.getCccForms()) {
-			for (CCCQuestion tempQuestion : tempForm.getQuestions()) {
+			for (CCCQuestion tempQuestion : tempForm.getQuestions()) {				
 				if (tempQuestion.getQuestionCongruencyStatus()!=null) {
 					if (congStatus_warn.equals(tempQuestion.getQuestionCongruencyStatus())) {
 						countQuestWarn++;
@@ -1171,7 +1196,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 								}
 							}
 						}
-					}					
+					}				
 				}
 			}
 		}
@@ -1191,7 +1216,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 		report.setCountManCrfMissing(stdManMissingCount);
 		report.setCountOptCrfMissing(stdOptMissingCount);
 		report.setCountCondCrfMissing(stdCondMissingCount);
-		report.setCountManCrfCongruent(manCrfCong);
+		//report.setCountManCrfCongruent(manCrfCong);
 		report.setCountManCrfwWithWarnings(manCrfWarn);
 		report.setCountManCrfWithErrors(manCrfErr);
 		report.setCountCondCrfCongruent(condCrfCong);
@@ -1203,7 +1228,7 @@ public class ReportGeneratorFeed implements ReportOutput {
 		
 		// FORMBUILD-636
 		report.setCountNciMissing(stdManMissingCount + report.getCountNrdsMissing());
-		report.setCountNciCongruent(manCrfCong + report.getCountNrdsCongruent());
+		//report.setCountNciCongruent(manCrfCong + report.getCountNrdsCongruent());
 		report.setCountNciWithWarnings(manCrfWarn + report.getCountNrdsWithWarnings());
 		report.setCountNciWithErrors(manCrfErr + report.getCountNrdsWithErrors());
 		

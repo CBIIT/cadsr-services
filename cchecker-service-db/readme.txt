@@ -70,5 +70,11 @@ curl -v http://localhost:4803/rest/retrievecategorynrds
 curl -v http://localhost:4803/rest/retrievereporterror?_cchecker=235393B4-3676-4A79-871C-EE632D4E8279
 returns 404 if not found
 
-9. Retrieve caDSR Context Name List
+9. Test DB connection GET request
+curl -v http://localhost:4803/rest/retrievetest
+returns 200, "Content-Type", "text/plain", and expected response is a string 
+NCI Standards
+
+10. Retrieve caDSR Context Name List
 curl -v http://localhost:4803/rest/retrievecontexts
+

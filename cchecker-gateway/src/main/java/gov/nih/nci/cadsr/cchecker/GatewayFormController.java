@@ -112,8 +112,9 @@ public class GatewayFormController {
 	 * @param requestEntity
 	 * @return List of Strings
 	 */
-	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
-	@PostMapping("/loadformservice")
+	//Commented since we do not release this service
+//	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
+//	@PostMapping("/loadformservice")
 	public ResponseEntity<?> loadFormService(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(name = "sessionid", required = true) String sessionid,
 			RequestEntity<FormLoadParamWrapper> requestEntity) {

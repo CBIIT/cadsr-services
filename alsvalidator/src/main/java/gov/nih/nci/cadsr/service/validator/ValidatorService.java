@@ -14,9 +14,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import gov.nih.nci.cadsr.dao.model.AlternateNameUiModel;
 import gov.nih.nci.cadsr.dao.model.PermissibleValuesModel;
@@ -113,7 +113,7 @@ public class ValidatorService {
 			List<String> pvVmList = new ArrayList<String>();
 			Map<String, List<String>> pvVmMap =  new HashMap<String, List<String>>();
 			int pvMaxLen = 0;
-			int vdMaxLen = 0;
+			Integer vdMaxLen = null;
 			String allowableCdes = "";
 			
 			//Obtaining Value Domain's Max Length for comparison
@@ -171,7 +171,7 @@ public class ValidatorService {
 			
 			// Removing this validation after discussing with the team, as it doesn't serve a significant purpose
 			// Comparing RAVE Length (FixedUnit) with the caDSR PVs Max length
-			/*if (vdMaxLen != 0)
+			/*if (vdMaxLen != null)
 				question = checkCdeMaxLength (question, pvMaxLen, vdMaxLen, computeRaveLength(question.getRaveLength()));*/ 
 			question.setCdeMaxLength(vdMaxLen);
 			
@@ -223,19 +223,20 @@ public class ValidatorService {
 	protected static CCCQuestion checkCdeVersions(CdeDetails cdeDetails, CCCQuestion question) {
 		//Checking for different versions of CDEs
 		Boolean newerVersionExists = false;
-		Float latestVersion = null;
+		Float latestVersion = Float.valueOf(question.getCdeVersion());
+		float latestVersionVal = latestVersion.floatValue();
 		if (cdeDetails.getDataElement()!=null) {
 			for (OtherVersion otherVersion : cdeDetails.getDataElement().getOtherVersions()) {
-				if (otherVersion.getVersion() >  Float.valueOf(question.getCdeVersion())) {
+				if (otherVersion.getVersion() >  latestVersionVal) {
 					newerVersionExists = true;
-					latestVersion = otherVersion.getVersion();
+					latestVersionVal = otherVersion.getVersion();
 				}					
 			}
 			
 			// If a RAVE ALS version of the CDE is older than the latest CDE version available, 
 			// then report a WARNING with an error message.
 			if (newerVersionExists) {
-				question.setMessage(assignQuestionErrorMessage(question.getMessage(),String.format(msg3, latestVersion)));
+				question.setMessage(assignQuestionErrorMessage(question.getMessage(),String.format(msg3, latestVersionVal)));
 				if (question.getQuestionCongruencyStatus()==null)
 					question.setQuestionCongruencyStatus(congStatus_warn);
 			} 
@@ -328,7 +329,7 @@ public class ValidatorService {
 			it's an error. (we will provide the team with a list of the mappings between the Rave Datatypes 
 			and caDSR datatypes ,the names are not the same). */ 
 			
-			if (question.getRaveControlType()!=null) {
+			if (!(StringUtils.isEmpty(question.getRaveControlType()))) {
 				// When RAVE control type is Non-Enumerated & VD type is N (Non-enumerated)
 				if (isNonEnumerated(question.getRaveControlType().toUpperCase()) && "N".equalsIgnoreCase(vdType)) {
 					question.setControlTypeResult(matchString);
@@ -351,6 +352,12 @@ public class ValidatorService {
 							question.setMessage(assignQuestionErrorMessage(question.getMessage(), String.format(msg7, errorVal.toArray())));
 							question.setQuestionCongruencyStatus(congStatus_errors); 
 						}
+					
+					// Checking for Rave Coded data in the event of Control Type conflict - VS
+					if (!question.getRaveCodedData().isEmpty() && "N".equalsIgnoreCase(vdType)) {						
+						question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg5));
+					}
+					
 					// Introducing Not Checked status for those data types that are not part of the 
 					// designated data types that will be verified against the CDE
 					if (notCheckedString.equals(result) && question.getQuestionCongruencyStatus()==null)
@@ -392,11 +399,14 @@ public class ValidatorService {
 			for (String userDataString : userDataStringList) {
 				// Getting the Coded Data value for the corresponding User Data String from RAVE ALS
 				String pvValue = codedDataList.get(userDataStringList.indexOf(userDataString));
+				
+				//Identifying & Replacing the '@@' or '##' patterns in pv value 
+				pvValue = codedDataReplace(pvValue);
 				// Obtaining the PV value meanings list for comparison with User Data String
 				List<String> pvVmList = pvVmMap.get(pvValue);				
-				if (pvVmList!=null) {
-					if (pvVmList.contains(userDataString)) {
-						isMatch = true;
+				if (pvVmList!=null) {//this means that coded data matched one of allowed PV values
+					//userDataString is in a prepared allowed value list, or userDataString is equal to its coded data when the code data matched to a PV value
+					if ((pvVmList.contains(userDataString)) || (userDataString.equals(pvValue))) {
 						pvCheckerResultsList.add(matchString);
 						allowCdesList.add("");
 					} else {
@@ -413,9 +423,15 @@ public class ValidatorService {
 			question.setPvResults(pvCheckerResultsList);
 			// Allowable CDE Text Choices built from the PV value meanings list
 			question.setAllowableCdeTextChoices(allowCdesList);
+			String errMsg = assignQuestionErrorMessage(question.getMessage(), msg9);
 			if (!isMatch) {
-				if((question.getMessage() != null) && (question.getMessage().indexOf(msg9) == -1))
-					question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg9));
+				if(question.getMessage() != null) {
+					if (question.getMessage().indexOf(msg9) == -1) {			
+						question.setMessage(errMsg); 
+					}
+				} else {
+					question.setMessage(errMsg);
+				}
 				question.setQuestionCongruencyStatus(congStatus_errors);
 			}
 		}
@@ -431,10 +447,6 @@ public class ValidatorService {
 	 */
 	protected static CCCQuestion setCodedDataCheckerResult (List<String> pvList, CCCQuestion question) {
 		List<String> cdResult = new ArrayList<String>();
-		String at_str = "@@";
-		String hash_str = "##";		
-		String comma_str = ",";
-		String semicolon_str = ";";
 		
 		/* Compare each CodedData value to all of the Value Domain's PermissibleValue.value
 			Exceptions: If it does not match one of the CDEs PV Value, "ERROR"
@@ -449,20 +461,21 @@ public class ValidatorService {
 		if (!pvList.isEmpty()) {
 			for (String codedData : question.getRaveCodedData()) {
 				// Identifying and replacing the @@ and ## patterns
-				// with ',' and ';' respectively 
-				if (codedData!=null) {
-					if (codedData.indexOf(at_str) > -1)
-						codedData = replacePattern(codedData, at_str, comma_str);
-					if (codedData.indexOf(hash_str) > -1)
-						codedData = replacePattern(codedData, hash_str, semicolon_str);
-				}
+				// with ',' and ';' respectively
+				codedData = codedDataReplace(codedData);
 				if (pvList.contains(codedData)) {
 					cdResult.add(matchString);
 				} else {
 					cdResult.add(errorString);
 					// FORMBUILD-647
-					if ((question.getMessage()!=null) && (question.getMessage().indexOf(msg10) == -1))
-						question.setMessage(assignQuestionErrorMessage(question.getMessage(), msg10));
+					String errMsg = assignQuestionErrorMessage(question.getMessage(), msg10);
+					if (question.getMessage()!=null) {
+						if (question.getMessage().indexOf(msg10) == -1) { 
+							question.setMessage(errMsg);
+						}
+					} else {
+						question.setMessage(errMsg);
+					}
 					question.setQuestionCongruencyStatus(congStatus_errors);
 				}
 			}
@@ -597,7 +610,7 @@ public class ValidatorService {
 		errorVal.add(vdDisplayFormat);
 		Boolean result = false;
 		//if CDE VD has no data format (null or empty), we consider this validation is OK
-		if (org.apache.commons.lang3.StringUtils.isBlank(vdDisplayFormat)) {
+		if (StringUtils.isBlank(vdDisplayFormat)) {
 			result = true;
 		}
 		else //we compare VD data format with anything received from ALS including empty
@@ -649,8 +662,11 @@ public class ValidatorService {
 	protected static int computeRaveLength (String raveLength) {
 		int raveLengthInt = 0;
 		if (raveLength!=null && raveLength.trim().length() > 0 && !"%".equals(raveLength)) {
-			raveLength = raveLength.toLowerCase();
-			// Looking for "Characters" to ignore it for length computation using pattern matching
+			raveLength = raveLength.toLowerCase();			
+			int patternHolderCharCount = StringUtils.countMatches(raveLength, patternHolderChar);
+			int patternHolderNumCount = StringUtils.countMatches(raveLength, patternHolderNum);
+
+			// Looking for "Characters" to ignore them for length computation using pattern matching
 			if (raveLength.indexOf(characters_string) > -1) {
 				Pattern pattern = Pattern.compile("\\d+");
 				Matcher matcher = pattern.matcher(raveLength);
@@ -658,11 +674,11 @@ public class ValidatorService {
 					raveLength = matcher.group();
 				}
 				// Looking for "dddd.." pattern to compute length
-			} else if (StringUtils.countOccurrencesOf(raveLength, patternHolderChar) > 1) {
-				raveLength = String.valueOf(StringUtils.countOccurrencesOf(raveLength, patternHolderChar));
+			} else if (patternHolderCharCount > 1) {
+				raveLength = String.valueOf(patternHolderCharCount);
 				// Looking for "9999.." pattern to compute length
-			} else if (StringUtils.countOccurrencesOf(raveLength, patternHolderNum) > 1) {
-				raveLength = String.valueOf(StringUtils.countOccurrencesOf(raveLength, patternHolderNum));
+			} else if (patternHolderNumCount > 1) {
+				raveLength = String.valueOf(patternHolderNumCount);
 			}	
 		} else {
 			raveLength = "0";
@@ -775,7 +791,27 @@ public class ValidatorService {
 			stringWithPattern = matcher.replaceAll(replacement);
 		}
 		return stringWithPattern;
-	}	
+	}
+	
+	/**
+	 * Replaces the '##' or '@@' pattern in Coded Data
+	 * @param codedData
+	 * @return String
+	 */				
+	protected static String codedDataReplace (String codedData) {
+		String at_str = "@@";
+		String hash_str = "##";		
+		String comma_str = ",";
+		String semicolon_str = ";";		
+		if (codedData!=null) {
+			if (codedData.indexOf(at_str) > -1)
+				codedData = replacePattern(codedData, at_str, comma_str);
+			if (codedData.indexOf(hash_str) > -1)
+				codedData = replacePattern(codedData, hash_str, semicolon_str);
+		}
+		return codedData;
+	}
+	
 	
 	/**
 	 * Data Type comparison

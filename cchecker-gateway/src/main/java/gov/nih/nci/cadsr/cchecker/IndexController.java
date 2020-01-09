@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class IndexController {
 	// inject via application.properties
 	@Value("${welcome.message:test}")
-	private String message = "Hello caDSR CDE Congruency Checker World";
+	private String message = "CDE Validator";
     @RequestMapping(method= RequestMethod.GET,value="/")
     String index(Map<String, Object> model){
     	model.put("pageTitle", this.message);;

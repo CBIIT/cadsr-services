@@ -43,7 +43,7 @@ public class ExcelReportGenerator {
 	private static final String summaryFormsHeader = "Report Summary - Click on Form Name to expand results";
 	private static final String summaryFormsValidResult = "Validation Result";
 	private static final int summaryFormsValidResultColNum = 1;
-	private static final String checkerReportOwnerLbl = "CDE Congruency Checker Report for";
+	private static final String checkerReportOwnerLbl = "CDE Validator Report for";
 	private static final String raveProtocolNameLbl = "Rave Protocol Name ";
 	private static final String raveProtocolNumLbl = "Rave Protocol Number ";
 	private static final String reportDateLbl = "Date Validated ";
