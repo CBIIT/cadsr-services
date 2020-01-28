@@ -71,6 +71,7 @@ public class GatewayFormController {
 	 * @param request
 	 * @return List of caDSR context names.
 	 */
+	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
 	@GetMapping("/retrievecontexts")
 	public ResponseEntity<?> retrieveContextList(HttpServletRequest request) {
 		logger.debug("gateway retrieveContextList called");
