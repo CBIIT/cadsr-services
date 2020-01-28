@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { XmlService } from '../services/xml.service';
+import { RestService } from '../services/rest.service';
 
 @Component({
   selector: 'app-cadsr-xml',
@@ -6,10 +8,19 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./cadsr-xml.component.css']
 })
 export class CadsrXmlComponent implements OnInit {
-
-  constructor() { }
+  xmlContexts:Object;
+  constructor(private xmlService: XmlService, private restService: RestService) { }
 
   ngOnInit() {
+    this.restService.getXmlContexts().subscribe(
+      data => {
+        this.xmlContexts = data;
+      },
+      error => {
+      },
+      () => {
+      }
+    );
   }
 
 }

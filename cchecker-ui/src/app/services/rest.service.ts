@@ -54,6 +54,14 @@ export class RestService {
     });
   };
 
+  // gets contexts for xml generation //
+  getXmlContexts = () => {
+    return this.http.get(`${this.REST_API}/gateway/retrievecontexts`,
+      {
+        withCredentials: true
+      });
+  };
+
   // upload file service //
   uploadAlsFile(file, name){
     return this.http.post(`${this.REST_API}/gateway/parseservice?owner=${name}`,file,
