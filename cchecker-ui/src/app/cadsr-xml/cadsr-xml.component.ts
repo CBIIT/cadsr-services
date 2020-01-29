@@ -17,6 +17,7 @@ export class CadsrXmlComponent implements OnInit {
         this.xmlContexts = data;
       },
       error => {
+        this.xmlContexts = ["ABTC", "AECC", "AHRQ", "Alliance", "BBRB", "BOLD", "BRIDG"]
       },
       () => {
       }
