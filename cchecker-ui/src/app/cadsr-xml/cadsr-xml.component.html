@@ -1,6 +1,9 @@
-<p>
+<p class="xml" *ngIf="formListServce.getSessionDataItem('formListData')">
 <select name="xmlContext" id="xmlContext" ngModel #localxmlContext>
   <option value="" disabled>Select a Context</option>
-  <option *ngFor="let c of xmlContexts" [ngValue]="c">{{c}}</option>
+  <option *ngFor="let c of xmlContexts">{{c}}</option>
 </select>
+<button [disabled]="!localxmlContext.value || !formListServce.getSessionDataItem('checkedItems').length" (click)="formServiceClick(localxmlContext.value)">
+  Generate XML
+</button>
 </p>

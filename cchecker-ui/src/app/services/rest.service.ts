@@ -49,10 +49,19 @@ export class RestService {
   // gets report data from location //
   getReportFromLocation = (location) => {
     return this.http.get(`${this.REST_API}/gateway/retrievereporterror/${location}`,
-    {
-      withCredentials:true
-    });
+      {
+        withCredentials: true
+      });
   };
+
+  // generate xml file  //
+  getXmlFileFromSession = (sessionid) => this.http.get(`${this.REST_API}/gateway/retrieveformxml/${sessionid}`,
+    {
+      observe: 'response',
+      responseType: "blob",
+      withCredentials: true
+    }
+  );
 
   // gets contexts for xml generation //
   getXmlContexts = () => {
@@ -60,6 +69,16 @@ export class RestService {
       {
         withCredentials: true
       });
+  };
+
+  // calls formxmlservice to prepare xml file //
+  formXmlService = (checkedItems, context, sessionId) => {
+    const data = { "contextName": context, "selForms": checkedItems};
+    return this.http.post(`${this.REST_API}/gateway/formxmlservice?sessionid=${sessionId}`, data,
+      {
+        withCredentials: true,
+        responseType: 'text'
+      }); 
   };
 
   // upload file service //
