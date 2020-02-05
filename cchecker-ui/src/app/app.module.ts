@@ -21,6 +21,7 @@ const APP_ROUTES: Routes = [
   { path: '', component: AlsUploadFormComponent },
   { path: 'forms', component: AlsFormListComponent },
   { path: 'report', component: AlsReportComponent },
+  { path: 'generatexml', component: AlsFormListComponent },
   { path: 'contact-us', component: ContactComponent }
 ];
 

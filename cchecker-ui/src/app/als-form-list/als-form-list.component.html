@@ -1,12 +1,11 @@
 <h1>
-   Medidata RAVE ALS Form List <span *ngIf="(formListData | async)?.formsList.length"> for {{userName}}</span>
+   Medidata RAVE ALS <span>{{getTitle()}}</span> <span *ngIf="(formListData | async)?.formsList.length"> for {{userName}}</span>
 </h1>
 
 <h1 class="fileName" *ngIf="(formListData | async)?.formsList.length">
         Filename: {{fileName}}
 </h1>
 
-<app-cadsr-xml></app-cadsr-xml>
 
 <div class="alert alert-danger" role="alert" *ngIf="!(formListData | async)?.formsList.length">
     Please upload a file with form data.
@@ -16,7 +15,7 @@
   {{errorMessage}}
 </div>
 <ng-container *ngIf="(formListData |  async)?.formsList.length">
-    <table id="formListButtons">
+    <table id="formListButtons" *ngIf="isFormListPage()">
         <tr>
             <td>
                 <button [disabled]="!(checkedItems | async)?.length || validating" class="btn btn-primary" (click)="checkForms()">Check Form<span *ngIf="(checkedItems | async)?.length>1">s</span></button>
@@ -26,8 +25,17 @@
             </td>
         </tr>
     </table>
-  <div class="help_text">Select one or more forms to check and click "Check Form(s)".</div><br />
-    <div class="formCriteriaCheckboxes" style="border-bottom:1px solid #000">
+    <table id="formListButtons" *ngIf="!isFormListPage()">
+        <tr>
+            <td>
+                <app-cadsr-xml></app-cadsr-xml>
+            </td>
+        </tr>
+    </table>
+
+    <div class="help_text" *ngIf="isFormListPage()">Select one or more forms to check and click "Check Form(s)".</div>
+    <div class="help_text" *ngIf="!isFormListPage()">Select one or more forms and click "Generate XML".</div><br />
+    <div class="formCriteriaCheckboxes" style="border-bottom:1px solid #000" *ngIf="isFormListPage()">
         <div style="display:none">
             <input type="checkbox" id="checkUom" name="checkUom" [disabled]="validating" (change)="setFormListOptionCheckbox($event)" ([ngModel])="checkUom" [checked]="(formListData | async)?.checkUom">
             <label for="checkUom">Check UOM</label>        
@@ -39,12 +47,12 @@
         <div style="display:none">
             <input type="checkbox" [disabled]="validating" id="mustDisplayException" name="mustDisplayException" (change)="setFormListOptionCheckbox($event)" ([ngModel])="mustDisplayException" [checked]="(formListData | async)?.mustDisplayException">
             <label for="mustDisplayException">Display Exception Details</label>        
-        </div>  
-    </div><Br />
-    <div *ngIf="validating">
+        </div>
+    </div>
+    <div *ngIf="validating && isFormListPage()">
         <app-progress-bar [statusMessage]="'Validating Form ' + getCurrentForm() + ' of ' + (checkedItems | async)?.length + getCurrentQuestionCount() " [type]="'busy'" [percentage]="100"></app-progress-bar><br />
     </div>
-    <div *ngIf="cancelButtonStatus">
+    <div *ngIf="cancelButtonStatus && isFormListPage()">
         <app-progress-bar [statusMessage]="'Cancelation in Progress'" [type]="'busy'" [percentage]="100"></app-progress-bar><br />
     </div>    
     <div class="formsSelected" *ngIf="(checkedItems | async)?.length">
@@ -104,7 +112,7 @@
     </ng-container>
     </table>     
 <br />
-
+<span *ngIf="isFormListPage()">
     <div class="formCriteriaCheckboxes">
         <div style="display:none">
             <input type="checkbox" id="checkUom_1" name="checkUom" (change)="setFormListOptionCheckbox($event)" ([ngModel])="checkUom" [checked]="(formListData | async)?.checkUom">
@@ -122,7 +130,10 @@
 
     <div>
         <button [disabled]="!(checkedItems | async)?.length || validating" class="btn btn-primary" (click)="checkForms()">Check Form<span *ngIf="(checkedItems | async)?.length>1">s</span></button>
-    </div>    
+    </div>
+
+    
+</span>  
 </ng-container>
 
 <div *ngIf="validating"><br />

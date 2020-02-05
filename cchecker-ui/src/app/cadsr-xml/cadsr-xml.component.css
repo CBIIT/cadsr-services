@@ -1,4 +1,7 @@
 .xml {
-  border:1px solid #000;
-  padding:10px;
+  padding:0px;
+  margin:0px;
+}
+.xml button {
+  margin-left:10px;
 }

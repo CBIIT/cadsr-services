@@ -26,10 +26,12 @@ export class AlsFormListComponent implements OnInit {
   checkFormsService;
   feedService;
   cancelButtonStatus:Boolean;
+  currentRoute:String;
   constructor(private formListService:FormListService, private restService:RestService, private reportService:ReportService, private router:Router) {
   }
 
   ngOnInit() {
+    this.currentRoute = this.router.url.replace('/', '');
     this.cancelButtonStatus = this.formListService.getCancelButtonStatus();
     this.checkedItems = this.formListService.getCheckedItems(); // get checked items as observable //
     this.formListData = this.formListService.getFormListData(); // get form data as observable //
@@ -45,6 +47,25 @@ export class AlsFormListComponent implements OnInit {
     this.totalQuestionCount=this.getTotalQuestionCount();
 
   };
+
+  // returns page title based on route //
+  getTitle = () => {
+    if (this.currentRoute=='forms') {
+      return 'Form List'
+    }
+    else {
+      return 'Generate XML'
+    }
+  }
+
+  isFormListPage = () => {
+    if (this.currentRoute == 'forms') {
+      return 1;
+    }
+    else {
+      return 0;
+    }    
+  }
 
   cancelValidation() {
     this.formListService.setCancelButtonStatus(true);
