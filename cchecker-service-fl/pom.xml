@@ -11,8 +11,7 @@
 		<logback-classic.version>1.2.3</logback-classic.version>
 		<slf4j.version>1.7.25</slf4j.version>
 		<commons-logging.version>1.2</commons-logging.version>
-		<jackson.version>2.9.7</jackson.version>
-		<jackson-mapper-asl.version>1.9.13</jackson-mapper-asl.version>
+		<!--  jackson.version>2.9.7</jackson.version -->
 		<ojdbc.version>12.1.0.2.0</ojdbc.version>
 	</properties>
   	<repositories>
@@ -216,22 +215,11 @@
 		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
-			<!-- version>${jackson.version}</version -->
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<!-- version>${jackson.version}</version -->
+			<artifactId>jackson-annotations</artifactId>
 		</dependency>
 		<dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-		</dependency>
-		<dependency>
-		<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-mapper-asl</artifactId>
-			<version>${jackson-mapper-asl.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>nih.nci.cadsr</groupId>
