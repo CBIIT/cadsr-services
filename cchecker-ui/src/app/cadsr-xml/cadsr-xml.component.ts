@@ -14,8 +14,7 @@ export class CadsrXmlComponent implements OnInit {
   constructor(private xmlService: XmlService, private restService: RestService, private formListServce:FormListService) { }
 
   formServiceClick = function(c) {
-    console.log(c)
-    const checkedItems = this.formListServce.getSessionDataItem('checkedItems');
+    const checkedItems = this.formListServce.getFormListAsSimpleArray();
     const sessionId = this.formListServce.getSessionDataItem('formListData')['sessionid'];
     this.restService.formXmlService(checkedItems, c, sessionId).subscribe(
       data => {

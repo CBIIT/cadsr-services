@@ -3,7 +3,7 @@
   <option value="" disabled>Select a Context</option>
   <option *ngFor="let c of xmlContexts">{{c}}</option>
 </select>
-<button class="btn btn-primary" [disabled]="!localxmlContext.value || !formListServce.getSessionDataItem('checkedItems').length" (click)="formServiceClick(localxmlContext.value)">
+<button class="btn btn-primary" [disabled]="!localxmlContext.value" (click)="formServiceClick(localxmlContext.value)">
   Generate XML
 </button>
 </p>

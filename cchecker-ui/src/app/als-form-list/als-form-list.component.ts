@@ -16,6 +16,7 @@ import { looseIdentical } from '@angular/core/src/util';
 export class AlsFormListComponent implements OnInit {
   checkedItems:Observable<String[]>;
   errorMessage:String;  
+  errorMessage2:String;  
   formValidationStatus:Object={currFormName: "", currFormNumber: 1, countValidatedQuestions: 0};
   formListData:Observable<Object>;
   totalQuestionCount:Number;
@@ -87,6 +88,7 @@ export class AlsFormListComponent implements OnInit {
     this.formListService.setCancelButtonStatus(false);
     let checkedItems:String[];
     this.errorMessage = null;
+    this.errorMessage2 = null;
     let formListData:Object;
     this.totalQuestionCount=this.getTotalQuestionCount();
     this.checkedItems.subscribe(data=>checkedItems=data).unsubscribe();

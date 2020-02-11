@@ -53,6 +53,13 @@ export class FormListService {
   // gets cancel status. used to check if form valication is being canceled //
   getCancelButtonStatus = () => this.getSessionDataItem('cancelButtonStatus')
 
+    // get forms from session as a simple array //
+  getFormListAsSimpleArray = () => {
+    const formListData = this.getSessionDataItem('formListData');
+    // return formListData.map( (i) => i.formName )
+    return formListData.formsList.map((i) => i.formName)
+  }
+
   // gets valid items length as observable //
   getValidItemsLength = () => this.validItemsLength.asObservable();
 
