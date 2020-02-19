@@ -6,7 +6,6 @@
         Filename: {{fileName}}
 </h1>
 
-
 <div class="alert alert-danger" role="alert" *ngIf="!(formListData | async)?.formsList.length">
     Please upload a file with form data.
 </div>
@@ -22,7 +21,7 @@
     <table id="formListButtons" *ngIf="isFormListPage()">
         <tr>
             <td>
-                <button [disabled]="!(checkedItems | async)?.length || validating" class="btn btn-primary" (click)="checkForms()">Check Form<span *ngIf="(checkedItems | async)?.length>1">s</span></button>
+                <button [disabled]="!(checkedItems | async)?.length || validating || isGeneratingXML" class="btn btn-primary" (click)="checkForms()">Check Form<span *ngIf="(checkedItems | async)?.length>1">s</span></button>
             </td>
             <td *ngIf="validating" class="td">
                     <button (click)="cancelValidation()" class="btn btn-primary" [disabled]="cancelButtonStatus">Cancel Validation</button>
@@ -132,7 +131,7 @@
     </div>
 
     <div>
-        <button [disabled]="!(checkedItems | async)?.length || validating" class="btn btn-primary" (click)="checkForms()">Check Form<span *ngIf="(checkedItems | async)?.length>1">s</span></button>
+        <button [disabled]="!(checkedItems | async)?.length || validating || isGeneratingXML" class="btn btn-primary" (click)="checkForms()">Check Form<span *ngIf="(checkedItems | async)?.length>1">s</span></button>
     </div>
 
     

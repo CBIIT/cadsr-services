@@ -28,11 +28,14 @@ export class AlsFormListComponent implements OnInit {
   feedService;
   cancelButtonStatus:Boolean;
   currentRoute:String;
+  isGeneratingXML:Boolean;
+
   constructor(private formListService:FormListService, private restService:RestService, private reportService:ReportService, private router:Router) {
   }
 
   ngOnInit() {
     this.currentRoute = this.router.url.replace('/', '');
+    this.isGeneratingXML = this.formListService.getSessionDataItem('isGeneratingXML');
     this.cancelButtonStatus = this.formListService.getCancelButtonStatus();
     this.checkedItems = this.formListService.getCheckedItems(); // get checked items as observable //
     this.formListData = this.formListService.getFormListData(); // get form data as observable //
