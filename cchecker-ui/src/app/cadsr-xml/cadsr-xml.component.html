@@ -1,9 +1,16 @@
+<div class="alert alert-success" role="alert" *ngIf="statusMessage">
+  {{statusMessage}}
+</div>
+  <div *ngIf="isGeneratingXML">
+    <app-progress-bar [statusMessage]="'Generating XML'" [type]="'busy'" [percentage]="100"></app-progress-bar><br />
+  </div>
+
 <p class="xml" *ngIf="formListServce.getSessionDataItem('formListData')">
 <select name="xmlContext" id="xmlContext" ngModel #localxmlContext>
   <option value="" disabled>Select a Context</option>
   <option *ngFor="let c of xmlContexts">{{c}}</option>
 </select>
-<button class="btn btn-primary" [disabled]="!localxmlContext.value" (click)="formServiceClick(localxmlContext.value)">
+<button class="btn btn-primary" [disabled]="!localxmlContext.value || isGeneratingXML || isValidating" (click)="formServiceClick(localxmlContext.value)">
   Generate XML
 </button>
 </p>

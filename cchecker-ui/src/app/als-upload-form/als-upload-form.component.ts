@@ -17,7 +17,8 @@ export class AlsUploadFormComponent implements OnInit {
   uploadProgress:Number=0;
   alsFile:FormData;
   name:String;
-  isValidating:Boolean;
+  isValidating: Boolean;
+  isGeneratingXML: Boolean;
   fileName:String;
 
   constructor(private router:Router, private restService:RestService, private formListService:FormListService) { 
@@ -75,6 +76,7 @@ export class AlsUploadFormComponent implements OnInit {
     if (this.formListService.getValidationStatus()) {
       this.isValidating = true;
     };
+    this.isGeneratingXML = this.formListService.getSessionDataItem('isGeneratingXML');
   }
 
 }

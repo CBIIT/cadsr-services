@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { XmlService } from '../services/xml.service';
 import { RestService } from '../services/rest.service';
 import { FormListService } from '../services/formlist.service';
 import { saveAs } from 'file-saver'
@@ -11,25 +10,38 @@ import { saveAs } from 'file-saver'
 })
 export class CadsrXmlComponent implements OnInit {
   xmlContexts:Object;
-  constructor(private xmlService: XmlService, private restService: RestService, private formListServce:FormListService) { }
+  statusMessage: String;
+  isGeneratingXML: Boolean;
+  loaded: Boolean;
+  isValidating:Boolean;
+  constructor(private restService: RestService, private formListServce:FormListService) { }
 
   formServiceClick = function(c) {
+    this.statusMessage = null;
+    this.isGeneratingXML = true;
+    this.formListServce.setSessionDataItem('isGeneratingXML', true);
     const checkedItems = this.formListServce.getFormListAsSimpleArray();
     const sessionId = this.formListServce.getSessionDataItem('formListData')['sessionid'];
     this.restService.formXmlService(checkedItems, c, sessionId).subscribe(
       data => {
+        console.log("data?")
+
       },
       error => {
+        console.log("ERRR?")
+
         
       },
       () => {
+        console.log("I AM DONE")
         this.downloadXmlFile(sessionId);
+        this.isGeneratingXML = false;
+        this.formListServce.setSessionDataItem('isGeneratingXML', false);
       }
     );
   };
 
   downloadXmlFile = (sessionId) => {
-    console.log(sessionId)
     var that = this;
     this.restService.getXmlFileFromSession(sessionId).subscribe(
       data => {
@@ -38,15 +50,18 @@ export class CadsrXmlComponent implements OnInit {
         saveAs(blob, filename);
       },
       error => {
-        // this.isGenerating = false;
+        this.isGeneratingXML = false;
+        this.formListServce.setSessionDataItem('isGeneratingXML', false);
         // this.errorMessage = 'Unexpected error, please contact Application Support (<a href="mailto:NCIAppSupport@nih.gov">NCIAppSupport@nih.gov</a>)';
         // const reader: FileReader = new FileReader();
         // reader.readAsText(error.error)
         // reader.onloadend = (error): void => this.errorMessage = reader.result;
       },
       () => {
-        // that.isGenerating = false;
-        console.log("DONE")
+        this.statusMessage = 'XML file downloaded succesfully';
+        this.isGeneratingXML = false;
+        this.formListServce.setSessionDataItem('isGeneratingXML',false);
+
       });
 
 
@@ -54,6 +69,8 @@ export class CadsrXmlComponent implements OnInit {
   };
 
   ngOnInit() {
+    this.isValidating = this.formListServce.getSessionDataItem('isValidating');
+    this.isGeneratingXML = this.formListServce.getSessionDataItem('isGeneratingXML');
     this.restService.getXmlContexts().subscribe(
       data => {
         this.xmlContexts = data;

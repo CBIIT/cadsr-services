@@ -6,6 +6,14 @@
         Filename: {{fileName}}
 </h1>
 
+<div class="alert alert-warning" role="alert" *ngIf="isGeneratingXML && isFormListPage()">
+    XML generation is in progress. Please wait to validate forms.
+</div>
+
+<div class="alert alert-warning" role="alert" *ngIf="isValidating && !isFormListPage()">
+    Validation is in progress. Please wait to generate XML.
+</div>
+
 <div class="alert alert-danger" role="alert" *ngIf="!(formListData | async)?.formsList.length">
     Please upload a file with form data.
 </div>
@@ -13,7 +21,7 @@
 <div class="alert alert-danger" role="alert" *ngIf="errorMessage && isFormListPage()">
   {{errorMessage}}
 </div>
-<div class="alert alert-danger" role="alert" *ngIf="errorMessage && !isFormListPage">
+<div class="alert alert-danger" role="alert" *ngIf="errorMessage && !isFormListPage()">
   {{errorMessage2}}
 </div>
 
