@@ -38,7 +38,7 @@ export class CadsrXmlComponent implements OnInit {
         this.downloadXmlFile(sessionId);
         const currentRoute = this.router.url;
         console.log(currentRoute);
-        this.router.navigateByUrl(currentRoute)
+        this.router.navigateByUrl('/generatexml')
 
         this.isGeneratingXML = false;
         this.formListServce.setSessionDataItem('isGeneratingXML', false);
