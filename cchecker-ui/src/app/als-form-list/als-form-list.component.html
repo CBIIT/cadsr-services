@@ -9,8 +9,7 @@
 <div class="alert alert-warning" role="alert" *ngIf="isGeneratingXML && isFormListPage()">
     XML generation is in progress. Please wait to validate forms.
 </div>
-
-<div class="alert alert-warning" role="alert" *ngIf="isValidating && !isFormListPage()">
+<div class="alert alert-warning" role="alert" *ngIf="validating && !isFormListPage()">
     Validation is in progress. Please wait to generate XML.
 </div>
 
