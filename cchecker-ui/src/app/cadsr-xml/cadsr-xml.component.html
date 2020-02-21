@@ -6,7 +6,7 @@
   </div>
 
 <p class="xml" *ngIf="formListServce.getSessionDataItem('formListData')">
-<select name="xmlContext" id="xmlContext" ngModel #localxmlContext [disabled]="!localxmlContext.value || isGeneratingXML || isValidating">
+<select name="xmlContext" id="xmlContext" ngModel #localxmlContext [disabled]="isGeneratingXML || isValidating">
   <option value="" disabled>Select a Context</option>
   <option *ngFor="let c of xmlContexts">{{c}}</option>
 </select>
