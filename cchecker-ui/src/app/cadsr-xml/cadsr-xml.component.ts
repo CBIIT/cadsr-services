@@ -38,7 +38,7 @@ export class CadsrXmlComponent implements OnInit {
         this.downloadXmlFile(sessionId);
         const currentRoute = this.router.url;
         console.log(currentRoute);
-        this.router.navigateByUrl('/generatexml')
+        this.router.navigateByUrl('/generatexml?r=1')
 
         this.isGeneratingXML = false;
         this.formListServce.setSessionDataItem('isGeneratingXML', false);
@@ -74,6 +74,10 @@ export class CadsrXmlComponent implements OnInit {
   };
 
   ngOnInit() {
+    const currentRouteParam = this.router.url.search('r=1');
+    if (currentRouteParam>-1) {
+      this.statusMessage = 'XML file downloaded succesfully';
+    }
     this.isValidating = this.formListServce.getSessionDataItem('isValidating');
     this.isGeneratingXML = this.formListServce.getSessionDataItem('isGeneratingXML');
     this.restService.getXmlContexts().subscribe(

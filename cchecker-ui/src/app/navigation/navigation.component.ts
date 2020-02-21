@@ -15,6 +15,13 @@ export class NavigationComponent implements OnInit {
 ngOnInit() {
 }
 
-getSelectedStyle = (link) => link==this.currentRoute? true : false;
+getSelectedStyle = (link) => {
+  if (link==this.currentRoute.replace('?r=1','')) {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
 
 }
