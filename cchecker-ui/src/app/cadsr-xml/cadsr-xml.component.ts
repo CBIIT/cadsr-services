@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { RestService } from '../services/rest.service';
 import { FormListService } from '../services/formlist.service';
 import { saveAs } from 'file-saver'
+import { Router } from '../../../node_modules/@angular/router';
 
 @Component({
   selector: 'app-cadsr-xml',
@@ -14,7 +15,7 @@ export class CadsrXmlComponent implements OnInit {
   isGeneratingXML: Boolean;
   loaded: Boolean;
   isValidating:Boolean;
-  constructor(private restService: RestService, private formListServce:FormListService) { }
+  constructor(private restService: RestService, private formListServce:FormListService, private router:Router) { }
 
   formServiceClick = function(c) {
     this.statusMessage = null;
@@ -35,6 +36,10 @@ export class CadsrXmlComponent implements OnInit {
       () => {
         console.log("I AM DONE")
         this.downloadXmlFile(sessionId);
+        const currentRoute = this.router.url;
+        console.log(currentRoute);
+        this.router.navigateByUrl(currentRoute)
+
         this.isGeneratingXML = false;
         this.formListServce.setSessionDataItem('isGeneratingXML', false);
       }
