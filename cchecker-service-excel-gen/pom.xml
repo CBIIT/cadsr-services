@@ -3,9 +3,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>gov.nih.nci.cadsr</groupId>
 	<artifactId>cchecker-service-excel-gen</artifactId>
-	<version>1.0.1</version>
+	<version>2.0.0</version>
 	<packaging>jar</packaging>
 	<name>cchecker-service-excel-gen</name>
+	<description>CDE Validator report generator</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<logback-classic.version>1.2.3</logback-classic.version>

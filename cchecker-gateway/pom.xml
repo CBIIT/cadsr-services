@@ -6,8 +6,8 @@
 	<artifactId>cchecker-gateway</artifactId>
 	<packaging>war</packaging>
 	<name>cchecker-gateway</name>
-	<description>Spring Boot ALS Parser</description>
-	<version>1.0.1</version>
+	<description>CDE Validator Gateway service</description>
+	<version>2.0.0</version>
 
 	<properties>
 		<java.version>1.8</java.version>
