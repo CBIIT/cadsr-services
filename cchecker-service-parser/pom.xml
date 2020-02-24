@@ -13,7 +13,7 @@
 		<slf4j.version>1.7.25</slf4j.version>
 		<commons-logging.version>1.2</commons-logging.version>
 		<!--  jackson.version>2.9.7</jackson.version -->
-		<poi.version>4.0.1</poi.version>
+		<poi.version>4.1.2</poi.version>
 		<jsoup.version>1.11.3</jsoup.version>
 	</properties>
 	<parent>
