@@ -108,12 +108,12 @@ export class AlsFormListComponent implements OnInit {
         error => {
           this.formListService.setValidationStatus(false);
 
-          this.errorMessage = 'Cannot communicate with the server'
+          this.errorMessage = 'Cannot communicate with the server. <br /><br />If this continues to fail report to <a href="/contact-us">NCI Application Support</a>.'
           if (error.error=='' || typeof(error.error)=='object') {
-            this.errorMessage = 'Cannot communicate with the server'
+            this.errorMessage = 'Cannot communicate with the server. <br /><br />If this continues to fail report to <a href="/contact-us">NCI Application Support</a>.'
           }
           else {
-            this.errorMessage = error.error;
+            this.errorMessage = error.error + '<br /><br />If this continues to fail report to <a href="/contact-us">NCI Application Support</a>.';
           }
 
           this.validating = false;

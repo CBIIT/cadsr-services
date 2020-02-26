@@ -65,10 +65,10 @@ export class AlsReportComponent implements OnInit, AfterViewInit, OnDestroy {
       }, 
       error => {
         this.isGenerating = false;
-        this.errorMessage = 'Unexpected error, please contact Application Support (<a href="mailto:NCIAppSupport@nih.gov">NCIAppSupport@nih.gov</a>)';
+        this.errorMessage = 'Unexpected error, please contact <a href="/contact-us">NCI Application Support</a>.';
         const reader: FileReader = new FileReader();  
         reader.readAsText(error.error)
-        reader.onloadend = (error):void => this.errorMessage = reader.result;
+        reader.onloadend = (error): void => this.errorMessage = reader.result + '<br /><br />If this continues to fail report to <a href="/contact-us">NCI Application Support</a>.';
       },
       () => {
         that.isGenerating = false;

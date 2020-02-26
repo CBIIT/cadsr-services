@@ -56,13 +56,13 @@ export class AlsUploadFormComponent implements OnInit {
         };
       }, 
       error => { 
-        this.errorMessage = 'Cannot communicate with the server'
+        this.errorMessage = 'Cannot communicate with the server. <br /><br />If this continues to fail report to <a href="/contact-us">NCI Application Support Desk</a>.'
         this.uploadProgress = 0;
         if (error.error=='' || typeof(error.error)=='object') {
-          this.errorMessage = 'Cannot communicate with the server'
+          this.errorMessage = 'Cannot communicate with the server. <br /><br />If this continues to fail report to <a href="/contact-us">NCI Application Support Desk</a>.'
         }
         else {
-          this.errorMessage = error.error;
+          this.errorMessage = error.error + '<br /><br />If this continues to fail report to <a href="/contact-us">NCI Application Support Desk</a>.';
         }
       },
       () => {
@@ -76,7 +76,7 @@ export class AlsUploadFormComponent implements OnInit {
     if (this.formListService.getValidationStatus()) {
       this.isValidating = true;
     };
-    this.isGeneratingXML = this.formListService.getSessionDataItem('isGeneratingXML');
+    this.isGeneratingXML = this.formListService.getSessionDataItem('isGeneratingXML');  
   }
 
 }
