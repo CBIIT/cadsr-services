@@ -49,7 +49,7 @@
         </div>
         <div>
             <input type="checkbox" [disabled]="validating" id="checkStdCrfCde" name="checkStdCrfCde" (change)="setFormListOptionCheckbox($event)" ([ngModel])="checkStdCrfCde" [checked]="(formListData | async)?.checkStdCrfCde">
-            <label for="checkStdCrfCde">Include check against CDEs in Standard CRF Modules</label>        
+            <label for="checkStdCrfCde">Include check against CDEs in Mandatory Modules of NCI Standard CRFs, in addition to checking for NRDS CDEs.</label>        
         </div>
         <div style="display:none">
             <input type="checkbox" [disabled]="validating" id="mustDisplayException" name="mustDisplayException" (change)="setFormListOptionCheckbox($event)" ([ngModel])="mustDisplayException" [checked]="(formListData | async)?.mustDisplayException">
@@ -127,7 +127,7 @@
         </div>
         <div>
             <input type="checkbox" id="checkStdCrfCde_1" name="checkStdCrfCde" (change)="setFormListOptionCheckbox($event)" ([ngModel])="checkStdCrfCde" [checked]="(formListData | async)?.checkStdCrfCde">
-            <label for="checkStdCrfCde_1">Include check against CDEs in Standard CRF Modules</label>        
+            <label for="checkStdCrfCde_1">Include check against CDEs in Mandatory Modules of NCI Standard CRFs, in addition to checking for NRDS CDEs.</label>        
         </div>
         <div style="display:none">
             <input type="checkbox" id="mustDisplayException_1" name="mustDisplayException" (change)="setFormListOptionCheckbox($event)" ([ngModel])="mustDisplayException" [checked]="(formListData | async)?.mustDisplayException">
