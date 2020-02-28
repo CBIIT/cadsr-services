@@ -314,7 +314,7 @@
                      <td>{{question.message}}</td>
                      <td class="borderleft">{{question.raveFieldLabel}}</td>
                      <td>{{question.raveFieldLabelResult}}</td>
-                     <td class="borderright">{{question.cdePermitQuestionTextChoices}}</td>
+                     <td class="borderright" [innerHTML]="question.cdePermitQuestionTextChoices | separatebycharacter"></td>
                      <td>{{question.raveControlType}}</td>
                      <td>{{question.controlTypeResult}}</td>
                      <td class="borderright">{{question.cdeValueDomainType}}</td>

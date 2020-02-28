@@ -15,6 +15,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ReportFilterPipe } from './report-filter.pipe';
 import { ContactComponent } from './contact/contact.component';
 import { CadsrXmlComponent } from './cadsr-xml/cadsr-xml.component';
+import { SeparatebycharacterPipe } from './separatebycharacter.pipe';
 
 const APP_ROUTES: Routes = [
   // Default empty path
@@ -36,7 +37,8 @@ const APP_ROUTES: Routes = [
     ProgressBarComponent,
     ReportFilterPipe,
     ContactComponent,
-    CadsrXmlComponent
+    CadsrXmlComponent,
+    SeparatebycharacterPipe
   ],
   imports: [
     BrowserModule,
