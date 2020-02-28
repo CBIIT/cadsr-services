@@ -10,7 +10,7 @@ export const environment = {
   
   cdeBrowserUrl:'https://cdebrowser-dev.nci.nih.gov',
   formBuilderUrl:'https://formbuilder-dev.nci.nih.gov/FormBuilder',
-  helpLink:'https://wiki.nci.nih.gov/display/caDSR/caDSR+Database+and+Tools'
+  helpLink:'https://wiki.nci.nih.gov/display/caDSR/caDSR+CDE+Validator'
 };
 
 /*

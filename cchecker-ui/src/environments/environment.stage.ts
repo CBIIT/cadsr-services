@@ -5,5 +5,5 @@ export const environment = {
   timestamp: '',
   cdeBrowserUrl:'https://cdebrowser-stage.nci.nih.gov',
   formBuilderUrl:'https://formbuilder-stage.nci.nih.gov/FormBuilder',
-  helpLink:'https://wiki.nci.nih.gov/display/caDSR/caDSR+Database+and+Tools'
+  helpLink:'https://wiki.nci.nih.gov/display/caDSR/caDSR+CDE+Validator'
 };
