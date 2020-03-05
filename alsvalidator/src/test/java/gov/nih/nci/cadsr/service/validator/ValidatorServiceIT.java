@@ -258,7 +258,7 @@ public class ValidatorServiceIT {
 		pvVmList.add("Black or African American");
 		pvVmList.add("BLACK OR AFRICAN AMERICAN");
 		pvVmMap.put("LA10610-6", pvVmList);
-		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
 		assertEquals(expectedResult, actualResult.getPvResults().get(0));
 	}
 	@Test
@@ -271,7 +271,7 @@ public class ValidatorServiceIT {
 		pvVmList.add("Black or African American");
 		pvVmList.add("BLACK OR AFRICAN AMERICAN");
 		pvVmMap.put("LA10610-6", pvVmList);
-		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
 		assertEquals(expectedResult, actualResult.getPvResults().get(0));
 	}
 	@Test
@@ -280,7 +280,7 @@ public class ValidatorServiceIT {
 		question.getRaveCodedData().add("LA10610-6");
 		question.getRaveUserString().add("LA10610-6");
 		Map pvVmMap = new HashMap<String, List<String>>();
-		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
 		assertEquals(expectedResult, actualResult.getPvResults().get(0));
 	}	
 	/**
@@ -296,7 +296,7 @@ public class ValidatorServiceIT {
 		pvVmList.add("Female");
 		pvVmList.add("F");
 		pvVmMap.put("F", pvVmList);
-		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
 		assertEquals(expectedResult, actualResult.getPvResults().get(0));
 	}	
 
@@ -316,7 +316,7 @@ public class ValidatorServiceIT {
 		pvVmList.add("Exception");
 		pvVmList.add("1 - No");				
 		pvVmMap.put("No", pvVmList);
-		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, true);
 		assertEquals(expectedResult, actualResult.getAllowableCdeTextChoices().get(0));
 	}	
 	
@@ -338,7 +338,7 @@ public class ValidatorServiceIT {
 		List codedDataList = Arrays.asList("Fresh Tissue", "Blood", "Bone Marrow", "Buccal Cell Sample");
 		question.setRaveCodedData(codedDataList);
 		List pvList = Arrays.asList("Fresh Tissue", "Frozen Tissue");
-		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question);
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
 		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
 	}
 	
@@ -351,7 +351,7 @@ public class ValidatorServiceIT {
 		List codedDataList = Arrays.asList("Blood", "Bone Marrow", "Buccal Cell Sample", "Fresh Tissue");
 		question.setRaveCodedData(codedDataList);
 		List pvList = Arrays.asList("Frozen Tissue", "Formalin Fixed Tissue");
-		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question);
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
 		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
 	}	
 

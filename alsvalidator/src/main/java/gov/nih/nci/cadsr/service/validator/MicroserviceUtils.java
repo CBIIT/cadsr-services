@@ -92,4 +92,77 @@ public class MicroserviceUtils {
 		}
 		return false;
 	}
+	
+	/**
+	 * Case-sensitive comparison of 2 strings (ALS value vs caDSR value) and without a list of characters to ignore 
+	 * 
+	 * @param cadsrStr String
+	 * @param alsStr String
+	 * @return boolean
+	 */	
+	public static boolean compareValues(String cadsrStr, String alsStr) {
+		if ((! (StringUtils.isBlank(cadsrStr)) && (! StringUtils.isBlank(alsStr)))) {
+			return cadsrStr.equals(alsStr);
+		}
+		else if (((StringUtils.isBlank(cadsrStr)) && (!(StringUtils.isBlank(alsStr)))) ||
+				((! StringUtils.isBlank(cadsrStr)) && ((StringUtils.isBlank(alsStr))))) 
+		{
+			return false;
+		}
+		else if ((StringUtils.isBlank(cadsrStr)) && (StringUtils.isBlank(alsStr))) {
+			return true;
+		}
+		return false;
+	}
+
+	
+	/**
+	 * Case-sensitive comparison of a list of values with a string 
+	 * 
+	 * @param textList
+	 * @param textField
+	 * @return boolean
+	 */		
+	public static boolean compareValuesList(List<String> textList, String textField) {
+		for (String textCompared : textList) {
+			if (compareValues(textCompared, textField)) {
+				return true;
+			}
+		}
+		return false;
+	}	
+	
+	
+	
+	
+	/**
+	 * Call the custom compare function based on the user choice from the UI whether to ignore case sensitivity or not.  
+	 * 
+	 * @param cadsrStr
+	 * @param alsStr
+	 * @return boolean
+	 */
+	public static boolean compareValuesBasedOnCaseSensitivity(String cadsrStr, String alsStr, boolean isCaseSensitive) {
+		if (isCaseSensitive) {
+			return compareValues(cadsrStr, alsStr);
+		} else {
+			return compareWithIgnore(cadsrStr, alsStr);
+		}
+	}
+	
+	/**
+	 * Call the custom compare function for a list of values based on the user choice from the UI whether to ignore case sensitivity or not.  
+	 * 
+	 * @param textList
+	 * @param textField
+	 * @return boolean
+	 */				
+	public static boolean compareListBasedOnCaseSensitivity(List<String> textList, String textField, boolean isCaseSensitive) {
+		if (isCaseSensitive) {
+			return compareValuesList(textList, textField);
+		} else {
+			return compareListWithIgnore(textList, textField);
+		}
+	}	
+	
 }

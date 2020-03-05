@@ -95,6 +95,8 @@ public class ValidatorService {
 			logger.debug("CDE data not available for publicId:version="+question.getCdePublicId() + ":" + question.getCdeVersion());
 		} else {
 			
+			// User choice if they would like the value comparisons to be case-sensitive or not. True = Yes.
+			Boolean isCaseSensitive = false; // Setting it to default value : false until we start getting it from the UI
 			//Checking for retired CDEs 
 			question = checkCdeRetired(cdeDetails.getDataElement().getDataElementDetails().getWorkflowStatus(),question);
 
@@ -152,10 +154,10 @@ public class ValidatorService {
 				question.setAllowableCdeValue(allowableCdes);
 			
 			// Checking for the presence of RAVE user data string in the PV Value meaning list - PV Checker result
-			question = setPvCheckerResult (pvVmMap, question);
+			question = setPvCheckerResult (pvVmMap, question, isCaseSensitive);
 				
 			// Checking for the presence of RAVE Coded data in the PV values list - Coded Data Checker Result
-			question = setCodedDataCheckerResult(pvList, question);
+			question = setCodedDataCheckerResult(pvList, question, isCaseSensitive);
 				
 			// Comparing RAVE Data format with caDSR Value Domain Datatype - Datatype Checker Result
 			question = checkDataTypeCheckerResult (question, field.getDataFormat(), cdeDetails.getValueDomain().getValueDomainDetails().getDataType());
@@ -275,7 +277,7 @@ public class ValidatorService {
 			}
 		}			
 
-		if (!rdDocTextList.isEmpty() && rdDocTextList.contains(question.getRaveFieldLabel())) {
+		if (MicroserviceUtils.compareValuesList(rdDocTextList, question.getRaveFieldLabel())) {
 			question.setRaveFieldLabelResult(matchString);
 		} 
 		else if (MicroserviceUtils.compareListWithIgnore(rdDocTextList, question.getRaveFieldLabel())) {
@@ -378,7 +380,7 @@ public class ValidatorService {
 	 * @param question
 	 * @return CCCQuestion
 	 */
-	protected static CCCQuestion setPvCheckerResult (Map<String, List<String>> pvVmMap, CCCQuestion question) {
+	protected static CCCQuestion setPvCheckerResult (Map<String, List<String>> pvVmMap, CCCQuestion question, Boolean isCaseSensitive) {
 		// Checking for the presence of RAVE user data string in the PV Value meaning list - PV Checker result
 		Boolean isMatch = true;
 		List<String> userDataStringList = question.getRaveUserString();
@@ -406,7 +408,8 @@ public class ValidatorService {
 				List<String> pvVmList = pvVmMap.get(pvValue);				
 				if (pvVmList!=null) {//this means that coded data matched one of allowed PV values
 					//userDataString is in a prepared allowed value list, or userDataString is equal to its coded data when the code data matched to a PV value
-					if ((pvVmList.contains(userDataString)) || (userDataString.equals(pvValue))) {
+					if ((MicroserviceUtils.compareListBasedOnCaseSensitivity(pvVmList, userDataString, isCaseSensitive)) 
+							|| (MicroserviceUtils.compareValuesBasedOnCaseSensitivity(userDataString, pvValue, isCaseSensitive))) {						
 						pvCheckerResultsList.add(matchString);
 						allowCdesList.add("");
 					} else {
@@ -445,7 +448,7 @@ public class ValidatorService {
 	 * @param question
 	 * @return CCCQuestion
 	 */
-	protected static CCCQuestion setCodedDataCheckerResult (List<String> pvList, CCCQuestion question) {
+	protected static CCCQuestion setCodedDataCheckerResult (List<String> pvList, CCCQuestion question, Boolean isCaseSensitive) {
 		List<String> cdResult = new ArrayList<String>();
 		
 		/* Compare each CodedData value to all of the Value Domain's PermissibleValue.value
@@ -462,8 +465,8 @@ public class ValidatorService {
 			for (String codedData : question.getRaveCodedData()) {
 				// Identifying and replacing the @@ and ## patterns
 				// with ',' and ';' respectively
-				codedData = codedDataReplace(codedData);
-				if (pvList.contains(codedData)) {
+				codedData = codedDataReplace(codedData);				
+				if (MicroserviceUtils.compareListBasedOnCaseSensitivity(pvList, codedData, isCaseSensitive)) {
 					cdResult.add(matchString);
 				} else {
 					cdResult.add(errorString);
