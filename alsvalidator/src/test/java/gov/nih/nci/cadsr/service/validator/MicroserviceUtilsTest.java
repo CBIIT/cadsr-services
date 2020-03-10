@@ -147,4 +147,78 @@ public class MicroserviceUtilsTest {
 		assertEquals("failed clean ParenthR", MicroserviceUtils.removeIgnored("cadsr Str"+")"), 
 				"cadsr Str");
 	}
+	
+	
+	@Test
+	public void testCompareValNoMatch() {
+		assertFalse("Not match - different case", MicroserviceUtils.compareValues("Person", "PERSON"));
+	}
+	
+	@Test
+	public void testCompareValMatch() {
+		assertTrue("Match - same case", MicroserviceUtils.compareValues("PERSON", "PERSON"));
+	}	
+	
+	@Test
+	public void testCompDiffPunctMatch() {
+		assertTrue("Match - same punctuation", MicroserviceUtils.compareValues("PERSON"+ignored, "PERSON"+ignored));
+	}
+	
+	@Test
+	public void testCompDiffPunctNoMatch() {
+		assertFalse("No Match - same punctuation, diff order", MicroserviceUtils.compareValues("PERSON"+ignored, ignored+"PERSON"));
+	}
+	
+	@Test
+	public void testCompExcludedPunct() {
+		assertFalse("No Match - exluded punctuation", MicroserviceUtils.compareValues("PERSON"+ignored, "PERSON"+"}"));
+	}	
+	
+	
+	@Test
+	public void testCompWithNullA() {
+		assertFalse("Compare with Null A", MicroserviceUtils.compareValues("PERSON", null));
+	}
+	
+	@Test
+	public void testCompWithNullB() {
+		assertFalse("Compare with Null B", MicroserviceUtils.compareValues(null, "PERSON"));
+	}	
+	
+	@Test
+	public void testCompWithNullBoth() {
+		assertTrue("Compare with Null", MicroserviceUtils.compareValues(null, null));
+	}	
+	
+	@Test
+	public void testCompValLeadSpacesNoMatch() {
+		assertFalse("Compare with lead spaces", MicroserviceUtils.compareValues("PERSON", " PERSON"));
+	}	
+	
+	@Test
+	public void testCompValTrailSpacesNoMatch() {
+		assertFalse("Compare with trail spaces", MicroserviceUtils.compareValues("PERSON", "PERSON "));
+	}
+	
+	@Test
+	public void testCompValMidSpacesNoMatch() {
+		assertFalse("Compare with spaces in the middle", MicroserviceUtils.compareValues("PERSON", "PER SON"));
+	}
+	
+	@Test
+	public void testCompValSpacesMatch() {
+		assertTrue("Compare with blank spaces for values", MicroserviceUtils.compareValues(" ", " "));
+	}
+	
+	@Test
+	public void testCompValUnequalSpacesMatch() {
+		assertTrue("Compare with unequal blank spaces for values", MicroserviceUtils.compareValues("  ", " "));
+	}	
+	
+	@Test
+	public void testCompValSpaceNull() {
+		assertTrue("Compare null with blank spaces for values", MicroserviceUtils.compareValues("  ", null));
+	}		
+	
+	
 }
