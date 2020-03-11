@@ -228,7 +228,10 @@ public class ReportGeneratorFeedIT {
 		cccReport.setCccForms(formsList);
 		cccReport.setTotalFormsCong(1);
 		cccReport.setSelectedFormsCount(1);
-		cccReport.setCountNrdsMissing(47);
+		// This count could change overtime as it is coming from the total nrds records in the database. 
+		// Although it is fine now, uncommenting it would result in a mismatch with the database if the number changes and will cause the test to fail.
+		// This fail will stop the build & deploy process (docker).
+		// cccReport.setCountNrdsMissing(47); 
 		return cccReport;		
 	}
 	
@@ -244,8 +247,9 @@ public class ReportGeneratorFeedIT {
 		assertEquals(expectedReport.getCountNrdsWithErrors(), actualReport.getCountNrdsWithErrors());
 		assertEquals(expectedReport.getCountNrdsWithWarnings(), actualReport.getCountNrdsWithWarnings());
 		assertEquals(expectedReport.getCountNciCongruent(), actualReport.getCountNciCongruent());
-		assertEquals(expectedReport.getCountNrdsMissing(), actualReport.getCountNrdsMissing());		
-		assertEquals(expectedReport.getCountQuestionsChecked(), actualReport.getCountQuestionsChecked());		
+		// See comment in the buildReportObject() method for NrdsMissingCount.
+		//assertEquals(expectedReport.getCountNrdsMissing(), actualReport.getCountNrdsMissing());
+		assertEquals(expectedReport.getCountQuestionsChecked(), actualReport.getCountQuestionsChecked());
 		assertEquals(expectedReport.getTotalFormsCong(), actualReport.getTotalFormsCong());
 		assertEquals(expectedReport.getSelectedFormsCount(), actualReport.getSelectedFormsCount());
 	}	
