@@ -106,7 +106,7 @@ public class ReportGeneratorFeedIT {
 		testFormB.setFormOid("ENROLLMENT");
 		testFormB.setDraftFormName("Enrollment");
 		testFormB.setOrdinal("2");
-		forms.add(testFormB);		
+		forms.add(testFormB);
 		alsData.setForms(forms);
 		return alsData;
 		
@@ -202,7 +202,7 @@ public class ReportGeneratorFeedIT {
 		cccReport.setReportDate("02/19/2020");
 		cccReport.setRaveProtocolName("10231");
 		cccReport.setRaveProtocolNumber("SUBJECT_ENROLLMENT");
-		cccReport.setTotalFormsCount(1);
+		cccReport.setTotalFormsCount(2);
 		List<CCCQuestion> questionsList = new ArrayList<CCCQuestion>();
 		CCCQuestion question = new CCCQuestion();
 		question.setSequenceNumber(2);
@@ -220,12 +220,19 @@ public class ReportGeneratorFeedIT {
 		formsList.add(form);
 		CCCForm form2 = new CCCForm();
 		form2.setCongruencyStatus("CONGRUENT");
+		form2.setRaveFormOid("ENROLLMENT");
+		form2.setQuestions(new ArrayList<CCCQuestion>());
+		form2.setCountTotalQuestions(4);
+		form2.setTotalQuestionsChecked(4);		
 		formsList.add(form2);
 		cccReport.setCccForms(formsList);
+		cccReport.setTotalFormsCong(1);
+		cccReport.setSelectedFormsCount(1);
+		cccReport.setCountNrdsMissing(47);
 		return cccReport;		
 	}
 	
-	@Test // TO BE FIXED - In progress
+	@Test
 	public void testGetFinalReportData() {
 		CCCReport expectedReport = buildReportObject();
 		CCCReport actualReport = repGenFeed.getFinalReportData(idseq, buildAlsData(), selForms, checkUom, checkStdCrfCde, displayExceptionDetails);
@@ -238,11 +245,9 @@ public class ReportGeneratorFeedIT {
 		assertEquals(expectedReport.getCountNrdsWithWarnings(), actualReport.getCountNrdsWithWarnings());
 		assertEquals(expectedReport.getCountNciCongruent(), actualReport.getCountNciCongruent());
 		assertEquals(expectedReport.getCountNrdsMissing(), actualReport.getCountNrdsMissing());		
-		assertEquals(expectedReport.getCountQuestionsChecked(), actualReport.getCountQuestionsChecked());
-		//FIX
-		//assertEquals(expectedReport.getTotalFormsCong(), actualReport.getTotalFormsCong());		
-		//assertEquals(expectedReport.getSelectedFormsCount(), actualReport.getSelectedFormsCount());
-		//assertEquals(expectedReport.getCccForms().size(), actualReport.getCccForms().size());
+		assertEquals(expectedReport.getCountQuestionsChecked(), actualReport.getCountQuestionsChecked());		
+		assertEquals(expectedReport.getTotalFormsCong(), actualReport.getTotalFormsCong());
+		assertEquals(expectedReport.getSelectedFormsCount(), actualReport.getSelectedFormsCount());
 	}	
 	
 
