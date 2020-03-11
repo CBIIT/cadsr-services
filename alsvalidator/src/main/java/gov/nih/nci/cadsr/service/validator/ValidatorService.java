@@ -96,7 +96,7 @@ public class ValidatorService {
 		} else {
 			
 			// User choice if they would like the value comparisons to be case-sensitive or not. True = Yes.
-			Boolean isCaseSensitive = false; // Setting it to default value : false until we start getting it from the UI
+			Boolean isCaseSensitive = true; // Setting it to default value : true until we start getting it from the UI
 			//Checking for retired CDEs 
 			question = checkCdeRetired(cdeDetails.getDataElement().getDataElementDetails().getWorkflowStatus(),question);
 
