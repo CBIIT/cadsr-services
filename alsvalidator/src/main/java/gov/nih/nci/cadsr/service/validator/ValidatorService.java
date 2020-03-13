@@ -96,7 +96,8 @@ public class ValidatorService {
 		} else {
 			
 			// User choice if they would like the value comparisons to be case-sensitive or not. True = Yes.
-			Boolean isCaseSensitive = true; // Setting it to default value : true until we start getting it from the UI
+			// VALIDATOR-52 : Requires a case-insensitive comparison
+			Boolean isCaseSensitive = false; // Setting it to default value : false until we start getting it from the UI
 			//Checking for retired CDEs 
 			question = checkCdeRetired(cdeDetails.getDataElement().getDataElementDetails().getWorkflowStatus(),question);
 
@@ -138,6 +139,8 @@ public class ValidatorService {
 						if (pv.getShortMeaning()!=null)
 							pvVmList.add(pv.getShortMeaning());
 						pvVmMap.put(pvVal, pvVmList);
+						// VALIDATOR-52 Adding VMs & Alternate Names, to be compared with User String & Coded Data 
+						pvList.addAll(pvVmList);
 						// Building the allowable CDEs (concatenated text of all PVs for the CDE) string
 						if (allowableCdes.length() > 0)
 							allowableCdes = allowableCdes + "|"+pvVal;
@@ -147,7 +150,7 @@ public class ValidatorService {
 							pvMaxLen = pvVal.length();
 					}
 				}
-			}			
+			}
 
 			// Setting the Allowable CDEs
 			if (allowableCdes.length() > 0) 
@@ -406,7 +409,7 @@ public class ValidatorService {
 				pvValue = codedDataReplace(pvValue);
 				// Obtaining the PV value meanings list for comparison with User Data String
 				List<String> pvVmList = pvVmMap.get(pvValue);				
-				if (pvVmList!=null) {//this means that coded data matched one of allowed PV values
+				if (pvVmList!=null) {//this means that coded data matched one of allowed PV values, PV meanings or Alternate Names 
 					//userDataString is in a prepared allowed value list, or userDataString is equal to its coded data when the code data matched to a PV value
 					if ((MicroserviceUtils.compareListBasedOnCaseSensitivity(pvVmList, userDataString, isCaseSensitive)) 
 							|| (MicroserviceUtils.compareValuesBasedOnCaseSensitivity(userDataString, pvValue, isCaseSensitive))) {						
@@ -450,7 +453,6 @@ public class ValidatorService {
 	 */
 	protected static CCCQuestion setCodedDataCheckerResult (List<String> pvList, CCCQuestion question, Boolean isCaseSensitive) {
 		List<String> cdResult = new ArrayList<String>();
-		
 		/* Compare each CodedData value to all of the Value Domain's PermissibleValue.value
 			Exceptions: If it does not match one of the CDEs PV Value, "ERROR"
 		 */
@@ -465,9 +467,31 @@ public class ValidatorService {
 			for (String codedData : question.getRaveCodedData()) {
 				// Identifying and replacing the @@ and ## patterns
 				// with ',' and ';' respectively
-				codedData = codedDataReplace(codedData);				
-				if (MicroserviceUtils.compareListBasedOnCaseSensitivity(pvList, codedData, isCaseSensitive)) {
-					cdResult.add(matchString);
+				codedData = codedDataReplace(codedData);
+				Boolean isMatch = false;
+				Boolean setWarn = false;
+				if (isCaseSensitive) {
+					isMatch = MicroserviceUtils.compareValuesList(pvList, codedData);
+				} else {
+					// Without using warning as an option - Only Match or Error
+					//isMatch = MicroserviceUtils.compareListWithIgnore(pvList, codedData);
+
+					// With Warning - Begin
+					if (!MicroserviceUtils.compareValuesList(pvList, codedData)) {
+						if (MicroserviceUtils.compareListWithIgnore(pvList, codedData)) {
+							setWarn = true;
+							cdResult.add(warningString);
+							question.setQuestionCongruencyStatus(congStatus_warn);
+						}
+					} else {
+						isMatch = true;
+					}
+					// With Warning - End					
+				}
+				if (isMatch) {
+					if (!setWarn) {
+						cdResult.add(matchString);
+					}
 				} else {
 					cdResult.add(errorString);
 					// FORMBUILD-647
