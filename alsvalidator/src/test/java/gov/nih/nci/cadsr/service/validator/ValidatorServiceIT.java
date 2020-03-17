@@ -274,7 +274,7 @@ public class ValidatorServiceIT {
 		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
 		assertEquals(expectedResult, actualResult.getPvResults().get(0));
 	}
-	//@Test - FIXIT
+	@Test
 	public void testSetPvCheckerResulErrorNoCodedData() {
 		String expectedResult = "ERROR";
 		question.getRaveCodedData().add("LA10610-6");

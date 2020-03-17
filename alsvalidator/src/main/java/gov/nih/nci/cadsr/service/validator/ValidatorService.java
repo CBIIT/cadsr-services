@@ -399,7 +399,6 @@ public class ValidatorService {
 		 Exceptions: If it does not match the PV Value MEaning or the PV for the CodedData, 
 		 or one of the ValueMeaning Alternate Names, "ERROR" */
 		
-		Boolean setWarn = false;
 		if (userDataStringList!=null) {
 			for (String userDataString : userDataStringList) {
 				// Getting the Coded Data value for the corresponding User Data String from RAVE ALS
@@ -408,36 +407,22 @@ public class ValidatorService {
 				//Identifying & Replacing the '@@' or '##' patterns in pv value 
 				pvValue = codedDataReplace(pvValue);
 				// Obtaining the PV value meanings list for comparison with User Data String
-				List<String> pvVmList = pvVmMap.get(pvValue);
-				pvVmList.add(pvValue);
-				
-				if (isCaseSensitive) {
-					isMatch = MicroserviceUtils.compareValuesList(pvVmList, userDataString);
-				} else {
-					// Without using warning as an option - Only Match or Error
-					//isMatch = MicroserviceUtils.compareListWithIgnore(pvVmList, userDataString);
-	
-					// With Warning - Begin
-					if (!MicroserviceUtils.compareValuesList(pvVmList, userDataString)) {
-						if (MicroserviceUtils.compareListWithIgnore(pvVmList, userDataString)) {
-							setWarn = true;
-							pvCheckerResultsList.add(warningString);
-							question.setQuestionCongruencyStatus(congStatus_warn);
-						}
-					} else {
-						isMatch = true;
-					}
-					// With Warning - End					
-				}
-				
-				if (isMatch) {
-					if (!setWarn) {
+				List<String> pvVmList = pvVmMap.get(pvValue);				
+				if (pvVmList!=null) {//this means that coded data matched one of allowed PV values, PV meanings or Alternate Names 
+					//userDataString is in a prepared allowed value list, or userDataString is equal to its coded data when the code data matched to a PV value
+					if ((MicroserviceUtils.compareListBasedOnCaseSensitivity(pvVmList, userDataString, isCaseSensitive)) 
+							|| (MicroserviceUtils.compareValuesBasedOnCaseSensitivity(userDataString, pvValue, isCaseSensitive))) {						
 						pvCheckerResultsList.add(matchString);
 						allowCdesList.add("");
-					}
-				} else {
+					} else {
+						isMatch = false;
+						pvCheckerResultsList.add(errorString);
+						allowCdesList.add(createAllowableTextChoices(pvVmList));
+					}	
+				} else {					
+					isMatch = false;
 					pvCheckerResultsList.add(errorString);
-					allowCdesList.add(createAllowableTextChoices(pvVmList));
+					allowCdesList.add("");
 				}
 			}
 			question.setPvResults(pvCheckerResultsList);
