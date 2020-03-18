@@ -385,7 +385,7 @@ public class ValidatorService {
 	 */
 	protected static CCCQuestion setPvCheckerResult (Map<String, List<String>> pvVmMap, CCCQuestion question, Boolean isCaseSensitive) {
 		// Checking for the presence of RAVE user data string in the PV Value meaning list - PV Checker result
-		Boolean isMatch = false;
+		Boolean isMatch = true;
 		List<String> userDataStringList = question.getRaveUserString();
 		List<String> codedDataList = question.getRaveCodedData();
 		List<String> allowCdesList = new ArrayList<String>();
@@ -410,15 +410,32 @@ public class ValidatorService {
 				List<String> pvVmList = pvVmMap.get(pvValue);				
 				if (pvVmList!=null) {//this means that coded data matched one of allowed PV values, PV meanings or Alternate Names 
 					//userDataString is in a prepared allowed value list, or userDataString is equal to its coded data when the code data matched to a PV value
-					if ((MicroserviceUtils.compareListBasedOnCaseSensitivity(pvVmList, userDataString, isCaseSensitive)) 
-							|| (MicroserviceUtils.compareValuesBasedOnCaseSensitivity(userDataString, pvValue, isCaseSensitive))) {						
-						pvCheckerResultsList.add(matchString);
-						allowCdesList.add("");
+					pvVmList.add(pvValue);
+					if (isCaseSensitive) {
+						if (MicroserviceUtils.compareValuesList(pvVmList, userDataString)) {
+							pvCheckerResultsList.add(matchString);
+							allowCdesList.add("");
+						} else {
+							isMatch = false;
+							pvCheckerResultsList.add(errorString);
+							allowCdesList.add(createAllowableTextChoices(pvVmList));							
+						}
 					} else {
-						isMatch = false;
-						pvCheckerResultsList.add(errorString);
-						allowCdesList.add(createAllowableTextChoices(pvVmList));
-					}	
+						if (MicroserviceUtils.compareListWithIgnore(pvVmList, userDataString)) {
+								if (MicroserviceUtils.compareValuesList(pvVmList, userDataString)) {
+									pvCheckerResultsList.add(matchString);
+									allowCdesList.add("");
+								} else {
+									pvCheckerResultsList.add(warningString);
+									allowCdesList.add("");
+								}
+							} else {
+								isMatch = false;
+								pvCheckerResultsList.add(errorString);
+								allowCdesList.add(createAllowableTextChoices(pvVmList));
+						}
+						
+					}
 				} else {					
 					isMatch = false;
 					pvCheckerResultsList.add(errorString);
