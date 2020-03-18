@@ -410,7 +410,8 @@ public class ValidatorService {
 				List<String> pvVmList = pvVmMap.get(pvValue);				
 				if (pvVmList!=null) {//this means that coded data matched one of allowed PV values, PV meanings or Alternate Names 
 					//userDataString is in a prepared allowed value list, or userDataString is equal to its coded data when the code data matched to a PV value
-					pvVmList.add(pvValue);
+					//VS - VALIDATOR-52 - requiring the PVs also be compared against User Data String
+					pvVmList.add(pvValue); 
 					if (isCaseSensitive) {
 						if (MicroserviceUtils.compareValuesList(pvVmList, userDataString)) {
 							pvCheckerResultsList.add(matchString);
@@ -425,9 +426,10 @@ public class ValidatorService {
 								if (MicroserviceUtils.compareValuesList(pvVmList, userDataString)) {
 									pvCheckerResultsList.add(matchString);
 									allowCdesList.add("");
-								} else {
+									// WARNING - BEGIN									
+								} else { 
 									pvCheckerResultsList.add(warningString);
-									allowCdesList.add("");
+									allowCdesList.add(""); // WARNING - END
 								}
 							} else {
 								isMatch = false;
