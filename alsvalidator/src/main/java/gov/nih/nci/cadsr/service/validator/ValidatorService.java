@@ -498,6 +498,7 @@ public class ValidatorService {
 					if (!MicroserviceUtils.compareValuesList(pvList, codedData)) {
 						if (MicroserviceUtils.compareListWithIgnore(pvList, codedData)) {
 							setWarn = true;
+							isMatch = true;
 							cdResult.add(warningString);
 							question.setQuestionCongruencyStatus(congStatus_warn);
 						}
