@@ -261,25 +261,279 @@ public class ValidatorServiceIT {
 		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
 		assertEquals(expectedResult, actualResult.getPvResults().get(0));
 	}
+	
+	/**
+	 * PV Checker result - MATCH - Mixed case (upper and lower)
+	 */
 	@Test
-	public void testSetPvCheckerResultMatchCodedData() {
+	public void testSetPvCheckerResultMatch1() {		
 		String expectedResult = "MATCH";
 		question.getRaveCodedData().add("LA10610-6");
-		question.getRaveUserString().add("LA10610-6");
+		question.getRaveUserString().add("Black or African American");
 		Map pvVmMap = new HashMap<String, List<String>>();
 		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("LA10610-6");
 		pvVmList.add("Black or African American");
-		pvVmList.add("BLACK OR AFRICAN AMERICAN");
 		pvVmMap.put("LA10610-6", pvVmList);
 		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
 		assertEquals(expectedResult, actualResult.getPvResults().get(0));
 	}
+	
+	/**
+	 * PV Checker result - MATCH - Null CD vs Null PV
+	 */	
+	@Test
+	public void testSetPvCheckerResultMatch2() {
+		String expectedResult = "MATCH";
+		question.getRaveCodedData().add("LA10610-6");
+		question.getRaveUserString().add(null);
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add(null);
+		pvVmMap.put("LA10610-6", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}
+	
+	/**
+	 * PV Checker result - MATCH - ALL UPPER CASE
+	 */	
+	@Test
+	public void testSetPvCheckerResultMatch3() {
+		String expectedResult = "MATCH";
+		question.getRaveCodedData().add("LA10610-6");
+		question.getRaveUserString().add("HISPANIC");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("HISPANIC");
+		pvVmMap.put("LA10610-6", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}	
+	
+	/**
+	 * PV Checker result - MATCH - No strings to compare - <BLANK> for both strings
+	 */	
+	@Test
+	public void testSetPvCheckerResultMatch4() {
+		String expectedResult = "MATCH";
+		question.getRaveCodedData().add("LA10610-6");
+		question.getRaveUserString().add("");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("");
+		pvVmMap.put("LA10610-6", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}		
+	
+	/**
+	 * PV Checker result - MATCH - Null vs <BLANK>
+	 */	
+	@Test
+	public void testSetPvCheckerResultMatch5() {
+		String expectedResult = "MATCH";
+		question.getRaveCodedData().add("LA10610-6");
+		question.getRaveUserString().add(null);
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("");
+		pvVmMap.put("LA10610-6", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}			
+	
+	
+	/**
+	 * PV Checker result - MATCH - ALL LOWER CASE
+	 */	
+	@Test
+	public void testSetPvCheckerResultMatch6() {
+		String expectedResult = "MATCH";
+		question.getRaveCodedData().add("LA10610-6");
+		question.getRaveUserString().add("asian");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("asian");
+		pvVmMap.put("LA10610-6", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}		
+	
+	/**
+	 * PV Checker result - WARNING - Ignoring case differences
+	 */	
+	@Test
+	public void testSetPvCheckerResultCaseInsensitiveWarn1() {
+		String expectedResult = "WARNING";
+		question.getRaveCodedData().add("LA10610-6");
+		question.getRaveUserString().add("Black or African American");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("BLACK OR AFRICAN AMERICAN");
+		pvVmMap.put("LA10610-6", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}	
+	
+	/**
+	 * PV Checker result - WARNING - Ignoring case differences
+	 */	
+	@Test
+	public void testSetPvCheckerResultCaseInsensitiveWarn2() {
+		String expectedResult = "WARNING";
+		question.getRaveCodedData().add("LA10610-6");
+		question.getRaveUserString().add("Black or African American");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("BLACK OR African American");
+		pvVmMap.put("LA10610-6", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}	
+	
+	
+	/**
+	 * PV Checker result - WARNING - Ignoring punctuation differences
+	 */	
+	@Test
+	public void testSetPvCheckerResultIgnorePunctWarn1() {
+		String expectedResult = "WARNING";
+		question.getRaveCodedData().add("LA10610-6");
+		question.getRaveUserString().add("Black or African American");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("Black or African American,");
+		pvVmMap.put("LA10610-6", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}		
+	
+	/**
+	 * PV Checker result - WARNING - Ignoring punctuation differences
+	 */	
+	@Test
+	public void testSetPvCheckerResultIgnorePunctWarn2() {
+		String expectedResult = "WARNING";
+		question.getRaveCodedData().add("LA10610-6");
+		question.getRaveUserString().add("Black or African American");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("Black- or African American");
+		pvVmMap.put("LA10610-6", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}			
+	
+	/**
+	 * PV Checker result - WARNING - Ignoring punctuation differences
+	 */	
+	@Test
+	public void testSetPvCheckerResultIgnorePunctWarn3() {
+		String expectedResult = "WARNING";
+		question.getRaveCodedData().add("LA10610-6");
+		question.getRaveUserString().add("Black or African American");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("Black or African. American");
+		pvVmMap.put("LA10610-6", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}		
+	
+	/**
+	 * PV Checker result - WARNING - Ignoring punctuation differences
+	 */	
+	@Test
+	public void testSetPvCheckerResultIgnorePunctWarn4() {
+		String expectedResult = "WARNING";
+		question.getRaveCodedData().add("LA10610-6");
+		question.getRaveUserString().add("Black or African American");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("Black or; African American");
+		pvVmMap.put("LA10610-6", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}				
+	
+	/**
+	 * PV Checker result - WARNING - Ignoring punctuation differences
+	 */	
+	@Test
+	public void testSetPvCheckerResultIgnorePunctWarn5() {
+		String expectedResult = "WARNING";
+		question.getRaveCodedData().add("LA10610-6");
+		question.getRaveUserString().add("Black or African American");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("?Black or African American");
+		pvVmMap.put("LA10610-6", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}		
+	
+	/**
+	 * PV Checker result - WARNING - Ignoring punctuation differences
+	 */	
+	@Test
+	public void testSetPvCheckerResultIgnorePunctWarn6() {
+		String expectedResult = "WARNING";
+		question.getRaveCodedData().add("LA10610-6");
+		question.getRaveUserString().add("Black or African American");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("Black \"or African American");
+		pvVmMap.put("LA10610-6", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}			
+	
+	/**
+	 * PV Checker result - WARNING - Ignoring punctuation differences
+	 */	
+	@Test
+	public void testSetPvCheckerResultIgnorePunctWarn7() {
+		String expectedResult = "WARNING";
+		question.getRaveCodedData().add("LA10610-6");
+		question.getRaveUserString().add("Black or African American");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("Black or African' American");
+		pvVmMap.put("LA10610-6", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}		
+	
+	/**
+	 * PV Checker result - WARNING - Ignoring punctuation differences
+	 */	
+	@Test
+	public void testSetPvCheckerResultIgnorePunctWarn8() {
+		String expectedResult = "WARNING";
+		question.getRaveCodedData().add("LA10610-6");
+		question.getRaveUserString().add("Black or African American");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("(Black) or African American");
+		pvVmMap.put("LA10610-6", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}					
+	
+	
+	/**
+	 * PV Checker result - ERROR (NON-MATCH)
+	 */		
 	@Test
 	public void testSetPvCheckerResulErrorNoCodedData() {
 		String expectedResult = "ERROR";
 		question.getRaveCodedData().add("LA10610-6");
 		question.getRaveUserString().add("LA10610-6");
 		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("Not valid VM");
+		pvVmMap.put("Unmatched VM", pvVmList);
 		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
 		assertEquals(expectedResult, actualResult.getPvResults().get(0));
 	}	
@@ -287,7 +541,7 @@ public class ValidatorServiceIT {
 	 * PV Checker result - ERROR (NON-MATCH)
 	 */	
 	@Test
-	public void testSetPvCheckerResultError() {		
+	public void testSetPvCheckerResultError1() {		
 		String expectedResult = "ERROR";
 		question.getRaveCodedData().add("F");
 		question.getRaveUserString().add("M");
@@ -299,6 +553,105 @@ public class ValidatorServiceIT {
 		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
 		assertEquals(expectedResult, actualResult.getPvResults().get(0));
 	}	
+	
+	/**
+	 * PV Checker result - ERROR (NON-MATCH) - Null user data string vs Non-null pv list
+	 */	
+	@Test
+	public void testSetPvCheckerResultError2() {		
+		String expectedResult = "ERROR";
+		question.getRaveCodedData().add("F");
+		question.getRaveUserString().add(null);
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("Female");
+		pvVmList.add("F");
+		pvVmMap.put("F", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}	
+	
+	/**
+	 * PV Checker result - ERROR (NON-MATCH) - Null pv list vs Non-null user data string
+	 */	
+	@Test
+	public void testSetPvCheckerResultError3() {		
+		String expectedResult = "ERROR";
+		question.getRaveCodedData().add("F");
+		question.getRaveUserString().add("M");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add(null);
+		pvVmMap.put("F", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}		
+	
+	/**
+	 * PV Checker result - ERROR (NON-MATCH) - <BLANK> pv list against user data string
+	 */	
+	@Test
+	public void testSetPvCheckerResultError4() {		
+		String expectedResult = "ERROR";
+		question.getRaveCodedData().add("F");
+		question.getRaveUserString().add("M");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("");
+		pvVmMap.put("F", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}		
+	
+	/**
+	 * PV Checker result - ERROR (NON-MATCH) - <BLANK> user data string against pv list 
+	 */	
+	@Test
+	public void testSetPvCheckerResultError5() {		
+		String expectedResult = "ERROR";
+		question.getRaveCodedData().add("F");
+		question.getRaveUserString().add("");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("M");
+		pvVmMap.put("F", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}			
+	
+	
+	/**
+	 * PV Checker result - ERROR - Excluded punctuation mismatch
+	 */	
+	@Test
+	public void testSetPvCheckerResultError6() {
+		String expectedResult = "ERROR";
+		question.getRaveCodedData().add("LA10610-6");
+		question.getRaveUserString().add("Black or African American");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("{Black or African American");
+		pvVmMap.put("LA10610-6", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}						
+	
+	/**
+	 * PV Checker result - ERROR - Excluded punctuation mismatch
+	 */	
+	@Test
+	public void testSetPvCheckerResultError7() {
+		String expectedResult = "ERROR";
+		question.getRaveCodedData().add("LA10610-6");
+		question.getRaveUserString().add("Black or |African American");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("Black or African American");
+		pvVmMap.put("LA10610-6", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}							
+	
 
 	/**
 	 * Creating Allowable CDE values as a concatenated string, in case of a NON-MATCH scenario
@@ -330,10 +683,10 @@ public class ValidatorServiceIT {
 	
 	
 	/**
-	 *  Test coded data checker result - Match
+	 *  Test coded data checker result - Mixed case Match
 	 */
 	@Test
-	public void testSetCodedDataCheckerResultMatch() {		
+	public void testSetCodedDataCheckerResultMatch1() {		
 		String expectedResult = "MATCH";
 		List codedDataList = Arrays.asList("Fresh Tissue", "Blood", "Bone Marrow", "Buccal Cell Sample");
 		question.setRaveCodedData(codedDataList);
@@ -343,10 +696,231 @@ public class ValidatorServiceIT {
 	}
 	
 	/**
-	 *  Test coded data checker result - Error
+	 *  Test coded data checker result - <BLANK> coded data vs <BLANK> pv
+	 */
+	@Test
+	public void testSetCodedDataCheckerResultMatch2() {		
+		String expectedResult = "MATCH";
+		List codedDataList = Arrays.asList("");
+		question.setRaveCodedData(codedDataList);
+		List pvList = Arrays.asList("");
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
+		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
+	}
+	
+	/**
+	 *  Test coded data checker result - Match - All upper case
+	 */
+	@Test
+	public void testSetCodedDataCheckerResultMatch3() {
+		String expectedResult = "MATCH";
+		List codedDataList = Arrays.asList("FRESH TISSUE", "Blood", "Bone Marrow", "Buccal Cell Sample");
+		question.setRaveCodedData(codedDataList);
+		List pvList = Arrays.asList("FRESH TISSUE");
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
+		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
+	}
+	
+	/**
+	 *  Test coded data checker result - Match - All lower case
+	 */
+	@Test
+	public void testSetCodedDataCheckerResultMatch4() {
+		String expectedResult = "MATCH";
+		List codedDataList = Arrays.asList("fresh tissue", "Blood", "Bone Marrow", "Buccal Cell Sample");
+		question.setRaveCodedData(codedDataList);
+		List pvList = Arrays.asList("fresh tissue");
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
+		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
+	}	
+	
+	
+	/**
+	 *  Test coded data checker result - <BLANK> coded data against Null PV
+	 */
+	@Test
+	public void testSetCodedDataCheckerResultMatch5() {		
+		String expectedResult = "MATCH";
+		List codedDataList = Arrays.asList("");
+		question.setRaveCodedData(codedDataList);
+		List pvList = new ArrayList<String>();
+		pvList.add(null);
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
+		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
+	}	
+	
+	/**
+	 *  Test coded data checker result - Null coded data against Null PV
+	 */
+	@Test
+	public void testSetCodedDataCheckerResultMatch6() {		
+		String expectedResult = "MATCH";
+		List codedDataList = new ArrayList<String>();
+		codedDataList.add(null);
+		question.setRaveCodedData(codedDataList);
+		List pvList = new ArrayList<String>();
+		pvList.add(null);
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
+		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
+	}		
+	
+	
+	/**
+	 *  Test coded data checker result - Case Insensitive - Different cases
+	 */
+	@Test
+	public void testSetCodedDataCheckerResultCaseInsensitiveWarn1() {		
+		String expectedResult = "WARNING";
+		List codedDataList = new ArrayList<String>();
+		codedDataList.add("FRESH TISSUE");
+		question.setRaveCodedData(codedDataList);
+		List pvList = new ArrayList<String>();
+		pvList.add("fresh tissue");
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
+		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
+	}			
+	
+	/**
+	 *  Test coded data checker result - Partial case differences
+	 */
+	@Test
+	public void testSetCodedDataCheckerResultCaseInsensitiveWarn2() {
+		String expectedResult = "WARNING";
+		List codedDataList = new ArrayList<String>();
+		codedDataList.add("FRESH TISSUE");
+		question.setRaveCodedData(codedDataList);
+		List pvList = new ArrayList<String>();
+		pvList.add("FRESH tissue");
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
+		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
+	}
+	
+	
+	/**
+	 * Coded data checker result - WARNING - Ignoring punctuation differences
+	 */		
+	@Test
+	public void testSetCodedDataCheckerResultIgnorePunct1() {
+		String expectedResult = "WARNING";
+		List codedDataList = new ArrayList<String>();
+		codedDataList.add("FRESH TISSUE");
+		question.setRaveCodedData(codedDataList);
+		List pvList = new ArrayList<String>();
+		pvList.add("FRESH- TISSUE");
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
+		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
+	}	
+	
+	/**
+	 * Coded data checker result - WARNING - Ignoring punctuation differences
+	 */		
+	@Test
+	public void testSetCodedDataCheckerResultIgnorePunct2() {
+		String expectedResult = "WARNING";
+		List codedDataList = new ArrayList<String>();
+		codedDataList.add("FRESH TISSUE");
+		question.setRaveCodedData(codedDataList);
+		List pvList = new ArrayList<String>();
+		pvList.add("FRESH TISSUE;");
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
+		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
+	}		
+	
+	/**
+	 * Coded data checker result - WARNING - Ignoring punctuation differences
+	 */		
+	@Test
+	public void testSetCodedDataCheckerResultIgnorePunct3() {
+		String expectedResult = "WARNING";
+		List codedDataList = new ArrayList<String>();
+		codedDataList.add("FRESH TISSUE");
+		question.setRaveCodedData(codedDataList);
+		List pvList = new ArrayList<String>();
+		pvList.add("FRESH (TISSUE)");
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
+		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
+	}		
+	
+	/**
+	 * Coded data checker result - WARNING - Ignoring punctuation differences
+	 */		
+	@Test
+	public void testSetCodedDataCheckerResultIgnorePunct4() {
+		String expectedResult = "WARNING";
+		List codedDataList = new ArrayList<String>();
+		codedDataList.add("FRESH TISSUE");
+		question.setRaveCodedData(codedDataList);
+		List pvList = new ArrayList<String>();
+		pvList.add("?FRESH TISSUE");
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
+		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
+	}
+	
+	/**
+	 * Coded data checker result - WARNING - Ignoring punctuation differences
+	 */		
+	@Test
+	public void testSetCodedDataCheckerResultIgnorePunct5() {
+		String expectedResult = "WARNING";
+		List codedDataList = new ArrayList<String>();
+		codedDataList.add("FreshTissue");
+		question.setRaveCodedData(codedDataList);
+		List pvList = new ArrayList<String>();
+		pvList.add("Fresh.Tissue");
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
+		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
+	}	
+	
+	/**
+	 * Coded data checker result - WARNING - Ignoring punctuation differences
+	 */		
+	@Test
+	public void testSetCodedDataCheckerResultIgnorePunct6() {
+		String expectedResult = "WARNING";
+		List codedDataList = new ArrayList<String>();
+		codedDataList.add("FRESH TISSUE");
+		question.setRaveCodedData(codedDataList);
+		List pvList = new ArrayList<String>();
+		pvList.add("FRESH\" TISSUE");
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
+		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
+	}		
+	
+	/**
+	 * Coded data checker result - WARNING - Ignoring punctuation differences
+	 */		
+	@Test
+	public void testSetCodedDataCheckerResultIgnorePunct7() {
+		String expectedResult = "WARNING";
+		List codedDataList = new ArrayList<String>();
+		codedDataList.add("FRESH TISSUE");
+		question.setRaveCodedData(codedDataList);
+		List pvList = new ArrayList<String>();
+		pvList.add("FRESH TISSUE'");
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
+		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
+	}		
+	
+	/**
+	 * Coded data checker result - WARNING - Ignoring punctuation differences
+	 */		
+	@Test
+	public void testSetCodedDataCheckerResultIgnorePunct8() {
+		String expectedResult = "WARNING";
+		List codedDataList = new ArrayList<String>();
+		codedDataList.add("FRESH TISSUE");
+		question.setRaveCodedData(codedDataList);
+		List pvList = new ArrayList<String>();
+		pvList.add(":FRESH TISSUE");
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
+		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
+	}		
+		
+	/**
+	 *  Test coded data checker result - Error - No coded data
 	 */	
 	@Test
-	public void testSetCodedDataCheckerResultError() {		
+	public void testSetCodedDataCheckerResultError1() {		
 		String expectedResult = "ERROR";
 		List codedDataList = Arrays.asList("Blood", "Bone Marrow", "Buccal Cell Sample", "Fresh Tissue");
 		question.setRaveCodedData(codedDataList);
@@ -354,6 +928,112 @@ public class ValidatorServiceIT {
 		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
 		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
 	}	
+	
+	/**
+	 *  Test coded data checker result - ERROR (NON-MATCH) - Excluded punctuation - Coded data
+	 */	
+	@Test
+	public void testSetCodedDataCheckerResultError2() {		
+		String expectedResult = "ERROR";
+		List codedDataList = new ArrayList<String>();
+		codedDataList.add("FRESH |TISSUE");
+		question.setRaveCodedData(codedDataList);
+		List pvList = new ArrayList<String>();
+		pvList.add("FRESH TISSUE");
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
+		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
+	}		
+	
+	/**
+	 *  Test coded data checker result - ERROR (NON-MATCH) - Excluded punctuation - pv list
+	 */	
+	@Test
+	public void testSetCodedDataCheckerResultError3() {		
+		String expectedResult = "ERROR";
+		List codedDataList = new ArrayList<String>();
+		codedDataList.add("FRESH TISSUE");
+		question.setRaveCodedData(codedDataList);
+		List pvList = new ArrayList<String>();
+		pvList.add("|FRESH TISSUE");
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
+		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
+	}
+	
+	/**
+	 *  Test coded data checker result - ERROR (NON-MATCH) - <BLANK> coded data vs Non-null pv list
+	 */	
+	@Test
+	public void testSetCodedDataCheckerResultError4() {		
+		String expectedResult = "ERROR";
+		List codedDataList = new ArrayList<String>();
+		codedDataList.add("");
+		question.setRaveCodedData(codedDataList);
+		List pvList = new ArrayList<String>();
+		pvList.add("FRESH TISSUE");
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
+		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
+	}		
+	
+	/**
+	 *  Test coded data checker result - ERROR (NON-MATCH) - <BLANK> pv list vs Non-null coded data
+	 */	
+	@Test
+	public void testSetCodedDataCheckerResultError5() {
+		String expectedResult = "ERROR";
+		List codedDataList = new ArrayList<String>();
+		codedDataList.add("FRESH TISSUE");
+		question.setRaveCodedData(codedDataList);
+		List pvList = new ArrayList<String>();
+		pvList.add("");
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
+		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
+	}	
+	
+	/**
+	 *  Test coded data checker result - ERROR (NON-MATCH) - Null coded data vs Non-null pv list
+	 */	
+	@Test
+	public void testSetCodedDataCheckerResultError6() {		
+		String expectedResult = "ERROR";
+		List codedDataList = new ArrayList<String>();
+		codedDataList.add(null);
+		question.setRaveCodedData(codedDataList);
+		List pvList = new ArrayList<String>();
+		pvList.add("FRESH TISSUE");
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
+		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
+	}		
+	
+	/**
+	 *  Test coded data checker result - ERROR (NON-MATCH) - Null pv list vs Non-null coded data
+	 */	
+	@Test
+	public void testSetCodedDataCheckerResultError7() {
+		String expectedResult = "ERROR";
+		List codedDataList = new ArrayList<String>();
+		codedDataList.add("FRESH TISSUE");
+		question.setRaveCodedData(codedDataList);
+		List pvList = new ArrayList<String>();
+		pvList.add(null);
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
+		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
+	}		
+	
+	/**
+	 *  Test coded data checker result - ERROR (NON-MATCH) - Null pv list vs Non-null coded data
+	 */	
+	@Test
+	public void testSetCodedDataCheckerResultError8() {
+		String expectedResult = "ERROR";
+		List codedDataList = new ArrayList<String>();
+		codedDataList.add("Fresh_Tissue");
+		question.setRaveCodedData(codedDataList);
+		List pvList = new ArrayList<String>();
+		pvList.add("Fresh-Tissue");
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
+		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
+	}			
+	
 
 	/*The following tests verify the Data type checker result implementing the below requirement.
 	 * 

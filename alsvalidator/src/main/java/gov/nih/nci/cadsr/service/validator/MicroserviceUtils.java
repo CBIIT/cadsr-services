@@ -3,7 +3,9 @@
  */
 package gov.nih.nci.cadsr.service.validator;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -163,6 +165,33 @@ public class MicroserviceUtils {
 		} else {
 			return compareListWithIgnore(textList, textField);
 		}
+	}	
+	
+	/**
+	 * Get the PV VM list from the Map by ignoring case and punctuation , based on case-sensitivity flag 
+	 * 
+	 * @param pvVmMap
+	 * @param pvValue
+	 * @param isCaseSensitive	
+	 * @return List<String>
+	 */
+	public static List<String> getPVVMList (Map<String, List<String>> pvVmMap, String pvValue, Boolean isCaseSensitive) {
+		List<String> pvVmList;
+		if (isCaseSensitive) {
+			pvVmList = new ArrayList<String>();
+			pvVmList = pvVmMap.get(pvValue);
+		} else {
+			pvVmList = new ArrayList<String>();
+			for (String compareKey : pvVmMap.keySet()) {
+				if (removeIgnored(compareKey).equalsIgnoreCase(removeIgnored(pvValue))) {
+					pvVmList = pvVmMap.get(compareKey);
+				}
+			}			
+		}
+		if (pvVmList!=null && pvVmList.size()>0)
+			return pvVmList;
+		else 
+			return null;
 	}	
 	
 }

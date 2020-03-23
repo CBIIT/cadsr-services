@@ -407,11 +407,11 @@ public class ValidatorService {
 				//Identifying & Replacing the '@@' or '##' patterns in pv value 
 				pvValue = codedDataReplace(pvValue);
 				// Obtaining the PV value meanings list for comparison with User Data String
-				List<String> pvVmList = pvVmMap.get(pvValue);				
+				List<String> pvVmList = MicroserviceUtils.getPVVMList(pvVmMap, pvValue, isCaseSensitive); // VALIDATOR-52
 				if (pvVmList!=null) {//this means that coded data matched one of allowed PV values, PV meanings or Alternate Names 
 					//userDataString is in a prepared allowed value list, or userDataString is equal to its coded data when the code data matched to a PV value
-					//VS - VALIDATOR-52 - requiring the PVs also be compared against User Data String
-					pvVmList.add(pvValue); 
+					//VS - VALIDATOR-52 - requires that the PVs also be compared against User Data String
+					pvVmList.add(pvValue);
 					if (isCaseSensitive) {
 						if (MicroserviceUtils.compareValuesList(pvVmList, userDataString)) {
 							pvCheckerResultsList.add(matchString);
@@ -953,13 +953,16 @@ public class ValidatorService {
 	protected static List<String> returnOrderedNonDuplicateVMs(List<String> allowableCdeTextChoicesList) {
 		if (allowableCdeTextChoicesList!=null && allowableCdeTextChoicesList.size()>0) {
 			Set<String> allowCdesSet = new TreeSet<String>(); 
-			allowCdesSet.addAll(allowableCdeTextChoicesList);
+			for (String allowedCde : allowableCdeTextChoicesList) {
+				if (!StringUtils.isBlank(allowedCde)) {
+					allowCdesSet.add(allowedCde);
+				}
+			}
 			List<String> tempChoicesList = new ArrayList<String>();
 			tempChoicesList.addAll(allowCdesSet);
 			return tempChoicesList; 
 		} else 
-			return allowableCdeTextChoicesList;
-		
-	}
+			return allowableCdeTextChoicesList;		
+	}	
 	
 }

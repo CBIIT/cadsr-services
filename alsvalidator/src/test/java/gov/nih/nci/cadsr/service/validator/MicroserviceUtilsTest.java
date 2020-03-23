@@ -2,6 +2,11 @@ package gov.nih.nci.cadsr.service.validator;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.Test;
 
 import gov.nih.nci.cadsr.service.validator.MicroserviceUtils;
@@ -219,6 +224,93 @@ public class MicroserviceUtilsTest {
 	public void testCompValSpaceNull() {
 		assertTrue("Compare null with blank spaces for values", MicroserviceUtils.compareValues("  ", null));
 	}		
+	
+	/**
+	 *  Test Get PV VM List - Success - case insensitivity: false
+	 */		
+	@Test
+	public void testGetPVVMList1() {
+		String expectedValue = "Lymph Node, Axilla";
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("Lymph Node, Axilla");
+		Map<String, List<String>> pvVmMap =  new HashMap<String, List<String>>();
+		pvVmMap.put("LN, Axilla", pvVmList);
+		List<String> obtainedPvVmList = MicroserviceUtils.getPVVMList (pvVmMap, "LN- Axilla", false);
+		assertEquals(expectedValue, obtainedPvVmList.get(0));
+	}
+	
+	
+	/**
+	 *  Test Get PV VM List - Failure(returns null) - case sensitivity: true
+	 */		
+	@Test
+	public void testGetPVVMList2() {
+		String expectedValue = null;
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("Lymph Node, Axilla");
+		Map<String, List<String>> pvVmMap =  new HashMap<String, List<String>>();
+		pvVmMap.put("LN, Axilla", pvVmList);
+		List<String> obtainedPvVmList = MicroserviceUtils.getPVVMList (pvVmMap, "LN- Axilla", true);
+		assertEquals(expectedValue, obtainedPvVmList);
+	}	
+	
+	/**
+	 *  Test Get PV VM List - Success - case insensitivity: false
+	 */		
+	@Test
+	public void testGetPVVMList3() {
+		String expectedValue = "Lymph Node, Axilla";
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("Lymph Node, Axilla");
+		Map<String, List<String>> pvVmMap =  new HashMap<String, List<String>>();
+		pvVmMap.put("LN, Axilla", pvVmList);
+		List<String> obtainedPvVmList = MicroserviceUtils.getPVVMList (pvVmMap, "", false);
+		assertNotEquals(expectedValue, obtainedPvVmList);
+	}
+	
+	
+	/**
+	 *  Test Get PV VM List - Success - case sensitivity: true
+	 */		
+	@Test
+	public void testGetPVVMList4() {
+		String expectedValue = "Lymph Node, Axilla";
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("Lymph Node, Axilla");
+		Map<String, List<String>> pvVmMap =  new HashMap<String, List<String>>();
+		pvVmMap.put("LN, Axilla", pvVmList);
+		List<String> obtainedPvVmList = MicroserviceUtils.getPVVMList (pvVmMap, "LN, Axilla", true);
+		assertEquals(expectedValue, obtainedPvVmList.get(0));
+	}		
+	
+	/**
+	 *  Test Get PV VM List - Success - case insensitivity: true
+	 */		
+	@Test
+	public void testGetPVVMList5() {
+		String expectedValue = "Mandible";
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("Mandible");
+		Map<String, List<String>> pvVmMap =  new HashMap<String, List<String>>();
+		pvVmMap.put("Mandible", pvVmList);
+		List<String> obtainedPvVmList = MicroserviceUtils.getPVVMList (pvVmMap, "Mandible", true);
+		assertEquals(expectedValue, obtainedPvVmList.get(0));
+	}
+	
+	
+	/**
+	 *  Test Get PV VM List - Success - case sensitivity: false
+	 */		
+	@Test
+	public void testGetPVVMList6() {
+		String expectedValue = "Ear, Inner";
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("Ear, Inner");
+		Map<String, List<String>> pvVmMap =  new HashMap<String, List<String>>();
+		pvVmMap.put("EAR, Inner", pvVmList);
+		List<String> obtainedPvVmList = MicroserviceUtils.getPVVMList (pvVmMap, "Ear, Inner", false);
+		assertEquals(expectedValue, obtainedPvVmList.get(0));
+	}			
 	
 	
 }
