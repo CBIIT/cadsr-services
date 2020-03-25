@@ -358,7 +358,25 @@ public class ValidatorServiceIT {
 		pvVmMap.put("LA10610-6", pvVmList);
 		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
 		assertEquals(expectedResult, actualResult.getPvResults().get(0));
-	}		
+	}
+	
+	@Test
+	public void testSetPvCheckerResultMatch7() {
+		String expectedResult = "MATCH";
+		question.getRaveCodedData().add("Lymph Node, Cervical");
+		question.getRaveUserString().add("LN, Cervical");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("Lymph Node, Cervical");
+		pvVmList.add("LN, Cervical");
+		pvVmMap.put("LN, Cervical", pvVmList);
+		pvVmMap.put("Lymph Node, Cervical", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}
+	
+	
+	
 	
 	/**
 	 * PV Checker result - WARNING - Ignoring case differences
@@ -652,6 +670,41 @@ public class ValidatorServiceIT {
 		assertEquals(expectedResult, actualResult.getPvResults().get(0));
 	}							
 	
+	
+	/**
+	 * PV Checker result - ERROR (NON-MATCH) - Single space coded data value 
+	 */	
+	@Test
+	public void testSetPvCheckerResultError8() {		
+		String expectedResult = "ERROR";
+		question.getRaveCodedData().add("");
+		question.getRaveCodedData().add("F");
+		question.getRaveUserString().add("Male");
+		question.getRaveUserString().add("Female");		
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("M");
+		pvVmMap.put("F", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}				
+	
+	/**
+	 * PV Checker result - ERROR (NON-MATCH) - <BLANK> coded data (where CD is not available/is blank for a given User data string in ALS) 
+	 */	
+	@Test
+	public void testSetPvCheckerResultError9() {		
+		String expectedResult = "ERROR";
+		question.getRaveCodedData().add("F");
+		question.getRaveUserString().add("Male");
+		question.getRaveUserString().add("Female");		
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.add("M");
+		pvVmMap.put("F", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}					
 
 	/**
 	 * Creating Allowable CDE values as a concatenated string, in case of a NON-MATCH scenario

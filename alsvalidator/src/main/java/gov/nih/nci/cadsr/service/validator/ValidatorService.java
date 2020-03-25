@@ -134,13 +134,19 @@ public class ValidatorService {
 						pvList.add(pvVal);
 						pvVmList = new ArrayList<String>();
 						// Building a map with PV Alternate names list and PV value meanings list  
-						Map<String, List<String>> vmMap = buildValueMeaningMap (cdeDetails, pv.getVmIdseq()); 
-						pvVmList = vmMap.get(alternateNames_key);						
-						if (pv.getShortMeaning()!=null)
+						Map<String, List<String>> vmMap = buildValueMeaningMap (cdeDetails, pv.getVmIdseq());
+						pvVmList = vmMap.get(alternateNames_key);
+						pvVmList.add(pvVal);
+						if (pv.getShortMeaning()!=null) {
 							pvVmList.add(pv.getShortMeaning());
-						pvVmMap.put(pvVal, pvVmList);
+							pvVmMap.put(pv.getShortMeaning(), pvVmList);
+						}
+						pvVmMap.put(pvVal, pvVmList);						
 						// VALIDATOR-52 Adding VMs & Alternate Names, to be compared with User String & Coded Data 
 						pvList.addAll(pvVmList);
+						for (String alternateVMTxt : vmMap.get(alternateNames_key)) {
+							pvVmMap.put(alternateVMTxt, pvVmList);
+						}						
 						// Building the allowable CDEs (concatenated text of all PVs for the CDE) string
 						if (allowableCdes.length() > 0)
 							allowableCdes = allowableCdes + "|"+pvVal;
@@ -402,16 +408,17 @@ public class ValidatorService {
 		if (userDataStringList!=null) {
 			for (String userDataString : userDataStringList) {
 				// Getting the Coded Data value for the corresponding User Data String from RAVE ALS
-				String pvValue = codedDataList.get(userDataStringList.indexOf(userDataString));
-				
-				//Identifying & Replacing the '@@' or '##' patterns in pv value 
-				pvValue = codedDataReplace(pvValue);
+				String pvValue = new String();
+				if (codedDataList.size() == userDataStringList.size()) {
+					pvValue = codedDataList.get(userDataStringList.indexOf(userDataString));				
+					//Identifying & Replacing the '@@' or '##' patterns in pv value 
+					pvValue = codedDataReplace(pvValue); 
+				}
 				// Obtaining the PV value meanings list for comparison with User Data String
 				List<String> pvVmList = MicroserviceUtils.getPVVMList(pvVmMap, pvValue, isCaseSensitive); // VALIDATOR-52
 				if (pvVmList!=null) {//this means that coded data matched one of allowed PV values, PV meanings or Alternate Names 
 					//userDataString is in a prepared allowed value list, or userDataString is equal to its coded data when the code data matched to a PV value
 					//VS - VALIDATOR-52 - requires that the PVs also be compared against User Data String
-					pvVmList.add(pvValue);
 					if (isCaseSensitive) {
 						if (MicroserviceUtils.compareValuesList(pvVmList, userDataString)) {
 							pvCheckerResultsList.add(matchString);
