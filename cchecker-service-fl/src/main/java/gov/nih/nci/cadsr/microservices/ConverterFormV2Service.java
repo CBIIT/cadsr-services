@@ -133,7 +133,7 @@ public class ConverterFormV2Service {
 		// multiple protocols will be set later
 
 		form.setFormType("CRF"); // TYPE
-		form.setAslName(formDesc.getLoadType()); // WORKFLOW
+		form.setAslName(FormDescriptor.DEFAULT_WORKFLOW_STATUS); // WORKFLOW
 		form.setVersion(new Float(1.0)); // VERSION
 		form.setPreferredDefinition(formDesc.getPreferredDefinition()); // PREFERRED_DEFINITION
 
