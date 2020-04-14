@@ -6,6 +6,7 @@ package gov.nih.nci.cadsr.service.validator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -432,11 +433,10 @@ public class ValidatorService {
 						if (MicroserviceUtils.compareListWithIgnore(pvVmList, userDataString)) {
 								if (MicroserviceUtils.compareValuesList(pvVmList, userDataString)) {
 									pvCheckerResultsList.add(matchString);
-									allowCdesList.add("");
-									// WARNING - BEGIN									
+									allowCdesList.add("");									
 								} else { 
 									pvCheckerResultsList.add(warningString);
-									allowCdesList.add(""); // WARNING - END
+									allowCdesList.add("");
 								}
 							} else {
 								isMatch = false;
@@ -818,7 +818,7 @@ public class ValidatorService {
 	protected static String createAllowableTextChoices (List<String> pvVmList) {
 		StringBuffer allowableVmTextChoices = new StringBuffer();
 		// Building a list of Allowable CDE text choices (in case of a 'Not match' for PV checker)
-		pvVmList = returnOrderedNonDuplicateVMs(pvVmList);
+		pvVmList = returnOrderedByPvVmNonDuplicateVMs(pvVmList); // VALIDATOR-68 Display PV first
 		for (String altName : pvVmList) {
 			if (allowableVmTextChoices.length() > 0)
 				allowableVmTextChoices.append("|"+altName);
@@ -971,5 +971,25 @@ public class ValidatorService {
 		} else 
 			return allowableCdeTextChoicesList;		
 	}	
+	
+	/**
+	 * Returning an ordered (by PVs first, then VMs/Alternate names) non-duplicate list of CDE text choices
+	 * @param allowableCdeTextChoicesList
+	 * @return List<String>
+	 */		
+	protected static List<String> returnOrderedByPvVmNonDuplicateVMs(List<String> allowableCdeTextChoicesList) {
+		if (allowableCdeTextChoicesList!=null && allowableCdeTextChoicesList.size()>0) {
+			Set<String> allowCdesSet = new LinkedHashSet<String>(); 
+			for (String allowedCde : allowableCdeTextChoicesList) {
+				if (!StringUtils.isBlank(allowedCde)) {
+					allowCdesSet.add(allowedCde);
+				}
+			}
+			List<String> tempChoicesList = new ArrayList<String>();
+			tempChoicesList.addAll(allowCdesSet);
+			return tempChoicesList; 
+		} else 
+			return allowableCdeTextChoicesList;		
+	}		
 	
 }

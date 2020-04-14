@@ -710,8 +710,8 @@ public class ValidatorServiceIT {
 	 * Creating Allowable CDE values as a concatenated string, in case of a NON-MATCH scenario
 	 */	
 	@Test
-	public void testSetPvCheckerResultAllowableCdeValues() {		
-		String expectedResult = "1 - No|Exception|LA32-8|No|Not a Serious Adverse Event";
+	public void testSetPvCheckerResultAllowableCdeValues() {
+		String expectedResult = "No|Not a Serious Adverse Event|LA32-8|Exception|1 - No";
 		question.getRaveCodedData().add("No");
 		question.getRaveUserString().add("NO");
 		Map pvVmMap = new HashMap<String, List<String>>();
