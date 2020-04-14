@@ -101,7 +101,7 @@
         </tr>
         <!-- end render this row always -->
         <!-- render and hide this row only if there is an error -->        
-        <tr *ngIf="record['expand']" [ngClass]="{'rowError':record.expand}" *ngIf="isFormListPage()">
+        <tr *ngIf="record['expand'] && isFormListPage()" [ngClass]="{'rowError':record.expand}">
         <td></td>
         <td colspan="3" class="errorText">
             <div *ngFor="let error of record.errors">
