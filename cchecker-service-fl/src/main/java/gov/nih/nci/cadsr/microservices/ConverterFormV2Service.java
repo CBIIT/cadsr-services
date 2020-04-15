@@ -274,6 +274,7 @@ public class ConverterFormV2Service {
 				
 				currentForm = currentForm.replaceAll("\\<\\?xml(.+?)\\?\\>", "").trim();
 				currFileOut.write(currentForm.toString().getBytes("UTF-8"));//download the current form
+				currFileOut.write(System.lineSeparator().getBytes("UTF-8"));//add a new lines between forms
 				currFileOut.flush();
 			}//one form processing loop
 		}
