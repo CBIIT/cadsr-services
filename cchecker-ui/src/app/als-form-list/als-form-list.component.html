@@ -86,10 +86,10 @@
         <tr [ngClass]="{'rowOdd':i%2==0,'rowEven':i%2==1}">
             <td class="checbox" *ngIf="isFormListPage()">
                 <input type="checkbox" [disabled]="validating" attr.aria-label="{{record.formName}} checkbox" *ngIf="record.isValid" (change)="setCheckedItem(record)" name="checkedItem" value="a" [checked]="getCheckedStatus(record)">
-                <span *ngIf="!record.isValid && isFormListPage()" class="fa fa-lg fa-exclamation-triangle"></span>
+                <span *ngIf="!record.isValid" class="fa fa-lg fa-exclamation-triangle"></span>
             </td>
             <td>
-                <a *ngIf="!record.isValid" href="#"  (click)="setExpandCollapse(record)">
+                <a *ngIf="!record.isValid &&  isFormListPage()" href="#"  (click)="setExpandCollapse(record)">
                     <span class="fa fa-lg formName" [ngClass]="{'fa-minus-square':record.expand,'fa-plus-square':!record.expand}"></span>
                 </a>
                 <span class="formName">{{record.formName}}</span>
