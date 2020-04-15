@@ -360,16 +360,25 @@ public class ValidatorServiceIT {
 		assertEquals(expectedResult, actualResult.getPvResults().get(0));
 	}
 	
+	/**
+	 * PV Checker result - MATCH - PV
+	 */		
 	@Test
 	public void testSetPvCheckerResultMatch7() {
 		String expectedResult = "MATCH";
 		question.getRaveCodedData().add("Lymph Node, Cervical");
 		question.getRaveUserString().add("LN, Cervical");
 		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvList = new ArrayList<String>();
+		pvList.add("LN, Cervical");
+		List<String> vmList = new ArrayList<String>();
+		vmList.add("Lymph Node, Cervical");
+		List<String> altNameList = new ArrayList<String>();
+		altNameList.add("Lymph Node, Cervical");
 		List<String> pvVmList = new ArrayList<String>();
-		pvVmList.add("Lymph Node, Cervical");
-		pvVmList.add("LN, Cervical");
-		pvVmMap.put("LN, Cervical", pvVmList);
+		pvVmList.addAll(pvList);
+		pvVmList.addAll(vmList);
+		pvVmList.addAll(altNameList);
 		pvVmMap.put("Lymph Node, Cervical", pvVmList);
 		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
 		assertEquals(expectedResult, actualResult.getPvResults().get(0));
@@ -705,6 +714,59 @@ public class ValidatorServiceIT {
 		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
 		assertEquals(expectedResult, actualResult.getPvResults().get(0));
 	}					
+	
+	/**
+	 * PV Checker result - ERROR (NON-MATCH) - PV Meaning  
+	 */	
+	@Test
+	public void testSetPvCheckerResultErrorVm() {		
+		String expectedResult = "ERROR";
+		question.getRaveCodedData().add("M");		
+		question.getRaveCodedData().add("F");
+		question.getRaveUserString().add("Male");
+		question.getRaveUserString().add("Female");		
+		List<String> pvList = new ArrayList<String>();
+		pvList.add("Male");
+		List<String> vmList = new ArrayList<String>();
+		vmList.add("Male, Man");
+		List<String> altNameList = new ArrayList<String>();
+		altNameList.add("Man");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.addAll(pvList);
+		pvVmList.addAll(vmList);
+		pvVmList.addAll(altNameList);
+		pvVmMap.put("Male", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}	
+	
+	
+	/**
+	 * PV Checker result - ERROR (NON-MATCH) - Alternate names  
+	 */	
+	@Test
+	public void testSetPvCheckerResultErrorAltNames() {		
+		String expectedResult = "ERROR";
+		question.getRaveCodedData().add("M");		
+		question.getRaveCodedData().add("F");
+		question.getRaveUserString().add("Male");
+		question.getRaveUserString().add("Female");		
+		List<String> pvList = new ArrayList<String>();
+		pvList.add("Male");
+		List<String> vmList = new ArrayList<String>();
+		vmList.add("Male, Man");
+		List<String> altNameList = new ArrayList<String>();
+		altNameList.add("Man");
+		Map pvVmMap = new HashMap<String, List<String>>();
+		List<String> pvVmList = new ArrayList<String>();
+		pvVmList.addAll(pvList);
+		pvVmList.addAll(vmList);
+		pvVmList.addAll(altNameList);
+		pvVmMap.put("Man", pvVmList);
+		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
+		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+	}		
 
 	/**
 	 * Creating Allowable CDE values as a concatenated string, in case of a NON-MATCH scenario
@@ -720,7 +782,10 @@ public class ValidatorServiceIT {
 		pvVmList.add("Not a Serious Adverse Event");
 		pvVmList.add("LA32-8");
 		pvVmList.add("Exception");
-		pvVmList.add("1 - No");				
+		pvVmList.add("1 - No");
+		// add VM
+		pvVmList.add("No");
+		pvVmList.add("LA32-8");
 		pvVmMap.put("No", pvVmList);
 		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, true);
 		assertEquals(expectedResult, actualResult.getAllowableCdeTextChoices().get(0));
@@ -1085,8 +1150,23 @@ public class ValidatorServiceIT {
 		pvList.add("Fresh-Tissue");
 		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
 		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
-	}			
+	}
 	
+	
+	/**
+	 *  Test coded data checker result - ERROR (NON-MATCH) - Coded data vs PV meaning/Alternate names
+	 */	
+	@Test
+	public void testSetCodedDataCheckerResultErrorVmAltNames() {
+		String expectedResult = "ERROR";
+		List codedDataList = new ArrayList<String>();
+		codedDataList.add("Fresh_Tissue");
+		question.setRaveCodedData(codedDataList);
+		List pvList = new ArrayList<String>();
+		pvList.add("Tissue");
+		CCCQuestion actualResult = ValidatorService.setCodedDataCheckerResult(pvList, question, false);
+		assertEquals(expectedResult, actualResult.getCodedDataResult().get(0));
+	}	
 
 	/*The following tests verify the Data type checker result implementing the below requirement.
 	 * 

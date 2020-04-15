@@ -137,17 +137,14 @@ public class ValidatorService {
 						// Building a map with PV Alternate names list and PV value meanings list  
 						Map<String, List<String>> vmMap = buildValueMeaningMap (cdeDetails, pv.getVmIdseq());
 						pvVmList = vmMap.get(alternateNames_key);
-						pvVmList.add(pvVal);
 						if (pv.getShortMeaning()!=null) {
 							pvVmList.add(pv.getShortMeaning());
-							pvVmMap.put(pv.getShortMeaning(), pvVmList);
 						}
-						pvVmMap.put(pvVal, pvVmList);						
-						// VALIDATOR-52 Adding VMs & Alternate Names, to be compared with User String & Coded Data 
-						pvList.addAll(pvVmList);
-						for (String alternateVMTxt : vmMap.get(alternateNames_key)) {
-							pvVmMap.put(alternateVMTxt, pvVmList);
-						}						
+						List<String> combinedList = new ArrayList<String>();
+						combinedList.add(pvVal);
+						pvVmList = returnAlphabeticallySortedList(pvVmList);
+						combinedList.addAll(pvVmList);
+						pvVmMap.put(pvVal, combinedList);
 						// Building the allowable CDEs (concatenated text of all PVs for the CDE) string
 						if (allowableCdes.length() > 0)
 							allowableCdes = allowableCdes + "|"+pvVal;
@@ -991,5 +988,26 @@ public class ValidatorService {
 		} else 
 			return allowableCdeTextChoicesList;		
 	}		
+	
+	
+	/**
+	 * Returning an alphabetically ordered non-duplicate list
+	 * @param orderedList
+	 * @return List<String>
+	 */		
+	protected static List<String> returnAlphabeticallySortedList(List<String> unsortedList) {
+		if (unsortedList!=null && unsortedList.size()>0) {
+			Set<String> tempSet = new TreeSet<String>();
+			for (String listItem : unsortedList) {
+				if (!StringUtils.isBlank(listItem)) {
+					tempSet.add(listItem);
+				}
+			}
+			List<String> sortedList = new ArrayList<String>();
+			sortedList.addAll(tempSet);
+			return sortedList; 
+		} else 
+			return unsortedList;		
+	}			
 	
 }

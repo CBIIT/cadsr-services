@@ -2,6 +2,7 @@ package gov.nih.nci.cadsr.service.validator;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -418,6 +419,42 @@ public class ValidatorServiceTest {
 		}
 		assertArrayEquals(expecteds, actuals);
 	}
+	
+	/**
+	 * Testing the preservation of insertion order of items
+	 */	
+	@Test
+	public void testInsertionOrderedNonDuplicateItems() {
+		List<String> unsortedList = new ArrayList<String>();
+		unsortedList.add("PermissibleValue");		
+		unsortedList.add("ValueMeaning1");
+		unsortedList.add("ValueMeaning2");
+		unsortedList.add("AlternateName1");
+		unsortedList.add("AlternateName2");
+		List<String> sortedList = ValidatorService.returnOrderedByPvVmNonDuplicateVMs(unsortedList);
+		String[] expecteds = {"PermissibleValue", "ValueMeaning1", "ValueMeaning2", "AlternateName1", "AlternateName2"};
+		String[] actuals = new String[5];
+		for (int i = 0; i < sortedList.size(); i++) {
+			actuals[i] = sortedList.get(i);
+		}
+		assertArrayEquals(expecteds, actuals);
+	}		
+	
+	
+	/**
+	 * Testing the alphabetical ordering of items
+	 */	
+	@Test
+	public void testOrderedNonDuplicateItems() {
+		List<String> unsortedList = Arrays.asList("Patient", "Adrenal", "Tissue", "Cerebrum");
+		List<String> sortedList = ValidatorService.returnAlphabeticallySortedList(unsortedList);
+		String[] expecteds = {"Adrenal", "Cerebrum", "Patient", "Tissue"};
+		String[] actuals = new String[4];
+		for (int i = 0; i < sortedList.size(); i++) {
+			actuals[i] = sortedList.get(i);
+		}
+		assertArrayEquals(expecteds, actuals);
+	}	
 	
 	
 }
