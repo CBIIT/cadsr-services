@@ -40,7 +40,7 @@
             </td>
         </tr>
     </table>
-
+    <div class="help_text" *ngIf="!isFormListPage()">All forms will be included when generating the caDSR XML Form</div>
     <div class="help_text" *ngIf="isFormListPage()">Select one or more forms to check and click "Check Form(s)".<br /><br /></div>
     <div class="formCriteriaCheckboxes" style="border-bottom:1px solid #000" *ngIf="isFormListPage()">
         <div style="display:none">
@@ -86,7 +86,7 @@
         <tr [ngClass]="{'rowOdd':i%2==0,'rowEven':i%2==1}">
             <td class="checbox" *ngIf="isFormListPage()">
                 <input type="checkbox" [disabled]="validating" attr.aria-label="{{record.formName}} checkbox" *ngIf="record.isValid" (change)="setCheckedItem(record)" name="checkedItem" value="a" [checked]="getCheckedStatus(record)">
-                <span *ngIf="!record.isValid" class="fa fa-lg fa-exclamation-triangle"></span>
+                <span *ngIf="!record.isValid && isFormListPage()" class="fa fa-lg fa-exclamation-triangle"></span>
             </td>
             <td>
                 <a *ngIf="!record.isValid" href="#"  (click)="setExpandCollapse(record)">
