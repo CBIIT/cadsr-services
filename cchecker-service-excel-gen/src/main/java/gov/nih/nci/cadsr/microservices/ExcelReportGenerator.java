@@ -694,6 +694,7 @@ public class ExcelReportGenerator {
 			newCell = row.createCell(colNum++);
 			if (question.getPvResults() != null && !question.getPvResults().isEmpty()) {
 				newCell.setCellValue(question.getPvResults().get(m));
+				newCell.setCellStyle(cell_Style_wrap);
 			} else {
 				newCell.setCellValue("");
 			}
