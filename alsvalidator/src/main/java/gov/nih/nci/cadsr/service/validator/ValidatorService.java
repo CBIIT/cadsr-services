@@ -38,6 +38,7 @@ public class ValidatorService {
 	private static final String errorString = "ERROR";
 	private static final String matchString = "MATCH";
 	private static final String notCheckedString = "NOT CHECKED";
+	private static final String pvResultNotCheckedString = "PV NOT FOUND - VM NOT CHECKED";
 	private static final String warningString = "WARNING";
 	private static final String retiredArchivedStatus = "RETIRED ARCHIVED";
 	private static final String retiredPhasedOutStatus = "RETIRED PHASED OUT";
@@ -444,7 +445,7 @@ public class ValidatorService {
 					}
 				} else {					
 					isMatch = false;
-					pvCheckerResultsList.add(errorString);
+					pvCheckerResultsList.add(pvResultNotCheckedString); // VALIDATOR-67 PV NOT FOUND - VM NOT CHECKED result
 					allowCdesList.add("");
 				}
 			}

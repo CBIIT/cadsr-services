@@ -550,11 +550,11 @@ public class ValidatorServiceIT {
 	
 	
 	/**
-	 * PV Checker result - ERROR (NON-MATCH)
+	 * PV Checker result - (PV NOT FOUND - VM NOT CHECKED) (NON-MATCH)
 	 */		
 	@Test
 	public void testSetPvCheckerResulErrorNoCodedData() {
-		String expectedResult = "ERROR";
+		String expectedResult = "PV NOT FOUND - VM NOT CHECKED";
 		question.getRaveCodedData().add("LA10610-6");
 		question.getRaveUserString().add("LA10610-6");
 		Map pvVmMap = new HashMap<String, List<String>>();
@@ -681,11 +681,11 @@ public class ValidatorServiceIT {
 	
 	
 	/**
-	 * PV Checker result - ERROR (NON-MATCH) - Single space coded data value 
+	 * PV Checker result - (PV NOT FOUND - VM NOT CHECKED) (NON-MATCH) - Single space coded data value 
 	 */	
 	@Test
 	public void testSetPvCheckerResultError8() {		
-		String expectedResult = "ERROR";
+		String expectedResult = "PV NOT FOUND - VM NOT CHECKED";
 		question.getRaveCodedData().add("");
 		question.getRaveCodedData().add("F");
 		question.getRaveUserString().add("Male");
@@ -699,11 +699,11 @@ public class ValidatorServiceIT {
 	}				
 	
 	/**
-	 * PV Checker result - ERROR (NON-MATCH) - <BLANK> coded data (where CD is not available/is blank for a given User data string in ALS) 
+	 * PV Checker result - (PV NOT FOUND - VM NOT CHECKED) (NON-MATCH) - <BLANK> coded data (where CD is not available/is blank for a given User data string in ALS) 
 	 */	
 	@Test
 	public void testSetPvCheckerResultError9() {		
-		String expectedResult = "ERROR";
+		String expectedResult = "PV NOT FOUND - VM NOT CHECKED";
 		question.getRaveCodedData().add("F");
 		question.getRaveUserString().add("Male");
 		question.getRaveUserString().add("Female");		
@@ -716,11 +716,11 @@ public class ValidatorServiceIT {
 	}					
 	
 	/**
-	 * PV Checker result - ERROR (NON-MATCH) - PV Meaning  
+	 * PV Checker result - (PV NOT FOUND - VM NOT CHECKED) (NON-MATCH) - PV Meaning  
 	 */	
 	@Test
 	public void testSetPvCheckerResultErrorVm() {		
-		String expectedResult = "ERROR";
+		String expectedResult = "PV NOT FOUND - VM NOT CHECKED";
 		question.getRaveCodedData().add("M");		
 		question.getRaveCodedData().add("F");
 		question.getRaveUserString().add("Male");
@@ -743,11 +743,11 @@ public class ValidatorServiceIT {
 	
 	
 	/**
-	 * PV Checker result - ERROR (NON-MATCH) - Alternate names  
+	 * PV Checker result - (PV NOT FOUND - VM NOT CHECKED) (NON-MATCH) - Alternate names  
 	 */	
 	@Test
 	public void testSetPvCheckerResultErrorAltNames() {		
-		String expectedResult = "ERROR";
+		String expectedResult = "PV NOT FOUND - VM NOT CHECKED";
 		question.getRaveCodedData().add("M");		
 		question.getRaveCodedData().add("F");
 		question.getRaveUserString().add("Male");
