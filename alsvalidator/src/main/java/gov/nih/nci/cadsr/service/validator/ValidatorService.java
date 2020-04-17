@@ -404,14 +404,27 @@ public class ValidatorService {
 		 Exceptions: If it does not match the PV Value MEaning or the PV for the CodedData, 
 		 or one of the ValueMeaning Alternate Names, "ERROR" */
 		
+		/*
+		 Iterating through the list of User Data String values for the question, and using that index get their corresponding 
+		 value in the coded data list at that index position. The value thus returned will be used as key (PV) to retrieve the 
+		 VM list (VMs/Alternate Names) from the PV-VM Map of the question (CDE). If there is no matching key, no VM list will be 
+		 returned and therefore the result is 'PV NOT FOUND - VM NOT CHECKED'. If VM List is returned, then User data string 
+		 will be compared to this VM list. If atleast one value matches with UDS, then result is 'MATCH', else 'ERROR'. 
+		 In case of the 'ERROR', PV & the VM list values will be added to the Allowable CDE PV/VM column.
+		 */
+		
 		if (userDataStringList!=null) {
+			int udsIdx = -1;			// Initializing an index for User Data String, that'll be used for Coded data retrieval
 			for (String userDataString : userDataStringList) {
+				udsIdx++;
 				// Getting the Coded Data value for the corresponding User Data String from RAVE ALS
 				String pvValue = new String();
 				if (codedDataList.size() == userDataStringList.size()) {
-					pvValue = codedDataList.get(userDataStringList.indexOf(userDataString));				
+					pvValue = codedDataList.get(udsIdx);
 					//Identifying & Replacing the '@@' or '##' patterns in pv value 
 					pvValue = codedDataReplace(pvValue); 
+				} else {
+					logger.error("Coded data list is different compared to the User data string list.");
 				}
 				// Obtaining the PV value meanings list for comparison with User Data String
 				List<String> pvVmList = MicroserviceUtils.getPVVMList(pvVmMap, pvValue, isCaseSensitive); // VALIDATOR-52
