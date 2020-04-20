@@ -554,7 +554,8 @@ public class ValidatorServiceIT {
 	 */		
 	@Test
 	public void testSetPvCheckerResulErrorNoCodedData() {
-		String expectedResult = "PV NOT FOUND - VM NOT CHECKED";
+		String expectedPvResult = "PV NOT FOUND";
+		String expectedAllowablePvVm = "VM NOT CHECKED";
 		question.getRaveCodedData().add("LA10610-6");
 		question.getRaveUserString().add("LA10610-6");
 		Map pvVmMap = new HashMap<String, List<String>>();
@@ -562,7 +563,8 @@ public class ValidatorServiceIT {
 		pvVmList.add("Not valid VM");
 		pvVmMap.put("Unmatched VM", pvVmList);
 		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
-		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+		assertEquals(expectedPvResult, actualResult.getPvResults().get(0));
+		assertEquals(expectedAllowablePvVm, actualResult.getAllowableCdeTextChoices().get(0));
 	}	
 	/**
 	 * PV Checker result - ERROR (NON-MATCH)
@@ -685,7 +687,8 @@ public class ValidatorServiceIT {
 	 */	
 	@Test
 	public void testSetPvCheckerResultError8() {		
-		String expectedResult = "PV NOT FOUND - VM NOT CHECKED";
+		String expectedPvResult = "PV NOT FOUND";
+		String expectedAllowablePvVm = "VM NOT CHECKED";
 		question.getRaveCodedData().add("");
 		question.getRaveCodedData().add("F");
 		question.getRaveUserString().add("Male");
@@ -695,7 +698,8 @@ public class ValidatorServiceIT {
 		pvVmList.add("M");
 		pvVmMap.put("F", pvVmList);
 		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
-		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+		assertEquals(expectedPvResult, actualResult.getPvResults().get(0));
+		assertEquals(expectedAllowablePvVm, actualResult.getAllowableCdeTextChoices().get(0));
 	}				
 	
 	/**
@@ -703,7 +707,8 @@ public class ValidatorServiceIT {
 	 */	
 	@Test
 	public void testSetPvCheckerResultError9() {		
-		String expectedResult = "PV NOT FOUND - VM NOT CHECKED";
+		String expectedPvResult = "PV NOT FOUND";
+		String expectedAllowablePvVm = "VM NOT CHECKED";
 		question.getRaveCodedData().add("F");
 		question.getRaveUserString().add("Male");
 		question.getRaveUserString().add("Female");		
@@ -712,7 +717,8 @@ public class ValidatorServiceIT {
 		pvVmList.add("M");
 		pvVmMap.put("F", pvVmList);
 		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
-		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+		assertEquals(expectedPvResult, actualResult.getPvResults().get(0));
+		assertEquals(expectedAllowablePvVm, actualResult.getAllowableCdeTextChoices().get(0));
 	}					
 	
 	/**
@@ -720,7 +726,8 @@ public class ValidatorServiceIT {
 	 */	
 	@Test
 	public void testSetPvCheckerResultErrorVm() {		
-		String expectedResult = "PV NOT FOUND - VM NOT CHECKED";
+		String expectedPvResult = "PV NOT FOUND";
+		String expectedAllowablePvVm = "VM NOT CHECKED";
 		question.getRaveCodedData().add("M");		
 		question.getRaveCodedData().add("F");
 		question.getRaveUserString().add("Male");
@@ -738,7 +745,8 @@ public class ValidatorServiceIT {
 		pvVmList.addAll(altNameList);
 		pvVmMap.put("Male", pvVmList);
 		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
-		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+		assertEquals(expectedPvResult, actualResult.getPvResults().get(0));
+		assertEquals(expectedAllowablePvVm, actualResult.getAllowableCdeTextChoices().get(0));
 	}	
 	
 	
@@ -747,7 +755,8 @@ public class ValidatorServiceIT {
 	 */	
 	@Test
 	public void testSetPvCheckerResultErrorAltNames() {		
-		String expectedResult = "PV NOT FOUND - VM NOT CHECKED";
+		String expectedPvResult = "PV NOT FOUND";
+		String expectedAllowablePvVm = "VM NOT CHECKED";
 		question.getRaveCodedData().add("M");		
 		question.getRaveCodedData().add("F");
 		question.getRaveUserString().add("Male");
@@ -765,7 +774,8 @@ public class ValidatorServiceIT {
 		pvVmList.addAll(altNameList);
 		pvVmMap.put("Man", pvVmList);
 		CCCQuestion actualResult = ValidatorService.setPvCheckerResult(pvVmMap, question, false);
-		assertEquals(expectedResult, actualResult.getPvResults().get(0));
+		assertEquals(expectedPvResult, actualResult.getPvResults().get(0));
+		assertEquals(expectedAllowablePvVm, actualResult.getAllowableCdeTextChoices().get(0));
 	}		
 
 	/**
