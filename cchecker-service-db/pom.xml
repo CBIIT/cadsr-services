@@ -85,6 +85,12 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<testFailureIgnore>true</testFailureIgnore>
+				</configuration>
+			</plugin>
 			<!--  This is to copy all dependencies libraries to target/lib. Uncomment if required -->
 			<!--  plugin>
 				<groupId>org.apache.maven.plugins</groupId>
