@@ -29,7 +29,9 @@ export class CadsrXmlComponent implements OnInit {
 
       },
       error => {
-        console.log("ERRR?")
+        this.isGeneratingXML = false;
+        this.formListServce.setSessionDataItem('isGeneratingXML', false);
+        this.errorMessage = 'Unexpected error <br /><br />If this continues to fail report to <a href="/contact-us">NCI Application Support</a>.<br /><br />' + error.error
 
         
       },
