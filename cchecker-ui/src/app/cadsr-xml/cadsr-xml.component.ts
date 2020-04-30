@@ -20,6 +20,7 @@ export class CadsrXmlComponent implements OnInit {
   formServiceClick = function(c) {
     this.statusMessage = null;
     this.isGeneratingXML = true;
+    this.errorMessage = null;
     this.formListServce.setSessionDataItem('isGeneratingXML', true);
     const checkedItems = this.formListServce.getFormListAsSimpleArray();
     const sessionId = this.formListServce.getSessionDataItem('formListData')['sessionid'];
