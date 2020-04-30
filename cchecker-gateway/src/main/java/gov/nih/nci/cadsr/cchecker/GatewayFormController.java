@@ -193,7 +193,7 @@ public class GatewayFormController {
 	public ResponseEntity<?> formXmlService(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(name = "sessionid", required = true) String sessionid,
 			RequestEntity<FormLoadParamWrapper> requestEntity) {
-		//logger.debug("request received loadFormService");
+		//logger.debug("request received formxmlservice");
 		//check for session cookie
 		Cookie cookie = GatewayBootController.retrieveCookie(request);
 		String sessionCookieValue = null;
@@ -202,7 +202,7 @@ public class GatewayFormController {
 			return GatewayBootController.buildErrorResponse(GatewayBootController.SESSION_NOT_VALID + sessionCookieValue, HttpStatus.BAD_REQUEST);
 		}
 		
-		logger.debug("formXmlService session cookie: " + sessionCookieValue);
+		logger.debug("formxmlservice session cookie: " + sessionCookieValue);
 		
 		//sessionid parameter to validate
 		if (!ParameterValidator.validateIdSeq(sessionid)) {
@@ -248,14 +248,15 @@ public class GatewayFormController {
 				return new ResponseEntity<String>(sessionid, httpHeaders, HttpStatus.CREATED);
 			}
 			else {
-				logger.error("formXmlService error response: " + statusCode);
+				logger.error("error response from FL microservice by URI: " + CCHECKER_FORM_XML_SERVICE_URL + " response code: " + statusCode + ", response data: " + responseData + ", request:" + formLoadParamWrapper);
 				HttpStatus errorCode = responseEntity.getStatusCode();//This can be user error or server error
-				return GatewayBootController.buildErrorResponse("Error on load forms for session: " + sessionid + detailsStr + responseData, errorCode);
+				return GatewayBootController.buildErrorResponse("Error on generate XML for session: " + sessionid + ", error details: " + responseData, errorCode);
 			}
 		}
 		catch (RestClientException re) {
-			 String errorMessage = "Error on form xml service session: " + sessionid + detailsStr + ". Error details: " + re.getMessage();
-			 return GatewayBootController.buildErrorResponse(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
+			logger.error("RestClientException on a call of FL microservice by URI: " + CCHECKER_FORM_XML_SERVICE_URL + ". Error details: " + re.getMessage() + ", request:" + formLoadParamWrapper, re);
+			String errorMessage = "Failed to generate XML for session: " + sessionid + ". Error details: " + re.getMessage();
+			return GatewayBootController.buildErrorResponse(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	/**
@@ -280,6 +281,7 @@ public class GatewayFormController {
 	public void retrieveFormXml(HttpServletRequest request, HttpServletResponse response, 
 			@PathVariable("idseq") String idseq) throws Exception {
 		if  (!ParameterValidator.validateIdSeq(idseq)) {
+			logger.error("retrieveformxml service invalid session: " + idseq);
 			response.setHeader("Content-Type", GatewayBootController.TEXT_PLAIN_MIME_TYPE);
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			IOUtils.copy(new ByteArrayInputStream(("Report ID is not valid: " + idseq + '\n').getBytes()),
@@ -287,7 +289,7 @@ public class GatewayFormController {
 		} 
 		else {
 			String filePath = buildXmllFilePath(idseq);
-			logger.debug("...retrieveExcelReportError from: " + filePath);
+			logger.debug("...retrieveformxml from: " + filePath);
 			response.setHeader("Content-Type", XML_MIME_TYPE);
 			response.setHeader("Content-Disposition", "attachment; filename=" + fileFormLoaderPrefix + idseq + XML_FILE_EXT);
 			response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
@@ -297,6 +299,7 @@ public class GatewayFormController {
 				IOUtils.copy(GatewayBootController.openFileAsInputStream(filePath), response.getOutputStream());
 			}
 			else {
+				logger.error("retrieveformxml service file not found: " + filePath);
 				response.setHeader("Content-Type", GatewayBootController.TEXT_PLAIN_MIME_TYPE);
 				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 				IOUtils.copy(new ByteArrayInputStream(("Form XML file with ID is not found: " + idseq + '\n').getBytes()),
