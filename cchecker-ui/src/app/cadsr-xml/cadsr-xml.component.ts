@@ -36,6 +36,7 @@ export class CadsrXmlComponent implements OnInit {
         
       },
       () => {
+        this.errorMessage = null;
         console.log("I AM DONE")
         this.downloadXmlFile(sessionId);
         const currentRoute = this.router.url;
