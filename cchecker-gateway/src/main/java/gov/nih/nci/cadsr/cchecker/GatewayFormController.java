@@ -6,7 +6,9 @@ package gov.nih.nci.cadsr.cchecker;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.Cookie;
@@ -250,14 +252,18 @@ public class GatewayFormController {
 			else {
 				logger.error("error response from FL microservice by URI: " + CCHECKER_FORM_XML_SERVICE_URL + " response code: " + statusCode + ", response data: " + responseData + ", request:" + formLoadParamWrapper);
 				HttpStatus errorCode = responseEntity.getStatusCode();//This can be user error or server error
-				return GatewayBootController.buildErrorResponse("Error on generate XML for session: " + sessionid + ", error details: " + responseData, errorCode);
+				return GatewayBootController.buildErrorResponse("Error on generate XML for session: " + sessionid + ", time: " + errorTimeStamp(), errorCode);
 			}
 		}
 		catch (RestClientException re) {
 			logger.error("RestClientException on a call of FL microservice by URI: " + CCHECKER_FORM_XML_SERVICE_URL + ". Error details: " + re.getMessage() + ", request:" + formLoadParamWrapper, re);
-			String errorMessage = "Failed to generate XML for session: " + sessionid + ". Error details: " + re.getMessage();
+			String errorMessage = "Failed to generate XML for session: " + sessionid + ", time: " + errorTimeStamp();
 			return GatewayBootController.buildErrorResponse(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+	protected static String errorTimeStamp() {
+		SimpleDateFormat simpleDatatimeFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm Z");
+		return simpleDatatimeFormat.format(new Date());
 	}
 	/**
 	 * This function builds location URL based on request URI.
