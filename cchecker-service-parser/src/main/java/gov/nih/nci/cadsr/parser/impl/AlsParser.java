@@ -253,18 +253,15 @@ public class AlsParser implements Parser {
 				errFieldNames.put(draftFormName, cell_formDraftName);
 			if (form.getOrdinal() == null)
 				errFieldNames.put(ordinal_str, cell_formOrdinal);
-			for (String fieldName : errFieldNames.keySet()) {
-				cccError = addParsingValidationMsg(cccError, fieldName, formsSheetName, row.getRowNum() + 1,
-						errFieldNames.get(fieldName), errorSeverity_error, err_msg_empty,
-						dataFormatter.formatCellValue(row.getCell(cell_formOid)), null, null, null, null);
-			}
-			if (cccError.getAlsErrors().size() > 0) {
-				alsData.setCccError(cccError);
+			if (errFieldNames.isEmpty()) {
+				forms.add(form);
 			} else {
-				if (row.getCell(cell_formOid) != null && row.getCell(cell_formOrdinal) != null
-						&& row.getCell(cell_formDraftName) != null) {
-					forms.add(form);
+				for (String fieldName : errFieldNames.keySet()) {
+					cccError = addParsingValidationMsg(cccError, fieldName, formsSheetName, row.getRowNum() + 1,
+							errFieldNames.get(fieldName), errorSeverity_error, err_msg_empty,
+							dataFormatter.formatCellValue(row.getCell(cell_formOid)), null, null, null, null);
 				}
+				alsData.setCccError(cccError);
 			}
 		}
 		alsData.setForms(forms);
