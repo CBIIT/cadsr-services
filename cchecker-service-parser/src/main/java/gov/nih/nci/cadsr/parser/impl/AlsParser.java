@@ -96,8 +96,8 @@ public class AlsParser implements Parser {
 	private static final String codedData_str = "Coded Data";
 	private static final String userDataString_str = "User Data String";
 	private static final String specify_str = "Specify";
-	private static String err_msg_1 = "RAVE Protocol Name is missing in the ALS file.";
-	private static String err_msg_2 = "RAVE Protocol Number is missing in the ALS file.";
+	private static String err_msg_1 = "RAVE Protocol Name (CRFDraft -> ProjectName) is missing in the ALS file.";
+	private static String err_msg_2 = "RAVE Protocol Number (CRFDraft -> PrimaryFormOID) is missing in the ALS file.";
 	private static String err_msg_15 = "Data Dictionary Name is empty.";
 	private static String err_msg_16 = "Coded Data is empty.";
 	private static String err_msg_17 = "Ordinal is empty.";
@@ -135,7 +135,7 @@ public class AlsParser implements Parser {
 				if (sheet != null) {
 					if (crfDraftSheetName.equalsIgnoreCase(sheet.getSheetName())) {
 						// Parse CRF Draft Sheet(Summary info) from the ALS file
-						alsData = getCrfDraft(sheet, alsData, cccError);
+						alsData = getCrfDraft(sheet, alsData);
 					} else if (formsSheetName.equalsIgnoreCase(sheet.getSheetName())) {
 						// Parse Forms sheet from the ALS file
 						alsData = getForms(sheet, alsData, cccError);
@@ -162,6 +162,7 @@ public class AlsParser implements Parser {
 					} else {
 						alsError.setErrorSeverity(errorSeverity_fatal);
 					}
+					logger.error(alsError.getErrorDesc());
 					cccError.addAlsError(alsError);
 				}
 			}
@@ -176,11 +177,14 @@ public class AlsParser implements Parser {
 			}
 			alsError.setErrorSeverity(errorSeverity_fatal);
 			cccError.addAlsError(alsError);
+			logger.error(alsError.getErrorDesc());
 		} catch (NullPointerException npe) {
 			cccError = addError(npe.getMessage(), errorSeverity_fatal, cccError);
+			logger.error(npe.getMessage());
 		} catch (POIXMLException poixe) {
 			// Office documents other than Excel (XLSX)
 			cccError = addError(invalidFileUploadMsg, errorSeverity_fatal, cccError);
+			logger.error(invalidFileUploadMsg);
 		}
 		if (cccError.getAlsErrors().size() > 0)
 			alsData.setCccError(cccError);
@@ -196,7 +200,7 @@ public class AlsParser implements Parser {
 	 * 
 	 */
 
-	protected static ALSData getCrfDraft(Sheet sheet, ALSData alsData, CCCError cccError) throws IOException {
+	protected static ALSData getCrfDraft(Sheet sheet, ALSData alsData) throws IOException {
 		DateFormat dateFormat = new SimpleDateFormat(reportDateFormat);
 		Date date = new Date();
 		alsData.setReportDate(dateFormat.format(date));
@@ -209,18 +213,12 @@ public class AlsParser implements Parser {
 		crfDraft.setProjectName(row.getCell(cell_crfDraftProjectName) != null ? dataFormatter.formatCellValue(row.getCell(cell_crfDraftProjectName)) : null);
 		if (StringUtils.isBlank(crfDraft.getProjectName())) {		
 			logger.warn(err_msg_1);
-		} else {
-			cccError.setRaveProtocolName(crfDraft.getProjectName());
 		}		
 		crfDraft.setPrimaryFormOid(row.getCell(cell_crfDraftPrimaryFormOid) != null ? dataFormatter.formatCellValue(row.getCell(cell_crfDraftPrimaryFormOid)) : null);
 		if (StringUtils.isBlank(crfDraft.getPrimaryFormOid())) {
 			logger.warn(err_msg_2);
-		} else {
-			cccError.setRaveProtocolNumber(crfDraft.getPrimaryFormOid());
 		}
 		alsData.setCrfDraft(crfDraft);
-		if (cccError.getAlsErrors().size() > 0)
-			alsData.setCccError(cccError);
 		return alsData;
 	}
 
