@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.poi.ooxml.POIXMLException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -205,17 +207,14 @@ public class AlsParser implements Parser {
 		// DraftName, ProjectName & PrimaryFormOID
 		crfDraft.setDraftName(row.getCell(cell_crfDraftName) != null ? dataFormatter.formatCellValue(row.getCell(cell_crfDraftName)) : null);
 		crfDraft.setProjectName(row.getCell(cell_crfDraftProjectName) != null ? dataFormatter.formatCellValue(row.getCell(cell_crfDraftProjectName)) : null);
-		if (crfDraft.getProjectName() == null) {
-			cccError = addParsingValidationMsg(cccError, crfDraftProjName_str, crfDraftSheetName, row.getRowNum() + 1,
-					cell_crfDraftProjectName, errorSeverity_error, err_msg_1,
-					null, null, null, null, null);			
+		if (StringUtils.isBlank(crfDraft.getProjectName())) {		
+			logger.warn(err_msg_1);
 		} else {
 			cccError.setRaveProtocolName(crfDraft.getProjectName());
 		}		
 		crfDraft.setPrimaryFormOid(row.getCell(cell_crfDraftPrimaryFormOid) != null ? dataFormatter.formatCellValue(row.getCell(cell_crfDraftPrimaryFormOid)) : null);
-		if (crfDraft.getPrimaryFormOid() == null) {
-			cccError = addParsingValidationMsg(cccError, crfDraftPrimaryFormOID_str, crfDraftSheetName, row.getRowNum() + 1,
-					cell_crfDraftPrimaryFormOid, errorSeverity_error, err_msg_2, null, null, null, null, null);			
+		if (StringUtils.isBlank(crfDraft.getPrimaryFormOid())) {
+			logger.warn(err_msg_2);
 		} else {
 			cccError.setRaveProtocolNumber(crfDraft.getPrimaryFormOid());
 		}
