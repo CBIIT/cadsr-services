@@ -210,3 +210,20 @@ content: "» "
 .lowercase {
   text-transform:lowercase;
 }
+
+.uploadInstructions {
+  border:1px solid #ced4da;
+  background-color:#F9F9F9;
+  padding:14px;
+  margin-bottom:15px;
+
+}
+
+.uploadInstructions ol {
+  margin:5px;
+  padding:1px 0px 0px 11px;
+}
+
+.uploadInstructions li {
+  padding:2px;
+}

@@ -11,6 +11,27 @@
 <div class="alert alert-warning" role="alert" *ngIf="isGeneratingXML">
     XML generation is in progress. Please wait to upload a new file.
 </div>
+
+<div class="uploadInstructions">
+    "Instructions"
+    <ol>
+        <li>Export the forms as a Rave ALS using Rave Architect
+            <ul>
+                <li>This file will be saved as .xml</li>
+            </ul>
+        </li>
+        <li>Launch Microsoft Excel</li>
+        <li>Select "Open" from the Excel menu bar</li>
+        <li>Select the .xml file
+            <ul>
+                <li>It will open in Excel and multiple spreadsheets will be displayed</li>
+            </ul>
+        </li>
+        <li>Select "File" from the Excel menu bar</li>
+        <li>Select "Save As"</li>
+        <li>Select "Excel Workbook (.xlsx)" from the File Format drop down</li>
+    </ol>
+</div>
 <form #alsForm="ngForm">
     <div class="form-group">
         <label for="name">Name</label>
