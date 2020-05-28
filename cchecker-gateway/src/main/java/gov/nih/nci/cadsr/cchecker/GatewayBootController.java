@@ -74,6 +74,9 @@ public class GatewayBootController {
 	//FORMBUILD-633
 	static String CCHECKER_FEED_FORM_SERVICE_URL;
 	static String CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL;
+	
+	//VALIDATOR-76
+	static String CCHECKER_XML_PARSER_URL;
 
 	private static String URL_RETRIEVE_ALS_FORMAT;
 	private static String URL_RETRIEVE_REPORT_ERROR_FORMAT;
@@ -149,7 +152,7 @@ public class GatewayBootController {
 	 * @return ALSDataWrapper
 	 */
 	protected ALSDataWrapper submitPostRequestParser(String filePath) {
-		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(CCHECKER_PARSER_URL);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(CCHECKER_XML_PARSER_URL);
 
 		// add some String
 		builder.queryParam("filepath", filePath);
@@ -340,7 +343,7 @@ public class GatewayBootController {
 		//catch REST client exception
 		try {
 			// call parser
-			ALSDataWrapper wrapper = serviceParser.submitPostRequestParser(saveAbsPath,CCHECKER_PARSER_URL);
+			ALSDataWrapper wrapper = serviceParser.submitPostRequestParser(saveAbsPath,CCHECKER_XML_PARSER_URL);
 			HttpStatus parserStatusCode = wrapper.getStatusCode();
 			if (!HttpStatus.OK.equals(parserStatusCode)) {
 				String errorMessage = "Error on parsing file: " + file.getOriginalFilename();
@@ -723,6 +726,8 @@ public class GatewayBootController {
 		CCHECKER_FEED_VALIDATE_SERVICE_URL = GatewayBootWebApplication.CCHECKER_FEED_VALIDATE_SERVICE_URL;
 		CCHECKER_FEED_FORM_SERVICE_URL = GatewayBootWebApplication.CCHECKER_FEED_FORM_SERVICE_URL;
 		CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL = GatewayBootWebApplication.CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL;
+		// VALIDATOR-76
+		CCHECKER_XML_PARSER_URL = GatewayBootWebApplication.CCHECKER_XML_PARSER_URL;
 		ACCESS_CONTROL_ALLOW_ORIGIN = GatewayBootWebApplication.ACCESS_CONTROL_ALLOW_ORIGIN;
 		logger.debug("GatewayBootController CCHECKER_PARSER_URL: " + CCHECKER_PARSER_URL);
 		logger.debug("GatewayBootController UPLOADED_FOLDER: " + UPLOADED_FOLDER);

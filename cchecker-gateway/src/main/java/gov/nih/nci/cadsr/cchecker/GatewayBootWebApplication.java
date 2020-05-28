@@ -54,6 +54,9 @@ public class GatewayBootWebApplication extends SpringBootServletInitializer {
 	static String ACCESS_CONTROL_ALLOW_ORIGIN_HEADER = "Access-Control-Allow-Origin";
 	static String ACCESS_CONTROL_ALLOW_ORIGIN;
 	static String CCHECKER_DB_SERVICE_TEST_URL;
+	// VALIDATOR-76
+	static String CCHECKER_XML_PARSER_URL;
+	
 	
 	@Primary
 	@Bean
@@ -98,6 +101,8 @@ public class GatewayBootWebApplication extends SpringBootServletInitializer {
 		CCHECKER_LOAD_FORM_SERVICE_URL = properties.getProperty("CCHECKER_LOAD_FORM_SERVICE_URL");
 		CCHECKER_FORM_XML_SERVICE_URL = properties.getProperty("CCHECKER_FORM_XML_SERVICE_URL");
 		
+		//VALIDATOR-76	
+		CCHECKER_XML_PARSER_URL = properties.getProperty("CCHECKER_XML_PARSER_URL");
 
 		logger.info("!!! Loaded CChecker Gateway properties: " + properties);
 
