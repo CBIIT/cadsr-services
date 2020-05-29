@@ -59,17 +59,18 @@ public class XmlAlsParserController {
 			ALSData alsData = new ALSData();//alsParser.parse(filePath);
 			alsPostProcessor.postProcess(alsData);
 			
-			//File file = new File("/local/content/cchecker/RAVE-ALS-10057_14-JUN-2017_NS-TEXT-AS-XML.xml");
+			File file = new File("/local/content/cchecker/RAVE-ALS-10057_14-JUN-2017_NS-TEXT-AS-XML.xml");
 			//File file = new File("/local/content/cchecker/From-PeterZipFile-RAVE-ALS-10057_14-JUN-2017_NS.xls");
-			File file = new File(filePath);
+			//File file = new File("/local/content/cchecker/RAVE-ALS-10057-VS-TestFileA.xlsx");
+			//File file = new File(filePath);
 			String fileContent = IOUtils.toString(new FileInputStream(file));
 			SAXParserFactory parserFactory = SAXParserFactory.newInstance();
 			SAXParser parser = parserFactory.newSAXParser();
 			SAXHandler handler = new SAXHandler();
 
 			ByteArrayInputStream bis = new ByteArrayInputStream(fileContent.getBytes());
-			//logger.info("XML file in path: /local/content/cchecker/RAVE-ALS-10057_14-JUN-2017_NS-TEXT-AS-XML.xml");
-			logger.info("XML file in path: /local/content/cchecker/From-PeterZipFile-RAVE-ALS-10057_14-JUN-2017_NS.xls");
+			logger.info("XML file in path: /local/content/cchecker/RAVE-ALS-10057_14-JUN-2017_NS-TEXT-AS-XML.xml");
+			//logger.info("XML file in path: /local/content/cchecker/From-PeterZipFile-RAVE-ALS-10057_14-JUN-2017_NS.xls");
 			
 			parser.parse(bis, handler);
 			

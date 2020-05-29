@@ -18,11 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @EnableAutoConfiguration
 //(exclude={DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
-public class CCheckerParserService {
-	private static final Logger logger = LoggerFactory.getLogger(CCheckerParserService.class);
+public class CCheckerXmlAlsParserService {
+	private static final Logger logger = LoggerFactory.getLogger(CCheckerXmlAlsParserService.class);
 	@RequestMapping("/")
 	String home() {
-		return "CCheckerParserService is running!\n";
+		return "CCheckerXmlAlsParserService is running!\n";
 	}
 	public static void main(String[] args) throws Exception {
 		//We do not have microservice specific properties
@@ -31,6 +31,6 @@ public class CCheckerParserService {
 //		try (InputStream input = classLoader.getResourceAsStream("boot.properties")) {
 //			properties.load(input);
 //		}
-		SpringApplication.run(CCheckerParserService.class, args);
+		SpringApplication.run(CCheckerXmlAlsParserService.class, args);
 	}
 }
