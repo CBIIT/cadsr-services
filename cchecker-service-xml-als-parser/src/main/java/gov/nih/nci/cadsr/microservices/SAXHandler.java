@@ -15,8 +15,11 @@ public class SAXHandler extends DefaultHandler {
 
 	private final static Logger logger = LoggerFactory.getLogger(SAXHandler.class);
     public List<XmlRow> xmlRowList = new ArrayList<>();
+    public List<String> sheetsList = new ArrayList<String>();
     XmlRow xmlRow = null;
     String content = null;
+    String sheetName = new String();
+    
 
     @Override
     //Triggered when the start of tag is found.
@@ -28,14 +31,16 @@ public class SAXHandler extends DefaultHandler {
                 xmlRow = new XmlRow();
                 break;
             case "Worksheet":
+            	sheetName = new String();
             	int length = attributes.getLength();
             for (int i=0; i<length; i++) {
             	// get qualified (prefixed) name by index
             	String name = attributes.getQName(i);
-                logger.debug("Name:" + name);
+                //logger.debug("Name:" + name);
             	// get attribute's value by index.
             	String value = attributes.getValue(i);
-            	logger.debug("Value:" + value);
+            	//logger.debug("Value:" + value);
+                sheetName = value;
             }            	         
             	break;
         }
@@ -51,6 +56,10 @@ public class SAXHandler extends DefaultHandler {
             case "Data":
                 xmlRow.cellList.add(content);
                 break;
+            case "Worksheet":
+            	sheetsList.add(sheetName);
+            	sheetName = new String();
+            	break;
         }
     }
 

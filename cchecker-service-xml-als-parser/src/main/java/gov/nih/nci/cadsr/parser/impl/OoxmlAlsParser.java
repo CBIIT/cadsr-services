@@ -130,16 +130,23 @@ public class OoxmlAlsParser {
 			
 			int count = 0;
 			logger.debug(" Handler rows count: "+handler.xmlRowList.size());
-			for (XmlRow xmlRow : handler.xmlRowList) {
-			    if (xmlRow.cellList.size() > 10) {
-			        String crfDraftName = xmlRow.cellList.get(0);
-			        count++;
-			        String projectName = xmlRow.cellList.get(2);
-			        String primaryFormOid = xmlRow.cellList.get(4);
-			        logger.debug("CRF DRAFT NAME: '" + crfDraftName + "', projectName: '" + projectName + "', primaryFormOid: '" + primaryFormOid + "'");
-			        if (count > 10)
-			        	break;
-			    }
+			logger.debug(" Sheets: "+handler.sheetsList);
+			for (String sheet : handler.sheetsList) {
+				if ("CRFDraft".equalsIgnoreCase(sheet)) { 
+					for (XmlRow xmlRow : handler.xmlRowList) {
+					    if (xmlRow.cellList.size() > 10) {
+					        String crfDraftName = xmlRow.cellList.get(0);
+					        count++;
+					        String projectName = xmlRow.cellList.get(2);
+					        String primaryFormOid = xmlRow.cellList.get(4);
+					        logger.debug("CRF DRAFT NAME: '" + crfDraftName + "', projectName: '" + projectName + "', primaryFormOid: '" + primaryFormOid + "'");
+					        //if (count > 10)
+					        //	break;
+					    }
+					} 
+				} else {
+					logger.debug("Sheet name: "+sheet);
+				}
 			}
 		} catch (NullPointerException npe) {
 			cccError = addError(npe.getMessage(), errorSeverity_fatal, cccError);

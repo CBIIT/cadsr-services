@@ -58,24 +58,24 @@ public class XmlAlsParserController {
 			//TODO we do not need filename here consider to remove the second parameter, but keep the class member and a setter method.
 			ALSData alsData = new ALSData();//alsParser.parse(filePath);
 			alsPostProcessor.postProcess(alsData);
-			
-			File file = new File("/local/content/cchecker/RAVE-ALS-10057_14-JUN-2017_NS-TEXT-AS-XML.xml");
+			Long startTime = System.currentTimeMillis();
+			//File file = new File("/local/content/cchecker/RAVE-ALS-10057_14-JUN-2017_NS-TEXT-AS-XML.xml");
 			//File file = new File("/local/content/cchecker/From-PeterZipFile-RAVE-ALS-10057_14-JUN-2017_NS.xls");
 			//File file = new File("/local/content/cchecker/RAVE-ALS-10057-VS-TestFileA.xlsx");
-			//File file = new File(filePath);
+			File file = new File(filePath);
 			String fileContent = IOUtils.toString(new FileInputStream(file));
 			SAXParserFactory parserFactory = SAXParserFactory.newInstance();
 			SAXParser parser = parserFactory.newSAXParser();
 			SAXHandler handler = new SAXHandler();
 
 			ByteArrayInputStream bis = new ByteArrayInputStream(fileContent.getBytes());
-			logger.info("XML file in path: /local/content/cchecker/RAVE-ALS-10057_14-JUN-2017_NS-TEXT-AS-XML.xml");
+			//logger.info("XML file in path: /local/content/cchecker/RAVE-ALS-10057_14-JUN-2017_NS-TEXT-AS-XML.xml");
 			//logger.info("XML file in path: /local/content/cchecker/From-PeterZipFile-RAVE-ALS-10057_14-JUN-2017_NS.xls");
-			
-			parser.parse(bis, handler);
-			
+			logger.info("XML file in path: "+filePath);
+			parser.parse(bis, handler);			
 			ooxmlAlsParser.parseXml(handler);
-			
+			Long endTime = System.currentTimeMillis();
+			logger.info("Time taken: " + (endTime - startTime)+" ms.");
 			HttpHeaders httpHeaders = new HttpHeaders();
 			httpHeaders.add("Content-Type", "application/json");	
 

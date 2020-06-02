@@ -40,7 +40,7 @@
     </div>
     <div class="form-group">
         <label for="alsFile">ALS File</label>
-        <input type="file" accept=".xlsx" class="form-control-file" [disabled]="isValidating || isGeneratingXML" (change)="getFile($event)" id="alsFile" required [(ngModel)]="alsFile" name="alsFile" #error_file="ngModel">
+        <input type="file" accept=".xlsx, .xls, .xml" class="form-control-file" [disabled]="isValidating || isGeneratingXML" (change)="getFile($event)" id="alsFile" required [(ngModel)]="alsFile" name="alsFile" #error_file="ngModel">
         <div class="help_text ">Rave ALS xml files need to be opened in Excel <br /><span class="filetype_line2">and saved as Excel Workbook (*.xlsx).</span></div>
         <!-- checking for file is because microsoft edge doesn't recognize .valid even when file is selected. file is set as formData in ts file -->
         <div [hidden]="error_file.valid || (error_file.pristine && !submitted) || file" class="alert alert-danger">ALS File is required</div>
