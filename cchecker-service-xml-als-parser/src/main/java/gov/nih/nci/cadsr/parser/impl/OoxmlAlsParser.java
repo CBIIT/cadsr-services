@@ -128,22 +128,38 @@ public class OoxmlAlsParser {
 		ALSError alsError;
 		try {
 			
-			int count = 0;
 			logger.debug(" Handler rows count: "+handler.xmlRowList.size());
 			logger.debug(" Sheets: "+handler.sheetsList);
+			
 			for (String sheet : handler.sheetsList) {
 				if ("CRFDraft".equalsIgnoreCase(sheet)) { 
-					for (XmlRow xmlRow : handler.xmlRowList) {
+					for (XmlRow xmlRow : handler.sheetRowsMap.get("CRFDraft")) {
 					    if (xmlRow.cellList.size() > 10) {
-					        String crfDraftName = xmlRow.cellList.get(0);
-					        count++;
+					        String crfDraftName = xmlRow.cellList.get(0);					        
 					        String projectName = xmlRow.cellList.get(2);
 					        String primaryFormOid = xmlRow.cellList.get(4);
 					        logger.debug("CRF DRAFT NAME: '" + crfDraftName + "', projectName: '" + projectName + "', primaryFormOid: '" + primaryFormOid + "'");
-					        //if (count > 10)
-					        //	break;
 					    }
 					} 
+				} else if ("Forms".equalsIgnoreCase(sheet)) { 
+						for (XmlRow xmlRow : handler.sheetRowsMap.get("Forms")) {
+						    if (xmlRow.cellList.size() > 1) {
+						        String formOid = xmlRow.cellList.get(0);
+						        String draftFormName = xmlRow.cellList.get(2);
+						        logger.debug("Forms Form OID: '" + formOid + "', Form Name: '" + draftFormName);
+						    }
+						} 
+				} else if ("Fields".equalsIgnoreCase(sheet)) { 
+					for (XmlRow xmlRow : handler.sheetRowsMap.get("Fields")) {
+					    if (xmlRow.cellList.size() > 10) {
+					        String formOid = xmlRow.cellList.get(0);
+					        String fieldOid = xmlRow.cellList.get(1);
+					        String ordinal = xmlRow.cellList.get(2);
+					        String draftFieldName = xmlRow.cellList.get(3);
+					        String dataFormat = xmlRow.cellList.get(6);
+					        logger.debug("Fields Form OID: '" + formOid + "', fieldOid: '" + fieldOid + "', ordinal: '" + ordinal + "', draftFieldName: '" + draftFieldName + "', dataFormat: '" + dataFormat + "'");
+					    }
+					} 											
 				} else {
 					logger.debug("Sheet name: "+sheet);
 				}

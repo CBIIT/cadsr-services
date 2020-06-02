@@ -1,7 +1,9 @@
 package gov.nih.nci.cadsr.microservices;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import gov.nih.nci.cadsr.data.XmlRow;
 
@@ -19,6 +21,7 @@ public class SAXHandler extends DefaultHandler {
     XmlRow xmlRow = null;
     String content = null;
     String sheetName = new String();
+    public Map <String, List<XmlRow>> sheetRowsMap = new HashMap<String, List<XmlRow>>();
     
 
     @Override
@@ -32,6 +35,7 @@ public class SAXHandler extends DefaultHandler {
                 break;
             case "Worksheet":
             	sheetName = new String();
+            	xmlRowList = new ArrayList<>();
             	int length = attributes.getLength();
             for (int i=0; i<length; i++) {
             	// get qualified (prefixed) name by index
@@ -58,6 +62,7 @@ public class SAXHandler extends DefaultHandler {
                 break;
             case "Worksheet":
             	sheetsList.add(sheetName);
+            	sheetRowsMap.put(sheetName, xmlRowList);            	
             	sheetName = new String();
             	break;
         }
