@@ -56,8 +56,8 @@ public class XmlAlsParserController {
 		logger.info("Parse file in path: " + filePath);
 		try {
 			//TODO we do not need filename here consider to remove the second parameter, but keep the class member and a setter method.
-			ALSData alsData = new ALSData();//alsParser.parse(filePath);
-			alsPostProcessor.postProcess(alsData);
+			//ALSData alsData = new ALSData();//alsParser.parse(filePath);
+			//alsPostProcessor.postProcess(alsData);
 			Long startTime = System.currentTimeMillis();
 			//File file = new File("/local/content/cchecker/RAVE-ALS-10057_14-JUN-2017_NS-TEXT-AS-XML.xml");
 			//File file = new File("/local/content/cchecker/From-PeterZipFile-RAVE-ALS-10057_14-JUN-2017_NS.xls");
@@ -73,7 +73,7 @@ public class XmlAlsParserController {
 			//logger.info("XML file in path: /local/content/cchecker/From-PeterZipFile-RAVE-ALS-10057_14-JUN-2017_NS.xls");
 			logger.info("XML file in path: "+filePath);
 			parser.parse(bis, handler);			
-			ooxmlAlsParser.parseXml(handler);
+			ALSData alsData = ooxmlAlsParser.parseXml(handler);
 			Long endTime = System.currentTimeMillis();
 			logger.info("Time taken: " + (endTime - startTime)+" ms.");
 			HttpHeaders httpHeaders = new HttpHeaders();

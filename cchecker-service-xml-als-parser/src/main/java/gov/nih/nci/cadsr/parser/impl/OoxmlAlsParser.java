@@ -121,7 +121,7 @@ public class OoxmlAlsParser {
 	 * database
 	 * 
 	 */
-	public void parseXml(SAXHandler handler) throws IOException, NullPointerException {
+	public ALSData parseXml(SAXHandler handler) throws IOException, NullPointerException {
 		CCCError cccError = getErrorObject();
 		ALSData alsData = getAlsDataInstance();
 		logger.debug(" IN parsing XML method");
@@ -133,33 +133,11 @@ public class OoxmlAlsParser {
 			
 			for (String sheet : handler.sheetsList) {
 				if ("CRFDraft".equalsIgnoreCase(sheet)) { 
-					for (XmlRow xmlRow : handler.sheetRowsMap.get("CRFDraft")) {
-					    if (xmlRow.cellList.size() > 10) {
-					        String crfDraftName = xmlRow.cellList.get(0);					        
-					        String projectName = xmlRow.cellList.get(2);
-					        String primaryFormOid = xmlRow.cellList.get(4);
-					        logger.debug("CRF DRAFT NAME: '" + crfDraftName + "', projectName: '" + projectName + "', primaryFormOid: '" + primaryFormOid + "'");
-					    }
-					} 
-				} else if ("Forms".equalsIgnoreCase(sheet)) { 
-						for (XmlRow xmlRow : handler.sheetRowsMap.get("Forms")) {
-						    if (xmlRow.cellList.size() > 1) {
-						        String formOid = xmlRow.cellList.get(0);
-						        String draftFormName = xmlRow.cellList.get(2);
-						        logger.debug("Forms Form OID: '" + formOid + "', Form Name: '" + draftFormName);
-						    }
-						} 
+					alsData = getCrfDraft(handler.sheetRowsMap.get("CRFDraft"), alsData); 
+				} else if ("Forms".equalsIgnoreCase(sheet)) {
+					alsData = getForms(handler.sheetRowsMap.get("Forms"), alsData);
 				} else if ("Fields".equalsIgnoreCase(sheet)) { 
-					for (XmlRow xmlRow : handler.sheetRowsMap.get("Fields")) {
-					    if (xmlRow.cellList.size() > 10) {
-					        String formOid = xmlRow.cellList.get(0);
-					        String fieldOid = xmlRow.cellList.get(1);
-					        String ordinal = xmlRow.cellList.get(2);
-					        String draftFieldName = xmlRow.cellList.get(3);
-					        String dataFormat = xmlRow.cellList.get(6);
-					        logger.debug("Fields Form OID: '" + formOid + "', fieldOid: '" + fieldOid + "', ordinal: '" + ordinal + "', draftFieldName: '" + draftFieldName + "', dataFormat: '" + dataFormat + "'");
-					    }
-					} 											
+					alsData = getFields(handler.sheetRowsMap.get("Fields"), alsData);											
 				} else {
 					logger.debug("Sheet name: "+sheet);
 				}
@@ -224,9 +202,30 @@ public class OoxmlAlsParser {
 			cccError = addError(npe.getMessage(), errorSeverity_fatal, cccError);
 		}
 		if (cccError.getAlsErrors().size() > 0)
-			alsData.setCccError(cccError); 
+			alsData.setCccError(cccError);*/ 
 		logger.debug("Parsing done ");
-		return alsData;*/
+		return alsData;
+	}
+	
+	protected static ALSData getCrfDraft (List<XmlRow> xmlRowList, ALSData alsData) {
+		for (XmlRow xmlRow : xmlRowList) {
+		    if (xmlRow.cellList.size() > 10) {
+		    	if ("DraftName".equalsIgnoreCase(xmlRow.cellList.get(0))) {
+		        	continue;
+		        } else {
+			    	ALSCrfDraft crfDraft = getAlsCrfDraftInstance();		    	
+					crfDraft.setDraftName(xmlRow.cellList.get(0) != null ? xmlRow.cellList.get(0) : null);
+					crfDraft.setProjectName(xmlRow.cellList.get(2) != null ? xmlRow.cellList.get(2) : null);
+					crfDraft.setPrimaryFormOid(xmlRow.cellList.get(4) != null ? xmlRow.cellList.get(4) : null);
+			        String crfDraftName = xmlRow.cellList.get(0);					        
+			        String projectName = xmlRow.cellList.get(2);
+			        String primaryFormOid = xmlRow.cellList.get(4);
+			        logger.debug("CRF DRAFT NAME: '" + crfDraftName + "', projectName: '" + projectName + "', primaryFormOid: '" + primaryFormOid + "'");
+			        alsData.setCrfDraft(crfDraft);
+		        }
+		    }
+		}
+		return alsData;
 	}
 
 	/**
@@ -237,7 +236,7 @@ public class OoxmlAlsParser {
 	 * 
 	 */
 
-	protected static ALSData getCrfDraft(Sheet sheet, ALSData alsData, CCCError cccError) throws IOException {
+	/*protected static ALSData getCrfDraft(Sheet sheet, ALSData alsData, CCCError cccError) throws IOException {
 		DateFormat dateFormat = new SimpleDateFormat(reportDateFormat);
 		Date date = new Date();
 		alsData.setReportDate(dateFormat.format(date));
@@ -266,7 +265,31 @@ public class OoxmlAlsParser {
 		if (cccError.getAlsErrors().size() > 0)
 			alsData.setCccError(cccError);
 		return alsData;
+	}*/
+	
+	
+	
+	protected static ALSData getForms(List<XmlRow> xmlRowList, ALSData alsData) throws IOException {
+		List<ALSForm> forms = new ArrayList<ALSForm>();
+		for (XmlRow xmlRow : xmlRowList) {
+		    if (xmlRow.cellList.size() > 1) {
+		    	if ("DraftFormName".equalsIgnoreCase(xmlRow.cellList.get(2)) && "OID".equalsIgnoreCase(xmlRow.cellList.get(0))) {
+		        	continue;
+		        } else {
+			    	ALSForm form = getAlsFormInstance();
+			        String formOid = xmlRow.cellList.get(0);
+			        form.setFormOid(xmlRow.cellList.get(0) != null ? xmlRow.cellList.get(0) : null);
+			        String draftFormName = xmlRow.cellList.get(2);
+			        form.setDraftFormName(xmlRow.cellList.get(2) != null ? xmlRow.cellList.get(2) : null);
+			        logger.debug("Forms Form OID: '" + formOid + "', Form Name: '" + draftFormName);
+			        forms.add(form);
+		        }
+		    }
+		} 
+		alsData.setForms(forms);
+		return alsData;
 	}
+	
 
 	/**
 	 * @param Sheet
@@ -274,7 +297,7 @@ public class OoxmlAlsParser {
 	 *         out of the ALS input file
 	 * 
 	 */
-	protected static ALSData getForms(Sheet sheet, ALSData alsData, CCCError cccError) throws IOException {
+	/*protected static ALSData getForms(Sheet sheet, ALSData alsData, CCCError cccError) throws IOException {
 		List<ALSForm> forms = new ArrayList<ALSForm>();
 		DataFormatter dataFormatter = new DataFormatter();
 		Iterator<Row> rowIterator = sheet.rowIterator();
@@ -312,6 +335,52 @@ public class OoxmlAlsParser {
 		}
 		alsData.setForms(forms);
 		return alsData;
+	}*/
+	
+	
+	protected static ALSData getFields(List<XmlRow> xmlRowList, ALSData alsData) throws NullPointerException {
+		DataFormatter dataFormatter = new DataFormatter();
+		List<ALSField> fields = new ArrayList<ALSField>();		
+		int sequence = 0;		
+		for (XmlRow xmlRow : xmlRowList) {
+		    if (xmlRow.cellList.size() > 10) {
+		    	if ("Ordinal".equalsIgnoreCase(xmlRow.cellList.get(2)) && "FormOID".equalsIgnoreCase(xmlRow.cellList.get(0)) 
+		    			&& "FieldOID".equalsIgnoreCase(xmlRow.cellList.get(1))) {
+		        	continue;
+		        } else {		    	
+			    	ALSField field = getAlsFieldInstance();
+			        String formOid = xmlRow.cellList.get(0);
+			        String fieldOid = xmlRow.cellList.get(1);
+			        String ordinal = xmlRow.cellList.get(2);
+			        String draftFieldName = xmlRow.cellList.get(3);
+			        String dataFormat = xmlRow.cellList.get(6);
+			        field.setFormOid(xmlRow.cellList.get(0) != null ? xmlRow.cellList.get(0) : null);
+			        field.setFieldOid(xmlRow.cellList.get(1) != null ? xmlRow.cellList.get(1) : null);
+			        field.setOrdinal(xmlRow.cellList.get(2) != null ? xmlRow.cellList.get(2) : null);
+			        field.setDraftFieldName(xmlRow.cellList.get(3) != null ? xmlRow.cellList.get(3) : null);
+			        field.setDataFormat(xmlRow.cellList.get(6) != null ? xmlRow.cellList.get(6) : null);
+					//field.setDataDictionaryName(row.getCell(cell_fieldDataDictionaryName) != null ? dataFormatter.formatCellValue(row.getCell(cell_fieldDataDictionaryName)) : null);
+					//field.setUnitDictionaryName(row.getCell(cell_fieldUnitDictionaryName) != null ? dataFormatter.formatCellValue(row.getCell(cell_fieldUnitDictionaryName)) : null);					
+					//field.setDefaultValue();
+					field.setSequenceNumber(sequence);
+					//String controlType = row.getCell(cell_fieldControlType) != null ? dataFormatter.formatCellValue(row.getCell(cell_fieldControlType)) : null;
+					//field.setControlType(controlType);
+					//field.setPreText(row.getCell(cell_fieldPreText) != null ? stripHtml(dataFormatter.formatCellValue((row.getCell(cell_fieldPreText)))) : null);
+					//field.setFixedUnit(row.getCell(cell_fieldFixedUnit) != null ? dataFormatter.formatCellValue(row.getCell(cell_fieldFixedUnit)) : null);
+					for (ALSForm form : alsData.getForms()) {
+						if (field.getFormOid()!= null && field.getFormOid().equalsIgnoreCase(form.getFormOid())) {
+							form.getFields().add(field);
+						}
+					}
+					fields.add(field);
+					// FORMBUILD-652
+					sequence++;
+			        logger.debug("Fields Form OID: '" + formOid + "', fieldOid: '" + fieldOid + "', ordinal: '" + ordinal + "', draftFieldName: '" + draftFieldName + "', dataFormat: '" + dataFormat + "'");
+		        }
+		    }
+		}		
+		alsData.setFields(fields);
+		return alsData;
 	}
 
 	/**
@@ -320,7 +389,7 @@ public class OoxmlAlsParser {
 	 *         parsed out of the ALS input file
 	 * 
 	 */
-	protected static ALSData getFields(Sheet sheet, ALSData alsData, CCCError cccError) throws NullPointerException {
+	/*protected static ALSData getFields(Sheet sheet, ALSData alsData, CCCError cccError) throws NullPointerException {
 		DataFormatter dataFormatter = new DataFormatter();
 		List<ALSField> fields = new ArrayList<ALSField>();
 		ALSField field;
@@ -414,7 +483,7 @@ public class OoxmlAlsParser {
 		}
 		alsData.setFields(fields);
 		return alsData;
-	}
+	} */
 	
 	/**
 	 * @param Sheet
