@@ -39,13 +39,21 @@ public class FormService {
 		FormsUiData formUiData = new FormsUiData();
 		List<ALSForm> alsFormList = alsData.getForms();
 		if (alsFormList != null) {
-			for (ALSForm form : alsFormList) {
-				//FORMBUILD-639 exclude cdeCart forms from the form list
-				if (includeForm(form)) {
-					formsList.add(createFormDisplay(form, alsData.getCccError().getAlsErrors()));
+			if (alsFormList.size() > 0) {
+				for (ALSForm form : alsFormList) {
+					//FORMBUILD-639 exclude cdeCart forms from the form list
+					if (includeForm(form)) {
+						formsList.add(createFormDisplay(form, alsData.getCccError().getAlsErrors()));
+					}
 				}
+				}
+			else {
+				logger.warn("collectFormsUiData alsFormList.size() is zero");
 			}
 			formUiData.setFormsList(formsList);
+		}
+		else {
+			logger.warn("collectFormsUiData alsFormList is null");
 		}
 		return formUiData;
 	}

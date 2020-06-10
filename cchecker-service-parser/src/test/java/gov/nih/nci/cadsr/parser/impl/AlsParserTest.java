@@ -69,6 +69,37 @@ public class AlsParserTest {
 	}
 	
 	/**
+	 * Creates a Sheet named CRFDraft in the Excel, with blank Project Name
+	 * @throws IOException
+	 */
+	public void createCrfDraftInExcelBlankProjectName () throws IOException {
+	    sheet = workbook.createSheet("CRFDraft");
+	    row = sheet.createRow(crfDraftStartRow);
+	    cell = row.createCell(cell_zero);
+	    cell.setCellValue("14-JUN-2017 NS");
+	    cell = row.createCell(cell_two);	    
+	    cell.setCellValue("");	    
+	    cell = row.createCell(cell_four);	    
+	    cell.setCellValue("SUBJECT_ENROLLMENT");
+	}	
+
+	/**
+	 * Creates a Sheet named CRFDraft in the Excel, with blank Primary Form OID
+	 * @throws IOException
+	 */
+	public void createCrfDraftInExcelBlankPrimaryFormOID () throws IOException {
+	    sheet = workbook.createSheet("CRFDraft");
+	    row = sheet.createRow(crfDraftStartRow);
+	    cell = row.createCell(cell_zero);
+	    cell.setCellValue("14-JUN-2017 NS");
+	    cell = row.createCell(cell_two);	    
+	    cell.setCellValue("10057");	    
+	    cell = row.createCell(cell_four);	    
+	    cell.setCellValue("");
+	}		
+
+	
+	/**
 	 * Creates a Sheet named Forms in the Excel
 	 * @throws IOException
 	 */	
@@ -312,11 +343,24 @@ public class AlsParserTest {
 	public void testGetCrfDraftProjectName() throws IOException {
 		createCrfDraftInExcel();		
 		String expectedResult = "10057";
-		CCCError cccError = new CCCError();
-		alsData = AlsParser.getCrfDraft(sheet, alsData, cccError);
+		alsData = AlsParser.getCrfDraft(sheet, alsData);
 		String actualResult = alsData.getCrfDraft().getProjectName();
 		assertEquals(expectedResult, actualResult);
 	}
+	
+	/**
+	 * Testing retrieval of CRF Project name when it is blank 
+	 */		
+	@Test
+	public void testGetCrfDraftBlankProjectName() throws IOException {
+		createCrfDraftInExcelBlankProjectName();		
+		String expectedResult = "";
+		CCCError cccError = new CCCError();
+		alsData = AlsParser.getCrfDraft(sheet, alsData);
+		String actualResult = alsData.getCrfDraft().getProjectName();
+		assertEquals(expectedResult, actualResult);
+	}		
+	
 	
 	/**
 	 * Testing retrieval of CRF Primary Form OID from CRFDraft sheet 
@@ -325,11 +369,25 @@ public class AlsParserTest {
 	public void testGetCrfDraftPrimaryFormOid() throws IOException {
 		createCrfDraftInExcel();		
 		String expectedResult = "SUBJECT_ENROLLMENT";
-		CCCError cccError = new CCCError();
-		alsData = AlsParser.getCrfDraft(sheet, alsData, cccError);
+		alsData = AlsParser.getCrfDraft(sheet, alsData);
 		String actualResult = alsData.getCrfDraft().getPrimaryFormOid();
 		assertEquals(expectedResult, actualResult);
 	}
+	
+	
+
+	/**
+	 * Testing retrieval of CRF Primary Form OID when it is blank
+	 */			
+	@Test
+	public void testGetCrfDraftBlankPrimaryFormOid() throws IOException {
+		createCrfDraftInExcelBlankPrimaryFormOID();
+		String expectedResult = "";
+		alsData = AlsParser.getCrfDraft(sheet, alsData);
+		String actualResult = alsData.getCrfDraft().getPrimaryFormOid();
+		assertEquals(expectedResult, actualResult);
+	}	
+	
 	
 	/**
 	 * Testing retrieval of Form Names from Forms sheet 
