@@ -82,6 +82,23 @@ public class AlsParserTest {
 	    cell = row.createCell(cell_four);	    
 	    cell.setCellValue("SUBJECT_ENROLLMENT");
 	}	
+	
+	
+	/**
+	 * Creates a Sheet named CRFDraft in the Excel, with special characters in Project Name
+	 * @throws IOException
+	 */
+	public void createCrfDraftInExcelProjectNameSpChar () throws IOException {
+	    sheet = workbook.createSheet("CRFDraft");
+	    row = sheet.createRow(crfDraftStartRow);
+	    cell = row.createCell(cell_zero);
+	    cell.setCellValue("14-JUN-2017 NS");
+	    cell = row.createCell(cell_two);	    
+	    cell.setCellValue("10057 <>?\"}{_)(*&^%$#@!~`-=[]\\;',./");	    
+	    cell = row.createCell(cell_four);	    
+	    cell.setCellValue("SUBJECT_ENROLLMENT");
+	}		
+	
 
 	/**
 	 * Creates a Sheet named CRFDraft in the Excel, with blank Primary Form OID
@@ -360,6 +377,20 @@ public class AlsParserTest {
 		String actualResult = alsData.getCrfDraft().getProjectName();
 		assertEquals(expectedResult, actualResult);
 	}		
+	
+	
+	/**
+	 * Testing retrieval of CRF Project name when it has special characters 
+	 */		
+	@Test
+	public void testGetCrfDraftProjectNameSpChars() throws IOException {
+		createCrfDraftInExcelProjectNameSpChar();		
+		String expectedResult = "10057 <>?\"}{_)(*&^%$#@!~`-=[]\\;',./";
+		CCCError cccError = new CCCError();
+		alsData = AlsParser.getCrfDraft(sheet, alsData);
+		String actualResult = alsData.getCrfDraft().getProjectName();
+		assertEquals(expectedResult, actualResult);
+	}			
 	
 	
 	/**
