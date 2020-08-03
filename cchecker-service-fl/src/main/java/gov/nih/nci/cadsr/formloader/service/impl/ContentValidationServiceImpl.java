@@ -738,7 +738,7 @@ public class ContentValidationServiceImpl implements ContentValidationService {
 				continue;
 			}
 			
-			logger.debug("Start validating questions for form [" + form.getPublicId() + "|" + form.getVersion() + "|" + form.getFormSeqId() + "]");
+			logger.trace("Start validating questions for form [" + form.getPublicId() + "|" + form.getVersion() + "|" + form.getFormSeqId() + "]");
 			
 			//JR417 refactored into FormLoaderHelper!
 //			List<String> questPublicIds = new ArrayList<String>();
@@ -784,7 +784,7 @@ List<DataElementTransferObject> cdeDtos = null;	//repository.getCDEsByPublicIds(
 			
 			form.setLoadStatus(FormDescriptor.STATUS_CONTENT_VALIDATED);
 			
-			logger.debug("Done validating questions for form [" + form.getPublicId() + "|" + form.getVersion()  + "]");
+			logger.trace("Done validating questions for form [" + form.getPublicId() + "|" + form.getVersion()  + "]");
 		}
 		
 	}

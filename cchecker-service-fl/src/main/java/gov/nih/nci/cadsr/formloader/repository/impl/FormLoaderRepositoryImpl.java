@@ -174,7 +174,7 @@ public class FormLoaderRepositoryImpl implements FormLoaderRepository {
 			return null;
 		}
 		List<DataElementTransferObject> des = questionV2Dao.getCdesByPublicIds(cdePublicIds);
-		logger.debug("getCDEsByPublicIds(): Dao returns " + des.size() + " CDEs");
+		logger.trace("getCDEsByPublicIds(): Dao returns " + des.size() + " CDEs");
 		
 		return des;
 	}
