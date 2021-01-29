@@ -4,8 +4,8 @@ MAINTAINER Shaun Einolf
 RUN yum -y update && yum -y install cronie git java-1.8.0-openjdk-devel sudo util-linux wget epel-release
 
 WORKDIR /tmp
-RUN wget https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.31/bin/apache-tomcat-9.0.31.tar.gz \
-    && mkdir apache-tomcat && tar xvfz apache-tomcat-9.0.31.tar.gz -C ./apache-tomcat --strip-components 1 \
+RUN wget https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.41/bin/apache-tomcat-9.0.41.tar.gz \
+    && mkdir apache-tomcat && tar xvfz apache-tomcat-9.0.41.tar.gz -C ./apache-tomcat --strip-components 1 \
     && cd apache-tomcat/webapps && rm -rf examples docs host-manager manager ROOT/*  && cd ../.. \
     && mv apache-tomcat /usr/local/apache-tomcat
 
