@@ -27,6 +27,7 @@ import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -47,6 +48,8 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -307,7 +310,7 @@ public class GatewayBootController {
 	 * @param uploadfile
 	 * @return ResponseEntity
 	 */
-	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
+	@CrossOrigin(allowCredentials="true",maxAge=9000)
 	@PostMapping("/parseservice")
 	// @ResponseBody
 	public ResponseEntity<?> parseService(HttpServletRequest request, HttpServletResponse response,
@@ -409,7 +412,7 @@ public class GatewayBootController {
 	 * @param sessionid String not null and not empty
 	 * @return ResponseEntity
 	 */
-	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
+	@CrossOrigin(allowCredentials="true",maxAge=9000)
 	@PostMapping("/checkservice")
 	public ResponseEntity<?> checkService(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(name = "checkUOM", required = false, defaultValue = "false") boolean checkUOM,
@@ -510,7 +513,7 @@ public class GatewayBootController {
 		return location;
 	}
 	
-	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
+	@CrossOrigin(allowCredentials="true",maxAge=9000)
 	@GetMapping("/retrievereporterror/{idseq}")
 	public ResponseEntity<?> retrieveErrorReport(HttpServletRequest request,
 			@PathVariable("idseq") String idseq) {
@@ -531,7 +534,7 @@ public class GatewayBootController {
 	
 	}
 	
-	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
+	@CrossOrigin(allowCredentials="true",maxAge=9000)
 	@GetMapping("/genexcelcheckreport/{idseq}")
 	public void genExcelCheckReport(HttpServletRequest request, HttpServletResponse response,  @PathVariable("idseq") String idseq) throws IOException {
 		Cookie cookie = retrieveCookie(request);
@@ -569,7 +572,7 @@ public class GatewayBootController {
 		response.flushBuffer();
 	}
 	
-	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
+	@CrossOrigin(allowCredentials="true",maxAge=9000)
 	@GetMapping("/retrieveexcelreporterror/{idseq}")
 	public void retrieveExcelReportError(HttpServletRequest request, HttpServletResponse response, 
 			@PathVariable("idseq") String idseq) throws Exception {
@@ -759,7 +762,7 @@ public class GatewayBootController {
 	 * @param filename
 	 * @return ALSData
 	 */
-	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
+	@CrossOrigin(allowCredentials="true",maxAge=9000)
 	@GetMapping("/parsefileservice")
 	@ResponseBody
 	public ALSData parseFileService(HttpServletRequest request, HttpServletResponse response,
@@ -771,7 +774,7 @@ public class GatewayBootController {
 		return alsData.getAlsData();
 	}
 	//TODO remove test method testFeed
-	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
+	@CrossOrigin(allowCredentials="true",maxAge=9000)
 	@GetMapping("/testfeed/{id}")
 	public ResponseBodyEmitter testFeed(@PathVariable("id") String amount) {
 		int num = Integer.parseInt(amount);
@@ -877,7 +880,7 @@ public class GatewayBootController {
 	 * @param idseq not null
 	 * @return SseEmitter with FeedFormStatus
 	 */
-	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
+	@CrossOrigin(allowCredentials="true",maxAge=9000)
 	@GetMapping("/feedvalidatestatus/{idseq}")
 	public ResponseBodyEmitter feedCheckForm(HttpServletRequest request, @PathVariable("idseq") String idseq) {
 		logger.debug("feedvalidatestatus called with session: " + idseq);
@@ -938,4 +941,6 @@ public class GatewayBootController {
 		service.shutdown();
 		return emitter;
 	}
+		
 }
+
