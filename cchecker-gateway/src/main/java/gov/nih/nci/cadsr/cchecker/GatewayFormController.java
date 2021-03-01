@@ -282,7 +282,7 @@ public class GatewayFormController {
 		return location;
 	}
 	
-	@CrossOrigin(origins = {"http://localhost:4200", "https://cdevalidator*.nci.nih.gov"}, allowCredentials="true",maxAge=9000)
+	@CrossOrigin(origins = {"http://localhost:4200", "https://cdevalidator-dev.nci.nih.gov"}, allowCredentials="true",maxAge=9000)
 	@GetMapping("/retrieveformxml/{idseq}")
 	public void retrieveFormXml(HttpServletRequest request, HttpServletResponse response, 
 			@PathVariable("idseq") String idseq) throws Exception {

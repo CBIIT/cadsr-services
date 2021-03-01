@@ -31,7 +31,7 @@ public class GatewayMonitorController {
 	@Autowired
 	private RestTemplate restTemplate;
 	
-	@CrossOrigin(origins = {"http://localhost:4200", "https://cdevalidator*.nci.nih.gov"}, allowCredentials="true",maxAge=9000)
+	@CrossOrigin(origins = {"http://localhost:4200", "https://cdevalidator-dev.nci.nih.gov"}, allowCredentials="true",maxAge=9000)
 	@GetMapping("/monitorcdevalidator")
 	public ResponseEntity<?> monitorCdeValidator(HttpServletRequest request) {
 		logger.debug("monitorCdeValidator called");

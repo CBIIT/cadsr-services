@@ -37,7 +37,7 @@ public class GatewayCancelRequestController {
 	 * @param idseq not null
 	 * @return SseEmitter
 	 */
-	@CrossOrigin(origins = {"http://localhost:4200", "https://cdevalidator*.nci.nih.gov"}, allowCredentials="true",maxAge=9000)
+	@CrossOrigin(origins = {"http://localhost:4200", "https://cdevalidator-dev.nci.nih.gov"}, allowCredentials="true",maxAge=9000)
 	@GetMapping("/cancelvalidation/{idseq}")
 	public ResponseEntity<?> feedCheckStatus(HttpServletRequest request, @PathVariable("idseq") String idseq) {
 		logger.debug("cancelvalidation called with session: " + idseq);
