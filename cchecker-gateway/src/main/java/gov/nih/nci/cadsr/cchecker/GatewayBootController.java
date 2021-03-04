@@ -61,7 +61,9 @@ import gov.nih.nci.cadsr.data.FormsUiData;
 
 @Controller
 @EnableWebMvc
-@CrossOrigin(origins = {"http://localhost:4200", "https://cdevalidator-dev.nci.nih.gov"}, allowCredentials="true",maxAge=9000)
+@CrossOrigin(origins = {"http://localhost:4200", "https://cdevalidator-dev.nci.nih.gov"
+		, "https://cdevalidator-qa.nci.nih.gov", "https://cdevalidator-stage.nci.nih.gov", 
+		"https://cdevalidator.nci.nih.gov"}, allowCredentials="true",maxAge=9000)
 //@RestController
 //@RequestMapping("/")
 public class GatewayBootController {
@@ -77,7 +79,7 @@ public class GatewayBootController {
 	//FORMBUILD-633
 	static String CCHECKER_FEED_FORM_SERVICE_URL;
 	static String CCHECKER_GEN_EXCEL_REPORT_ERROR_SERVICE_URL;
-
+	
 	private static String URL_RETRIEVE_ALS_FORMAT;
 	private static String URL_RETRIEVE_REPORT_ERROR_FORMAT;
 	private static String URL_RETRIEVE_REPORT_FULL_FORMAT;
@@ -310,7 +312,7 @@ public class GatewayBootController {
 	 * @param uploadfile
 	 * @return ResponseEntity
 	 */
-	//@CrossOrigin(origins = {"http://localhost:4200", "https://cdevalidator*.nci.nih.gov"}, allowCredentials="true",maxAge=9000)
+
 	@PostMapping("/parseservice")
 	// @ResponseBody
 	public ResponseEntity<?> parseService(HttpServletRequest request, HttpServletResponse response,
@@ -412,7 +414,7 @@ public class GatewayBootController {
 	 * @param sessionid String not null and not empty
 	 * @return ResponseEntity
 	 */
-	//@CrossOrigin(origins = {"http://localhost:4200", "https://cdevalidator*.nci.nih.gov"}, allowCredentials="true",maxAge=9000)
+
 	@PostMapping("/checkservice")
 	public ResponseEntity<?> checkService(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(name = "checkUOM", required = false, defaultValue = "false") boolean checkUOM,
@@ -513,7 +515,7 @@ public class GatewayBootController {
 		return location;
 	}
 	
-	//@CrossOrigin(origins = {"http://localhost:4200", "https://cdevalidator*.nci.nih.gov"}, allowCredentials="true",maxAge=9000)
+
 	@GetMapping("/retrievereporterror/{idseq}")
 	public ResponseEntity<?> retrieveErrorReport(HttpServletRequest request,
 			@PathVariable("idseq") String idseq) {
@@ -534,7 +536,7 @@ public class GatewayBootController {
 	
 	}
 	
-	//@CrossOrigin(origins = {"http://localhost:4200", "https://cdevalidator*.nci.nih.gov"}, allowCredentials="true",maxAge=9000)
+
 	@GetMapping("/genexcelcheckreport/{idseq}")
 	public void genExcelCheckReport(HttpServletRequest request, HttpServletResponse response,  @PathVariable("idseq") String idseq) throws IOException {
 		Cookie cookie = retrieveCookie(request);
@@ -572,7 +574,6 @@ public class GatewayBootController {
 		response.flushBuffer();
 	}
 	
-	//@CrossOrigin(origins = {"http://localhost:4200", "https://cdevalidator*.nci.nih.gov"}, allowCredentials="true",maxAge=9000)
 	@GetMapping("/retrieveexcelreporterror/{idseq}")
 	public void retrieveExcelReportError(HttpServletRequest request, HttpServletResponse response, 
 			@PathVariable("idseq") String idseq) throws Exception {
@@ -762,7 +763,7 @@ public class GatewayBootController {
 	 * @param filename
 	 * @return ALSData
 	 */
-	//@CrossOrigin(origins = {"http://localhost:4200", "https://cdevalidator*.nci.nih.gov"}, allowCredentials="true",maxAge=9000)
+
 	@GetMapping("/parsefileservice")
 	@ResponseBody
 	public ALSData parseFileService(HttpServletRequest request, HttpServletResponse response,
@@ -774,7 +775,6 @@ public class GatewayBootController {
 		return alsData.getAlsData();
 	}
 	//TODO remove test method testFeed
-	//@CrossOrigin(origins = {"http://localhost:4200", "https://cdevalidator*.nci.nih.gov"}, allowCredentials="true",maxAge=9000)
 	@GetMapping("/testfeed/{id}")
 	public ResponseBodyEmitter testFeed(@PathVariable("id") String amount) {
 		int num = Integer.parseInt(amount);
@@ -880,7 +880,7 @@ public class GatewayBootController {
 	 * @param idseq not null
 	 * @return SseEmitter with FeedFormStatus
 	 */
-	//@CrossOrigin(origins = {"http://localhost:4200", "https://cdevalidator*.nci.nih.gov"}, allowCredentials="true",maxAge=9000)
+
 	@GetMapping("/feedvalidatestatus/{idseq}")
 	public ResponseBodyEmitter feedCheckForm(HttpServletRequest request, @PathVariable("idseq") String idseq) {
 		logger.debug("feedvalidatestatus called with session: " + idseq);

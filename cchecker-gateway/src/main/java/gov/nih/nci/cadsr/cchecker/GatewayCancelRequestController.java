@@ -22,6 +22,9 @@ import org.springframework.web.client.RestTemplate;
  *
  */
 @Controller
+@CrossOrigin(origins = {"http://localhost:4200", "https://cdevalidator-dev.nci.nih.gov"
+		, "https://cdevalidator-qa.nci.nih.gov", "https://cdevalidator-stage.nci.nih.gov", 
+		"https://cdevalidator.nci.nih.gov"}, allowCredentials="true",maxAge=9000)
 public class GatewayCancelRequestController {
 	private static final Logger logger = LoggerFactory.getLogger(GatewayCancelRequestController.class);
 	static String CCHECKER_CANCEL_VALIDATE_SERVICE_URL;
@@ -37,7 +40,6 @@ public class GatewayCancelRequestController {
 	 * @param idseq not null
 	 * @return SseEmitter
 	 */
-	@CrossOrigin(origins = {"http://localhost:4200", "https://cdevalidator-dev.nci.nih.gov"}, allowCredentials="true",maxAge=9000)
 	@GetMapping("/cancelvalidation/{idseq}")
 	public ResponseEntity<?> feedCheckStatus(HttpServletRequest request, @PathVariable("idseq") String idseq) {
 		logger.debug("cancelvalidation called with session: " + idseq);

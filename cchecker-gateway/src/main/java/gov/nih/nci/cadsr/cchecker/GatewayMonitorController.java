@@ -22,6 +22,9 @@ import org.springframework.web.client.RestTemplate;
  *
  */
 @Controller
+@CrossOrigin(origins = {"http://localhost:4200", "https://cdevalidator-dev.nci.nih.gov"
+		, "https://cdevalidator-qa.nci.nih.gov", "https://cdevalidator-stage.nci.nih.gov", 
+		"https://cdevalidator.nci.nih.gov"}, allowCredentials="true",maxAge=9000)
 public class GatewayMonitorController {
 	static String CCHECKER_DB_SERVICE_TEST_URL;
 	private static final Logger logger = LoggerFactory.getLogger(GatewayMonitorController.class);
@@ -31,7 +34,6 @@ public class GatewayMonitorController {
 	@Autowired
 	private RestTemplate restTemplate;
 	
-	@CrossOrigin(origins = {"http://localhost:4200", "https://cdevalidator-dev.nci.nih.gov"}, allowCredentials="true",maxAge=9000)
 	@GetMapping("/monitorcdevalidator")
 	public ResponseEntity<?> monitorCdeValidator(HttpServletRequest request) {
 		logger.debug("monitorCdeValidator called");

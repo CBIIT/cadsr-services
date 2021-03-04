@@ -46,6 +46,9 @@ import gov.nih.nci.cadsr.data.FormLoadParamWrapper;
  */
 @RestController
 @EnableAutoConfiguration
+@CrossOrigin(origins = {"http://localhost:4200", "https://cdevalidator-dev.nci.nih.gov"
+		, "https://cdevalidator-qa.nci.nih.gov", "https://cdevalidator-stage.nci.nih.gov", 
+		"https://cdevalidator.nci.nih.gov"}, allowCredentials="true",maxAge=9000)
 public class GatewayFormController {
 	private static final Logger logger = LoggerFactory.getLogger(GatewayFormController.class);
 
@@ -73,7 +76,6 @@ public class GatewayFormController {
 	 * @param request
 	 * @return List of caDSR context names.
 	 */
-	@CrossOrigin(origins = "http://localhost:4200/*", allowCredentials="true",maxAge=9000)
 	@GetMapping("/retrievecontexts")
 	public ResponseEntity<?> retrieveContextList(HttpServletRequest request) {
 		logger.debug("gateway retrieveContextList called");
@@ -190,7 +192,6 @@ public class GatewayFormController {
 	 * @param requestEntity
 	 * @return List of Strings
 	 */
-	@CrossOrigin(origins = "http://localhost:4200/*", allowCredentials="true",maxAge=9000)
 	@PostMapping("/formxmlservice")
 	public ResponseEntity<?> formXmlService(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(name = "sessionid", required = true) String sessionid,
@@ -282,7 +283,6 @@ public class GatewayFormController {
 		return location;
 	}
 	
-	@CrossOrigin(origins = {"http://localhost:4200", "https://cdevalidator-dev.nci.nih.gov"}, allowCredentials="true",maxAge=9000)
 	@GetMapping("/retrieveformxml/{idseq}")
 	public void retrieveFormXml(HttpServletRequest request, HttpServletResponse response, 
 			@PathVariable("idseq") String idseq) throws Exception {
