@@ -9,9 +9,8 @@ import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.Banner;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -21,6 +20,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
@@ -54,6 +55,10 @@ public class GatewayBootWebApplication extends SpringBootServletInitializer {
 	static String ACCESS_CONTROL_ALLOW_ORIGIN_HEADER = "Access-Control-Allow-Origin";
 	static String ACCESS_CONTROL_ALLOW_ORIGIN;
 	static String CCHECKER_DB_SERVICE_TEST_URL;
+	static String ALLOWED_ORIGINS = "allowed.origins.urls";
+	
+	@Value("${allowed.origins.urls}")
+	  private String[] allOrgArr;	
 	
 	@Primary
 	@Bean
@@ -112,6 +117,18 @@ public class GatewayBootWebApplication extends SpringBootServletInitializer {
         //we can use the call below if other parameters are not needed
         //SpringApplication.run(GatewayBootWebApplication.class, args);
     }
+    
+    
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+            	registry.addMapping("/**").allowedOrigins(allOrgArr)
+            	.allowCredentials(true).maxAge(9000);
+            }
+        };
+    }    
 
 }
 /*

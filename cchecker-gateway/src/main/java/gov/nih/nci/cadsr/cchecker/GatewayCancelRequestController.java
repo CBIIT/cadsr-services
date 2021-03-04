@@ -22,9 +22,6 @@ import org.springframework.web.client.RestTemplate;
  *
  */
 @Controller
-@CrossOrigin(origins = {"http://localhost:4200", "https://cdevalidator-dev.nci.nih.gov"
-		, "https://cdevalidator-qa.nci.nih.gov", "https://cdevalidator-stage.nci.nih.gov", 
-		"https://cdevalidator.nci.nih.gov"}, allowCredentials="true",maxAge=9000)
 public class GatewayCancelRequestController {
 	private static final Logger logger = LoggerFactory.getLogger(GatewayCancelRequestController.class);
 	static String CCHECKER_CANCEL_VALIDATE_SERVICE_URL;

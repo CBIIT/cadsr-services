@@ -61,9 +61,6 @@ import gov.nih.nci.cadsr.data.FormsUiData;
 
 @Controller
 @EnableWebMvc
-@CrossOrigin(origins = {"http://localhost:4200", "https://cdevalidator-dev.nci.nih.gov"
-		, "https://cdevalidator-qa.nci.nih.gov", "https://cdevalidator-stage.nci.nih.gov", 
-		"https://cdevalidator.nci.nih.gov"}, allowCredentials="true",maxAge=9000)
 //@RestController
 //@RequestMapping("/")
 public class GatewayBootController {
