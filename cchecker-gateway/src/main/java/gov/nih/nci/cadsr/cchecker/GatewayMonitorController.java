@@ -31,7 +31,6 @@ public class GatewayMonitorController {
 	@Autowired
 	private RestTemplate restTemplate;
 	
-	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
 	@GetMapping("/monitorcdevalidator")
 	public ResponseEntity<?> monitorCdeValidator(HttpServletRequest request) {
 		logger.debug("monitorCdeValidator called");

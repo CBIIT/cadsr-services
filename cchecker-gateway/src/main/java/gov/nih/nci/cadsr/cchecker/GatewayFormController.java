@@ -73,7 +73,6 @@ public class GatewayFormController {
 	 * @param request
 	 * @return List of caDSR context names.
 	 */
-	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
 	@GetMapping("/retrievecontexts")
 	public ResponseEntity<?> retrieveContextList(HttpServletRequest request) {
 		logger.debug("gateway retrieveContextList called");
@@ -190,7 +189,6 @@ public class GatewayFormController {
 	 * @param requestEntity
 	 * @return List of Strings
 	 */
-	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
 	@PostMapping("/formxmlservice")
 	public ResponseEntity<?> formXmlService(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(name = "sessionid", required = true) String sessionid,
@@ -282,7 +280,6 @@ public class GatewayFormController {
 		return location;
 	}
 	
-	@CrossOrigin(allowedHeaders = "*",allowCredentials="true",maxAge=9000)
 	@GetMapping("/retrieveformxml/{idseq}")
 	public void retrieveFormXml(HttpServletRequest request, HttpServletResponse response, 
 			@PathVariable("idseq") String idseq) throws Exception {
