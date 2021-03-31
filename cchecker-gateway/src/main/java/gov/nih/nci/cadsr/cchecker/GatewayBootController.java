@@ -37,7 +37,6 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -133,6 +132,7 @@ public class GatewayBootController {
 								// stored persistently and will be deleted when
 								// the Web browser exits
 		cookie.setPath(COOKIE_PATH);
+		cookie.setSecure(true);
 		return cookie;
 	}
 
@@ -894,7 +894,7 @@ public class GatewayBootController {
 			return null;
 		}
 		
-		final SseEmitter emitter = new SseEmitter();
+		final SseEmitter emitter = new SseEmitter(10000000L); //Timeout - in milliseconds
 
 		ExecutorService service = Executors.newSingleThreadExecutor();
 		String identity = "@" + Integer.toHexString(System.identityHashCode(service));
