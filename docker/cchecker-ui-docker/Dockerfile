@@ -2,8 +2,8 @@ FROM ncidockerhub.nci.nih.gov/cbiit/centos7_base
 MAINTAINER Shaun Einolf
 RUN yum -y install epel-release
 RUN yum -y update && yum -y install git httpd sudo util-linux libxml2 wget epel-release
-RUN curl --silent --location https://rpm.nodesource.com/setup_10.x | sudo bash - \
-    && yum -y install nodejs
+RUN yum -y install rh-nodejs14
+RUN scl enable rh-nodejs14 bash
 RUN cd /etc/yum.repos.d && wget https://repo.codeit.guru/codeit.el`rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release)`.repo
 RUN yum -y install httpd
 
