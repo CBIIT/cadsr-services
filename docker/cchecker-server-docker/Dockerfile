@@ -25,6 +25,7 @@ COPY assets/crondelete /etc/cron.d/crondelete
 COPY assets/web.xml /usr/local/apache-tomcat/conf
 COPY assets/error.html /usr/local/apache-tomcat/webapps/ROOT
 COPY assets/index.html /logs
+COPY assets/server.xml /usr/local/apache-tomcat/conf
 
 RUN chmod 0644 /etc/cron.d/crondelete
 RUN crontab /etc/cron.d/crondelete
