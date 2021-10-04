@@ -9,7 +9,6 @@ RUN mkdir -p /usr/local/lib/nodejs
 RUN yum -y install epel-release
 RUN yum -y update && yum -y install git httpd sudo util-linux libxml2 wget epel-release
 RUN cd /etc/yum.repos.d && wget https://repo.codeit.guru/codeit.el`rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release)`.repo
-RUN yum -y install httpd
 WORKDIR /tmp
 RUN wget https://nodejs.org/dist/$VERSION/node-$VERSION-$DISTRO.tar.xz
 RUN tar -xJvf node-$VERSION-$DISTRO.tar.xz -C /usr/local/lib/nodejs 
