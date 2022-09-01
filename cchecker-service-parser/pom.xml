@@ -14,7 +14,7 @@
 		<commons-logging.version>1.2</commons-logging.version>
 		<!--  jackson.version>2.9.7</jackson.version -->
 		<poi.version>5.0.0</poi.version>
-		<jsoup.version>1.14.2</jsoup.version>
+		<jsoup.version>1.15.3</jsoup.version>
 	</properties>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
